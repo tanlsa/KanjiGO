@@ -619,7 +619,7 @@
       grassKanji: kind === 'grass' ? m.kanji : null,
       kanjiLevel,
       q: makeQuestion(m.kanji),
-      feedback: null, fbT: 0, qCooldown: 0, stun: 0, combo: 0, energy: 0,
+      feedback: null, fbT: 0, qCooldown: 0, retryQuestion: false, stun: 0, combo: 0, energy: 0,
       botNextIn: attackCycleMs, botCycleMs: attackCycleMs, questionElapsed: 0,
       shake: 0, flash: 0, botFlash: 0, hitStop: 0,
       petAttackT: 0, enemyAttackT: 0, enemyHitT: 0, playerHitT: 0,
@@ -642,6 +642,7 @@
     const q = battle.q;
     if (idx === q.correctIndex) {
       recordAnswer(q, true);
+      battle.retryQuestion = false;
       battle.combo++;
       battle.energy = Math.min(C.COMBAT.energyMax || 3, battle.energy + 1);
       const perfect = battle.questionElapsed <= (C.COMBAT.perfectMs || 2000);
@@ -671,6 +672,7 @@
       battle.combo = 0;
       battle.stun = C.COMBAT.wrongStun;
       battle.qCooldown = C.COMBAT.wrongStun;
+      battle.retryQuestion = true;
       battle.fbT = C.COMBAT.wrongStun;
       battle.feedback = { good: false, text: `✗ Sai! ${questionCorrection(q)}` };
       enemyAttack(battle, 'Sai đáp án');
@@ -698,6 +700,7 @@
     b.combo = 0;
     b.stun = C.COMBAT.wrongStun;
     b.qCooldown = C.COMBAT.wrongStun;
+    b.retryQuestion = true;
     b.fbT = C.COMBAT.wrongStun;
     b.feedback = { good: false, text: `⌛ Hết giờ! ${questionCorrection(b.q)} — quái phản công!` };
     enemyAttack(b);
@@ -1087,7 +1090,10 @@
     if (b.qCooldown > 0) {
       b.qCooldown -= dt;
       if (b.qCooldown <= 0 && b.monHp > 0 && !b.pendingLose) {
-        b.q = makeQuestion(b.mon.kanji, b.q.key);
+        // Sau khi bị quái phản công, cho người học làm lại đúng câu vừa sai.
+        // Chỉ câu trả lời đúng mới chuyển sang kiến thức tiếp theo.
+        if (!b.retryQuestion) b.q = makeQuestion(b.mon.kanji, b.q.key);
+        b.retryQuestion = false;
         b.questionElapsed = 0;
         b.feedback = null;
       }
@@ -1266,16 +1272,14 @@
     const petLunge = Math.sin(Math.max(0, Math.min(1, petP)) * Math.PI) * Math.min(120, stageW * .14);
     const enemyLunge = Math.sin(Math.max(0, Math.min(1, enemyP)) * Math.PI) * Math.min(120, stageW * .14);
     const enemyRecoil = b.enemyHitT > 0 ? Math.sin(b.enemyHitT / 16) * 9 * actorScale : 0;
-    const playerRecoil = b.playerHitT > 0 ? -Math.abs(Math.sin(b.playerHitT / 20)) * 18 * actorScale : 0;
+    const petRecoil = b.playerHitT > 0 ? -Math.abs(Math.sin(b.playerHitT / 20)) * 18 * actorScale : 0;
 
-    // Player đứng sau pet; scale combat tách khỏi scale ngoài world.
-    const playerSize = 120 * actorScale, petW = 140 * actorScale;
-    const playerX = plCX - playerSize * .75 + playerRecoil;
-    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX + 20, baseY + 3, 105 * actorScale, 20 * actorScale, 0, 0, Math.PI * 2); cx.fill();
-    cx.drawImage(imgs.player, 0, C.DIR_ROW.up * TILE, TILE, TILE, playerX - playerSize / 2, baseY - playerSize, playerSize, playerSize);
+    // Mini PvE chỉ hiển thị pet chiến đấu; player không xuất hiện trong sân đấu.
+    const petW = 150 * actorScale;
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, baseY + 3, 78 * actorScale, 19 * actorScale, 0, 0, Math.PI * 2); cx.fill();
     const petImg = imgs['mon_' + currentPetId];
     if (petImg) {
-      const ph = petW * petImg.height / petImg.width, petX = plCX + 30 * actorScale + petLunge + playerRecoil;
+      const ph = petW * petImg.height / petImg.width, petX = plCX + petLunge + petRecoil;
       cx.drawImage(petImg, petX - petW / 2, baseY - ph + idle, petW, ph);
     }
 
@@ -1295,12 +1299,13 @@
 
     // HUD đối xứng ở hai góc trên của sân đấu.
     const hpW = Math.max(140, Math.min(320, (stageW - 54) / 2));
-    const hudY = stageY + 18, enemyHudX = stageX + 18, playerHudX = stageX + stageW - hpW - 18;
+    const hudY = stageY + 18, petHudX = stageX + 18, enemyHudX = stageX + stageW - hpW - 18;
+    const pet = C.MONSTERS[currentPetId], petKanji = pet ? pet.kanji : '?';
+    drawHpBar(petHudX, hudY, `Pet của bạn · ${pet ? pet.name : ''} 「${petKanji}」`, player.hp, player.maxHp, '#43d17a', hpW);
     drawHpBar(enemyHudX, hudY, `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW);
-    drawHpBar(playerHudX, hudY, `${C.PLAYER.name}`, player.hp, player.maxHp, '#43d17a', hpW);
+    drawEnergyGauge(b, petHudX, hudY + 53, hpW);
     drawAttackGauge(b, enemyHudX, hudY + 53, hpW);
-    drawEnergyGauge(b, playerHudX, hudY + 53, hpW);
-    if (stageW >= 620) drawEncounterMastery(b, playerHudX, hudY + 91, hpW);
+    if (stageW >= 620) drawPetMastery(petKanji, petHudX, hudY + 91, hpW);
 
     if (b.combo > 1) {
       cx.fillStyle = '#ffd54a'; cx.font = 'bold 18px monospace'; cx.textAlign = 'center';
@@ -1696,8 +1701,8 @@
     cx.fillText('Chờ hết choáng mới trả lời tiếp — đọc kỹ đáp án đúng!', W / 2, fieldH / 2 + 24);
     cx.textAlign = 'left';
   }
-  function drawEncounterMastery(b, x, y, w = 260) {
-    const kanji = b.mon.kanji, s = ensureMastery(kanji);
+  function drawPetMastery(kanji, x, y, w = 260) {
+    const s = ensureMastery(kanji);
     cx.fillStyle = '#cde'; cx.font = '12px monospace';
     fitText(`📚 「${kanji}」  Lv.${s.level}/${C.KLEVEL.maxLevel} ${levelLabel(s.level)}`, x, y - 2, w, 12);
     const bx = x, by = y + 4;
