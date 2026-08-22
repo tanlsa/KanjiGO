@@ -28,7 +28,7 @@ window.CONFIG = {
     ACADEMY_DOOR: 7, ACADEMY_WALL: 8, ACADEMY_ROOF: 9,
   },
   BLOCKED_TILES: [1, 2, 6, 8, 9],
-  ACADEMY: { gx: 4, gy: 1, width: 3, height: 3, doorGx: 5, doorGy: 3 },
+  ACADEMY: { gx: 3, gy: 1, width: 5, height: 4, doorGx: 5, doorGy: 4 },
 
   ENCOUNTER: {
     TALLGRASS: 0.22, SURF: 0.15, FISH: 0.55,
@@ -108,7 +108,7 @@ window.CONFIG = {
     staminaRegenPerGrassWin: 1,
     relaxFromAttempt: 3,
   },
-  QUESTION_MODES: { weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1 } },
+  QUESTION_MODES: { weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2 } },
   PVE: {
     questions: 10,
     baseExpPerKanji: 6,

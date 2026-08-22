@@ -9,6 +9,7 @@
    KanjiGO (offline, double-click là chơi)
    • Combat REALTIME: đọc đúng kanji (On/Kun) mới ra đòn.
    • Đọc nhanh để đẩy lùi Attack Gauge; đủ năng lượng sẽ tung tuyệt kỹ.
+   • Giảng đường: học theo thứ tự Kanji Dex hoặc tự chọn một Kanji chưa unlock.
    • Kanji Dex (phím D): xem & đổi pet đi sau lưng.
    • Admin thêm chữ/câu dễ dàng: mở admin.html (dán từ Excel) HOẶC sửa js/kanji.js.
      js/config.js cấu hình • js/kanji.js dữ liệu mặc định
@@ -35,14 +36,19 @@
   #touch-actions{right:18px;bottom:28px;width:138px;height:58px;gap:10px}
   #touch-actions button{position:static;width:64px;height:52px;font-size:15px;font-weight:700}
   #touch-actions .touch-dex{color:#ffd54a}
-  #touch-back{right:18px;top:18px;width:76px;height:42px;border:2px solid rgba(159,216,245,.75);
-    border-radius:12px;background:rgba(11,16,48,.82);color:#fff;font-size:13px;font-weight:700}
+  #touch-back{right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:46px;height:42px;
+    border:2px solid rgba(159,216,245,.75);border-radius:12px;background:rgba(11,16,48,.9);
+    color:#fff;font-size:20px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.35)}
   kbd{background:#0f3460;border-radius:4px;padding:1px 6px;
     font-family:monospace;color:#fff;border:1px solid #16558f}
   #admin-link{margin-top:10px;font-size:12px;color:#9fd8f5}
   #admin-link a{color:#6cc0ff}
   h1,#hint,#admin-link{display:none}
-  @media (pointer:coarse), (max-width:700px){#touch-controls,#touch-back{display:block}#touch-actions{display:flex}}
+  @media (pointer:coarse), (max-width:700px){
+    #touch-controls,#touch-back{display:block}#touch-actions{display:flex}
+    #touch-controls{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom))}
+    #touch-actions{right:max(12px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom))}
+  }
 </style>
 </head>
 <body>
@@ -63,7 +69,7 @@
   <button data-action="interact" aria-label="Tương tác">SPACE</button>
   <button class="touch-dex" data-action="dex" aria-label="Mở Kanji Dex">DEX</button>
 </div>
-<button id="touch-back" class="touch-hidden" data-action="back" aria-label="Quay lại">← BACK</button>
+<button id="touch-back" class="touch-hidden" data-action="back" aria-label="Quay lại" title="Quay lại">←</button>
 <div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
 
 <script src="js/config.js"></script>

@@ -28,10 +28,10 @@
   lineH(5, 16, 8); lineV(11, 8, 16); lineH(11, 16, 16);
   rect(14, 10, 5, 5, T.PATH);
 
-  // Học viện 3×3, giữ nguyên tọa độ cửa trong CONFIG.ACADEMY.
-  [4,5,6].forEach((x) => put(x, 1, T.ROOF));
-  [4,5,6].forEach((x) => put(x, 2, T.WALL));
-  put(4, 3, T.WALL); put(5, 3, T.DOOR); put(6, 3, T.WALL);
+  // Giảng đường 5×4: hai hàng mái, hai hàng tường và cửa giữa nối thẳng lối chính.
+  rect(3, 1, 5, 2, T.ROOF);
+  rect(3, 3, 5, 2, T.WALL);
+  put(5, 4, T.DOOR);
 
   // Hồ phía đông bắc, có bờ gấp khúc và bến nối với đường chính.
   rect(23, 3, 7, 7, T.WATER);
@@ -46,7 +46,7 @@
   [[3,6],[4,6],[8,5],[9,5],[12,6],[13,6],[6,20],[7,20],[25,17],[26,17]].forEach(([x,y]) => put(x,y,T.TALL));
 
   // Hoa dùng làm landmark nhỏ và phá các mảng cỏ lớn.
-  [[2,5],[8,3],[9,10],[13,15],[18,8],[20,11],[21,16],[29,11],[3,18],[15,20],[29,20],[19,4]].forEach(([x,y]) => put(x,y,T.FLOWER));
+  [[2,5],[8,5],[9,10],[13,15],[18,8],[20,11],[21,16],[29,11],[3,18],[15,20],[29,20],[19,4]].forEach(([x,y]) => put(x,y,T.FLOWER));
 
   window.MAP_DATA = {
     TILES: tiles,

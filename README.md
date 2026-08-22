@@ -10,7 +10,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 - Overworld: `↑ ↓ ← →` di chuyển • giữ **`Shift`** để chạy • `Space` tương tác/câu cá • **`D`** mở Kanji Dex.
 - Battle (realtime): bấm **`1–4`** chọn cách đọc • `Esc` bỏ chạy.
 - Dex: `← → ↑ ↓` chọn • `Enter` cho pet đi cùng • `Esc/D` đóng.
-- Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • mini-check sai vẫn được qua.
+- Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • chọn học theo thứ tự KanjiDex hoặc tự chọn một Kanji chưa unlock.
 - Nghi thức: gauntlet 5 câu, cần 4/5; thể lực hồi khi thắng bụi cỏ.
 - Kỳ thi PvE: đến NPC ⛩, nhấn `Space` • 10 câu, xếp hạng A/B/C/D.
 
@@ -24,11 +24,14 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 5. **Combat có Attack Gauge và tuyệt kỹ:** trả lời đúng đẩy lùi lượt đánh của quái, trả lời
    nhanh nhận PERFECT; đủ 3 năng lượng pet tự tung skill. Sai/hết giờ khiến quái phản công,
    sau đó hiện đáp án đúng trong khoảng 1 giây.
-6. **Trang Admin nhập liệu** (`admin.html`): thêm chữ/câu cực nhanh, không cần đụng code.
-7. **Core gameplay loop v2**: mastery theo từng kanji, SRS Leitner, tòa giảng đường/thu phục,
+6. **Giảng đường học tập mới:** chỉ dạy Kanji chưa unlock, có hai chế độ học, lesson 5 bước,
+   lưu bài đang dở, ba mini-check, nghi thức trực quan và màn hình tổng kết unlock. Ví dụ từ
+   vựng được tách thành Kanji mục tiêu/chữ hỗ trợ, có furigana và quiz đọc/nghĩa toàn từ.
+7. **Trang Admin nhập liệu** (`admin.html`): thêm chữ/câu cực nhanh, không cần đụng code.
+8. **Core gameplay loop v2**: mastery theo từng kanji, SRS Leitner, tòa giảng đường/thu phục,
    bụi cỏ weighted theo chữ gỉ và kỳ thi PvE 10 câu.
-8. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
-9. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
+9. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
+10. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
 
 ## 🛠️ Admin thêm Kanji & câu hỏi (2 cách)
 
@@ -36,7 +39,8 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 1. Mở **admin.html**.
 2. Dán bảng từ **Excel/Google Sheets** vào 2 ô (mỗi cột cách nhau bằng **Tab**), hoặc dán CSV.
    - Bảng **KANJI**: `key, char, meaning, on, kun, monId`
-   - Bảng **CÂU HỎI**: `word, mean, target, answer, romaji, type` (type = `on`/`kun`)
+   - Bảng **CÂU HỎI**: `word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts`
+   - `parts`: `text~reading~romaji~meaning~role`, nhiều segment ngăn bằng `|`.
    - Nhiều cách đọc On/Kun ngăn nhau bằng `,` hoặc `;`.
    - `monId` phải khớp 1 id trong `CONFIG.MONSTERS` (`yin, ri, kuni, nen, dai, fish, bar`).
 3. Bấm **🔍 Xem trước & Kiểm tra** để soát lỗi/cảnh báo.
@@ -64,7 +68,7 @@ KanjiGO/
 ```
 
 ### Thay hình tòa Giảng đường
-Tòa nhà dùng riêng file `assets/world/academy.png` kích thước khuyến nghị **96×96 px**, nền trong suốt.
+Tòa nhà dùng riêng file `assets/world/academy.png` kích thước khuyến nghị **160×128 px**, nền trong suốt.
 Chỉ cần thay file này là hình trong game được cập nhật; không cần sửa bản đồ hay engine.
 Có thể chạy `tools/make_academy.ps1` để sinh lại hình mẫu trên Windows.
 

@@ -1,7 +1,7 @@
-word,mean,target,answer,romaji,type
-音楽,âm nhạc,音,おん,on,on
-足音,tiếng bước chân,音,おと,oto,kun
-毎日,mỗi ngày,日,にち,nichi,on
-国語,quốc ngữ (môn Văn),国,こく,koku,on
-大学,đại học,大,だい,dai,on
-大きい,to lớn,大,おお,oo,kun
+word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts
+音楽,âm nhạc,音,おん,on,on,おんがく,ongaku,音~おん~on~âm thanh~target|楽~がく~gaku~nhạc~support
+足音,tiếng bước chân,音,おと,oto,kun,あしおと,ashioto,足~あし~ashi~chân~support|音~おと~oto~âm thanh~target
+毎日,mỗi ngày,日,にち,nichi,on,まいにち,mainichi,毎~まい~mai~mỗi~support|日~にち~nichi~ngày~target
+国語,quốc ngữ (môn Văn),国,こく,koku,on,こくご,kokugo,国~こく~koku~quốc gia~target|語~ご~go~ngôn ngữ~support
+大学,đại học,大,だい,dai,on,だいがく,daigaku,大~だい~dai~lớn~target|学~がく~gaku~học~support
+大きい,to lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana

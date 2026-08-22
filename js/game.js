@@ -74,7 +74,7 @@
 
   // ---------- 📚 TIẾN ĐỘ HỌC ----------
   const LEARNING_KEY = 'KANJIGO_LEARNING_V1';
-  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, captureAttempts: {} };
+  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, captureAttempts: {}, academyDraft: null };
   const legacyMasteryKeys = new Set();
   const legacyPetProgress = {};
   const GAME_KEY = 'KANJIGO_GAME_V1';
@@ -173,6 +173,7 @@
       }
       learning.mastery = migrateMastery(saved.mastery);
       if (saved.captureAttempts && typeof saved.captureAttempts === 'object') learning.captureAttempts = saved.captureAttempts;
+      if (saved.academyDraft && typeof saved.academyDraft === 'object') learning.academyDraft = saved.academyDraft;
       saveLearning();
     } catch (e) { console.warn('[KanjiGO] Không đọc được tiến độ học.', e); }
   }
@@ -340,6 +341,7 @@
     const k = e.key.toLowerCase();
     keys[k] = true;
     if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
+    if (state === 'lecture' && k === 'backspace') e.preventDefault();
     if (state === 'overworld') {
       if (e.key === ' ') onSpace();
       if (k === 'd') openDex();
@@ -358,11 +360,19 @@
     else if (state === 'pve') onPveKey('escape');
   }
   cv.addEventListener('pointerdown', (e) => {
-    const quiz = state === 'battle' ? battle : state === 'capture' ? capture : state === 'pve' ? pve : null;
-    if (!quiz || quiz.phase !== 'fight') return;
     const r = cv.getBoundingClientRect();
     const x = (e.clientX - r.left) * cv.width / r.width;
     const y = (e.clientY - r.top) * cv.height / r.height;
+    if (state === 'lecture') { onLecturePointer(x, y); return; }
+    const quiz = state === 'battle' ? battle : state === 'capture' ? capture : state === 'pve' ? pve : null;
+    if (!quiz) return;
+    if (quiz.phase === 'end') {
+      if (state === 'battle') onBattleKey('enter');
+      else if (state === 'capture') onCaptureKey('enter');
+      else onPveKey('enter');
+      return;
+    }
+    if (quiz.phase !== 'fight') return;
     const panelY = cv.height - ((C.UI && C.UI.panelH) || 200);
     const bh = (C.UI && C.UI.answerH) || 36, gap = (C.UI && C.UI.answerGapY) || 8;
     const startY = panelY + 96, P = 22, bw = (cv.width - P * 2) / 2 - 10;
@@ -376,6 +386,20 @@
       else answerPve(idx);
     }
   });
+  function onLecturePointer(x, y) {
+    if (!lecture) return;
+    const scale = lecture.uiScale || 1;
+    x /= scale; y /= scale;
+    const hit = (lecture.hitboxes || []).find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
+    if (!hit) return;
+    if (hit.action === 'menu') selectAcademyMenu(hit.value.action, hit.value.char);
+    else if (hit.action === 'pick') startAcademyLesson(hit.value);
+    else if (hit.action === 'picker_prev') lecture.pickerSel = Math.max(0, (lecture.pickerSel || 0) - (lecture.pageSize || 1));
+    else if (hit.action === 'picker_next') lecture.pickerSel = Math.min(Math.max(0, academyFilteredList().length - 1), (lecture.pickerSel || 0) + (lecture.pageSize || 1));
+    else if (hit.action === 'answer') answerLecture(hit.value);
+    else if (hit.action === 'continue') academyNextStep();
+    else if (hit.action === 'back') openAcademyLobby();
+  }
   function pressed(dir) {
     if (dir === 'left') return keys['arrowleft'] || keys['a'];
     if (dir === 'right') return keys['arrowright'] || keys['d'] && false; // 'd' dành cho Dex
@@ -558,10 +582,26 @@
       if (new Set(words).size < 3) mode = 'm1';
       else { answer = q.word; options = optionSet(answer, words); }
     }
+    if (mode === 'm6') {
+      const readings = KDB.QUESTIONS.filter((item) => item !== q && item.wordReading).map((item) => item.wordReading);
+      if (!q.wordReading || new Set(readings).size < 3) mode = 'm1';
+      else { answer = q.wordReading; options = optionSet(answer, readings); }
+    }
+    if (mode === 'm7') {
+      const meanings = KDB.QUESTIONS.filter((item) => item !== q && item.mean).map((item) => item.mean);
+      if (!q.mean || new Set(meanings).size < 3) mode = 'm1';
+      else { answer = q.mean; options = optionSet(answer, meanings); }
+    }
     if (mode === 'm1') { answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
-    const result = { word, mean, target: q.target, answer, romaji: q.romaji, type, mode, options, correctIndex: options.indexOf(answer) };
+    const result = { word, mean, target: q.target, answer, romaji: q.romaji, type, mode, options, correctIndex: options.indexOf(answer),
+      wordReading: q.wordReading || '', wordRomaji: q.wordRomaji || '', parts: Array.isArray(q.parts) ? q.parts.map((part) => ({ ...part })) : [] };
     result.key = `${mode}|${questionKey(q)}`;
     return result;
+  }
+  function questionCorrection(q) {
+    if (q.mode === 'm6') return `「${q.word}」 đọc là「${q.answer}」${q.wordRomaji ? ` (${q.wordRomaji})` : ''}`;
+    if (q.mode === 'm7') return `「${q.word}」 nghĩa là “${q.answer}”`;
+    return `${q.target} ở đây đọc「${q.answer}」${q.romaji ? ` (${q.romaji})` : ''} — âm ${q.type.toUpperCase()}`;
   }
 
   function startBattle(kind) {
@@ -632,7 +672,7 @@
       battle.stun = C.COMBAT.wrongStun;
       battle.qCooldown = C.COMBAT.wrongStun;
       battle.fbT = C.COMBAT.wrongStun;
-      battle.feedback = { good: false, text: `✗ Sai! ${q.target} ở đây đọc「${q.answer}」(${q.romaji}) — âm ${q.type.toUpperCase()}` };
+      battle.feedback = { good: false, text: `✗ Sai! ${questionCorrection(q)}` };
       enemyAttack(battle, 'Sai đáp án');
     }
   }
@@ -659,7 +699,7 @@
     b.stun = C.COMBAT.wrongStun;
     b.qCooldown = C.COMBAT.wrongStun;
     b.fbT = C.COMBAT.wrongStun;
-    b.feedback = { good: false, text: `⌛ Hết giờ! Đáp án:「${b.q.answer}」(${b.q.romaji}) — quái phản công!` };
+    b.feedback = { good: false, text: `⌛ Hết giờ! ${questionCorrection(b.q)} — quái phản công!` };
     enemyAttack(b);
   }
   function makeBattleParticles(kind, count) {
@@ -706,39 +746,145 @@
 
   // ---------- 📖 GIẢNG ĐƯỜNG + NGHI THỨC THU PHỤC ----------
   let lecture = null, capture = null;
-  function nextLectureKanji() {
-    const info = Object.values(KDB.KANJI).find((item) => !ensureMastery(item.char).lectured);
-    return info ? info.char : Object.values(KDB.KANJI)[0].char;
+  function academyDexList() { return Object.values(KDB.KANJI); }
+  function academyLockedList() { return academyDexList().filter((info) => !ensureMastery(info.char).captured); }
+  function academyUnlockedCount() { return academyDexList().filter((info) => ensureMastery(info.char).captured).length; }
+  function academyEligibility(info) {
+    if (!info || !C.MONSTERS[info.monId]) return 'Thiếu monster asset/config';
+    if (!KDB.QUESTIONS.some((q) => q.target === info.char)) return 'Thiếu câu hỏi';
+    return '';
   }
-  function enterLecture(char = '') {
-    const target = resolveKanji(char || nextLectureKanji()), info = kanjiInfo(target);
-    if (!info) return false;
-    const examples = KDB.QUESTIONS.filter((q) => q.target === target).slice(0, 2);
-    lecture = { char: target, info, examples, phase: 'read', q: null, feedback: '' };
+  function nextLectureKanji() {
+    const info = academyLockedList()[0];
+    return info ? info.char : null;
+  }
+  function pendingAcademyKanji() {
+    const draftChar = learning.academyDraft && resolveKanji(learning.academyDraft.char);
+    if (draftChar && kanjiInfo(draftChar) && !ensureMastery(draftChar).captured) return draftChar;
+    const pending = academyDexList().find((info) => ensureMastery(info.char).lectured && !ensureMastery(info.char).captured);
+    return pending ? pending.char : null;
+  }
+  function academyMenuItems() {
+    const items = [
+      { action: 'guided', title: 'HỌC THEO LỘ TRÌNH', desc: 'Kanji chưa unlock đầu tiên theo thứ tự KanjiDex' },
+      { action: 'picker', title: 'CHỌN KANJI MỚI', desc: 'Tự chọn một chữ chưa unlock trong danh sách' },
+    ];
+    const pending = pendingAcademyKanji();
+    if (pending) items.push({ action: 'resume', title: `TIẾP TỤC 「${pending}」`, desc: 'Quay lại bài học hoặc nghi thức đang dang dở', char: pending });
+    return items;
+  }
+  function openAcademyLobby(message = '') {
+    lecture = { phase: 'lobby', menuSel: 0, message, hitboxes: [] };
     state = 'lecture';
     return true;
   }
+  function enterLecture(char = '') {
+    if (!char) return openAcademyLobby();
+    return startAcademyLesson(resolveKanji(char), true);
+  }
+  function openAcademyPicker() {
+    lecture = { phase: 'picker', pickerSel: 0, search: '', message: '', hitboxes: [] };
+    state = 'lecture';
+  }
+  function academyFilteredList() {
+    const locked = academyLockedList(), query = String((lecture && lecture.search) || '').trim().toLowerCase();
+    if (!query) return locked;
+    return locked.filter((info) => [info.char, info.meaning, ...(info.on || []), ...(info.kun || [])].join(' ').toLowerCase().includes(query));
+  }
+  function selectAcademyMenu(action, char = '') {
+    if (action === 'picker') { openAcademyPicker(); return; }
+    const target = action === 'resume' ? resolveKanji(char || pendingAcademyKanji()) : nextLectureKanji();
+    if (!target) { openAcademyLobby('🎓 Bạn đã unlock toàn bộ Kanji trong KanjiDex!'); return; }
+    startAcademyLesson(target, action === 'resume');
+  }
+  function academyQuestion(index, previousKey = '') {
+    const modes = ['m1', 'm6', 'm7'];
+    return makeQuestion(lecture.char, previousKey, modes[index % modes.length]);
+  }
+  function saveAcademyDraft() {
+    if (!lecture || !lecture.char || ensureMastery(lecture.char).captured || lecture.phase === 'summary') return;
+    learning.academyDraft = { char: lecture.char, phase: lecture.phase, checkIndex: lecture.checkIndex || 0, lessonScore: lecture.lessonScore || 0 };
+    saveLearning();
+  }
+  function startAcademyLesson(char, resume = false) {
+    const target = resolveKanji(char), info = kanjiInfo(target);
+    if (!info || ensureMastery(target).captured) { openAcademyLobby('Kanji này đã được unlock hoặc không còn trong dữ liệu.'); return false; }
+    const problem = academyEligibility(info);
+    if (problem) { openAcademyLobby(`⚠ 「${target}」 chưa thể học: ${problem}.`); return false; }
+    const examples = KDB.QUESTIONS.filter((q) => q.target === target).slice(0, 2);
+    const s = ensureMastery(target), draft = learning.academyDraft;
+    const resumable = ['intro', 'readings', 'examples', 'check'];
+    let phase = s.lectured ? 'ready' : 'intro', checkIndex = 0;
+    if (resume && draft && resolveKanji(draft.char) === target && resumable.includes(draft.phase)) {
+      phase = draft.phase; checkIndex = Math.max(0, Math.min(2, Number(draft.checkIndex) || 0));
+    }
+    lecture = { char: target, info, examples, phase, checkIndex, lessonScore: resume && draft ? Math.max(0, Number(draft.lessonScore) || 0) : 0,
+      q: null, answerLocked: false, feedback: '', message: '', hitboxes: [] };
+    if (phase === 'check') lecture.q = academyQuestion(checkIndex);
+    state = 'lecture';
+    saveAcademyDraft();
+    return true;
+  }
+  function academyNextStep() {
+    if (!lecture) return;
+    if (lecture.phase === 'intro') lecture.phase = 'readings';
+    else if (lecture.phase === 'readings') lecture.phase = 'examples';
+    else if (lecture.phase === 'examples') {
+      lecture.phase = 'check'; lecture.checkIndex = 0; lecture.q = academyQuestion(0);
+      lecture.feedback = ''; lecture.answerLocked = false;
+    } else if (lecture.phase === 'check' && lecture.answerLocked) {
+      lecture.checkIndex++;
+      if (lecture.checkIndex >= 3) finishLecture();
+      else {
+        const previous = lecture.q && lecture.q.key;
+        lecture.q = academyQuestion(lecture.checkIndex, previous);
+        lecture.feedback = ''; lecture.answerLocked = false;
+      }
+    } else if (lecture.phase === 'ready') startCapture(lecture.char);
+    else if (lecture.phase === 'summary') openAcademyLobby();
+    saveAcademyDraft();
+  }
+  function answerLecture(idx) {
+    if (!lecture || lecture.phase !== 'check' || lecture.answerLocked || !lecture.q) return;
+    const correct = idx === lecture.q.correctIndex;
+    if (correct) lecture.lessonScore++;
+    lecture.answerLocked = true;
+    lecture.feedback = correct ? '✓ Chính xác! Kiến thức đã được nạp.' : `✗ Đáp án đúng: ${lecture.q.answer} — đọc lại một lần rồi tiếp tục nhé.`;
+  }
   function finishLecture() {
     ensureMastery(lecture.char).lectured = true;
-    saveLearning();
-    lecture.phase = 'done';
-    lecture.feedback = `Đã học ${lecture.char}. Space để bắt đầu nghi thức thu phục.`;
+    lecture.phase = 'ready';
+    lecture.feedback = `Đã hoàn thành bài học 「${lecture.char}」.`;
+    saveAcademyDraft(); saveLearning();
   }
   function onLectureKey(k) {
     if (!lecture) return;
-    if (k === 'escape') { state = 'overworld'; lecture = null; return; }
-    if (lecture.phase === 'read' && (k === ' ' || k === 'enter')) {
-      lecture.phase = 'check'; lecture.q = makeQuestion(lecture.char, '', 'm1'); return;
-    }
-    if (lecture.phase === 'check' && ['1', '2', '3', '4'].includes(k)) {
-      const correct = parseInt(k, 10) - 1 === lecture.q.correctIndex;
-      lecture.feedback = correct ? '✓ Chính xác!' : `Đáp án là ${lecture.q.answer} — cứ đọc lại và tiếp tục nhé.`;
-      finishLecture();
+    if (k === 'escape') {
+      if (lecture.phase === 'lobby') { state = 'overworld'; lecture = null; }
+      else openAcademyLobby();
       return;
     }
-    if (lecture.phase === 'done' && (k === ' ' || k === 'enter')) {
-      if (!startCapture(lecture.char)) { state = 'overworld'; lecture = null; }
+    if (lecture.phase === 'lobby') {
+      const items = academyMenuItems();
+      if (k === 'arrowup' || k === 'w') lecture.menuSel = (lecture.menuSel - 1 + items.length) % items.length;
+      else if (k === 'arrowdown' || k === 's') lecture.menuSel = (lecture.menuSel + 1) % items.length;
+      else if (['1', '2', '3'].includes(k) && Number(k) <= items.length) { const item = items[Number(k) - 1]; selectAcademyMenu(item.action, item.char); }
+      else if (k === ' ' || k === 'enter') { const item = items[lecture.menuSel || 0]; selectAcademyMenu(item.action, item.char); }
+      return;
     }
+    if (lecture.phase === 'picker') {
+      const list = academyFilteredList();
+      if (k === 'arrowleft') lecture.pickerSel = Math.max(0, lecture.pickerSel - 1);
+      else if (k === 'arrowright') lecture.pickerSel = Math.min(Math.max(0, list.length - 1), lecture.pickerSel + 1);
+      else if (k === 'arrowup') lecture.pickerSel = Math.max(0, lecture.pickerSel - academyPickerCols());
+      else if (k === 'arrowdown') lecture.pickerSel = Math.min(Math.max(0, list.length - 1), lecture.pickerSel + academyPickerCols());
+      else if ((k === ' ' || k === 'enter') && list.length && !academyEligibility(list[lecture.pickerSel])) startAcademyLesson(list[lecture.pickerSel].char);
+      else if (k === 'backspace') { lecture.search = lecture.search.slice(0, -1); lecture.pickerSel = 0; }
+      else if (k.length === 1 && /^[\p{L}\p{N}]$/u.test(k)) { lecture.search += k; lecture.pickerSel = 0; }
+      return;
+    }
+    if (lecture.phase === 'check' && ['1', '2', '3', '4'].includes(k)) { answerLecture(parseInt(k, 10) - 1); return; }
+    if (k === ' ' || k === 'enter') academyNextStep();
   }
   function startCapture(char = '') {
     const target = resolveKanji(char || (lecture && lecture.char) || nextLectureKanji()), info = kanjiInfo(target);
@@ -751,11 +897,15 @@
     learning.captureAttempts[target] = attempt;
     stamina--;
     capture = { char: target, info, attempt, needed: attempt >= C.CAPTURE.relaxFromAttempt ? 3 : 4,
-      q: makeQuestion(target, '', 'm1'), index: 0, correct: 0, phase: 'fight', qCooldown: 0,
-      feedback: null, fbT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1 };
+      q: captureQuestion(target, 0), index: 0, correct: 0, phase: 'fight', qCooldown: 0,
+      feedback: null, fbT: 0, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1 };
     state = 'capture';
     saveGame(); saveLearning();
     return true;
+  }
+  function captureQuestion(target, index, previousKey = '') {
+    const modes = ['m1', 'm6', 'm7', 'm6', 'm1'];
+    return makeQuestion(target, previousKey, modes[index % modes.length]);
   }
   function finishCapture() {
     const passed = capture.correct >= capture.needed, s = ensureMastery(capture.char);
@@ -763,11 +913,14 @@
       s.captured = true; s.nextReview = Date.now() + (C.SRS.newlyCapturedDueMs || 0);
       collect(capture.info.monId); saveLearning(); saveGame();
       capture.feedback = `🎉 Thu phục thành công ${capture.char}!`;
+      if (learning.academyDraft && resolveKanji(learning.academyDraft.char) === capture.char) learning.academyDraft = null;
     } else {
       capture.feedback = `Chưa đủ điểm (${capture.correct}/5). Hãy luyện chữ cũ để hồi thể lực.`;
     }
+    capture.passed = passed;
     capture.endMsg = capture.feedback;
     capture.phase = 'end';
+    saveLearning();
   }
   function answerCapture(idx) {
     if (!capture || capture.phase !== 'fight' || capture.qCooldown > 0) return;
@@ -775,12 +928,22 @@
     recordAnswer(q, correct);
     if (correct) capture.correct++;
     capture.feedback = correct ? { good: true, text: '✓ Đúng!' } : { good: false, text: `✗ ${q.answer}` };
-    capture.fbT = 500; capture.qCooldown = 500; capture.index++;
+    capture.fbT = 650; capture.burstT = correct ? 520 : 0; capture.qCooldown = 650; capture.index++;
     if (capture.index >= 5) capture.pendingEnd = true;
   }
   function onCaptureKey(k) {
     if (!capture) return;
-    if (capture.phase === 'end') { if (k === ' ' || k === 'enter') { state = 'overworld'; capture = null; } return; }
+    if (capture.phase === 'end') {
+      if (k === ' ' || k === 'enter') {
+        const result = capture;
+        capture = null;
+        if (result.passed) {
+          lecture = { phase: 'summary', char: result.char, info: result.info, score: result.correct, hitboxes: [] };
+          state = 'lecture';
+        } else startAcademyLesson(result.char, true);
+      }
+      return;
+    }
     if (k === 'escape') { state = 'overworld'; capture = null; return; }
     if (['1', '2', '3', '4'].includes(k)) answerCapture(parseInt(k, 10) - 1);
   }
@@ -937,11 +1100,12 @@
   function updateCapture(dt) {
     if (!capture || capture.phase !== 'fight') return;
     if (capture.fbT > 0) capture.fbT -= dt;
+    if (capture.burstT > 0) capture.burstT -= dt;
     if (capture.qCooldown > 0) {
       capture.qCooldown -= dt;
       if (capture.qCooldown <= 0) {
         if (capture.pendingEnd) finishCapture();
-        else capture.q = makeQuestion(capture.char, capture.q.key, 'm1');
+        else capture.q = captureQuestion(capture.char, capture.index, capture.q.key);
       }
     }
   }
@@ -1198,39 +1362,299 @@
   }
 
   function renderLecture() {
-    const W = cv.width, H = cv.height, info = lecture.info;
-    cx.fillStyle = '#111b3d'; cx.fillRect(0, 0, W, H);
-    cx.fillStyle = '#6cc0ff'; cx.font = `bold 24px ${JPFONT}`; cx.fillText('📖 GIẢNG ĐƯỜNG', 28, 42);
-    cx.fillStyle = '#ffd54a'; cx.font = `bold 92px ${JPFONT}`; cx.fillText(info.char, 44, 154);
-    cx.fillStyle = '#fff'; cx.font = `bold 24px ${JPFONT}`; cx.fillText(info.meaning, 170, 105);
-    cx.fillStyle = '#ffd54a'; cx.font = `18px ${JPFONT}`; cx.fillText(`ON: ${info.on.join(', ')}`, 170, 140);
-    cx.fillStyle = '#6effa1'; cx.fillText(`KUN: ${info.kun.join(', ')}`, 170, 172);
-    if (lecture.phase === 'read') {
-      cx.fillStyle = '#b9c8e8'; cx.font = `16px ${JPFONT}`; cx.fillText('Ví dụ:', 44, 214);
-      lecture.examples.forEach((q, i) => cx.fillText(`• ${q.word} — ${q.mean} — ${q.answer}`, 64, 244 + i * 28));
-      cx.fillStyle = '#9fd8f5'; cx.font = '15px monospace'; cx.fillText('Space: làm mini-check   Esc: quay lại', 44, H - 28);
-    } else if (lecture.phase === 'check') {
-      cx.fillStyle = '#fff'; cx.font = `18px ${JPFONT}`; cx.fillText('Mini-check: chọn cách đọc đúng (sai vẫn được qua)', 34, H - 120);
-      drawLectureAnswers(lecture.q, 34, H - 88);
-    } else {
-      cx.fillStyle = '#6effa1'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(lecture.feedback, 34, H - 92);
-      cx.fillStyle = '#9fd8f5'; cx.font = '15px monospace'; cx.fillText('Space: bắt đầu nghi thức   Esc: quay lại', 34, H - 42);
+    const physicalW = cv.width, physicalH = cv.height;
+    // Giữ đủ không gian theo chiều dọc ở điện thoại xoay ngang. Toàn bộ UI
+    // được thu đồng nhất nên card, chữ và hitbox không tràn/chệch nhau.
+    const uiScale = Math.min(1, physicalH / 560);
+    const W = physicalW / uiScale, H = physicalH / uiScale;
+    lecture.uiScale = uiScale;
+    lecture.hitboxes = [];
+    cx.save(); cx.scale(uiScale, uiScale);
+    drawAcademyBackdrop(W, H);
+    drawAcademyHeader(W);
+    if (lecture.phase === 'lobby') renderAcademyLobby(W, H);
+    else if (lecture.phase === 'picker') renderAcademyPicker(W, H);
+    else if (lecture.phase === 'summary') renderAcademySummary(W, H);
+    else renderAcademyLesson(W, H);
+    cx.restore();
+  }
+  function drawAcademyBackdrop(W, H) {
+    const wall = cx.createLinearGradient(0, 0, 0, H); wall.addColorStop(0, '#17274a'); wall.addColorStop(.7, '#101a36'); wall.addColorStop(1, '#0b1026');
+    cx.fillStyle = wall; cx.fillRect(0, 0, W, H);
+    cx.fillStyle = 'rgba(242,177,72,.08)'; cx.fillRect(0, 68, W, 3);
+    const side = Math.max(18, (W - Math.min(1040, W - 24)) / 2 - 28);
+    cx.fillStyle = 'rgba(8,13,31,.72)'; cx.fillRect(0, 72, side, H - 72); cx.fillRect(W - side, 72, side, H - 72);
+    cx.strokeStyle = 'rgba(108,192,255,.08)'; cx.lineWidth = 1;
+    for (let y = 105; y < H; y += 52) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
+  }
+  function drawAcademyHeader(W) {
+    const total = academyDexList().length, unlocked = academyUnlockedCount(), compact = W < 620;
+    const touchBackVisible = (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) || cv.width <= 700;
+    const backReserve = touchBackVisible ? 58 / (lecture.uiScale || 1) : 0;
+    cx.fillStyle = 'rgba(8,13,31,.94)'; cx.fillRect(0, 0, W, 72);
+    cx.strokeStyle = '#244f80'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, 71); cx.lineTo(W, 71); cx.stroke();
+    cx.fillStyle = '#6cc0ff'; cx.font = `bold ${compact ? 17 : 24}px ${JPFONT}`; cx.fillText(compact ? '📖 GIẢNG ĐƯỜNG' : '📖 GIẢNG ĐƯỜNG KANJI', compact ? 14 : 24, compact ? 27 : 34);
+    if (!compact) { cx.fillStyle = '#b9c8e8'; cx.font = '12px monospace'; cx.fillText('Nơi tiếp nhận kiến thức mới và unlock mascot', 25, 55); }
+    const barW = compact ? W - 28 - backReserve : Math.min(250, Math.max(120, W * .22));
+    const bx = compact ? 14 : W - barW - 24 - backReserve, by = compact ? 45 : 25;
+    cx.fillStyle = '#26334b'; cx.fillRect(bx, by, barW, 9);
+    cx.fillStyle = '#56eaff'; cx.fillRect(bx, by, total ? barW * unlocked / total : barW, 9);
+    cx.fillStyle = '#dce8ff'; cx.font = `${compact ? 10 : 12}px monospace`; cx.textAlign = 'right';
+    cx.fillText(`${compact ? '' : 'ĐÃ UNLOCK '}${unlocked}/${total}`, W - (compact ? 10 : 24) - backReserve, compact ? 27 : 54); cx.textAlign = 'left';
+  }
+  function academyContent(W) {
+    const w = Math.min(960, W - 36); return { x: (W - w) / 2, w };
+  }
+  function drawAcademyCard(x, y, w, h, selected = false, disabled = false) {
+    cx.fillStyle = disabled ? 'rgba(30,36,54,.78)' : selected ? 'rgba(28,89,137,.96)' : 'rgba(18,31,61,.94)'; cx.fillRect(x, y, w, h);
+    cx.strokeStyle = disabled ? '#3f475d' : selected ? '#72ddff' : '#275b8f'; cx.lineWidth = selected ? 3 : 2; cx.strokeRect(x, y, w, h);
+  }
+  function renderAcademyLobby(W, H) {
+    const area = academyContent(W), items = academyMenuItems(), compact = W < 620;
+    const titleY = 112;
+    cx.fillStyle = '#fff'; fitText(compact ? 'Chọn cách học Kanji mới' : 'Bạn muốn khám phá Kanji mới theo cách nào?', area.x, titleY, area.w, compact ? 23 : 28, true);
+    cx.fillStyle = '#9fd8f5'; cx.font = `${compact ? 12 : 14}px ${JPFONT}`; fitText('Giảng đường chỉ hiển thị những chữ chưa unlock.', area.x, titleY + 26, area.w, compact ? 12 : 14);
+    if (lecture.message) { cx.fillStyle = lecture.message.startsWith('⚠') ? '#ffadad' : '#6effa1'; fitText(lecture.message, area.x, titleY + 53, area.w, 15, true); }
+    const cardH = Math.max(62, Math.min(82, (H - 210) / Math.max(3, items.length))), startY = titleY + 76;
+    items.forEach((item, i) => {
+      const y = startY + i * (cardH + 12), selected = i === (lecture.menuSel || 0);
+      drawAcademyCard(area.x, y, area.w, cardH, selected);
+      cx.fillStyle = selected ? '#7ff7ff' : '#ffd54a'; cx.font = `bold 19px ${JPFONT}`; cx.fillText(`${i + 1}. ${item.title}`, area.x + 22, y + 29);
+      cx.fillStyle = '#c5d2eb'; cx.font = `14px ${JPFONT}`; fitText(item.desc, area.x + 22, y + 55, area.w - 44, 14);
+      lecture.hitboxes.push({ x: area.x, y, w: area.w, h: cardH, action: 'menu', value: item });
+    });
+    cx.fillStyle = '#8395b5'; cx.font = '12px monospace';
+    cx.fillText(compact ? 'Chạm một lựa chọn · ← quay lại' : '↑↓ chọn · Enter xác nhận · Esc rời Giảng đường', area.x, H - 20);
+  }
+  function academyPickerCols() {
+    const width = cv.width / ((lecture && lecture.uiScale) || 1);
+    return width < 560 ? 2 : width < 860 ? 3 : width < 1180 ? 4 : 5;
+  }
+  function renderAcademyPicker(W, H) {
+    const area = academyContent(W), list = academyFilteredList(), cols = academyPickerCols(), gap = 12, compact = W < 620;
+    lecture.pickerSel = Math.max(0, Math.min(Math.max(0, list.length - 1), lecture.pickerSel || 0));
+    cx.fillStyle = '#fff'; cx.font = `bold 25px ${JPFONT}`; cx.fillText('Chọn một Kanji chưa unlock', area.x, 108);
+    cx.fillStyle = 'rgba(7,13,30,.9)'; cx.fillRect(area.x, 124, area.w, 38); cx.strokeStyle = '#275b8f'; cx.strokeRect(area.x, 124, area.w, 38);
+    cx.fillStyle = lecture.search ? '#fff' : '#7183a4'; cx.font = `14px ${JPFONT}`;
+    fitText(lecture.search ? `⌕ ${lecture.search}` : compact ? 'Chạm một thẻ để bắt đầu học' : '⌕ Gõ Kanji, nghĩa, ON hoặc KUN để tìm...', area.x + 14, 149, area.w - 28, 14);
+    const cardW = (area.w - gap * (cols - 1)) / cols, cardH = 132;
+    const rows = Math.max(1, Math.floor((H - 230) / (cardH + gap))), pageSize = cols * rows;
+    lecture.pageSize = pageSize;
+    const page = Math.floor((lecture.pickerSel || 0) / pageSize), pageStart = page * pageSize;
+    list.slice(pageStart, pageStart + pageSize).forEach((info, local) => {
+      const index = pageStart + local, col = local % cols, row = Math.floor(local / cols);
+      const x = area.x + col * (cardW + gap), y = 178 + row * (cardH + gap);
+      const problem = academyEligibility(info), selected = index === lecture.pickerSel;
+      drawAcademyCard(x, y, cardW, cardH, selected, !!problem);
+      const mon = imgs['mon_' + info.monId], iw = Math.min(66, cardW * .38);
+      if (mon) { const ih = iw * mon.height / mon.width; cx.globalAlpha = problem ? .35 : 1; cx.drawImage(mon, x + 10, y + 14, iw, ih); cx.globalAlpha = 1; }
+      cx.fillStyle = problem ? '#737b90' : '#ffd54a'; cx.font = `bold 35px ${JPFONT}`; cx.fillText(info.char, x + cardW - 48, y + 48);
+      cx.fillStyle = problem ? '#737b90' : '#fff'; fitText(info.meaning, x + 12, y + 91, cardW - 24, 14, true);
+      const status = problem || (ensureMastery(info.char).lectured ? 'TIẾP TỤC THU PHỤC' : 'CHƯA HỌC');
+      cx.fillStyle = problem ? '#ff9d9d' : ensureMastery(info.char).lectured ? '#6effa1' : '#9fd8f5'; fitText(status, x + 12, y + 116, cardW - 24, 10, true);
+      if (!problem) lecture.hitboxes.push({ x, y, w: cardW, h: cardH, action: 'pick', value: info.char });
+    });
+    if (!list.length) { cx.fillStyle = '#9fd8f5'; cx.font = `18px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText('Không tìm thấy Kanji mới phù hợp.', W / 2, H / 2); cx.textAlign = 'left'; }
+    const pages = Math.max(1, Math.ceil(list.length / pageSize));
+    cx.fillStyle = '#8395b5'; cx.font = '12px monospace';
+    fitText(compact ? `Chạm để học · Trang ${page + 1}/${pages}` : `←↑↓→ chọn · Enter học · Backspace xoá tìm kiếm · Trang ${page + 1}/${pages}`, area.x, H - 20, area.w, 12);
+    if (pages > 1) {
+      const navY = H - 60, navW = 92;
+      drawAcademyCard(area.x + area.w - navW * 2 - 10, navY, navW, 30, false, page <= 0);
+      drawAcademyCard(area.x + area.w - navW, navY, navW, 30, false, page >= pages - 1);
+      cx.fillStyle = '#dce8ff'; cx.font = 'bold 11px monospace'; cx.textAlign = 'center';
+      cx.fillText('◀ TRƯỚC', area.x + area.w - navW * 1.5 - 10, navY + 20);
+      cx.fillText('SAU ▶', area.x + area.w - navW * .5, navY + 20); cx.textAlign = 'left';
+      if (page > 0) lecture.hitboxes.push({ x: area.x + area.w - navW * 2 - 10, y: navY, w: navW, h: 30, action: 'picker_prev' });
+      if (page < pages - 1) lecture.hitboxes.push({ x: area.x + area.w - navW, y: navY, w: navW, h: 30, action: 'picker_next' });
+    }
+    lecture.hitboxes.push({ x: area.x + area.w - 90, y: 80, w: 90, h: 30, action: 'back' });
+    cx.fillStyle = '#9fd8f5'; cx.textAlign = 'right'; cx.fillText('Esc: quay lại', area.x + area.w, 105); cx.textAlign = 'left';
+  }
+  function lessonStep() { return ({ intro: 1, readings: 2, examples: 3, check: 4, ready: 5 }[lecture.phase] || 1); }
+  function drawLessonProgress(W) {
+    const area = academyContent(W), step = lessonStep(), y = 91, gap = 8, sw = (area.w - gap * 4) / 5;
+    for (let i = 0; i < 5; i++) { cx.fillStyle = i < step ? '#56eaff' : '#26334b'; cx.fillRect(area.x + i * (sw + gap), y, sw, 7); }
+    cx.fillStyle = '#9fd8f5'; cx.font = '11px monospace'; cx.fillText(`BƯỚC ${step}/5`, area.x, y + 23);
+  }
+  function drawLessonMascot(info, x, y, maxW, maxH) {
+    const img = imgs['mon_' + info.monId]; if (!img) return;
+    const scale = Math.min(maxW / img.width, maxH / img.height), w = img.width * scale, h = img.height * scale;
+    const bob = Math.sin(performance.now() / 260) * 4;
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(x + maxW / 2, y + maxH - 5, w * .38, 13, 0, 0, Math.PI * 2); cx.fill();
+    cx.drawImage(img, x + (maxW - w) / 2, y + (maxH - h) / 2 + bob, w, h);
+  }
+  function renderAcademyLesson(W, H) {
+    const area = academyContent(W), info = lecture.info, compact = W < 620, narrow = W < 460;
+    drawLessonProgress(W);
+    const bodyY = 126, bodyH = H - bodyY - 76;
+    drawAcademyCard(area.x, bodyY, area.w, bodyH);
+    if (lecture.phase === 'intro') {
+      const split = compact ? area.w * .55 : area.w * .58;
+      cx.fillStyle = '#9fd8f5'; cx.font = '13px monospace'; cx.fillText('KANJI MỚI', area.x + 28, bodyY + 34);
+      cx.fillStyle = '#ffd54a'; cx.font = `bold ${compact ? 82 : 126}px ${JPFONT}`; cx.fillText(info.char, area.x + 28, bodyY + (compact ? 118 : 162));
+      cx.fillStyle = '#fff'; fitText(info.meaning, area.x + 30, bodyY + (compact ? 153 : 205), split - 46, compact ? 21 : 28, true);
+      cx.fillStyle = '#a9bad8'; cx.font = `14px ${JPFONT}`; wrap('Quan sát hình dáng, đọc nghĩa và làm quen với mascot trước khi học cách đọc.', area.x + 30, bodyY + (compact ? 181 : 238), split - 48, 22);
+      drawLessonMascot(info, area.x + split, bodyY + 20, area.w - split - 18, bodyH - 35);
+    } else if (lecture.phase === 'readings') {
+      cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 23 : 27}px ${JPFONT}`; fitText(`Cách đọc của 「${info.char}」`, area.x + 28, bodyY + 42, area.w - 56, compact ? 23 : 27, true);
+      const gap = narrow ? 10 : 18, cardY = bodyY + 72;
+      const cardW = narrow ? area.w - 56 : (area.w - 74) / 2;
+      const cardH = narrow ? Math.min(104, (bodyH - 102) / 2) : Math.min(150, bodyH - 92);
+      const onX = area.x + 28, onY = cardY, kunX = narrow ? onX : area.x + 46 + cardW, kunY = narrow ? cardY + cardH + gap : cardY;
+      drawAcademyCard(onX, onY, cardW, cardH, true); drawAcademyCard(kunX, kunY, cardW, cardH, true);
+      cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 14 : 17}px monospace`; cx.fillText('ÂM ON', onX + 20, onY + 30);
+      cx.fillStyle = '#fff'; cx.font = `${compact ? 16 : 22}px ${JPFONT}`; wrap((info.on || []).join('  ·  ') || '—', onX + 20, onY + (narrow ? 61 : 72), cardW - 40, narrow ? 24 : 30);
+      cx.fillStyle = '#6effa1'; cx.font = `bold ${narrow ? 14 : 17}px monospace`; cx.fillText('ÂM KUN', kunX + 20, kunY + 30);
+      cx.fillStyle = '#fff'; cx.font = `${compact ? 16 : 22}px ${JPFONT}`; wrap((info.kun || []).join('  ·  ') || '—', kunX + 20, kunY + (narrow ? 61 : 72), cardW - 40, narrow ? 24 : 30);
+    } else if (lecture.phase === 'examples') {
+      cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 23 : 27}px ${JPFONT}`; cx.fillText('Từ vựng ví dụ', area.x + 28, bodyY + 42);
+      cx.fillStyle = '#9fd8f5'; cx.font = `${narrow ? 10 : 11}px monospace`;
+      cx.fillText(narrow ? 'VÀNG: đang học · XANH: hỗ trợ · chữ nhỏ: furigana' : 'VÀNG: chữ đang học  ·  XANH: chữ hỗ trợ  ·  Furigana nằm phía trên', area.x + 28, bodyY + 62);
+      const examples = lecture.examples || [], available = bodyH - 82 - Math.max(0, examples.length - 1) * 8;
+      const cardH = Math.min(90, Math.max(82, available / Math.max(1, examples.length)));
+      lecture.examples.forEach((q, i) => {
+        const y = bodyY + 72 + i * (cardH + 8); drawAcademyCard(area.x + 28, y, area.w - 56, cardH, i === 0);
+        drawBridgeVocabulary(q, info.char, area.x + 44, y + 5, area.w - 88, compact);
+      });
+    } else if (lecture.phase === 'check') renderAcademyCheck(area, bodyY, bodyH);
+    else if (lecture.phase === 'ready') {
+      drawLessonMascot(info, area.x + area.w * .57, bodyY + 22, area.w * .4, bodyH - 38);
+      cx.fillStyle = '#6effa1'; cx.font = `bold 25px ${JPFONT}`; cx.fillText('KIẾN THỨC ĐÃ ĐƯỢC NẠP!', area.x + 30, bodyY + 58);
+      cx.fillStyle = '#ffd54a'; cx.font = `bold 78px ${JPFONT}`; cx.fillText(info.char, area.x + 30, bodyY + 146);
+      cx.fillStyle = '#fff'; fitText(info.meaning, area.x + 120, bodyY + 118, area.w * .4, 24, true);
+      cx.fillStyle = '#b9c8e8'; cx.font = `15px ${JPFONT}`; wrap('Hoàn thành nghi thức để unlock mascot và đưa Kanji này vào KanjiDex.', area.x + 30, bodyY + 178, area.w * .5, 24);
+      cx.fillStyle = '#9fd8f5'; cx.font = 'bold 13px monospace'; cx.fillText(`MINI-CHECK ${lecture.lessonScore}/3`, area.x + 30, bodyY + 235);
+    }
+    if (lecture.phase !== 'check' || lecture.answerLocked) drawAcademyContinue(W, H, lecture.phase === 'ready' ? 'BẮT ĐẦU NGHI THỨC' : lecture.phase === 'check' ? 'CÂU TIẾP THEO' : 'TIẾP TỤC');
+    cx.fillStyle = '#8395b5'; cx.font = '11px monospace';
+    fitText(compact ? 'Chạm nút để tiếp tục · ← quay lại (đã lưu)' : 'Esc: quay lại sảnh (tiến độ được lưu)', area.x, H - 14, area.w, 11);
+  }
+  function vocabularyParts(q, target) {
+    if (Array.isArray(q.parts) && q.parts.length) return q.parts;
+    const word = String(q.word || '').replace(/\s*\([^)]*\)\s*$/, ''), index = word.indexOf(target);
+    if (index < 0) return [{ text: word, reading: q.wordReading || '', meaning: q.mean || '', role: 'support' }];
+    const parts = [];
+    if (index > 0) parts.push({ text: word.slice(0, index), reading: '', meaning: '', role: 'support' });
+    parts.push({ text: target, reading: q.answer || '', romaji: q.romaji || '', meaning: kanjiInfo(target)?.meaning || '', role: 'target' });
+    if (index + target.length < word.length) parts.push({ text: word.slice(index + target.length), reading: '', meaning: '', role: 'support' });
+    return parts;
+  }
+  function drawBridgeVocabulary(q, target, x, y, maxW, compact) {
+    const parts = vocabularyParts(q, target), gap = compact ? 12 : 17;
+    let size = compact ? 21 : 25, widths = [], total = Infinity;
+    while (size >= 14) {
+      widths = parts.map((part) => {
+        cx.font = `bold ${part.role === 'target' ? size + 2 : size}px ${JPFONT}`;
+        const textW = cx.measureText(part.text || '').width;
+        cx.font = `${Math.max(9, size - 11)}px ${JPFONT}`;
+        return Math.max(textW, cx.measureText(part.reading || '').width) + 10;
+      });
+      total = widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, parts.length - 1);
+      if (total <= maxW) break;
+      size--;
+    }
+    let cursor = x;
+    parts.forEach((part, i) => {
+      const width = widths[i], center = cursor + width / 2, targetPart = part.role === 'target', support = part.role === 'support';
+      if (i > 0) { cx.fillStyle = '#657b9e'; cx.font = 'bold 13px monospace'; cx.textAlign = 'center'; cx.fillText('+', cursor - gap / 2, y + 36); }
+      if (part.role !== 'kana' && part.reading) {
+        cx.fillStyle = targetPart ? '#ffe899' : '#9eeeff'; cx.font = `${Math.max(9, size - 11)}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText(part.reading, center, y + 13);
+      }
+      if (targetPart) {
+        cx.save(); cx.shadowColor = 'rgba(255,213,74,.85)'; cx.shadowBlur = 12;
+        cx.fillStyle = 'rgba(255,213,74,.18)'; cx.fillRect(cursor + 2, y + 17, width - 4, size + 9); cx.restore();
+      }
+      cx.fillStyle = targetPart ? '#ffe066' : support ? '#56eaff' : '#eef5ff';
+      cx.font = `bold ${targetPart ? size + 2 : size}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText(part.text, center, y + 42);
+      if (targetPart) { cx.fillStyle = '#ffe066'; cx.fillRect(cursor + 4, y + 46, width - 8, 2); }
+      if (part.meaning) { cx.textAlign = 'left'; cx.fillStyle = targetPart ? '#e9d9a0' : '#91aac9'; cx.font = `${Math.max(8, size - 13)}px ${JPFONT}`; fitText(part.meaning, cursor + 2, y + 60, width - 4, Math.max(8, size - 13)); }
+      cursor += width + gap;
+    });
+    cx.textAlign = 'left'; cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 11 : 13}px ${JPFONT}`;
+    const fullReading = q.wordReading || q.answer || '—', romaji = q.wordRomaji ? ` (${q.wordRomaji})` : '';
+    const prefix = compact ? 'CẢ CỤM  ' : 'ĐỌC CẢ CỤM  ';
+    cx.fillStyle = '#6effa1'; cx.font = `bold ${compact ? 9 : 10}px monospace`; cx.fillText(prefix, x, y + 80);
+    const prefixW = cx.measureText(prefix).width;
+    cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 11 : 13}px ${JPFONT}`;
+    fitText(`${fullReading}${romaji} · ${q.mean}`, x + prefixW, y + 80, maxW - prefixW, compact ? 11 : 13, true);
+  }
+  function renderAcademyCheck(area, bodyY, bodyH) {
+    const q = lecture.q;
+    cx.fillStyle = '#9fd8f5'; cx.font = 'bold 13px monospace'; cx.fillText(`MINI-CHECK ${lecture.checkIndex + 1}/3`, area.x + 28, bodyY + 32);
+    const prompt = q.mode === 'm6' ? `Chọn cách đọc TOÀN TỪ 「${q.word}」` : q.mode === 'm7' ? `Chọn nghĩa TOÀN TỪ 「${q.word}」` :
+      q.mode === 'm3' ? `Chọn nghĩa đúng của 「${q.target}」` : q.mode === 'm4' ? `「${q.word}」 dùng âm ON hay KUN?` : `Chọn cách đọc của 「${q.target}」 trong ${q.word}`;
+    cx.fillStyle = '#fff'; fitText(prompt, area.x + 28, bodyY + 67, area.w - 56, 22, true);
+    cx.fillStyle = '#ffd54a'; cx.font = `bold 34px ${JPFONT}`; fitText(q.word, area.x + 28, bodyY + 111, area.w - 56, 34, true);
+    const options = q.options, gap = 12, cols = 2, bw = (area.w - 68) / cols;
+    const bh = (lecture.uiScale || 1) < 1 ? 64 : 48;
+    const startY = bodyY + Math.min(145, Math.max(120, bodyH - 132));
+    options.forEach((option, i) => {
+      const col = i % 2, row = Math.floor(i / 2), x = area.x + 28 + col * (bw + gap), y = startY + row * (bh + 10);
+      let selected = false, disabled = false;
+      if (lecture.answerLocked) { selected = i === q.correctIndex; disabled = i !== q.correctIndex; }
+      drawAcademyCard(x, y, bw, bh, selected, disabled);
+      cx.fillStyle = disabled ? '#727b91' : '#fff'; fitText(`${i + 1}) ${option}`, x + 14, y + 31, bw - 28, 18, true);
+      if (!lecture.answerLocked) lecture.hitboxes.push({ x, y, w: bw, h: bh, action: 'answer', value: i });
+    });
+    if (lecture.feedback) {
+      cx.fillStyle = lecture.feedback.startsWith('✓') ? '#6effa1' : '#ffadad';
+      fitText(lecture.feedback, area.x + 28, Math.min(bodyY + bodyH - 10, startY + 116), area.w - 56, 14, true);
     }
   }
-  function drawLectureAnswers(q, x, y) {
-    const columns = cv.width < 620 ? 2 : Math.min(4, q.options.length), gap = 10;
-    const bw = columns === 4 ? 128 : Math.max(110, (cv.width - x * 2 - gap) / columns - gap / 2);
-    q.options.forEach((option, i) => {
-      const col = i % columns, row = Math.floor(i / columns), bx = x + col * (bw + gap), by = y + row * 46;
-      cx.fillStyle = 'rgba(22,85,143,.8)'; cx.fillRect(bx, by, bw, 38);
-      cx.fillStyle = '#fff'; fitText(`${i + 1}) ${option}`, bx + 12, by + 25, bw - 24, 16);
-    });
+  function drawAcademyContinue(W, H, label) {
+    const w = Math.min(310, W - 48), h = (lecture.uiScale || 1) < 1 ? 64 : 44, x = (W - w) / 2, y = H - h - 22;
+    cx.fillStyle = '#1d72aa'; cx.fillRect(x, y, w, h); cx.strokeStyle = '#72ddff'; cx.lineWidth = 2; cx.strokeRect(x, y, w, h);
+    cx.fillStyle = '#fff'; cx.font = 'bold 14px monospace'; cx.textAlign = 'center'; cx.fillText(`${label}  ▶`, W / 2, y + h / 2 + 5); cx.textAlign = 'left';
+    lecture.hitboxes.push({ x, y, w, h, action: 'continue' });
+  }
+  function renderAcademySummary(W, H) {
+    const area = academyContent(W), info = lecture.info, narrow = W < 460;
+    drawAcademyCard(area.x, 104, area.w, H - 145, true);
+    cx.fillStyle = '#6effa1'; fitText('🎉 UNLOCK THÀNH CÔNG!', area.x + 30, 148, area.w - 60, narrow ? 21 : 27, true);
+    cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 76 : 92}px ${JPFONT}`; cx.fillText(info.char, area.x + 34, narrow ? 242 : 248);
+    const textX = narrow ? area.x + 28 : area.x + 142, textY = narrow ? 326 : 205, textW = narrow ? area.w - 56 : area.w * .42;
+    cx.fillStyle = '#fff'; cx.font = `bold ${narrow ? 21 : 24}px ${JPFONT}`; fitText(C.MONSTERS[info.monId].name, textX, textY, textW, narrow ? 21 : 24, true);
+    cx.fillStyle = '#b9c8e8'; cx.font = `${narrow ? 14 : 15}px ${JPFONT}`; wrap(`${info.meaning} đã được thêm vào KanjiDex và từ giờ có thể xuất hiện ngoài thế giới.`, textX, textY + 31, narrow ? area.w - 56 : area.w * .48, narrow ? 22 : 25);
+    drawLessonMascot(info, narrow ? area.x + area.w * .52 : area.x + area.w * .62, narrow ? 160 : 126, narrow ? area.w * .42 : area.w * .34, narrow ? 130 : H - 210);
+    cx.fillStyle = '#9fd8f5'; cx.font = '13px monospace'; cx.fillText(`Nghi thức: ${lecture.score}/5 câu đúng`, area.x + 34, H - 105);
+    drawAcademyContinue(W, H, 'VỀ SẢNH GIẢNG ĐƯỜNG');
   }
   function renderCapture() {
     const W = cv.width, H = cv.height, fieldH = H - PANEL_H;
-    drawBattleBackground('grass', W, fieldH);
-    cx.fillStyle = '#fff'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(`NGHI THỨC THU PHỤC 「${capture.char}」`, 24, 34);
-    cx.fillStyle = '#ffd54a'; cx.font = '15px monospace'; cx.fillText(`Lần thử ${capture.attempt} • Đúng ${capture.correct}/5 • Cần ${capture.needed}/5 • Thể lực còn ${stamina}`, 24, 60);
+    const g = cx.createRadialGradient(W / 2, fieldH * .58, 20, W / 2, fieldH * .55, Math.max(W, fieldH) * .62);
+    g.addColorStop(0, '#234f70'); g.addColorStop(.48, '#162b4f'); g.addColorStop(1, '#090f25');
+    cx.fillStyle = g; cx.fillRect(0, 0, W, fieldH);
+    const pulse = .55 + .15 * Math.sin(performance.now() / 180), ringY = fieldH * .67;
+    cx.strokeStyle = `rgba(86,234,255,${pulse})`; cx.lineWidth = 3;
+    cx.beginPath(); cx.ellipse(W / 2, ringY, 155, 34, 0, 0, Math.PI * 2); cx.stroke();
+    cx.strokeStyle = `rgba(255,213,74,${pulse * .65})`; cx.lineWidth = 2;
+    cx.beginPath(); cx.ellipse(W / 2, ringY, 112, 23, 0, 0, Math.PI * 2); cx.stroke();
+    const img = imgs['mon_' + capture.info.monId];
+    if (img) {
+      const mw = Math.min(230, W * .28, fieldH * .42), mh = mw * img.height / img.width;
+      const bob = Math.sin(performance.now() / 230) * 5;
+      cx.save();
+      if (capture.burstT > 0) cx.filter = `brightness(${1.2 + capture.burstT / 240})`;
+      cx.drawImage(img, W / 2 - mw / 2, ringY - mh + bob, mw, mh); cx.restore();
+    }
+    if (capture.burstT > 0) {
+      const radius = 45 + (520 - capture.burstT) * .45;
+      cx.strokeStyle = `rgba(125,247,255,${capture.burstT / 520})`; cx.lineWidth = 5;
+      cx.beginPath(); cx.arc(W / 2, ringY - 80, radius, 0, Math.PI * 2); cx.stroke();
+    }
+    const captureCompact = W < 600, captureHudW = Math.min(W - 36, 520), captureHudH = captureCompact ? 92 : 76;
+    cx.fillStyle = 'rgba(8,13,31,.9)'; cx.fillRect(18, 16, captureHudW, captureHudH);
+    cx.strokeStyle = '#275b8f'; cx.lineWidth = 2; cx.strokeRect(18, 16, captureHudW, captureHudH);
+    cx.fillStyle = '#fff'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(`NGHI THỨC THU PHỤC 「${capture.char}」`, 32, 45);
+    cx.fillStyle = '#9fd8f5'; cx.font = '12px monospace'; cx.fillText(`Lần ${capture.attempt} · Cần ${capture.needed}/5 · Thể lực ${stamina}`, 32, 68);
+    const orbX = captureCompact ? 42 : 290, orbY = captureCompact ? 88 : 66, orbGap = captureCompact ? 27 : 30;
+    for (let i = 0; i < 5; i++) {
+      cx.fillStyle = i < capture.correct ? '#56eaff' : '#26334b'; cx.beginPath(); cx.arc(orbX + i * orbGap, orbY, 9, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = i < capture.correct ? '#d5fbff' : '#52617b'; cx.lineWidth = 2; cx.stroke();
+    }
+    cx.fillStyle = `rgba(255,213,74,.12)`; cx.font = `bold ${Math.min(180, fieldH * .34)}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText(capture.char, W / 2, fieldH * .48); cx.textAlign = 'left';
+    if (capture.phase === 'fight' && capture.feedback && capture.fbT > 0) drawFeedbackBanner(capture, W, fieldH);
     drawQuizPanel(capture, W, H);
   }
   function renderPve() {
@@ -1309,7 +1733,8 @@
     cx.fillStyle = '#9fd8f5'; cx.font = '13px monospace';
     const compact = W < 620;
     const instruction = q.mode === 'm2' ? (compact ? 'Chọn KANJI:' : 'Chọn KANJI đúng theo nghĩa:') : q.mode === 'm3' ? (compact ? 'Chọn nghĩa:' : 'Chọn nghĩa đúng của KANJI:') :
-      q.mode === 'm4' ? 'Chữ này trong từ đọc theo âm ON hay KUN?' : q.mode === 'm5' ? `Từ nào chứa chữ 「${q.target}」?` : 'Chọn đúng cách đọc (phím 1–4 hoặc chạm nút):';
+      q.mode === 'm4' ? 'Chữ này trong từ đọc theo âm ON hay KUN?' : q.mode === 'm5' ? `Từ nào chứa chữ 「${q.target}」?` :
+      q.mode === 'm6' ? 'Chọn cách đọc của TOÀN BỘ từ:' : q.mode === 'm7' ? 'Chọn nghĩa của TOÀN BỘ từ:' : 'Chọn đúng cách đọc (phím 1–4 hoặc chạm nút):';
     cx.fillText(instruction, x + P, y + 24);
     cx.fillStyle = '#6effa1'; cx.font = '12px monospace'; cx.textAlign = 'right';
     cx.fillText(compact ? `${learning.correct}/${learning.total} đúng · ${learningAccuracy()}%` : `Học: ${learning.correct}/${learning.total} đúng  •  ${learningAccuracy()}%  •  🔥${learning.streak}`, W - P, y + 24);
@@ -1317,7 +1742,8 @@
     cx.fillStyle = '#fff'; cx.font = `bold 30px ${JPFONT}`;
     fitText(q.mode === 'm3' ? q.target : q.mode === 'm2' ? q.mean : q.word, x + P, y + 58, W - P * 2, 30, true);
     cx.fillStyle = '#ffd54a'; cx.font = `15px ${JPFONT}`;
-    fitText(q.mode === 'm3' ? `Chọn nghĩa của 「${q.target}」` : q.mode === 'm4' ? `「${q.word}」 — ${q.mean}` : q.mode === 'm5' ? `Chữ cần tìm: 「${q.target}」` : `（${q.mean}）   ·   chữ cần đọc: 「${q.target}」`, x + P, y + 82, W - P * 2, 15);
+    fitText(q.mode === 'm3' ? `Chọn nghĩa của 「${q.target}」` : q.mode === 'm4' ? `「${q.word}」 — ${q.mean}` : q.mode === 'm5' ? `Chữ cần tìm: 「${q.target}」` :
+      q.mode === 'm6' ? `Gợi ý nghĩa: ${q.mean}` : q.mode === 'm7' ? `Đọc là: ${q.wordReading || '—'}` : `（${q.mean}）   ·   chữ cần đọc: 「${q.target}」`, x + P, y + 82, W - P * 2, 15);
 
     // ── VÙNG 2: 4 ĐÁP ÁN (2×2) — giãn cách rộng, mờ đi khi bị khoá ──
     const ans = q.options;
@@ -1333,7 +1759,7 @@
       cx.fillStyle = hinted ? 'rgba(90,100,120,.38)' : 'rgba(22,85,143,.55)'; cx.fillRect(ox, oy, bw, bh);
       cx.strokeStyle = disabled ? '#3a4a6a' : '#2f7fc0'; cx.lineWidth = 1; cx.strokeRect(ox, oy, bw, bh);
       cx.fillStyle = '#9fd8f5'; cx.font = 'bold 16px monospace'; cx.fillText(`${i + 1})`, ox + 12, oy + bh / 2 + 6);
-      cx.fillStyle = '#fff'; cx.font = `20px ${JPFONT}`; cx.fillText(ans[i] || '', ox + 42, oy + bh / 2 + 7);
+      cx.fillStyle = '#fff'; fitText(ans[i] || '', ox + 42, oy + bh / 2 + 7, bw - 54, 20);
       cx.globalAlpha = 1;
     }
 
@@ -1513,7 +1939,8 @@
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
     levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight,
     getKanjiStat: (kanji) => ({ ...ensureMastery(kanji) }), getStreak: (kanji) => { const s = ensureMastery(kanji); return { winStreak: s.winStreak, lossStreak: s.lossStreak, bestWinStreak: s.bestWinStreak }; },
-    recordAnswer, enterLecture, startCapture, answerCapture, getCapture: () => capture,
+    recordAnswer, enterLecture, onLectureKey, answerLecture, getLecture: () => lecture,
+    nextLectureKanji, academyLockedList, academyFilteredList, startCapture, answerCapture, onCaptureKey, updateCapture, getCapture: () => capture,
     getStamina: () => stamina, startPve, answerPve, getPve: () => pve,
     getPveResult: () => pveResult,
   };

@@ -31,6 +31,7 @@
   .msg.warn{background:rgba(120,90,20,.25);border-color:#b7902f;color:var(--warn)}
   .msg.err{background:rgba(110,30,36,.3);border-color:#a83b48;color:var(--err)}
   table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  #preview{overflow-x:auto}
   th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
   th{background:#0b1330;color:#9fd8f5}
   .jp{font-family:"Yu Gothic","Noto Sans JP",sans-serif;font-size:15px}
@@ -60,8 +61,8 @@
     </div>
     <div class="card">
       <h2>② Bảng CÂU HỎI (ngân hàng quiz)</h2>
-      <p class="hint">Mỗi dòng = 1 câu. <b>type</b> chỉ nhận <code>on</code> hoặc <code>kun</code>.</p>
-      <code class="cols">word    mean    target    answer    romaji    type</code>
+      <p class="hint">Mỗi dòng = 1 câu. <b>parts</b>: <code>text~reading~romaji~meaning~role</code>, nhiều phần ngăn bằng <code>|</code>.</p>
+      <code class="cols">word    mean    target    answer    romaji    type    wordReading    wordRomaji    parts</code>
       <textarea id="taQ" spellcheck="false"></textarea>
     </div>
   </div>
@@ -106,8 +107,8 @@ function fillDefault(){
     [key, v.char, v.meaning, v.on.join(', '), v.kun.join(', '), v.monId].join('\t'));
   $('taKanji').value = 'key\tchar\tmeaning\ton\tkun\tmonId\n' + kRows.join('\n');
   const qRows = DEF.QUESTIONS.map(q =>
-    [q.word, q.mean, q.target, q.answer, q.romaji, q.type].join('\t'));
-  $('taQ').value = 'word\tmean\ttarget\tanswer\tromaji\ttype\n' + qRows.join('\n');
+    [q.word, q.mean, q.target, q.answer, q.romaji, q.type, q.wordReading||'', q.wordRomaji||'', encodeParts(q.parts)].join('\t'));
+  $('taQ').value = 'word\tmean\ttarget\tanswer\tromaji\ttype\twordReading\twordRomaji\tparts\n' + qRows.join('\n');
   log('', []); $('preview').innerHTML=''; $('genOut').textContent='(bấm "Xem trước" để tạo)';
 }
 
@@ -126,6 +127,12 @@ function parseRows(text, headerKeys){
   return out;
 }
 const splitReadings = (s) => (s || '').split(/[;,]/).map(x => x.trim()).filter(Boolean);
+const encodeParts = (parts) => Array.isArray(parts) ? parts.map(p =>
+  [p.text||'', p.reading||'', p.romaji||'', p.meaning||'', p.role||'support'].join('~')).join('|') : '';
+const parseParts = (value) => String(value||'').split('|').map(raw => {
+  const [text, reading, romaji, meaning, role] = raw.split('~').map(x => (x||'').trim());
+  return { text, reading, romaji, meaning, role: role||'support' };
+}).filter(part => part.text);
 
 // ---------- build data + validate ----------
 function build(){
@@ -146,12 +153,23 @@ function build(){
 
   const QUESTIONS = [];
   qRows.forEach((c, i) => {
-    const [word, mean, target, answer, romaji, type] = c;
+    const [word, mean, target, answer, romaji, type, wordReading, wordRomaji, rawParts] = c;
     if (!word || !target || !answer) { msgs.push(['err', `Câu hỏi dòng ${i+1}: thiếu word/target/answer.`]); return; }
     const tp = (type||'').toLowerCase();
     if (tp !== 'on' && tp !== 'kun') msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): type="${type}" không phải on/kun.`]);
     if (charSet.size && !charSet.has(target)) msgs.push(['warn', `Câu hỏi dòng ${i+1}: chữ hỏi "${target}" chưa có trong bảng KANJI (vẫn chạy được).`]);
-    QUESTIONS.push({ word, mean: mean||'', target, answer, romaji: romaji||'', type: tp||'on' });
+    const parts = parseParts(rawParts);
+    parts.forEach((part) => {
+      if (!['target','support','kana'].includes(part.role)) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): role="${part.role}" không hợp lệ; dùng support.`]), part.role = 'support';
+    });
+    if (parts.length && !parts.some((part) => part.role === 'target')) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): parts chưa có role=target.`]);
+    if (parts.length && !wordReading) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): thiếu wordReading; quiz đọc toàn từ sẽ fallback về câu hỏi Kanji.`]);
+    if (wordReading && !parts.length) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): có wordReading nhưng chưa khai báo parts; game sẽ dùng hiển thị tương thích.`]);
+    const question = { word, mean: mean||'', target, answer, romaji: romaji||'', type: tp||'on' };
+    if (wordReading) question.wordReading = wordReading;
+    if (wordRomaji) question.wordRomaji = wordRomaji;
+    if (parts.length) question.parts = parts;
+    QUESTIONS.push(question);
   });
 
   // distractor = kho mặc định + toàn bộ answer (khử trùng)
@@ -176,12 +194,12 @@ function preview(data){
   const kRows = Object.entries(data.KANJI).map(([k,v]) =>
     `<tr><td>${k}</td><td class="jp">${v.char}</td><td>${v.meaning}</td><td class="jp">${v.on.join('・')}</td><td class="jp">${v.kun.join('・')}</td><td>${v.monId}</td></tr>`).join('');
   const qRows = data.QUESTIONS.slice(0,200).map(q =>
-    `<tr><td class="jp">${q.word}</td><td>${q.mean}</td><td class="jp">${q.target}</td><td class="jp">${q.answer}</td><td>${q.romaji}</td><td>${q.type}</td></tr>`).join('');
+    `<tr><td class="jp">${q.word}</td><td>${q.mean}</td><td class="jp">${q.target}</td><td class="jp">${q.answer}</td><td class="jp">${q.wordReading||'—'}</td><td>${q.wordRomaji||'—'}</td><td>${q.parts?.length||0}</td><td>${q.type}</td></tr>`).join('');
   $('preview').innerHTML =
     `<h3>📖 KANJI (${Object.keys(data.KANJI).length})</h3>
      <table><tr><th>key</th><th>char</th><th>meaning</th><th>on</th><th>kun</th><th>monId</th></tr>${kRows}</table>
      <h3>❓ CÂU HỎI (${data.QUESTIONS.length})</h3>
-     <table><tr><th>word</th><th>mean</th><th>target</th><th>answer</th><th>romaji</th><th>type</th></tr>${qRows}</table>`;
+     <table><tr><th>word</th><th>mean</th><th>target</th><th>answer</th><th>wordReading</th><th>wordRomaji</th><th>parts</th><th>type</th></tr>${qRows}</table>`;
 }
 function genFile(data){
   const j = (o) => JSON.stringify(o, null, 2);

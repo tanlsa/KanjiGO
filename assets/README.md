@@ -27,7 +27,7 @@ assets/
 0 cỏ | 1 cây | 2 nước | 3 đường | 4 hoa | 5 bụi cỏ | 6 thuyền
 ```
 
-Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng `world/academy.png`, nên không cần nằm trong tileset. `academy.png` là sprite RGBA `96×96 px` (footprint `3×3` tile); cửa chính nằm giữa ô dưới cùng để khớp `ACADEMY_DOOR` tại `(5, 3)`.
+Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng `world/academy.png`, nên không cần nằm trong tileset. `academy.png` là sprite RGBA `160×128 px` (footprint `5×4` tile); cửa chính nằm giữa ô dưới cùng để khớp `ACADEMY_DOOR` tại `(5, 4)`.
 
 ## Monsters
 
