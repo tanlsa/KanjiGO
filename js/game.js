@@ -569,16 +569,22 @@
     if (!monId) { showNoCapturedEncounter(); return false; }
     const m = C.MONSTERS[monId];
     const kanjiLevel = ensureMastery(m.kanji).level;
+    const levelDamage = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (kanjiLevel - 1);
+    const battleMaxHp = Math.max(m.maxHp, Math.ceil(levelDamage * (C.COMBAT.enemyHpPerDamage || 1)));
     syncPlayerScale(m.kanji, true);
     state = 'battle';
+    const attackCycleMs = rnd([C.COMBAT.botMinMs, C.COMBAT.botMaxMs]);
     battle = {
-      kind, monId, mon: m, monHp: m.maxHp, monMaxHp: m.maxHp,
+      kind, monId, mon: m, monHp: battleMaxHp, monMaxHp: battleMaxHp,
       grassKanji: kind === 'grass' ? m.kanji : null,
       kanjiLevel,
       q: makeQuestion(m.kanji),
-      feedback: null, fbT: 0, qCooldown: 0, stun: 0, combo: 0,
-      botNextIn: rnd([C.COMBAT.botMinMs, C.COMBAT.botMaxMs]),
-      shake: 0, flash: 0, botFlash: 0,
+      feedback: null, fbT: 0, qCooldown: 0, stun: 0, combo: 0, energy: 0,
+      botNextIn: attackCycleMs, botCycleMs: attackCycleMs, questionElapsed: 0,
+      shake: 0, flash: 0, botFlash: 0, hitStop: 0,
+      petAttackT: 0, enemyAttackT: 0, enemyHitT: 0, playerHitT: 0,
+      perfectT: 0, skillT: 0, skillName: '', particles: [], damageNumbers: [],
+      pendingWin: 0, pendingLose: 0,
       phase: 'fight', result: null, endMsg: '', counted: false,
     };
     return true;
@@ -597,21 +603,73 @@
     if (idx === q.correctIndex) {
       recordAnswer(q, true);
       battle.combo++;
-      const dmg = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (battle.kanjiLevel - 1) + battle.combo * C.COMBAT.comboBonus;
+      battle.energy = Math.min(C.COMBAT.energyMax || 3, battle.energy + 1);
+      const perfect = battle.questionElapsed <= (C.COMBAT.perfectMs || 2000);
+      const special = battle.energy >= (C.COMBAT.energyMax || 3);
+      const baseDmg = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (battle.kanjiLevel - 1) + battle.combo * C.COMBAT.comboBonus;
+      const dmg = special ? Math.round(baseDmg * (C.COMBAT.specialMultiplier || 1.5)) : baseDmg;
       battle.monHp = Math.max(0, battle.monHp - dmg);
-      battle.feedback = { good: true, text: `✓ Đúng! ${q.target} — ${q.answer}  (-${dmg} HP)` };
-      battle.fbT = 900; battle.qCooldown = 850; battle.shake = 200;
-      if (battle.monHp <= 0) { win(); return; }
+      const push = perfect ? (C.COMBAT.perfectGaugePush || .35) : (C.COMBAT.gaugePush || .2);
+      battle.botNextIn = Math.min(battle.botCycleMs, battle.botNextIn + battle.botCycleMs * push);
+      battle.feedback = { good: true, text: `${perfect ? '⚡ PERFECT! ' : '✓ Đúng! '}${q.target} — ${q.answer}  (-${dmg} HP)` };
+      battle.fbT = 900; battle.qCooldown = special ? 1050 : 700;
+      battle.shake = 220; battle.enemyHitT = 300; battle.petAttackT = special ? 650 : 460;
+      battle.petAttackTotal = battle.petAttackT;
+      battle.hitStop = C.COMBAT.hitStopMs || 70;
+      battle.perfectT = perfect ? 800 : 0;
+      battle.damageNumbers.push({ text: `-${dmg}`, side: 'enemy', t: 900, total: 900, color: special ? '#7ff7ff' : '#ffd54a' });
+      if (special) {
+        battle.energy = 0;
+        battle.skillKanji = (C.MONSTERS[currentPetId] || {}).kanji || q.target;
+        battle.skillName = `${battle.skillKanji}・${currentPetId === 'fish' ? '水流撃' : '連続撃'}`;
+        battle.skillT = 1000;
+        battle.particles = makeBattleParticles(currentPetId === 'fish' ? 'water' : battle.kind, 26);
+      }
+      if (battle.monHp <= 0) { battle.pendingWin = special ? 850 : 520; return; }
     } else {
       recordAnswer(q, false);
-      // ❗ SAI: choáng đủ wrongStun (3s). Khoá phím 1–4 và GIỮ NGUYÊN câu hỏi
-      //   trong suốt thời gian choáng để người chơi kịp học đáp án đúng.
       battle.combo = 0;
       battle.stun = C.COMBAT.wrongStun;
-      battle.qCooldown = C.COMBAT.wrongStun;   // không đổi câu khi đang choáng
-      battle.fbT = C.COMBAT.wrongStun;          // feedback hiển thị suốt lúc choáng
+      battle.qCooldown = C.COMBAT.wrongStun;
+      battle.fbT = C.COMBAT.wrongStun;
       battle.feedback = { good: false, text: `✗ Sai! ${q.target} ở đây đọc「${q.answer}」(${q.romaji}) — âm ${q.type.toUpperCase()}` };
+      enemyAttack(battle, 'Sai đáp án');
     }
+  }
+
+  function resetAttackGauge(b) {
+    b.botCycleMs = rnd([C.COMBAT.botMinMs, C.COMBAT.botMaxMs]);
+    b.botNextIn = b.botCycleMs;
+  }
+  function enemyAttack(b, reason = '') {
+    if (!b || b.phase !== 'fight' || b.pendingLose > 0) return;
+    const dmg = rnd(b.mon.atk);
+    player.hp = Math.max(0, player.hp - dmg);
+    b.flash = 180; b.botFlash = 320; b.enemyAttackT = 520; b.enemyAttackTotal = 520; b.playerHitT = 360;
+    b.damageNumbers.push({ text: `-${dmg}`, side: 'player', t: 900, total: 900, color: '#ff8585' });
+    b.playerHitMsg = `${b.mon.name} tấn công! -${dmg} HP`;
+    if (reason && !b.feedback) { b.feedback = { good: false, text: `⚠ ${reason} — ${b.playerHitMsg}` }; b.fbT = 1000; }
+    resetAttackGauge(b);
+    if (player.hp <= 0) b.pendingLose = 520;
+  }
+  function timeoutQuestion(b) {
+    if (!b || b.qCooldown > 0 || b.stun > 0) return;
+    recordAnswer(b.q, false);
+    b.combo = 0;
+    b.stun = C.COMBAT.wrongStun;
+    b.qCooldown = C.COMBAT.wrongStun;
+    b.fbT = C.COMBAT.wrongStun;
+    b.feedback = { good: false, text: `⌛ Hết giờ! Đáp án:「${b.q.answer}」(${b.q.romaji}) — quái phản công!` };
+    enemyAttack(b);
+  }
+  function makeBattleParticles(kind, count) {
+    const colors = kind === 'water' ? ['#bdf7ff', '#58d9ef', '#208fe0'] : ['#d9ff9e', '#7dda58', '#2d9848'];
+    return Array.from({ length: count }, (_, i) => ({
+      x: .48 + Math.random() * .18, y: .48 + Math.random() * .16,
+      vx: (Math.random() - .35) * .00032, vy: (-.00018 - Math.random() * .00025),
+      size: 3 + Math.random() * 7, t: 650 + Math.random() * 350,
+      color: colors[i % colors.length],
+    }));
   }
 
   function win() {
@@ -845,17 +903,35 @@
   }
   function updateBattle(dt) {
     const b = battle; if (!b) return;
+    if (b.hitStop > 0) {
+      const frozen = Math.min(dt, b.hitStop); b.hitStop -= frozen; dt -= frozen;
+      if (dt <= 0) return;
+    }
     if (b.shake > 0) b.shake -= dt; if (b.flash > 0) b.flash -= dt; if (b.botFlash > 0) b.botFlash -= dt;
+    if (b.petAttackT > 0) b.petAttackT -= dt; if (b.enemyAttackT > 0) b.enemyAttackT -= dt;
+    if (b.enemyHitT > 0) b.enemyHitT -= dt; if (b.playerHitT > 0) b.playerHitT -= dt;
+    if (b.perfectT > 0) b.perfectT -= dt; if (b.skillT > 0) b.skillT -= dt;
+    b.damageNumbers = (b.damageNumbers || []).filter((n) => { n.t -= dt; return n.t > 0; });
+    b.particles = (b.particles || []).filter((p) => {
+      p.t -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += .00000055 * dt;
+      return p.t > 0;
+    });
+    if (b.pendingWin > 0) { b.pendingWin -= dt; if (b.pendingWin <= 0) win(); }
+    if (b.pendingLose > 0) { b.pendingLose -= dt; if (b.pendingLose <= 0) lose(); }
     if (b.phase !== 'fight') return;
     if (b.stun > 0) b.stun -= dt;
     if (b.fbT > 0) b.fbT -= dt;
-    if (b.qCooldown > 0) { b.qCooldown -= dt; if (b.qCooldown <= 0 && b.monHp > 0) b.q = makeQuestion(b.mon.kanji, b.q.key); }
-    b.botNextIn -= dt;
-    if (b.botNextIn <= 0) {
-      const dmg = rnd(b.mon.atk); player.hp = Math.max(0, player.hp - dmg);
-      b.flash = 150; b.botFlash = 300; b.playerHitMsg = `${b.mon.name} tấn công! -${dmg} HP`;
-      b.botNextIn = rnd([C.COMBAT.botMinMs, C.COMBAT.botMaxMs]);
-      if (player.hp <= 0) { lose(); return; }
+    if (b.qCooldown > 0) {
+      b.qCooldown -= dt;
+      if (b.qCooldown <= 0 && b.monHp > 0 && !b.pendingLose) {
+        b.q = makeQuestion(b.mon.kanji, b.q.key);
+        b.questionElapsed = 0;
+        b.feedback = null;
+      }
+    } else if (!b.pendingWin && !b.pendingLose) {
+      b.questionElapsed += dt;
+      b.botNextIn -= dt;
+      if (b.botNextIn <= 0) timeoutQuestion(b);
     }
   }
   function updateCapture(dt) {
@@ -1014,35 +1090,58 @@
     const b = battle, W = cv.width, H = cv.height, FIELD_H = H - PANEL_H;
     drawBattleBackground(b.kind, W, FIELD_H);
     if (b.flash > 0) { cx.fillStyle = `rgba(255,80,80,${b.flash / 500})`; cx.fillRect(0, 0, W, FIELD_H); }
-    // monster
-    const monCX = W - 150, monBaseY = FIELD_H * 0.66;
-    cx.fillStyle = 'rgba(0,0,0,.22)'; cx.beginPath(); cx.ellipse(monCX, monBaseY + 2, 95, 20, 0, 0, Math.PI * 2); cx.fill();
-    const sh = b.shake > 0 ? Math.sin(b.shake / 20) * 6 : 0;
-    const m = b.mon, img = imgs['mon_' + b.monId];
-    if (b.botFlash > 0) { cx.save(); cx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 40); }
-    cx.drawImage(img, monCX - m.drawW / 2 + sh, monBaseY - m.drawH, m.drawW, m.drawH);
-    if (b.botFlash > 0) cx.restore();
-    // player + pet nhỏ
-    const plCX = 120, plBaseY = FIELD_H - 12, ps = 3.4;
-    cx.fillStyle = 'rgba(0,0,0,.22)'; cx.beginPath(); cx.ellipse(plCX, plBaseY + 2, 70, 16, 0, 0, Math.PI * 2); cx.fill();
-    cx.drawImage(imgs.player, 0, C.DIR_ROW.up * TILE, TILE, TILE, plCX - (TILE * ps) / 2, plBaseY - TILE * ps, TILE * ps, TILE * ps);
+    // Sân đấu logic tối đa 1280×720, nằm giữa cả trên màn hình siêu rộng.
+    const stageW = Math.min(W, 1280), stageH = Math.min(FIELD_H, stageW * 9 / 16);
+    const stageX = (W - stageW) / 2, stageY = Math.max(0, (FIELD_H - stageH) / 2);
+    const actorScale = Math.max(.48, Math.min(1, stageW / 900, stageH / 430));
+    const plCX = stageX + stageW * .25, monCX = stageX + stageW * .75;
+    const baseY = stageY + stageH * .82;
+    const idle = Math.sin(performance.now() / 260) * 3 * actorScale;
+    const petP = b.petAttackT > 0 ? 1 - b.petAttackT / (b.petAttackTotal || 460) : 0;
+    const enemyP = b.enemyAttackT > 0 ? 1 - b.enemyAttackT / (b.enemyAttackTotal || 520) : 0;
+    const petLunge = Math.sin(Math.max(0, Math.min(1, petP)) * Math.PI) * Math.min(120, stageW * .14);
+    const enemyLunge = Math.sin(Math.max(0, Math.min(1, enemyP)) * Math.PI) * Math.min(120, stageW * .14);
+    const enemyRecoil = b.enemyHitT > 0 ? Math.sin(b.enemyHitT / 16) * 9 * actorScale : 0;
+    const playerRecoil = b.playerHitT > 0 ? -Math.abs(Math.sin(b.playerHitT / 20)) * 18 * actorScale : 0;
+
+    // Player đứng sau pet; scale combat tách khỏi scale ngoài world.
+    const playerSize = 120 * actorScale, petW = 140 * actorScale;
+    const playerX = plCX - playerSize * .75 + playerRecoil;
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX + 20, baseY + 3, 105 * actorScale, 20 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    cx.drawImage(imgs.player, 0, C.DIR_ROW.up * TILE, TILE, TILE, playerX - playerSize / 2, baseY - playerSize, playerSize, playerSize);
     const petImg = imgs['mon_' + currentPetId];
-    if (petImg) { const pw = petSizeFor(petLevel(), 46), ph = pw * petImg.height / petImg.width; cx.drawImage(petImg, plCX + 30, plBaseY - ph, pw, ph); }
-
-    // HP bars
-    const hpW = Math.min(260, Math.max(150, (W - 70) / 2)), hpX = Math.max(28, W - 28 - hpW);
-    drawHpBar(28, 24, `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW);
-    drawHpBar(hpX, FIELD_H - 92, `${C.PLAYER.name}`, player.hp, player.maxHp, '#43d17a', hpW);
-    // tiến độ của Kanji đang gặp (không phải pet đang dắt)
-    drawEncounterMastery(b, hpX, FIELD_H - 42, hpW);
-
-    // cảnh báo bot sắp đánh
-    if (b.phase === 'fight' && b.botNextIn <= C.COMBAT.botTelegraph) {
-      cx.fillStyle = `rgba(230,80,80,${0.4 + 0.4 * Math.sin(Date.now() / 90)})`;
-      cx.font = 'bold 16px monospace'; cx.fillText('⚠ Bot sắp tấn công!', monCX - 90, 30);
+    if (petImg) {
+      const ph = petW * petImg.height / petImg.width, petX = plCX + 30 * actorScale + petLunge + playerRecoil;
+      cx.drawImage(petImg, petX - petW / 2, baseY - ph + idle, petW, ph);
     }
-    // combo
-    if (b.combo > 1) { cx.fillStyle = '#ffd54a'; cx.font = 'bold 18px monospace'; cx.fillText(`COMBO x${b.combo}`, 30, FIELD_H - 110); }
+
+    // Enemy cùng baseline để hai phía thực sự lao vào nhau.
+    const m = b.mon, img = imgs['mon_' + b.monId];
+    const enemyW = Math.min(240, m.drawW * 1.12) * actorScale;
+    const enemyH = enemyW * (m.drawH / m.drawW);
+    const enemyX = monCX - enemyLunge + enemyRecoil;
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(monCX, baseY + 3, enemyW * .46, 20 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    cx.save();
+    if (b.enemyHitT > 0) cx.filter = `brightness(${1.5 + 1.5 * Math.abs(Math.sin(b.enemyHitT / 25))}) saturate(.35)`;
+    else if (b.botFlash > 0) cx.filter = `brightness(${1.1 + .35 * Math.abs(Math.sin(Date.now() / 50))})`;
+    cx.drawImage(img, enemyX - enemyW / 2, baseY - enemyH - idle, enemyW, enemyH);
+    cx.restore();
+
+    drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, baseY });
+
+    // HUD đối xứng ở hai góc trên của sân đấu.
+    const hpW = Math.max(140, Math.min(320, (stageW - 54) / 2));
+    const hudY = stageY + 18, enemyHudX = stageX + 18, playerHudX = stageX + stageW - hpW - 18;
+    drawHpBar(enemyHudX, hudY, `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW);
+    drawHpBar(playerHudX, hudY, `${C.PLAYER.name}`, player.hp, player.maxHp, '#43d17a', hpW);
+    drawAttackGauge(b, enemyHudX, hudY + 53, hpW);
+    drawEnergyGauge(b, playerHudX, hudY + 53, hpW);
+    if (stageW >= 620) drawEncounterMastery(b, playerHudX, hudY + 91, hpW);
+
+    if (b.combo > 1) {
+      cx.fillStyle = '#ffd54a'; cx.font = 'bold 18px monospace'; cx.textAlign = 'center';
+      cx.fillText(`COMBO x${b.combo}`, stageX + stageW / 2, hudY + 22); cx.textAlign = 'left';
+    }
 
     // 🩹 FEEDBACK nổi ngay TRÊN khung câu hỏi (không đè lên đáp án)
     if (b.phase === 'fight' && b.feedback && b.fbT > 0) drawFeedbackBanner(b, W, FIELD_H);
@@ -1050,6 +1149,52 @@
     if (b.phase === 'fight' && b.stun > 0) drawStunOverlay(b, W, FIELD_H);
 
     drawQuizPanel(b, W, H);
+  }
+
+  function drawAttackGauge(b, x, y, w) {
+    const progress = Math.max(0, Math.min(1, 1 - b.botNextIn / Math.max(1, b.botCycleMs)));
+    const danger = b.botNextIn <= C.COMBAT.botTelegraph;
+    cx.fillStyle = 'rgba(11,16,32,.88)'; cx.fillRect(x, y, w, 28);
+    cx.fillStyle = '#b9c8e8'; cx.font = 'bold 11px monospace'; cx.fillText('⚔ ATTACK GAUGE', x + 8, y + 11);
+    cx.fillStyle = '#26334b'; cx.fillRect(x + 8, y + 16, w - 16, 7);
+    cx.fillStyle = danger ? '#ff5454' : '#f1a83b'; cx.fillRect(x + 8, y + 16, (w - 16) * progress, 7);
+    if (danger) { cx.strokeStyle = `rgba(255,90,90,${.5 + .5 * Math.sin(Date.now() / 80)})`; cx.lineWidth = 2; cx.strokeRect(x, y, w, 28); }
+  }
+
+  function drawEnergyGauge(b, x, y, w) {
+    const max = C.COMBAT.energyMax || 3, gap = 5, innerW = w - 16;
+    cx.fillStyle = 'rgba(11,16,32,.88)'; cx.fillRect(x, y, w, 28);
+    cx.fillStyle = '#b9c8e8'; cx.font = 'bold 11px monospace'; cx.fillText('✦ TUYỆT KỸ', x + 8, y + 11);
+    const pipW = (innerW - gap * (max - 1)) / max;
+    for (let i = 0; i < max; i++) {
+      cx.fillStyle = i < b.energy ? '#56eaff' : '#26334b';
+      cx.fillRect(x + 8 + i * (pipW + gap), y + 16, pipW, 7);
+    }
+  }
+
+  function drawBattleEffects(b, s) {
+    for (const p of b.particles || []) {
+      cx.globalAlpha = Math.min(1, p.t / 240); cx.fillStyle = p.color;
+      cx.beginPath(); cx.arc(s.stageX + p.x * s.stageW, s.stageY + p.y * s.stageH, p.size, 0, Math.PI * 2); cx.fill();
+    }
+    cx.globalAlpha = 1;
+    for (const n of b.damageNumbers || []) {
+      const life = 1 - n.t / n.total, x = n.side === 'enemy' ? s.monCX : s.plCX;
+      cx.globalAlpha = Math.min(1, n.t / 180); cx.fillStyle = n.color; cx.textAlign = 'center';
+      cx.font = 'bold 25px monospace'; cx.fillText(n.text, x, s.baseY - 170 - life * 50);
+    }
+    cx.globalAlpha = 1; cx.textAlign = 'left';
+    if (b.skillT > 0) {
+      const alpha = Math.min(1, b.skillT / 220);
+      cx.textAlign = 'center'; cx.fillStyle = `rgba(130,245,255,${alpha})`; cx.font = `bold 34px ${JPFONT}`;
+      cx.fillText(b.skillName, s.stageX + s.stageW / 2, s.stageY + s.stageH * .42);
+      cx.fillStyle = `rgba(210,255,255,${alpha * .18})`; cx.font = `bold ${Math.round(150 * Math.min(1, s.stageW / 900))}px ${JPFONT}`;
+      cx.fillText(b.skillKanji || b.mon.kanji, s.stageX + s.stageW / 2, s.stageY + s.stageH * .68); cx.textAlign = 'left';
+    } else if (b.perfectT > 0) {
+      cx.globalAlpha = Math.min(1, b.perfectT / 180); cx.fillStyle = '#7ff7ff'; cx.textAlign = 'center';
+      cx.font = 'bold 28px monospace'; cx.fillText('PERFECT!', s.stageX + s.stageW / 2, s.stageY + s.stageH * .42);
+      cx.globalAlpha = 1; cx.textAlign = 'left';
+    }
   }
 
   function renderLecture() {

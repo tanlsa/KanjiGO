@@ -21,8 +21,9 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 4. **Khung học được thiết kế lại — hết đè/chèn chữ.** Câu hỏi, nghĩa, 4 đáp án và dòng
    trạng thái nay nằm ở các vùng riêng biệt; feedback "đúng/sai" hiển thị dạng **banner nổi**
    phía trên khung nên không chồng lên đáp án. (chỉnh chiều cao khung ở `js/config.js → UI.panelH`).
-5. **Trả lời SAI → 😵 CHOÁNG 3 giây**, khoá phím `1–4` và có **đồng hồ đếm ngược** để chống
-   spam đáp án. (chỉnh ở `js/config.js → COMBAT.wrongStun`).
+5. **Combat có Attack Gauge và tuyệt kỹ:** trả lời đúng đẩy lùi lượt đánh của quái, trả lời
+   nhanh nhận PERFECT; đủ 3 năng lượng pet tự tung skill. Sai/hết giờ khiến quái phản công,
+   sau đó hiện đáp án đúng trong khoảng 1 giây.
 6. **Trang Admin nhập liệu** (`admin.html`): thêm chữ/câu cực nhanh, không cần đụng code.
 7. **Core gameplay loop v2**: mastery theo từng kanji, SRS Leitner, tòa giảng đường/thu phục,
    bụi cỏ weighted theo chữ gỉ và kỳ thi PvE 10 câu.
@@ -69,11 +70,12 @@ Có thể chạy `tools/make_academy.ps1` để sinh lại hình mẫu trên Win
 
 ## ⚙️ Chỉnh nhanh (js/config.js)
 - `UI.panelH` — chiều cao khung câu hỏi (tăng nếu muốn thoáng hơn).
-- `COMBAT.wrongStun` — thời gian choáng khi sai (ms). Mặc định `3000`.
-- `COMBAT.botMinMs/botMaxMs` — nhịp monster tự đánh; `baseDamage`, `comboBonus`, `runChance`…
+- `COMBAT.wrongStun` — thời gian xem lại đáp án khi sai (ms). Mặc định `1000`.
+- `COMBAT.botMinMs/botMaxMs` — thời gian đầy Attack Gauge; `perfectMs`, `gaugePush`,
+  `energyMax`, `specialMultiplier` điều chỉnh PERFECT và tuyệt kỹ.
 - `KLEVEL` — threshold MP, label, Recall/streak, damage/HP/pet scaling theo Kanji.
 - `PET.monId` — pet ban đầu.
 
 ## 🧩 Mở rộng tiếp
-- Bộ N4/N3 đầy đủ (dán 1 lần qua admin.html). 2) Save/Load tiến trình. 3) Giới hạn thời gian mỗi câu (+điểm tốc độ).
+- Bộ N4/N3 đầy đủ (dán 1 lần qua admin.html). 2) Save/Load tiến trình. 3) Thêm animation/âm thanh riêng cho từng hệ quái.
  

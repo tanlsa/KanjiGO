@@ -44,10 +44,17 @@ window.CONFIG = {
     baseDamage: 8,        // damage khi trả lời ĐÚNG (cộng theo level pet)
     dmgPerPetLevel: 2,    // mỗi cấp pet +damage
     comboBonus: 2,        // đúng liên tiếp: mỗi combo +damage
-    wrongStun: 3000,      // ❗ SAI: choáng 3s, khoá phím 1–4 (chống spam đáp án)
-    botMinMs: 3500,       // bot đánh: khoảng cách tối thiểu (ms)
-    botMaxMs: 5000,       // bot đánh: khoảng cách tối đa (ms)
-    botTelegraph: 1000,    // thời gian "báo trước" bot sắp đánh (ms)
+    wrongStun: 1000,      // sai: hiện đáp án + animation phản công ngắn
+    botMinMs: 4000,       // Attack Gauge: khoảng chuẩn bị tối thiểu (ms)
+    botMaxMs: 5000,       // Attack Gauge: khoảng chuẩn bị tối đa (ms)
+    botTelegraph: 1000,   // vùng nguy hiểm cuối thanh (ms)
+    perfectMs: 2000,      // trả lời trong thời gian này được PERFECT
+    gaugePush: 0.20,      // đúng thường đẩy lùi Attack Gauge 20%
+    perfectGaugePush: 0.35,
+    energyMax: 3,         // đủ 3 năng lượng tự động tung tuyệt kỹ
+    specialMultiplier: 1.5,
+    enemyHpPerDamage: 3.5,// bảo đảm mini quái sống đủ lâu để tích được tuyệt kỹ
+    hitStopMs: 70,
     runChance: 0.6,       // xác suất chạy thoát (Esc)
     loseExpPenalty: 10,   // THUA: trừ EXP của pet đang theo
   },
