@@ -9,6 +9,7 @@
   const TILES = window.MAP_DATA.TILES;
   const NPCS = window.MAP_DATA.NPCS;
   const KDB = window.KANJI_DB;
+  const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const TILE = C.TILE, ZOOM = C.ZOOM || 1;
   const MAP_H = TILES.length, MAP_W = TILES[0].length;
   const K = C.TILE_KEYS;
@@ -74,7 +75,7 @@
 
   // ---------- 📚 TIẾN ĐỘ HỌC ----------
   const LEARNING_KEY = 'KANJIGO_LEARNING_V1';
-  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, captureAttempts: {}, academyDraft: null };
+  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, captureAttempts: {}, academyDraft: null, badges: {} };
   const legacyMasteryKeys = new Set();
   const legacyPetProgress = {};
   const GAME_KEY = 'KANJIGO_GAME_V1';
@@ -90,6 +91,35 @@
     if (direct) return direct.char;
     const byKey = KDB.KANJI[value];
     return byKey ? byKey.char : value;
+  }
+  function tierOfKanji(value) {
+    const char = resolveKanji(value), info = kanjiInfo(char);
+    if (info && info.jlpt) return String(info.jlpt).toUpperCase();
+    for (const [tierId, tier] of Object.entries(CATALOG.tiers || {})) {
+      if ((tier.kanji || []).includes(char)) return tierId;
+    }
+    return 'BONUS';
+  }
+  function hasBadge(tier) { return learning.badges[String(tier || '').toUpperCase()] === true; }
+  function isTierUnlocked(tier) {
+    const id = String(tier || 'BONUS').toUpperCase();
+    if (id === 'BONUS') return true;
+    const definition = (CATALOG.tiers || {})[id];
+    return !definition || !definition.requiresBadge || hasBadge(definition.requiresBadge);
+  }
+  function tierProgress(tier) {
+    const id = String(tier || '').toUpperCase(), definition = (CATALOG.tiers || {})[id];
+    const chars = definition ? definition.kanji : [];
+    let available = 0, captured = 0;
+    for (const char of chars) {
+      if (kanjiInfo(char)) available++;
+      if (kanjiInfo(char) && learning.mastery[char] && learning.mastery[char].captured === true) captured++;
+    }
+    return { tier: id, total: chars.length, available, captured, missing: Math.max(0, chars.length - available) };
+  }
+  function isTierStudyComplete(tier) {
+    const progress = tierProgress(tier);
+    return progress.total > 0 && progress.available === progress.total && progress.captured === progress.total;
   }
   function levelFromMp(mp) {
     const K = C.KLEVEL, thresholds = K.thresholds || [null, 0], value = Math.max(0, Number(mp) || 0);
@@ -174,6 +204,7 @@
       learning.mastery = migrateMastery(saved.mastery);
       if (saved.captureAttempts && typeof saved.captureAttempts === 'object') learning.captureAttempts = saved.captureAttempts;
       if (saved.academyDraft && typeof saved.academyDraft === 'object') learning.academyDraft = saved.academyDraft;
+      if (saved.badges && typeof saved.badges === 'object') learning.badges = { ...saved.badges };
       saveLearning();
     } catch (e) { console.warn('[KanjiGO] Không đọc được tiến độ học.', e); }
   }
@@ -363,6 +394,7 @@
     const r = cv.getBoundingClientRect();
     const x = (e.clientX - r.left) * cv.width / r.width;
     const y = (e.clientY - r.top) * cv.height / r.height;
+    if (state === 'dex') { e.preventDefault(); onDexPointerDown(x, y, e.pointerId); return; }
     if (state === 'lecture') { onLecturePointer(x, y); return; }
     const quiz = state === 'battle' ? battle : state === 'capture' ? capture : state === 'pve' ? pve : null;
     if (!quiz) return;
@@ -386,6 +418,21 @@
       else answerPve(idx);
     }
   });
+  cv.addEventListener('pointermove', (e) => {
+    if (state !== 'dex' || !dex.drag || dex.drag.pointerId !== e.pointerId) return;
+    e.preventDefault();
+    const r = cv.getBoundingClientRect(), y = (e.clientY - r.top) * cv.height / r.height;
+    const delta = dex.drag.lastY - y;
+    if (Math.abs(y - dex.drag.startY) > 5) dex.drag.moved = true;
+    dex.scrollY += delta; dex.drag.lastY = y; clampDexScroll();
+  });
+  const endDexDrag = (e) => { if (dex.drag && (!e || dex.drag.pointerId === e.pointerId)) dex.drag = null; };
+  cv.addEventListener('pointerup', endDexDrag);
+  cv.addEventListener('pointercancel', endDexDrag);
+  cv.addEventListener('wheel', (e) => {
+    if (state !== 'dex') return;
+    e.preventDefault(); dex.scrollY += e.deltaY; clampDexScroll();
+  }, { passive: false });
   function onLecturePointer(x, y) {
     if (!lecture) return;
     const scale = lecture.uiScale || 1;
@@ -453,6 +500,7 @@
     const npc = npcInFront();
     if (npc && npc.type === 'lecture') { enterLecture(); return; }
     if (npc && npc.type === 'pve') { startPve(); return; }
+    if (npc && npc.type === 'gym') { startGym(npc.tier || 'N5'); return; }
     if (npc) { dialog.active = true; dialog.idx = 0; dialog.npc = npc; return; }
     if (player.moving) return;
     const f = frontTile();
@@ -508,12 +556,14 @@
   // ---------- ⚔️ COMBAT REALTIME (quiz kanji) ----------
   let battle = null;
   const rnd = (r) => Math.floor(Math.random() * (r[1] - r[0] + 1)) + r[0];
-  function capturedKanji() {
-    return Object.values(KDB.KANJI).map((k) => k.char).filter((char) => ensureMastery(char).captured && C.MONSTERS[kanjiInfo(char).monId]);
+  function capturedKanji(tier = '') {
+    return Object.values(KDB.KANJI).map((k) => k.char).filter((char) =>
+      ensureMastery(char).captured && C.MONSTERS[kanjiInfo(char).monId] &&
+      isTierUnlocked(tierOfKanji(char)) && (!tier || tierOfKanji(char) === String(tier).toUpperCase()));
   }
   function availableSpawn(kind) {
     const ids = C.SPAWN[kind] || Object.keys(C.MONSTERS);
-    return ids.filter((id) => C.MONSTERS[id] && ensureMastery(C.MONSTERS[id].kanji).captured);
+    return ids.filter((id) => C.MONSTERS[id] && isTierUnlocked(tierOfKanji(C.MONSTERS[id].kanji)) && ensureMastery(C.MONSTERS[id].kanji).captured);
   }
   function grassWeight(char, now = Date.now()) {
     return reappearWeight(char, now);
@@ -749,10 +799,28 @@
 
   // ---------- 📖 GIẢNG ĐƯỜNG + NGHI THỨC THU PHỤC ----------
   let lecture = null, capture = null;
-  function academyDexList() { return Object.values(KDB.KANJI); }
+  function academyDexList() {
+    const ordered = [], seen = new Set();
+    for (const [tierId, tier] of Object.entries(CATALOG.tiers || {})) {
+      if (!isTierUnlocked(tierId)) continue;
+      for (const char of tier.kanji || []) {
+        const info = kanjiInfo(char);
+        if (info && !seen.has(char)) { ordered.push(info); seen.add(char); }
+      }
+    }
+    for (const char of CATALOG.bonus || []) {
+      const info = kanjiInfo(char);
+      if (info && !seen.has(char)) { ordered.push(info); seen.add(char); }
+    }
+    for (const info of Object.values(KDB.KANJI)) {
+      if (!seen.has(info.char) && isTierUnlocked(tierOfKanji(info.char))) ordered.push(info);
+    }
+    return ordered;
+  }
   function academyLockedList() { return academyDexList().filter((info) => !ensureMastery(info.char).captured); }
   function academyUnlockedCount() { return academyDexList().filter((info) => ensureMastery(info.char).captured).length; }
   function academyEligibility(info) {
+    if (!isTierUnlocked(tierOfKanji(info && info.char))) return `Cần huy hiệu ${((CATALOG.tiers || {})[tierOfKanji(info && info.char)] || {}).requiresBadge || 'trước'}`;
     if (!info || !C.MONSTERS[info.monId]) return 'Thiếu monster asset/config';
     if (!KDB.QUESTIONS.some((q) => q.target === info.char)) return 'Thiếu câu hỏi';
     return '';
@@ -797,7 +865,13 @@
   function selectAcademyMenu(action, char = '') {
     if (action === 'picker') { openAcademyPicker(); return; }
     const target = action === 'resume' ? resolveKanji(char || pendingAcademyKanji()) : nextLectureKanji();
-    if (!target) { openAcademyLobby('🎓 Bạn đã unlock toàn bộ Kanji trong KanjiDex!'); return; }
+    if (!target) {
+      const n5 = tierProgress('N5');
+      const message = !hasBadge('N5')
+        ? `📚 Tiến độ N5: ${n5.captured}/${n5.total}. Content còn thiếu ${n5.missing} chữ.`
+        : '🎓 Bạn đã unlock toàn bộ Kanji hiện có trong KanjiDex!';
+      openAcademyLobby(message); return;
+    }
     startAcademyLesson(target, action === 'resume');
   }
   function academyQuestion(index, previousKey = '') {
@@ -953,17 +1027,30 @@
 
   // ---------- ⛩ PVE MINI TEST ----------
   let pve = null;
-  function randomCapturedKanji() {
-    const pool = capturedKanji();
+  function randomCapturedKanji(tier = '') {
+    const pool = capturedKanji(tier);
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
-  function startPve() {
-    const target = randomCapturedKanji();
+  function startPve(options = {}) {
+    if (typeof options === 'string') options = { tier: options };
+    const tier = String(options.tier || '').toUpperCase(), target = randomCapturedKanji(tier);
     if (!target) { showToast('Chưa có chữ nào được thu phục.'); return false; }
-    pve = { index: 0, total: C.PVE.questions, correct: 0, combo: 0, bestCombo: 0, phase: 'fight', qCooldown: 0,
+    pve = { index: 0, total: options.questions || C.PVE.questions, correct: 0, combo: 0, bestCombo: 0, phase: 'fight', qCooldown: 0,
+      mode: options.mode || 'practice', tier, passRatio: Number(options.passRatio) || 0,
       q: makeQuestion(target, '', '', true), seen: {}, feedback: null, pendingEnd: false };
     state = 'pve'; pveResult = null;
     return true;
+  }
+  function startGym(tier = 'N5') {
+    const id = String(tier).toUpperCase(), gym = C.PROGRESSION && C.PROGRESSION.gym && C.PROGRESSION.gym[id];
+    if (!gym) { showToast(`Chưa cấu hình Gym ${id}.`); return false; }
+    if (hasBadge(gym.badge || id)) { showToast(`🏅 Bạn đã có huy hiệu ${gym.badge || id}.`); return false; }
+    const progress = tierProgress(id);
+    if (!isTierStudyComplete(id)) {
+      showToast(`🔒 Gym ${id}: cần đủ ${progress.total} chữ (${progress.captured}/${progress.total}, thiếu content ${progress.missing}).`);
+      return false;
+    }
+    return startPve({ mode: 'gym', tier: id, questions: gym.questions, passRatio: gym.passRatio });
   }
   function finishPve() {
     const ratio = pve.correct / pve.total;
@@ -973,8 +1060,14 @@
       const info = kanjiInfo(char);
       if (info) rewards.push({ kanji: char, monId: info.monId });
     }
-    pveResult = { grade: rank.grade, ratio, correct: pve.correct, total: pve.total, bestCombo: pve.bestCombo, rewards };
-    pve.endMsg = `KẾT QUẢ: Hạng ${rank.grade} • ${pve.correct}/${pve.total} (${Math.round(ratio * 100)}%) • Combo cao nhất x${pve.bestCombo}`;
+    let badgeAwarded = '';
+    if (pve.mode === 'gym' && ratio >= pve.passRatio) {
+      const gym = C.PROGRESSION.gym[pve.tier], badge = gym.badge || pve.tier;
+      learning.badges[badge] = true; badgeAwarded = badge; saveLearning();
+    }
+    pveResult = { grade: rank.grade, ratio, correct: pve.correct, total: pve.total, bestCombo: pve.bestCombo, rewards, badgeAwarded };
+    const badgeText = badgeAwarded ? ` • 🏅 Huy hiệu ${badgeAwarded} — đã mở N4!` : (pve.mode === 'gym' ? ' • Chưa đạt Gym' : '');
+    pve.endMsg = `KẾT QUẢ: Hạng ${rank.grade} • ${pve.correct}/${pve.total} (${Math.round(ratio * 100)}%) • Combo cao nhất x${pve.bestCombo}${badgeText}`;
     pve.phase = 'end';
   }
   function answerPve(idx) {
@@ -995,29 +1088,98 @@
   }
 
   // ---------- 📖 KANJI DEX ----------
-  let dex = { sel: 0, list: [] };
-  function collectedList() { return Object.values(KDB.KANJI).map((info) => info.char); }
+  const DEX_SORTS = [
+    { id: 'catalog', label: 'LỘ TRÌNH' },
+    { id: 'kanji', label: 'KANJI A–Z' },
+    { id: 'level', label: 'LEVEL CAO' },
+    { id: 'recall', label: 'RECALL CAO' },
+  ];
+  let dex = { sel: 0, list: [], source: [], sort: 'catalog', group: true, scrollY: 0, maxScroll: 0, hitboxes: [], drag: null };
+  // Dex dùng cùng catalog với Giảng đường: đúng thứ tự JLPT và không lộ tier chưa mở.
+  function collectedList() { return academyDexList().map((info) => info.char); }
+  function refreshDexList(preserveChar = '') {
+    const previous = preserveChar || dex.list[dex.sel] || '';
+    const catalogIndex = new Map(dex.source.map((char, index) => [char, index]));
+    dex.list = [...dex.source].sort((a, b) => {
+      if (dex.sort === 'kanji') return a.localeCompare(b, 'ja');
+      if (dex.sort === 'level') return ensureMastery(b).level - ensureMastery(a).level || catalogIndex.get(a) - catalogIndex.get(b);
+      if (dex.sort === 'recall') return ensureMastery(b).recall - ensureMastery(a).recall || catalogIndex.get(a) - catalogIndex.get(b);
+      return catalogIndex.get(a) - catalogIndex.get(b);
+    });
+    dex.sel = Math.max(0, previous ? dex.list.indexOf(previous) : 0);
+    if (dex.sel < 0) dex.sel = 0;
+  }
   function openDex() {
     if (dialog.active || player.moving || fishing) return;
-    dex.list = collectedList();
+    dex.source = collectedList();
     const currentChar = C.MONSTERS[currentPetId] && C.MONSTERS[currentPetId].kanji;
-    dex.sel = Math.max(0, dex.list.indexOf(currentChar));
+    refreshDexList(currentChar);
+    dex.scrollY = 0; dex.drag = null;
     state = 'dex';
+    ensureDexSelectionVisible();
   }
   function dexLayout(total) {
     const W = cv.width, H = cv.height, ox = Math.max(18, Math.round(W * 0.024));
-    const gapX = Math.max(10, Math.round(W * 0.014)), gapY = Math.max(10, Math.round(H * 0.014));
-    const minCardW = 180;
+    const gapX = Math.max(9, Math.round(W * 0.012)), gapY = 10;
+    const minCardW = W < 620 ? 142 : 184;
     const widthCols = Math.floor((W - ox * 2 + gapX) / (minCardW + gapX));
-    const balancedCols = Math.ceil(Math.sqrt(Math.max(1, total)));
-    const cols = Math.max(1, Math.min(5, widthCols, balancedCols));
-    const panelH = Math.max(100, Math.min(150, Math.round(H * 0.16)));
-    const oy = 90, gridBottom = H - panelH - 16;
-    const availableH = Math.max(40, gridBottom - oy), rows = Math.max(1, Math.min(3, Math.floor((availableH + gapY) / (54 + gapY))));
-    const pageSize = cols * rows;
+    const cols = Math.max(1, Math.min(5, widthCols));
+    const panelH = Math.max(108, Math.min(142, Math.round(H * 0.18)));
+    const oy = W < 620 ? 126 : 112, gridBottom = H - panelH - 10;
+    const availableH = Math.max(80, gridBottom - oy);
     const cardW = (W - ox * 2 - gapX * (cols - 1)) / cols;
-    const cardH = Math.max(40, (availableH - gapY * (rows - 1)) / rows);
-    return { ox, oy, gapX, gapY, cols, rows, pageSize, cardW, cardH, panelH };
+    const cardH = H < 620 ? 124 : 146;
+    const rows = Math.max(1, Math.floor((availableH + gapY) / (cardH + gapY))), pageSize = cols * rows;
+    return { ox, oy, gapX, gapY, cols, rows, pageSize, cardW, cardH, panelH, availableH, gridBottom };
+  }
+  function dexSections() {
+    if (!dex.group) return [{ tier: 'ALL', label: 'TẤT CẢ KANJI', list: dex.list }];
+    const order = ['N5', 'N4', 'BONUS'];
+    return order.map((tier) => {
+      const list = dex.list.filter((char) => tierOfKanji(char) === tier);
+      const locked = tier !== 'BONUS' && !isTierUnlocked(tier) && ((CATALOG.tiers || {})[tier]?.kanji || []).some((char) => !!kanjiInfo(char));
+      return { tier, label: tier === 'BONUS' ? 'BONUS' : `JLPT ${tier}`, list, locked };
+    }).filter((section) => section.list.length || section.locked);
+  }
+  function dexContent(layout) {
+    const rows = []; let y = 0;
+    for (const section of dexSections()) {
+      if (dex.group) { rows.push({ type: 'header', section, y, h: 30 }); y += 30; }
+      for (let start = 0; start < section.list.length; start += layout.cols) {
+        rows.push({ type: 'cards', list: section.list.slice(start, start + layout.cols), y, h: layout.cardH });
+        y += layout.cardH + layout.gapY;
+      }
+      y += 8;
+    }
+    return { rows, height: Math.max(0, y - 8) };
+  }
+  function clampDexScroll() { dex.scrollY = Math.max(0, Math.min(dex.maxScroll || 0, Number(dex.scrollY) || 0)); }
+  function ensureDexSelectionVisible() {
+    if (state !== 'dex' || !dex.list.length) return;
+    const layout = dexLayout(dex.list.length), content = dexContent(layout), selected = dex.list[dex.sel];
+    const row = content.rows.find((item) => item.type === 'cards' && item.list.includes(selected));
+    dex.maxScroll = Math.max(0, content.height - layout.availableH); clampDexScroll();
+    if (!row) return;
+    if (row.y < dex.scrollY) dex.scrollY = Math.max(0, row.y - (dex.group ? 30 : 0));
+    else if (row.y + row.h > dex.scrollY + layout.availableH) dex.scrollY = row.y + row.h - layout.availableH;
+    clampDexScroll();
+  }
+  function cycleDexSort() {
+    const current = DEX_SORTS.findIndex((item) => item.id === dex.sort);
+    dex.sort = DEX_SORTS[(current + 1) % DEX_SORTS.length].id;
+    refreshDexList(); ensureDexSelectionVisible();
+  }
+  function onDexPointerDown(x, y, pointerId) {
+    const hit = (dex.hitboxes || []).find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
+    if (hit && hit.action === 'sort') {
+      if (hit.value === 'cycle') cycleDexSort();
+      else { const selected = dex.list[dex.sel]; dex.sort = hit.value; refreshDexList(selected); ensureDexSelectionVisible(); }
+      return;
+    }
+    if (hit && hit.action === 'group') { dex.group = !dex.group; dex.scrollY = 0; ensureDexSelectionVisible(); return; }
+    if (hit && hit.action === 'card') { dex.sel = hit.value; ensureDexSelectionVisible(); }
+    const layout = dexLayout(dex.list.length);
+    if (y >= layout.oy && y <= layout.gridBottom) dex.drag = { pointerId, startY: y, lastY: y, moved: false };
   }
   function onDexKey(k) {
     if (k === 'escape' || k === 'd') { state = 'overworld'; return; }
@@ -1027,6 +1189,12 @@
     else if (k === 'arrowright') dex.sel = (dex.sel + 1) % n;
     else if (k === 'arrowup' || k === 'w') dex.sel = (dex.sel - cols + n) % n;
     else if (k === 'arrowdown' || k === 's') dex.sel = (dex.sel + cols) % n;
+    else if (k === 'pageup') dex.sel = Math.max(0, dex.sel - cols * 3);
+    else if (k === 'pagedown') dex.sel = Math.min(n - 1, dex.sel + cols * 3);
+    else if (k === 'home') dex.sel = 0;
+    else if (k === 'end') dex.sel = n - 1;
+    else if (k === 'r') cycleDexSort();
+    else if (k === 'g') { dex.group = !dex.group; dex.scrollY = 0; ensureDexSelectionVisible(); }
     else if (k === 'enter' || k === ' ') {
       const info = kanjiInfo(dex.list[dex.sel]);
       if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) { showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return; }
@@ -1034,6 +1202,7 @@
       showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
       state = 'overworld';
     }
+    ensureDexSelectionVisible();
   }
 
   // ---------- VÒNG LẶP ----------
@@ -1121,7 +1290,7 @@
       pve.qCooldown -= dt;
       if (pve.qCooldown <= 0) {
         if (pve.pendingEnd) finishPve();
-        else { const target = randomCapturedKanji(); pve.q = makeQuestion(target, pve.q.key, '', true); }
+        else { const target = randomCapturedKanji(pve.tier); pve.q = makeQuestion(target, pve.q.key, '', true); }
       }
     }
   }
@@ -1256,6 +1425,254 @@
 
   // ----- BATTLE render -----
   const PANEL_H = (C.UI && C.UI.panelH) || 200;
+  function drawMonsterMeaningEffect(mon, centerX, baseY, width, alpha = 1) {
+    if (!mon || !mon.effect || alpha <= 0) return;
+    const now = performance.now(), t = now / 1000, unit = Math.max(.45, width / 210), effect = mon.effect;
+    const centerY = baseY - width * .47;
+    cx.save(); cx.globalAlpha = alpha; cx.lineCap = 'round'; cx.lineJoin = 'round';
+    const orbit = /^orbit-(\d+)$/.exec(effect);
+    if (orbit) {
+      const count = Number(orbit[1]), colors = { 1: '#fff4ad', 2: '#a8efff', 3: '#ffb2e9', 4: '#d7b4ff', 5: '#ffb86b', 9: '#85fff4' };
+      for (let i = 0; i < count; i++) {
+        const a = t * (count > 5 ? .55 : .82) + i * Math.PI * 2 / count;
+        const x = centerX + Math.cos(a) * width * .56, y = centerY + Math.sin(a) * width * .34;
+        cx.globalAlpha = alpha * (.35 + .4 * ((Math.sin(a * 2 + t * 2) + 1) / 2)); cx.fillStyle = colors[count] || '#d7efff';
+        cx.beginPath(); cx.arc(x, y, (count > 5 ? 2.1 : 3.2) * unit, 0, Math.PI * 2); cx.fill();
+      }
+    } else if (effect === 'rise') {
+      for (let i = 0; i < 3; i++) {
+        const phase = (t * .46 + i / 3) % 1, y = baseY - width * (.44 + phase * .44);
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .72;
+        cx.strokeStyle = '#a8efff'; cx.lineWidth = 3 * unit; cx.beginPath();
+        cx.moveTo(centerX - 8 * unit, y + 7 * unit); cx.lineTo(centerX, y); cx.lineTo(centerX + 8 * unit, y + 7 * unit); cx.stroke();
+      }
+    } else if (effect === 'sunrise') {
+      const cy = baseY - width * .48, radius = width * (.48 + Math.sin(t * 2) * .015);
+      cx.globalAlpha = alpha * (.28 + Math.sin(t * 2) * .06); cx.strokeStyle = '#ffe27a'; cx.lineWidth = 3 * unit;
+      cx.beginPath(); cx.arc(centerX, cy, radius * .66, Math.PI * 1.08, Math.PI * 1.92); cx.stroke();
+      for (let i = 0; i < 7; i++) {
+        const a = Math.PI * (1.08 + i * .14), r1 = radius * .76, r2 = radius * (.88 + .04 * Math.sin(t * 3 + i));
+        cx.beginPath(); cx.moveTo(centerX + Math.cos(a) * r1, cy + Math.sin(a) * r1); cx.lineTo(centerX + Math.cos(a) * r2, cy + Math.sin(a) * r2); cx.stroke();
+      }
+    } else if (effect === 'gold-sparkle') {
+      const points = [[-.52, -.72], [.50, -.58], [-.46, -.22], [.48, -.12]];
+      points.forEach(([px, py], i) => {
+        const pulse = .35 + .65 * Math.max(0, Math.sin(t * 3.2 + i * 1.7)), x = centerX + px * width, y = baseY + py * width, r = (3 + pulse * 4) * unit;
+        cx.globalAlpha = alpha * pulse; cx.strokeStyle = i % 2 ? '#fff4ad' : '#ffd54a'; cx.lineWidth = 2 * unit;
+        cx.beginPath(); cx.moveTo(x - r, y); cx.lineTo(x + r, y); cx.moveTo(x, y - r); cx.lineTo(x, y + r); cx.stroke();
+      });
+    } else if (effect === 'sound-wave') {
+      cx.strokeStyle = '#b8f3ff'; cx.lineWidth = 2.5 * unit;
+      for (let i = 0; i < 3; i++) {
+        const phase = (t * .7 + i / 3) % 1, r = width * (.34 + phase * .25);
+        cx.globalAlpha = alpha * (1 - phase) * .62;
+        cx.beginPath(); cx.arc(centerX, centerY, r, -.42 * Math.PI, .42 * Math.PI); cx.stroke();
+        cx.beginPath(); cx.arc(centerX, centerY, r, .58 * Math.PI, 1.42 * Math.PI); cx.stroke();
+      }
+    } else if (effect === 'sun-glow') {
+      const pulse = .42 + .12 * Math.sin(t * 2.4), r = width * .53;
+      cx.globalAlpha = alpha * pulse; cx.strokeStyle = '#fff29b'; cx.lineWidth = 2.5 * unit;
+      cx.beginPath(); cx.arc(centerX, centerY, r * .76, 0, Math.PI * 2); cx.stroke();
+      for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5, r1 = r * .86, r2 = r * (1 + .05 * Math.sin(t * 3 + i)); cx.beginPath(); cx.moveTo(centerX + Math.cos(a) * r1, centerY + Math.sin(a) * r1); cx.lineTo(centerX + Math.cos(a) * r2, centerY + Math.sin(a) * r2); cx.stroke(); }
+    } else if (effect === 'moon-glow') {
+      const r = width * .54; cx.globalAlpha = alpha * (.32 + .1 * Math.sin(t * 2)); cx.strokeStyle = '#b9dcff'; cx.lineWidth = 4 * unit;
+      cx.beginPath(); cx.arc(centerX, centerY, r, -.42 * Math.PI, .42 * Math.PI); cx.stroke();
+      cx.globalAlpha *= .65; cx.beginPath(); cx.arc(centerX + r * .18, centerY, r * .78, -.48 * Math.PI, .48 * Math.PI); cx.stroke();
+    } else if (effect === 'boundary') {
+      const pulse = (Math.sin(t * 2.2) + 1) / 2, pad = width * (.46 + pulse * .035);
+      cx.globalAlpha = alpha * (.24 + pulse * .16); cx.strokeStyle = '#78b6ff'; cx.lineWidth = 2.5 * unit;
+      cx.strokeRect(centerX - pad, centerY - width * .43, pad * 2, width * .86);
+    } else if (effect === 'grow' || effect === 'center-pulse' || effect === 'now-pulse' || effect === 'portal') {
+      const speed = effect === 'now-pulse' ? 1.45 : .7, phase = (t * speed) % 1, baseR = effect === 'portal' ? .28 : .18;
+      cx.globalAlpha = alpha * (1 - phase) * (effect === 'now-pulse' ? .65 : .42);
+      cx.strokeStyle = effect === 'portal' ? '#9be9ff' : effect === 'grow' ? '#ffc985' : '#a7f5ff'; cx.lineWidth = (effect === 'portal' ? 3 : 2.4) * unit;
+      cx.beginPath(); cx.ellipse(centerX, centerY, width * (baseR + phase * .42), width * (baseR * .65 + phase * .27), 0, 0, Math.PI * 2); cx.stroke();
+      if (effect === 'center-pulse') { cx.globalAlpha = alpha * .55; cx.beginPath(); cx.moveTo(centerX - 8 * unit, centerY); cx.lineTo(centerX + 8 * unit, centerY); cx.moveTo(centerX, centerY - 8 * unit); cx.lineTo(centerX, centerY + 8 * unit); cx.stroke(); }
+    } else if (effect === 'bubbles') {
+      cx.strokeStyle = '#b9f3ff'; cx.lineWidth = 2 * unit;
+      for (let i = 0; i < 5; i++) { const phase = (t * .34 + i * .19) % 1, side = i % 2 ? 1 : -1, x = centerX + side * width * (.34 + .08 * Math.sin(i)), y = baseY - width * (.12 + phase * .78); cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .65; cx.beginPath(); cx.arc(x, y, (2.5 + i % 3) * unit, 0, Math.PI * 2); cx.stroke(); }
+    } else if (effect === 'seasons' || effect === 'life') {
+      const colors = effect === 'seasons' ? ['#ff9fb5', '#72dfa0', '#ffd65c', '#a9d8ff'] : ['#7bff9d', '#c8ff78', '#63e89a', '#e7ffad'];
+      for (let i = 0; i < 4; i++) { const phase = (t * .24 + i * .23) % 1, x = centerX + Math.sin(t * 1.2 + i * 2) * width * .48, y = baseY - width * (.08 + phase * .82), r = (3 + i % 2) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .62; cx.fillStyle = colors[i]; cx.save(); cx.translate(x, y); cx.rotate(t + i); cx.fillRect(-r, -r * .55, r * 2, r * 1.1); cx.restore(); }
+      if (effect === 'life') { cx.globalAlpha = alpha * .48; cx.strokeStyle = '#9dff9f'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.moveTo(centerX, baseY - width * .05); cx.quadraticCurveTo(centerX - 3 * unit, baseY - width * .17, centerX - 13 * unit, baseY - width * .2); cx.moveTo(centerX, baseY - width * .13); cx.quadraticCurveTo(centerX + 4 * unit, baseY - width * .24, centerX + 14 * unit, baseY - width * .27); cx.stroke(); }
+    } else if (effect === 'people-pair') {
+      const sway = Math.sin(t * 1.8) * width * .04, y = centerY - width * .02;
+      cx.globalAlpha = alpha * .48; cx.strokeStyle = '#ffd7b0'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.moveTo(centerX - width * .46 + sway, y); cx.lineTo(centerX + width * .46 - sway, y); cx.stroke();
+      cx.fillStyle = '#ffe0bd'; for (const side of [-1, 1]) { cx.beginPath(); cx.arc(centerX + side * width * .48 - side * sway, y, 5 * unit, 0, Math.PI * 2); cx.fill(); }
+    } else if (effect === 'cross-flare') {
+      const pulse = .35 + .3 * ((Math.sin(t * 2.8) + 1) / 2), r = width * (.42 + pulse * .12);
+      cx.globalAlpha = alpha * pulse; cx.strokeStyle = '#ff8b8b'; cx.lineWidth = 3 * unit; cx.beginPath(); cx.moveTo(centerX - r, centerY); cx.lineTo(centerX + r, centerY); cx.moveTo(centerX, centerY - r); cx.lineTo(centerX, centerY + r); cx.stroke();
+    } else if (effect === 'page-flip') {
+      cx.globalAlpha = alpha * .48; cx.strokeStyle = '#fff2c4'; cx.lineWidth = 2 * unit;
+      for (const side of [-1, 1]) { const wave = Math.sin(t * 2.4 + side) * 5 * unit, x = centerX + side * width * .5; cx.beginPath(); cx.moveTo(x, centerY - 18 * unit); cx.quadraticCurveTo(x + side * wave, centerY, x, centerY + 18 * unit); cx.stroke(); }
+    } else if (effect === 'lengthen') {
+      const pulse = (.5 + .5 * Math.sin(t * 2)) * width * .08, top = centerY - width * .5 - pulse, bottom = centerY + width * .5 + pulse;
+      cx.globalAlpha = alpha * .42; cx.strokeStyle = '#ffc0e8'; cx.lineWidth = 2.5 * unit; cx.beginPath(); cx.moveTo(centerX, top); cx.lineTo(centerX, bottom); cx.moveTo(centerX - 6 * unit, top + 7 * unit); cx.lineTo(centerX, top); cx.lineTo(centerX + 6 * unit, top + 7 * unit); cx.moveTo(centerX - 6 * unit, bottom - 7 * unit); cx.lineTo(centerX, bottom); cx.lineTo(centerX + 6 * unit, bottom - 7 * unit); cx.stroke();
+    } else if (effect === 'outward' || effect === 'backtrail' || effect === 'forward') {
+      const dirs = effect === 'outward' ? [-1, 1] : effect === 'backtrail' ? [-1] : [1]; cx.strokeStyle = effect === 'backtrail' ? '#a8c7ff' : '#b8fff1'; cx.lineWidth = 2.5 * unit;
+      for (const dir of dirs) for (let i = 0; i < 3; i++) { const phase = (t * .55 + i / 3) % 1, x = centerX + dir * width * (.38 + phase * .27), y = centerY + (i - 1) * 12 * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .55; cx.beginPath(); cx.moveTo(x - dir * 7 * unit, y - 6 * unit); cx.lineTo(x, y); cx.lineTo(x - dir * 7 * unit, y + 6 * unit); cx.stroke(); }
+    } else if (effect === 'split') {
+      const phase = (.5 + .5 * Math.sin(t * 1.8)), gap = width * (.33 + phase * .18); cx.globalAlpha = alpha * .5; cx.fillStyle = '#ffc0a8';
+      for (const side of [-1, 1]) { cx.beginPath(); cx.arc(centerX + side * gap, centerY, 5 * unit, 0, Math.PI * 2); cx.fill(); }
+    } else if (effect === 'clock') {
+      const r = width * .13, x = centerX + width * .46, y = centerY - width * .35, a = t * 1.5;
+      cx.globalAlpha = alpha * .6; cx.strokeStyle = '#d9f2ff'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.arc(x, y, r, 0, Math.PI * 2); cx.moveTo(x, y); cx.lineTo(x + Math.cos(a) * r * .72, y + Math.sin(a) * r * .72); cx.moveTo(x, y); cx.lineTo(x + Math.cos(a * .2) * r * .48, y + Math.sin(a * .2) * r * .48); cx.stroke();
+    } else if (effect === 'steps') {
+      cx.fillStyle = '#baffcf'; for (let i = 0; i < 4; i++) { const phase = (t * .45 + i * .23) % 1, x = centerX - width * .5 + phase * width, y = baseY + ((i % 2) ? -8 : -2) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .4; cx.beginPath(); cx.ellipse(x, y, 5 * unit, 2.5 * unit, i % 2 ? -.35 : .35, 0, Math.PI * 2); cx.fill(); }
+    } else if (effect === 'scan') {
+      const phase = (.5 + .5 * Math.sin(t * 1.7)), y = centerY - width * .36 + phase * width * .72;
+      cx.globalAlpha = alpha * .45; cx.strokeStyle = '#d2c3ff'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.moveTo(centerX - width * .5, y); cx.lineTo(centerX + width * .5, y); cx.stroke();
+    } else if (effect === 'inward') {
+      cx.strokeStyle = '#ffb09d'; cx.lineWidth = 2.5 * unit;
+      for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
+        const phase = (t * .58 + i / 3) % 1, x = centerX + side * width * (.68 - phase * .3), y = centerY + (i - 1) * 13 * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .58; cx.beginPath();
+        cx.moveTo(x + side * 7 * unit, y - 6 * unit); cx.lineTo(x, y); cx.lineTo(x + side * 7 * unit, y + 6 * unit); cx.stroke();
+      }
+    } else if (effect === 'study') {
+      cx.strokeStyle = '#bcecff'; cx.lineWidth = 2 * unit;
+      for (let i = 0; i < 4; i++) {
+        const phase = (t * .28 + i * .24) % 1, side = i % 2 ? 1 : -1;
+        const x = centerX + side * width * (.43 + .06 * Math.sin(t * 1.8 + i)), y = baseY - width * (.08 + phase * .74), flap = Math.sin(t * 4 + i) * 3 * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .55; cx.beginPath();
+        cx.moveTo(x - 7 * unit, y + flap); cx.lineTo(x, y - 3 * unit); cx.lineTo(x + 7 * unit, y + flap); cx.moveTo(x, y - 3 * unit); cx.lineTo(x, y + 7 * unit); cx.stroke();
+      }
+    } else if (effect === 'height') {
+      const phase = (t * .45) % 1, x = centerX + width * .55, top = centerY - width * .5, bottom = centerY + width * .48;
+      cx.globalAlpha = alpha * .5; cx.strokeStyle = '#9dffd0'; cx.lineWidth = 2.5 * unit; cx.beginPath();
+      cx.moveTo(x, bottom); cx.lineTo(x, top); cx.moveTo(x - 6 * unit, top + 7 * unit); cx.lineTo(x, top); cx.lineTo(x + 6 * unit, top + 7 * unit); cx.stroke();
+      cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .6; cx.fillStyle = '#d1ffe6'; cx.beginPath(); cx.arc(x, bottom - phase * (bottom - top), 3.5 * unit, 0, Math.PI * 2); cx.fill();
+    } else if (effect === 'coin-ring') {
+      cx.strokeStyle = '#ffd08a'; cx.lineWidth = 2.5 * unit;
+      for (let i = 0; i < 2; i++) {
+        const phase = (t * .34 + i * .5) % 1, r = width * (.34 + phase * .22);
+        cx.globalAlpha = alpha * (1 - phase) * .52; cx.beginPath(); cx.ellipse(centerX, centerY, r, r * (.58 + .08 * Math.sin(t * 2 + i)), t * .25 + i, 0, Math.PI * 2); cx.stroke();
+      }
+      for (let i = 0; i < 3; i++) { const a = t * 1.2 + i * Math.PI * 2 / 3, x = centerX + Math.cos(a) * width * .52, y = centerY + Math.sin(a) * width * .3; cx.globalAlpha = alpha * .5; cx.fillStyle = '#fff0b8'; cx.fillRect(x - 2 * unit, y - 2 * unit, 4 * unit, 4 * unit); }
+    } else if (effect === 'child-bounce') {
+      const colors = ['#ffafd2', '#fff0a8', '#aeeeff'];
+      for (let i = 0; i < 3; i++) {
+        const bounce = Math.abs(Math.sin(t * 2.7 + i * .85)), x = centerX + (i - 1) * width * .28, y = baseY - 5 * unit - bounce * width * .18;
+        cx.globalAlpha = alpha * (.35 + bounce * .3); cx.fillStyle = colors[i]; cx.beginPath(); cx.arc(x, y, (3.5 + bounce * 1.5) * unit, 0, Math.PI * 2); cx.fill();
+      }
+    } else if (effect === 'outside-drift') {
+      cx.strokeStyle = '#d8b8ff'; cx.lineWidth = 2.3 * unit;
+      for (const side of [-1, 1]) for (let i = 0; i < 2; i++) {
+        const phase = (t * .35 + i * .42) % 1, x = centerX + side * width * (.5 + phase * .22), y = centerY + (i ? 18 : -18) * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .5; cx.beginPath(); cx.arc(x, y, (4 + phase * 4) * unit, 0, Math.PI * 2); cx.stroke();
+      }
+    } else if (effect === 'sink') {
+      cx.strokeStyle = '#8bfff2'; cx.lineWidth = 2.5 * unit;
+      for (let i = 0; i < 3; i++) {
+        const phase = (t * .48 + i / 3) % 1, y = centerY - width * .42 + phase * width * .78;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .58; cx.beginPath(); cx.moveTo(centerX - 7 * unit, y - 7 * unit); cx.lineTo(centerX, y); cx.lineTo(centerX + 7 * unit, y - 7 * unit); cx.stroke();
+      }
+    } else if (effect === 'approach') {
+      cx.strokeStyle = '#ffb09a'; cx.lineWidth = 2.5 * unit;
+      for (const side of [-1, 1]) for (let i = 0; i < 2; i++) {
+        const phase = (t * .5 + i * .46) % 1, x = centerX + side * width * (.72 - phase * .28), y = centerY + (i ? 17 : -17) * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .56; cx.beginPath(); cx.moveTo(x + side * 8 * unit, y - 6 * unit); cx.lineTo(x, y); cx.lineTo(x + side * 8 * unit, y + 6 * unit); cx.stroke();
+      }
+    } else if (effect === 'breeze') {
+      cx.strokeStyle = '#a9ffe0'; cx.lineWidth = 2.2 * unit;
+      for (let i = 0; i < 3; i++) {
+        const phase = (t * .3 + i * .29) % 1, x = centerX - width * .62 + phase * width * 1.24, y = centerY + (i - 1) * 22 * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .48; cx.beginPath(); cx.moveTo(x - 16 * unit, y); cx.quadraticCurveTo(x, y - 8 * unit, x + 15 * unit, y); cx.quadraticCurveTo(x + 22 * unit, y + 6 * unit, x + 9 * unit, y + 9 * unit); cx.stroke();
+      }
+    } else if (effect === 'tiny') {
+      const pulse = .5 + .5 * Math.sin(t * 2.6); cx.fillStyle = '#ffd5a8';
+      for (let i = 0; i < 5; i++) { const a = t * .55 + i * Math.PI * 2 / 5, r = width * (.25 + pulse * .04), x = centerX + Math.cos(a) * r, y = centerY + Math.sin(a) * r * .65; cx.globalAlpha = alpha * (.3 + pulse * .25); cx.beginPath(); cx.arc(x, y, (1.8 + i % 2) * unit, 0, Math.PI * 2); cx.fill(); }
+    } else if (effect === 'peaks') {
+      cx.globalAlpha = alpha * .42; cx.strokeStyle = '#e6c28c'; cx.lineWidth = 2.5 * unit; cx.beginPath();
+      cx.moveTo(centerX - width * .62, baseY - width * .08); cx.lineTo(centerX - width * .32, centerY - width * .12); cx.lineTo(centerX - width * .08, baseY - width * .08); cx.lineTo(centerX + width * .18, centerY - width * .28); cx.lineTo(centerX + width * .6, baseY - width * .08); cx.stroke();
+    } else if (effect === 'grace-step') {
+      cx.strokeStyle = '#ffb8d1'; cx.lineWidth = 2.2 * unit;
+      for (const side of [-1, 1]) { const phase = (t * .42 + (side > 0 ? .5 : 0)) % 1, x = centerX + side * width * (.28 + phase * .2), y = baseY - width * (.05 + phase * .15); cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .55; cx.beginPath(); cx.ellipse(x, y, 8 * unit, 3.5 * unit, side * .3, 0, Math.PI * 2); cx.stroke(); }
+    } else if (effect === 'north-star') {
+      const x = centerX, y = centerY - width * .62, r = (8 + 2 * Math.sin(t * 2.4)) * unit; cx.globalAlpha = alpha * .62; cx.strokeStyle = '#c8f4ff'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.moveTo(x - r, y); cx.lineTo(x + r, y); cx.moveTo(x, y - r); cx.lineTo(x, y + r); cx.stroke(); cx.beginPath(); cx.moveTo(x, y + r * 1.5); cx.lineTo(x, centerY - width * .43); cx.stroke();
+    } else if (effect === 'noon-ray') {
+      const y = centerY - width * .62, r = width * .1; cx.globalAlpha = alpha * .55; cx.strokeStyle = '#ffe27d'; cx.lineWidth = 2.3 * unit; cx.beginPath(); cx.arc(centerX, y, r, 0, Math.PI * 2); cx.stroke(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r2 = r * (1.55 + .12 * Math.sin(t * 3 + i)); cx.beginPath(); cx.moveTo(centerX + Math.cos(a) * r * 1.15, y + Math.sin(a) * r * 1.15); cx.lineTo(centerX + Math.cos(a) * r2, y + Math.sin(a) * r2); cx.stroke(); }
+    } else if (effect === 'hundred-grid') {
+      cx.fillStyle = '#e1c3ff'; const gap = width * .042, ox = centerX - gap * 4.5, oy = centerY - width * .55; for (let row = 0; row < 10; row++) for (let col = 0; col < 10; col++) { const pulse = .25 + .2 * Math.sin(t * 2 + (row + col) * .28); cx.globalAlpha = alpha * pulse; cx.fillRect(ox + col * gap, oy + row * gap, 1.5 * unit, 1.5 * unit); }
+    } else if (effect === 'ink-strokes') {
+      cx.strokeStyle = '#b9ffd0'; cx.lineWidth = 2.8 * unit; for (let i = 0; i < 4; i++) { const phase = (t * .3 + i * .24) % 1, side = i % 2 ? 1 : -1, x = centerX + side * width * (.42 + phase * .14), y = centerY + (i - 1.5) * 18 * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .48; cx.beginPath(); cx.moveTo(x - side * 13 * unit, y - 4 * unit); cx.quadraticCurveTo(x, y + 5 * unit, x + side * 8 * unit, y); cx.stroke(); }
+    } else if (effect === 'lead-arrow') {
+      const phase = (t * .52) % 1, x = centerX + width * (.34 + phase * .32), y = centerY - width * .08; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .6; cx.strokeStyle = '#8fffea'; cx.lineWidth = 2.5 * unit; cx.beginPath(); cx.moveTo(x - 16 * unit, y); cx.lineTo(x, y); cx.lineTo(x - 7 * unit, y - 7 * unit); cx.moveTo(x, y); cx.lineTo(x - 7 * unit, y + 7 * unit); cx.stroke();
+    } else if (effect === 'name-tag') {
+      const bob = Math.sin(t * 2.2) * 3 * unit, w = width * .3, h = width * .12, x = centerX - w / 2, y = centerY - width * .62 + bob; cx.globalAlpha = alpha * .5; cx.strokeStyle = '#ffd0bd'; cx.lineWidth = 2 * unit; cx.strokeRect(x, y, w, h); cx.beginPath(); cx.moveTo(x + w * .18, y + h * .52); cx.lineTo(x + w * .82, y + h * .52); cx.stroke();
+    } else if (effect === 'river-flow') {
+      cx.strokeStyle = '#8df1ff'; cx.lineWidth = 2.2 * unit; for (let i = 0; i < 3; i++) { const x = centerX + (i - 1) * width * .22, drift = Math.sin(t * 2 + i) * 5 * unit; cx.globalAlpha = alpha * .42; cx.beginPath(); cx.moveTo(x, centerY - width * .55); cx.bezierCurveTo(x + drift, centerY - width * .2, x - drift, centerY + width * .18, x, baseY - width * .02); cx.stroke(); }
+    } else if (effect === 'many-sparkles') {
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI * 2 / 12 + t * .18, r = width * (.43 + .08 * Math.sin(t * 1.8 + i)), x = centerX + Math.cos(a) * r, y = centerY + Math.sin(a) * r * .76, s = (2 + i % 3) * unit; cx.globalAlpha = alpha * (.28 + .28 * Math.max(0, Math.sin(t * 3 + i))); cx.strokeStyle = '#ffd1f4'; cx.lineWidth = 1.8 * unit; cx.beginPath(); cx.moveTo(x - s, y); cx.lineTo(x + s, y); cx.moveTo(x, y - s); cx.lineTo(x, y + s); cx.stroke(); }
+    } else if (effect === 'water-ripple') {
+      cx.strokeStyle = '#9beeff'; cx.lineWidth = 2.3 * unit; for (let i = 0; i < 3; i++) { const phase = (t * .4 + i / 3) % 1, r = width * (.2 + phase * .36); cx.globalAlpha = alpha * (1 - phase) * .55; cx.beginPath(); cx.ellipse(centerX, baseY - width * .04, r, r * .25, 0, 0, Math.PI * 2); cx.stroke(); }
+    } else if (effect === 'half-split') {
+      const gap = width * (.08 + .03 * Math.sin(t * 2.2)), r = width * .18; cx.globalAlpha = alpha * .5; cx.strokeStyle = '#ffd39a'; cx.lineWidth = 2.4 * unit; cx.beginPath(); cx.arc(centerX - gap, centerY, r, Math.PI / 2, Math.PI * 1.5); cx.arc(centerX + gap, centerY, r, -Math.PI / 2, Math.PI / 2); cx.stroke();
+    } else if (effect === 'strength-pulse') {
+      const phase = (t * .7) % 1, r = width * (.3 + phase * .28); cx.globalAlpha = alpha * (1 - phase) * .55; cx.strokeStyle = '#90adff'; cx.lineWidth = 3 * unit; cx.beginPath(); cx.arc(centerX, centerY, r, 0, Math.PI * 2); cx.stroke(); for (const side of [-1, 1]) { cx.beginPath(); cx.moveTo(centerX + side * width * .45, centerY); cx.lineTo(centerX + side * width * (.57 + phase * .08), centerY); cx.stroke(); }
+    } else if (effect === 'sunset-drift') {
+      const phase = (t * .18) % 1, x = centerX - width * .48 + phase * width * .96, y = centerY - width * .46 + Math.sin(phase * Math.PI) * width * .1, r = 7 * unit; cx.globalAlpha = alpha * .55; cx.fillStyle = '#ff9b5f'; cx.beginPath(); cx.arc(x, y, r, Math.PI, 0); cx.fill(); cx.strokeStyle = '#ffd1a8'; cx.lineWidth = 2 * unit; cx.beginPath(); cx.moveTo(x - r * 1.5, y); cx.lineTo(x + r * 1.5, y); cx.stroke();
+    } else if (effect === 'lightning') {
+      cx.strokeStyle = '#fff27a'; cx.lineWidth = 2.6 * unit; for (const side of [-1, 1]) { const flicker = Math.sin(t * 12 + side) > 0 ? 1 : .35, x = centerX + side * width * .5; cx.globalAlpha = alpha * .58 * flicker; cx.beginPath(); cx.moveTo(x, centerY - width * .32); cx.lineTo(x - side * 7 * unit, centerY - 7 * unit); cx.lineTo(x + side * 4 * unit, centerY - 5 * unit); cx.lineTo(x - side * 8 * unit, centerY + width * .28); cx.stroke(); }
+    } else if (effect === 'word-sparks') {
+      const colors = ['#dfc2ff', '#ffd9f3', '#bcecff']; for (let i = 0; i < 5; i++) { const phase = (t * .28 + i * .19) % 1, side = i % 2 ? 1 : -1, x = centerX + side * width * (.4 + .08 * Math.sin(i + t)), y = baseY - width * (.16 + phase * .66), s = (2.5 + i % 2) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .55; cx.fillStyle = colors[i % colors.length]; cx.fillRect(x - s, y - s, s * 2, s * 2); }
+    } else if (effect === 'earth-crumble') {
+      cx.fillStyle = '#c88a5a'; for (let i = 0; i < 7; i++) { const phase = (t * .34 + i * .13) % 1, x = centerX + Math.sin(i * 2.1) * width * .48, y = centerY + phase * width * .5, s = (2 + i % 3) * unit; cx.globalAlpha = alpha * (1 - phase) * .48; cx.fillRect(x - s, y - s, s * 2, s * 2); }
+    } else if (effect === 'leaf-fall') {
+      const colors = ['#a8ef73', '#63cf68', '#d2f58a']; for (let i = 0; i < 6; i++) { const phase = (t * .22 + i * .16) % 1, x = centerX + Math.sin(t * 1.8 + i * 1.7) * width * .53, y = centerY - width * .54 + phase * width * 1.05, r = (3 + i % 2) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .58; cx.fillStyle = colors[i % colors.length]; cx.save(); cx.translate(x, y); cx.rotate(t + i); cx.beginPath(); cx.ellipse(0, 0, r * 1.7, r, .4, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+    } else if (effect === 'steam-aroma') {
+      cx.strokeStyle = '#fff0bc'; cx.lineWidth = 2.2 * unit; for (let i = 0; i < 3; i++) { const phase = (t * .3 + i / 3) % 1, x = centerX + (i - 1) * width * .17, y = centerY - width * (.32 + phase * .32); cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .5; cx.beginPath(); cx.moveTo(x, y + 14 * unit); cx.bezierCurveTo(x - 7 * unit, y + 8 * unit, x + 7 * unit, y + 3 * unit, x, y - 5 * unit); cx.stroke(); }
+    } else if (effect === 'wheel-tracks') {
+      cx.strokeStyle = '#ff9b9b'; cx.lineWidth = 2.2 * unit; for (const side of [-1, 1]) { const x = centerX + side * width * .43, phase = (t * .45) % 1; cx.globalAlpha = alpha * .48; cx.beginPath(); cx.arc(x, baseY - width * .08, width * .1, 0, Math.PI * 2); cx.stroke(); for (let i = 0; i < 3; i++) { const y = baseY + ((phase + i / 3) % 1) * 18 * unit; cx.fillStyle = '#ffb0a8'; cx.fillRect(x - 4 * unit, y, 8 * unit, 2 * unit); } }
+    } else if (effect === 'south-compass') {
+      const x = centerX, y = baseY + width * .08, pulse = 3 * unit * Math.sin(t * 2.4); cx.globalAlpha = alpha * .55; cx.strokeStyle = '#8fffe0'; cx.lineWidth = 2.6 * unit; cx.beginPath(); cx.moveTo(x, centerY + width * .34); cx.lineTo(x, y + pulse); cx.lineTo(x - 7 * unit, y - 8 * unit + pulse); cx.moveTo(x, y + pulse); cx.lineTo(x + 7 * unit, y - 8 * unit + pulse); cx.stroke();
+    } else if (effect === 'question-orbit') {
+      cx.fillStyle = '#b9a4ff'; cx.font = `bold ${16 * unit}px ${JPFONT}`; cx.textAlign = 'center'; for (let i = 0; i < 3; i++) { const a = t * .8 + i * Math.PI * 2 / 3, r = width * .52; cx.globalAlpha = alpha * (.34 + .2 * Math.sin(t * 2 + i)); cx.fillText('?', centerX + Math.cos(a) * r, centerY + Math.sin(a) * r * .65); }
+    } else if (effect === 'myriad-stars') {
+      cx.fillStyle = '#ffe276'; for (let i = 0; i < 14; i++) { const a = i * 2.4 + t * .18, r = width * (.38 + (i % 4) * .06), s = (1.5 + i % 3) * unit; cx.globalAlpha = alpha * (.22 + .35 * Math.max(0, Math.sin(t * 3 + i))); cx.fillRect(centerX + Math.cos(a) * r - s, centerY + Math.sin(a) * r * .72 - s, s * 2, s * 2); }
+    } else if (effect === 'school-bell') {
+      const y = centerY - width * .57, swing = Math.sin(t * 3) * .18; cx.save(); cx.translate(centerX, y); cx.rotate(swing); cx.globalAlpha = alpha * .55; cx.strokeStyle = '#87f3e6'; cx.lineWidth = 2.5 * unit; cx.beginPath(); cx.arc(0, 0, 12 * unit, Math.PI, 0); cx.lineTo(15 * unit, 11 * unit); cx.lineTo(-15 * unit, 11 * unit); cx.closePath(); cx.stroke(); cx.beginPath(); cx.arc(0, 14 * unit, 3 * unit, 0, Math.PI * 2); cx.stroke(); cx.restore();
+    } else if (effect === 'repeat-loop') {
+      const pulse = 3 * unit * Math.sin(t * 2); cx.globalAlpha = alpha * .5; cx.strokeStyle = '#ff9f9f'; cx.lineWidth = 2.5 * unit; cx.beginPath(); cx.arc(centerX, centerY, width * .5 + pulse, .3, Math.PI * 1.65); cx.stroke(); const x = centerX + width * .49, y = centerY - width * .12; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - 9 * unit, y - 2 * unit); cx.lineTo(x - 4 * unit, y + 7 * unit); cx.stroke();
+    } else if (effect === 'white-shimmer') {
+      cx.strokeStyle = '#ffffff'; cx.lineWidth = 2 * unit; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, r = width * (.42 + .05 * Math.sin(t * 2 + i)), x = centerX + Math.cos(a) * r, y = centerY + Math.sin(a) * r * .7, s = (3 + i % 2) * unit; cx.globalAlpha = alpha * (.25 + .35 * Math.max(0, Math.sin(t * 3 + i))); cx.beginPath(); cx.moveTo(x - s, y); cx.lineTo(x + s, y); cx.moveTo(x, y - s); cx.lineTo(x, y + s); cx.stroke(); }
+    } else if (effect === 'sky-rays') {
+      cx.strokeStyle = '#8fd8ff'; cx.lineWidth = 2.3 * unit; for (let i = 0; i < 7; i++) { const x = centerX + (i - 3) * width * .16, phase = (t * .24 + i * .12) % 1; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .42; cx.beginPath(); cx.moveTo(x - 10 * unit, centerY - width * .62); cx.lineTo(x + 10 * unit, centerY - width * .28); cx.stroke(); }
+    } else if (effect === 'heart-embrace') {
+      cx.fillStyle = '#ff9aad'; cx.font = `bold ${13 * unit}px ${JPFONT}`; cx.textAlign = 'center'; for (const side of [-1, 1]) { const bob = Math.sin(t * 2.3 + side) * 6 * unit; cx.globalAlpha = alpha * .52; cx.fillText('♥', centerX + side * width * .5, centerY - width * .08 + bob); }
+    } else if (effect === 'fire-embers') {
+      const colors = ['#ffdb57', '#ff7a30', '#ff3c1f']; for (let i = 0; i < 9; i++) { const phase = (t * .3 + i * .11) % 1, x = centerX + Math.sin(i * 2.2) * width * .5, y = baseY - width * (.08 + phase * .75), s = (2 + i % 3) * unit; cx.globalAlpha = alpha * (1 - phase) * .62; cx.fillStyle = colors[i % colors.length]; cx.fillRect(x - s, y - s, s * 2, s * 2); }
+    } else if (effect === 'right-arrow') {
+      const phase = (t * .5) % 1, x = centerX + width * (.34 + phase * .28), y = centerY; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .58; cx.strokeStyle = '#83fff1'; cx.lineWidth = 3 * unit; cx.beginPath(); cx.moveTo(x - 20 * unit, y); cx.lineTo(x, y); cx.lineTo(x - 8 * unit, y - 8 * unit); cx.moveTo(x, y); cx.lineTo(x - 8 * unit, y + 8 * unit); cx.stroke();
+    } else if (effect === 'reading-pages') {
+      cx.strokeStyle = '#d7b4ff'; cx.lineWidth = 2 * unit; for (let i = 0; i < 4; i++) { const phase = (t * .28 + i * .22) % 1, side = i % 2 ? 1 : -1, x = centerX + side * width * (.42 + phase * .12), y = baseY - width * (.18 + phase * .62), w = 10 * unit, h = 7 * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .5; cx.strokeRect(x - w / 2, y - h / 2, w, h); cx.beginPath(); cx.moveTo(x, y - h / 2); cx.lineTo(x, y + h / 2); cx.stroke(); }
+    } else if (effect === 'friendship-link') {
+      const pulse = 2 * unit * Math.sin(t * 2.5), y = centerY - width * .05; cx.globalAlpha = alpha * .55; cx.strokeStyle = '#ff9eab'; cx.lineWidth = 2.5 * unit; cx.beginPath(); cx.arc(centerX - width * .44, y, 9 * unit + pulse, 0, Math.PI * 2); cx.arc(centerX + width * .44, y, 9 * unit + pulse, 0, Math.PI * 2); cx.moveTo(centerX - width * .35, y); cx.lineTo(centerX + width * .35, y); cx.stroke();
+    } else if (effect === 'left-arrow') {
+      const phase = (t * .5) % 1, x = centerX - width * (.34 + phase * .28), y = centerY; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .58; cx.strokeStyle = '#83fff1'; cx.lineWidth = 3 * unit; cx.beginPath(); cx.moveTo(x + 20 * unit, y); cx.lineTo(x, y); cx.lineTo(x + 8 * unit, y - 8 * unit); cx.moveTo(x, y); cx.lineTo(x + 8 * unit, y + 8 * unit); cx.stroke();
+    } else if (effect === 'rest-leaves') {
+      const colors = ['#c4ef6a', '#7ecb53']; for (let i = 0; i < 5; i++) { const phase = (t * .17 + i * .2) % 1, x = centerX + Math.sin(t + i * 1.8) * width * .5, y = centerY - width * .5 + phase * width * .85, r = (3 + i % 2) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .5; cx.fillStyle = colors[i % 2]; cx.save(); cx.translate(x, y); cx.rotate(t * .5 + i); cx.beginPath(); cx.ellipse(0, 0, r * 1.7, r, .45, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+    } else if (effect === 'guardian-shield') {
+      const pulse = width * (.5 + .025 * Math.sin(t * 2)); cx.globalAlpha = alpha * .34; cx.strokeStyle = '#ffd86c'; cx.lineWidth = 2.8 * unit; cx.beginPath(); cx.moveTo(centerX, centerY - pulse * .75); cx.lineTo(centerX + pulse * .62, centerY - pulse * .4); cx.lineTo(centerX + pulse * .5, centerY + pulse * .35); cx.quadraticCurveTo(centerX, centerY + pulse * .75, centerX - pulse * .5, centerY + pulse * .35); cx.lineTo(centerX - pulse * .62, centerY - pulse * .4); cx.closePath(); cx.stroke();
+    } else if (effect === 'rain-drops') {
+      cx.strokeStyle = '#89d9ff'; cx.lineWidth = 2.2 * unit; for (let i = 0; i < 8; i++) { const phase = (t * .36 + i * .13) % 1, x = centerX + Math.sin(i * 2.3) * width * .55, y = centerY - width * .55 + phase * width * 1.02, r = (2.5 + i % 3) * unit; cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .55; cx.beginPath(); cx.moveTo(x, y - r * 1.6); cx.quadraticCurveTo(x + r, y, x, y + r); cx.quadraticCurveTo(x - r, y, x, y - r * 1.6); cx.stroke(); }
+    } else if (effect === 'dark-cracks') {
+      cx.strokeStyle = '#c55aff'; cx.lineWidth = 2.2 * unit; for (const side of [-1, 1]) { const flicker = .35 + .35 * Math.max(0, Math.sin(t * 8 + side)); cx.globalAlpha = alpha * flicker; const x = centerX + side * width * .5; cx.beginPath(); cx.moveTo(x, centerY - width * .35); cx.lineTo(x - side * 8 * unit, centerY - width * .12); cx.lineTo(x + side * 4 * unit, centerY); cx.lineTo(x - side * 9 * unit, centerY + width * .28); cx.stroke(); }
+    } else if (effect === 'dim-lantern') {
+      const glow = .5 + .25 * Math.sin(t * 2.2), x = centerX - width * .5, y = centerY + width * .18; cx.globalAlpha = alpha * glow; cx.fillStyle = '#b57aff'; cx.beginPath(); cx.arc(x, y, 13 * unit, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = alpha * .7; cx.strokeStyle = '#ead8ff'; cx.lineWidth = 2 * unit; cx.strokeRect(x - 7 * unit, y - 10 * unit, 14 * unit, 20 * unit); cx.beginPath(); cx.arc(x, y - 10 * unit, 7 * unit, Math.PI, 0); cx.stroke();
+    } else if (effect === 'healing-cross') {
+      cx.fillStyle = '#8fffd8'; for (let i = 0; i < 4; i++) { const a = t * .45 + i * Math.PI / 2, r = width * (.46 + .04 * Math.sin(t * 2 + i)), x = centerX + Math.cos(a) * r, y = centerY + Math.sin(a) * r * .72, s = (4 + i % 2) * unit; cx.globalAlpha = alpha * (.3 + .25 * Math.max(0, Math.sin(t * 3 + i))); cx.fillRect(x - s * .3, y - s, s * .6, s * 2); cx.fillRect(x - s, y - s * .3, s * 2, s * .6); }
+    } else if (effect === 'thought-focus') {
+      const y = centerY - width * .62, pulse = 1 + .18 * Math.sin(t * 2.8); cx.globalAlpha = alpha * .58; cx.strokeStyle = '#ffd75e'; cx.lineWidth = 2.4 * unit; cx.beginPath(); cx.arc(centerX, y, 7 * unit * pulse, 0, Math.PI * 2); cx.stroke(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, r1 = 11 * unit, r2 = (17 + 2 * Math.sin(t * 2 + i)) * unit; cx.beginPath(); cx.moveTo(centerX + Math.cos(a) * r1, y + Math.sin(a) * r1); cx.lineTo(centerX + Math.cos(a) * r2, y + Math.sin(a) * r2); cx.stroke(); }
+    } else if (effect === 'speech-bubbles') {
+      cx.strokeStyle = '#ffe47d'; cx.lineWidth = 2.2 * unit;
+      for (let i = 0; i < 3; i++) {
+        const phase = (t * .26 + i * .31) % 1, side = i % 2 ? 1 : -1, x = centerX + side * width * (.43 + .05 * Math.sin(t + i)), y = baseY - width * (.15 + phase * .7), r = (5 + i) * unit;
+        cx.globalAlpha = alpha * Math.sin(phase * Math.PI) * .52; cx.beginPath(); cx.ellipse(x, y, r * 1.35, r, 0, 0, Math.PI * 2); cx.moveTo(x - side * r * .35, y + r * .82); cx.lineTo(x - side * r * .7, y + r * 1.35); cx.stroke();
+      }
+    }
+    cx.restore();
+  }
   function renderBattle() {
     const b = battle, W = cv.width, H = cv.height, FIELD_H = H - PANEL_H;
     drawBattleBackground(b.kind, W, FIELD_H);
@@ -1281,6 +1698,7 @@
     if (petImg) {
       const ph = petW * petImg.height / petImg.width, petX = plCX + petLunge + petRecoil;
       cx.drawImage(petImg, petX - petW / 2, baseY - ph + idle, petW, ph);
+      drawMonsterMeaningEffect(C.MONSTERS[currentPetId], petX, baseY + idle, petW);
     }
 
     // Enemy cùng baseline để hai phía thực sự lao vào nhau.
@@ -1294,6 +1712,7 @@
     else if (b.botFlash > 0) cx.filter = `brightness(${1.1 + .35 * Math.abs(Math.sin(Date.now() / 50))})`;
     cx.drawImage(img, enemyX - enemyW / 2, baseY - enemyH - idle, enemyW, enemyH);
     cx.restore();
+    drawMonsterMeaningEffect(m, enemyX, baseY - idle, enemyW);
 
     drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, baseY });
 
@@ -1393,7 +1812,8 @@
     for (let y = 105; y < H; y += 52) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
   }
   function drawAcademyHeader(W) {
-    const total = academyDexList().length, unlocked = academyUnlockedCount(), compact = W < 620;
+    const activeTier = hasBadge('N5') ? 'N4' : 'N5', progress = tierProgress(activeTier);
+    const total = progress.total, unlocked = progress.captured, compact = W < 620;
     const touchBackVisible = (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) || cv.width <= 700;
     const backReserve = touchBackVisible ? 58 / (lecture.uiScale || 1) : 0;
     cx.fillStyle = 'rgba(8,13,31,.94)'; cx.fillRect(0, 0, W, 72);
@@ -1405,7 +1825,7 @@
     cx.fillStyle = '#26334b'; cx.fillRect(bx, by, barW, 9);
     cx.fillStyle = '#56eaff'; cx.fillRect(bx, by, total ? barW * unlocked / total : barW, 9);
     cx.fillStyle = '#dce8ff'; cx.font = `${compact ? 10 : 12}px monospace`; cx.textAlign = 'right';
-    cx.fillText(`${compact ? '' : 'ĐÃ UNLOCK '}${unlocked}/${total}`, W - (compact ? 10 : 24) - backReserve, compact ? 27 : 54); cx.textAlign = 'left';
+    cx.fillText(`${compact ? '' : `${activeTier} ĐÃ UNLOCK `}${unlocked}/${total}`, W - (compact ? 10 : 24) - backReserve, compact ? 27 : 54); cx.textAlign = 'left';
   }
   function academyContent(W) {
     const w = Math.min(960, W - 36); return { x: (W - w) / 2, w };
@@ -1488,6 +1908,7 @@
     const bob = Math.sin(performance.now() / 260) * 4;
     cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(x + maxW / 2, y + maxH - 5, w * .38, 13, 0, 0, Math.PI * 2); cx.fill();
     cx.drawImage(img, x + (maxW - w) / 2, y + (maxH - h) / 2 + bob, w, h);
+    drawMonsterMeaningEffect(C.MONSTERS[info.monId], x + maxW / 2, y + (maxH + h) / 2 + bob, w, .9);
   }
   function renderAcademyLesson(W, H) {
     const area = academyContent(W), info = lecture.info, compact = W < 620, narrow = W < 460;
@@ -1642,6 +2063,7 @@
       cx.save();
       if (capture.burstT > 0) cx.filter = `brightness(${1.2 + capture.burstT / 240})`;
       cx.drawImage(img, W / 2 - mw / 2, ringY - mh + bob, mw, mh); cx.restore();
+      drawMonsterMeaningEffect(C.MONSTERS[capture.info.monId], W / 2, ringY + bob, mw, .9);
     }
     if (capture.burstT > 0) {
       const radius = 45 + (520 - capture.burstT) * .45;
@@ -1665,13 +2087,15 @@
   function renderPve() {
     const W = cv.width, H = cv.height, fieldH = H - PANEL_H;
     drawBattleBackground('grass', W, fieldH);
-    cx.fillStyle = '#fff'; cx.font = `bold 20px ${JPFONT}`; cx.fillText('⛩ KỲ THI JLPT MINI', 24, 34);
+    const examTitle = pve.mode === 'gym' ? `🏅 GYM ${pve.tier}` : '⛩ KỲ THI JLPT MINI';
+    cx.fillStyle = '#fff'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(examTitle, 24, 34);
     if (pve.phase === 'fight') cx.fillStyle = '#ffd54a';
     cx.font = '15px monospace'; cx.fillText(`Câu ${Math.min(pve.index + 1, pve.total)}/${pve.total} • Đúng ${pve.correct}`, 24, 60);
     if (pve.phase === 'end' && pveResult) {
       cx.fillStyle = '#ffd54a'; cx.font = `bold 46px ${JPFONT}`; cx.fillText(pveResult.grade, 50, 150);
       cx.fillStyle = '#fff'; cx.font = `16px ${JPFONT}`; cx.fillText('Kanji đã xuất hiện trong bài:', 130, 118);
       pveResult.rewards.slice(0, 6).forEach((reward, i) => cx.fillText(`「${reward.kanji}」 đã ôn`, 130, 146 + i * 23));
+      if (pveResult.badgeAwarded) { cx.fillStyle = '#6effa1'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(`🏅 Nhận huy hiệu ${pveResult.badgeAwarded} — N4 đã mở!`, 50, fieldH - 36); }
     }
     drawQuizPanel(pve, W, H);
   }
@@ -1819,7 +2243,7 @@
     silhouetteCache[monId] = canvas;
     return canvas;
   }
-  function renderDex() {
+  function renderDexLegacy() {
     const W = cv.width, H = cv.height, list = dex.list;
     const total = list.length, captured = list.filter((char) => ensureMastery(char).captured).length;
     const layout = dexLayout(total);
@@ -1891,6 +2315,80 @@
     }
   }
 
+  function renderDex() {
+    const W = cv.width, H = cv.height, list = dex.list;
+    const total = list.length, captured = list.filter((char) => ensureMastery(char).captured).length;
+    const layout = dexLayout(total), content = dexContent(layout);
+    dex.maxScroll = Math.max(0, content.height - layout.availableH); clampDexScroll(); dex.hitboxes = [];
+    cx.fillStyle = '#0e1430'; cx.fillRect(0, 0, W, H);
+    cx.fillStyle = '#fff'; fitText('📖 KANJI DEX', layout.ox, 32, W < 620 ? 160 : 205, Math.max(20, Math.min(28, W * .03)), true);
+    cx.fillStyle = '#6effa1'; cx.font = '14px monospace'; fitText(`Đã thu phục: ${captured}/${total}`, W < 620 ? layout.ox : layout.ox + 220, W < 620 ? 53 : 31, 150, 14);
+
+    const currentSort = DEX_SORTS.find((item) => item.id === dex.sort) || DEX_SORTS[0];
+    const controlY = W < 620 ? 64 : 44, controlH = 32, sortW = Math.min(210, Math.max(150, W * .45));
+    const groupW = Math.max(86, Math.min(170, W - layout.ox * 2 - sortW - 8)), groupX = layout.ox + sortW + 8;
+    const control = (x, w, active, text) => {
+      cx.fillStyle = active ? 'rgba(24,102,151,.9)' : 'rgba(18,31,61,.94)'; cx.fillRect(x, controlY, w, controlH);
+      cx.strokeStyle = active ? '#72ddff' : '#275b8f'; cx.lineWidth = active ? 2 : 1; cx.strokeRect(x, controlY, w, controlH);
+      cx.fillStyle = '#dce8ff'; cx.textAlign = 'left'; fitText(text, x + 7, controlY + 21, w - 14, 11, true);
+    };
+    control(layout.ox, sortW, true, `SORT: ${currentSort.label} ↻`);
+    control(groupX, groupW, dex.group, `NHÓM: ${dex.group ? 'JLPT ✓' : 'TẮT'}`);
+    dex.hitboxes.push({ x: layout.ox, y: controlY, w: sortW, h: controlH, action: 'sort', value: 'cycle' });
+    dex.hitboxes.push({ x: groupX, y: controlY, w: groupW, h: controlH, action: 'group' });
+    cx.fillStyle = '#8395b5'; cx.font = '11px monospace';
+    fitText(W < 620 ? 'Vuốt để cuộn · chạm chọn · Enter: đi cùng' : 'Cuộn/kéo · ↑↓←→ chọn · R sort · G nhóm · Enter đi cùng · Esc đóng', layout.ox, controlY + 48, W - layout.ox * 2, 11);
+
+    cx.save(); cx.beginPath(); cx.rect(0, layout.oy, W, layout.availableH); cx.clip();
+    for (const row of content.rows) {
+      const y = layout.oy + row.y - dex.scrollY;
+      if (y + row.h < layout.oy || y > layout.gridBottom) continue;
+      if (row.type === 'header') {
+        const sectionCaptured = row.section.list.filter((char) => ensureMastery(char).captured).length;
+        cx.fillStyle = 'rgba(15,40,75,.96)'; cx.fillRect(layout.ox, y, W - layout.ox * 2, 24);
+        cx.fillStyle = row.section.tier === 'N4' ? '#d7b4ff' : row.section.tier === 'BONUS' ? '#ffd98a' : '#77ddff'; cx.font = 'bold 13px monospace';
+        cx.fillText(row.section.locked ? `${row.section.label}  🔒 CẦN HUY HIỆU N5` : `${row.section.label}  ${sectionCaptured}/${row.section.list.length}`, layout.ox + 10, y + 17); continue;
+      }
+      row.list.forEach((char, col) => {
+        const index = list.indexOf(char), info = kanjiInfo(char); if (!info) return;
+        const id = info.monId, monster = C.MONSTERS[id]; if (!monster) return;
+        const stat = ensureMastery(char), unlocked = stat.captured, selected = index === dex.sel, following = unlocked && id === currentPetId;
+        const x = layout.ox + col * (layout.cardW + layout.gapX);
+        cx.fillStyle = selected ? (unlocked ? 'rgba(22,85,143,.92)' : 'rgba(40,45,65,.94)') : (unlocked ? 'rgba(20,28,60,.94)' : 'rgba(12,14,24,.97)'); cx.fillRect(x, y, layout.cardW, layout.cardH);
+        cx.strokeStyle = selected ? '#6cc0ff' : unlocked ? '#2a3a66' : '#242638'; cx.lineWidth = selected ? 3 : 1; cx.strokeRect(x, y, layout.cardW, layout.cardH);
+        const image = unlocked ? imgs['mon_' + id] : getSilhouette(id), iw = Math.max(30, Math.min(68, layout.cardW * .34, layout.cardH * .4));
+        if (image) { const ih = iw * image.height / image.width; cx.drawImage(image, x + 11, y + 9, iw, ih); }
+        const kanjiSize = Math.max(29, Math.min(44, layout.cardH * .3)); cx.fillStyle = unlocked ? '#ffd54a' : '#55586c'; cx.font = `bold ${kanjiSize}px ${JPFONT}`; cx.textAlign = 'right'; cx.fillText(unlocked ? info.char : '？', x + layout.cardW - 11, y + kanjiSize + 8); cx.textAlign = 'left';
+        cx.fillStyle = unlocked ? '#fff' : '#77798a'; fitText(unlocked ? monster.name : '？？？', x + 11, y + layout.cardH - 54, layout.cardW - 22, 14, true);
+        if (unlocked) {
+          cx.fillStyle = '#9fd8f5'; fitText(`Lv.${stat.level}/${C.KLEVEL.maxLevel} ${levelLabel(stat.level)}`, x + 11, y + layout.cardH - 36, layout.cardW - 22, 11);
+          cx.fillStyle = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777'; cx.font = '11px monospace'; cx.fillText(`Recall ${stat.recall}%`, x + 11, y + layout.cardH - 19);
+          if (following) { cx.fillStyle = '#6effa1'; cx.font = 'bold 9px monospace'; cx.textAlign = 'right'; cx.fillText('● ĐANG THEO', x + layout.cardW - 10, y + layout.cardH - 19); cx.textAlign = 'left'; }
+          const progress = stat.level >= C.KLEVEL.maxLevel ? 1 : expInLevel(char) / expToNext(char); cx.fillStyle = '#333'; cx.fillRect(x + 10, y + layout.cardH - 8, layout.cardW - 20, 5); cx.fillStyle = stat.level >= C.KLEVEL.maxLevel ? '#ffd54a' : '#6cc0ff'; cx.fillRect(x + 10, y + layout.cardH - 8, (layout.cardW - 20) * Math.max(0, Math.min(1, progress)), 5);
+        }
+        const hitY = Math.max(y, layout.oy), hitBottom = Math.min(y + layout.cardH, layout.gridBottom);
+        if (hitBottom > hitY) dex.hitboxes.push({ x, y: hitY, w: layout.cardW, h: hitBottom - hitY, action: 'card', value: index });
+      });
+    }
+    cx.restore();
+    if (dex.maxScroll > 0) {
+      const trackX = W - 8, trackH = layout.availableH, thumbH = Math.max(28, trackH * layout.availableH / content.height), thumbY = layout.oy + (trackH - thumbH) * dex.scrollY / dex.maxScroll;
+      cx.fillStyle = 'rgba(255,255,255,.1)'; cx.fillRect(trackX, layout.oy, 4, trackH); cx.fillStyle = '#6cc0ff'; cx.fillRect(trackX, thumbY, 4, thumbH);
+    }
+
+    const selected = kanjiInfo(list[dex.sel]), selectedUnlocked = selected && ensureMastery(selected.char).captured, panelY = H - layout.panelH;
+    cx.fillStyle = 'rgba(11,16,48,.97)'; cx.fillRect(0, panelY, W, layout.panelH); cx.strokeStyle = '#16558f'; cx.lineWidth = 2; cx.strokeRect(2, panelY + 2, W - 4, layout.panelH - 4);
+    if (selected && selectedUnlocked) {
+      const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
+      cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
+      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ') || '—'}`, 20, panelY + 57, narrow ? W - 40 : 280, 15);
+      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, narrow ? 20 : 320, narrow ? panelY + 78 : panelY + 57, narrow ? W - 40 : W - 340, 15);
+      cx.fillStyle = recallColor; cx.font = '13px monospace'; fitText(`Recall ${stat.recall}% · 🔥 ${stat.winStreak} (best ${stat.bestWinStreak})`, 20, narrow ? panelY + 100 : panelY + 82, W - 40, 13);
+    } else {
+      cx.fillStyle = '#9ab'; cx.font = `18px ${JPFONT}`; cx.fillText('？？？', 20, panelY + 34); cx.font = '14px monospace'; cx.fillText('Tới 🏛️ Giảng đường để thu phục chữ này.', 20, panelY + 65);
+    }
+  }
+
   function drawDialog() {
     const W = cv.width, H = cv.height, w = W - 44, h = 110, x = 22, y = H - h - 16;
     cx.fillStyle = 'rgba(11,16,48,.93)'; cx.fillRect(x, y, w, h);
@@ -1940,13 +2438,14 @@
     getBattle: () => battle, getPlayer: () => player,
     getPet: () => { const s = petMastery(); return { id: currentPetId, level: s.level, mp: s.mp, recall: s.recall, ...petData[currentPetId] }; },
     petData: () => petData, mastery: () => learning.mastery, makeQuestion, updateBattle,
-    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, setPet: (id) => { if (petData[id]) { currentPetId = id; ensureMastery(C.MONSTERS[id].kanji).captured = true; } saveGame(); },
+    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: (id) => { if (petData[id]) { currentPetId = id; ensureMastery(C.MONSTERS[id].kanji).captured = true; } saveGame(); },
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
     levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight,
     getKanjiStat: (kanji) => ({ ...ensureMastery(kanji) }), getStreak: (kanji) => { const s = ensureMastery(kanji); return { winStreak: s.winStreak, lossStreak: s.lossStreak, bestWinStreak: s.bestWinStreak }; },
     recordAnswer, enterLecture, onLectureKey, answerLecture, getLecture: () => lecture,
     nextLectureKanji, academyLockedList, academyFilteredList, startCapture, answerCapture, onCaptureKey, updateCapture, getCapture: () => capture,
-    getStamina: () => stamina, startPve, answerPve, getPve: () => pve,
+    getStamina: () => stamina, startPve, startGym, answerPve, getPve: () => pve,
+    tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, hasBadge,
     getPveResult: () => pveResult,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;

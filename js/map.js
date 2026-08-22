@@ -61,7 +61,7 @@
           '📖 Nhấn D để mở KANJI DEX và chọn pet đi cùng.',
         ],
       },
-      { gx: 27, gy: 18, type: 'pve', icon: '⛩', lines: ['⛩ Sàn đấu kỳ thi', 'Space để bắt đầu bài kiểm tra 10 câu.'] },
+      { gx: 27, gy: 18, type: 'gym', tier: 'N5', icon: '🏅', lines: ['🏅 Gym N5', 'Thu phục đủ Kanji N5 rồi vượt kỳ thi để nhận huy hiệu và mở N4.'] },
     ],
   };
 })();

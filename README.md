@@ -9,7 +9,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 ## 🎯 Điều khiển
 - Overworld: `↑ ↓ ← →` di chuyển • giữ **`Shift`** để chạy • `Space` tương tác/câu cá • **`D`** mở Kanji Dex.
 - Battle (realtime): bấm **`1–4`** chọn cách đọc • `Esc` bỏ chạy.
-- Dex: `← → ↑ ↓` chọn • `Enter` cho pet đi cùng • `Esc/D` đóng.
+- Dex: cuộn chuột hoặc kéo để xem danh sách • `← → ↑ ↓`, `Page Up/Down`, `Home/End` để chọn • `R` đổi cách sort • `G` bật/tắt nhóm JLPT N5/N4 • `Enter` cho pet đi cùng • `Esc/D` đóng.
 - Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • chọn học theo thứ tự KanjiDex hoặc tự chọn một Kanji chưa unlock.
 - Nghi thức: gauntlet 5 câu, cần 4/5; thể lực hồi khi thắng bụi cỏ.
 - Kỳ thi PvE: đến NPC ⛩, nhấn `Space` • 10 câu, xếp hạng A/B/C/D.
@@ -38,11 +38,14 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 ### Cách 1 — Dùng `admin.html` (khuyên dùng, không cần sửa code)
 1. Mở **admin.html**.
 2. Dán bảng từ **Excel/Google Sheets** vào 2 ô (mỗi cột cách nhau bằng **Tab**), hoặc dán CSV.
-   - Bảng **KANJI**: `key, char, meaning, on, kun, monId`
+   - Bảng **KANJI**: `key, char, meaning, on, kun, monId, jlpt`
    - Bảng **CÂU HỎI**: `word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts`
    - `parts`: `text~reading~romaji~meaning~role`, nhiều segment ngăn bằng `|`.
    - Nhiều cách đọc On/Kun ngăn nhau bằng `,` hoặc `;`.
-   - `monId` phải khớp 1 id trong `CONFIG.MONSTERS` (`yin, ri, kuni, nen, dai, fish, bar`).
+   - `monId` phải khớp một id trong `CONFIG.MONSTERS`; xem danh sách hiện hành tại `assets/README.md`.
+   - `jlpt` nhận `N5`, `N4` hoặc `BONUS`. Nếu bỏ trống, game tự đối chiếu `js/content-catalog.js`.
+
+Danh sách chuẩn và tiến độ sản xuất content nằm tại [KANJI-CONTENT-TRACKER.md](KANJI-CONTENT-TRACKER.md). N4 chỉ mở sau khi người chơi thu phục đủ 79 chữ N5 và vượt Gym N5 với tối thiểu 80% câu đúng.
 3. Bấm **🔍 Xem trước & Kiểm tra** để soát lỗi/cảnh báo.
 4. Bấm **✅ Áp dụng vào game** → lưu vào trình duyệt, mở lại `index.html` là chơi ngay.
    Hoặc **⬇️ Tải xuống kanji.js** để thay file vĩnh viễn (dùng cho bản đóng gói/chia sẻ).

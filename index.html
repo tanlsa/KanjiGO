@@ -24,7 +24,7 @@
   h1 .go{color:#6cc0ff}
   #hint{font-size:13px;color:#9aa;margin-bottom:10px;text-align:center;line-height:1.7}
   canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;
-    border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;background:#000}
+    border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;background:#000;touch-action:none}
   #touch-controls,#touch-actions,#touch-back{display:none;position:fixed;z-index:2;touch-action:none;user-select:none}
   #touch-controls{left:18px;bottom:18px;width:150px;height:150px}
   #touch-controls button,#touch-actions button{position:absolute;width:50px;height:50px;padding:0;
@@ -72,6 +72,7 @@
 <button id="touch-back" class="touch-hidden" data-action="back" aria-label="Quay lại" title="Quay lại">←</button>
 <div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
 
+<script src="js/content-catalog.js"></script>
 <script src="js/config.js"></script>
 <script src="js/kanji.js"></script>
 <script src="js/data-loader.js"></script>

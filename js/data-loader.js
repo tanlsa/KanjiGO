@@ -1,7 +1,8 @@
 // ============================================================
 //  DATA-LOADER.JS — Cầu nối dữ liệu ADMIN.
 //  Nếu admin đã "Áp dụng vào game" từ admin.html (lưu ở trình duyệt),
-//  thì dùng dữ liệu đó; nếu không, dùng KANJI_DB mặc định (js/kanji.js).
+//  thì merge lên dữ liệu mặc định. Content mới đóng gói cùng game không bị
+//  biến mất vì một bản import cũ; entry import vẫn được ưu tiên khi trùng key.
 //  => Admin không cần đụng code: chỉ mở admin.html, dán từ Excel là xong.
 // ============================================================
 (function () {
@@ -13,13 +14,18 @@
     if (raw) {
       const data = JSON.parse(raw);
       if (data && data.KANJI && Array.isArray(data.QUESTIONS) && data.QUESTIONS.length) {
-        // Nếu import thiếu distractor -> mượn kho mặc định để câu hỏi vẫn đủ 4 lựa chọn
-        if (!Array.isArray(data.DISTRACTORS) || !data.DISTRACTORS.length) {
-          data.DISTRACTORS = DEFAULT.DISTRACTORS;
-        }
-        window.KANJI_DB = data;
+        const questionKey = (q) => `${q.word}|${q.target}|${q.answer}|${q.type}`;
+        const questions = new Map();
+        for (const question of DEFAULT.QUESTIONS || []) questions.set(questionKey(question), question);
+        for (const question of data.QUESTIONS) questions.set(questionKey(question), question);
+        const merged = {
+          KANJI: { ...(DEFAULT.KANJI || {}), ...data.KANJI },
+          QUESTIONS: Array.from(questions.values()),
+          DISTRACTORS: Array.from(new Set([...(DEFAULT.DISTRACTORS || []), ...(data.DISTRACTORS || [])])),
+        };
+        window.KANJI_DB = merged;
         window.__KANJIGO_SOURCE = 'imported';
-        console.log(`[KanjiGO] Dùng dữ liệu IMPORT: ${Object.keys(data.KANJI).length} kanji, ${data.QUESTIONS.length} câu hỏi.`);
+        console.log(`[KanjiGO] Đã merge dữ liệu IMPORT: ${Object.keys(merged.KANJI).length} kanji, ${merged.QUESTIONS.length} câu hỏi.`);
       }
     }
   } catch (e) {
@@ -27,4 +33,3 @@
     window.KANJI_DB = DEFAULT;
   }
 })();
- 

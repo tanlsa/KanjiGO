@@ -1,6 +1,85 @@
-key,char,meaning,on,kun,monId
-on,音,Âm thanh,オン (on),おと (oto),yin
-ri,日,Ngày / Mặt trời,ニチ (nichi); ジツ (jitsu),ひ (hi); か (ka),ri
-koku,国,Quốc gia,コク (koku),くに (kuni),kuni
-nen,年,Năm,ネン (nen),とし (toshi),nen
-dai,大,To / Lớn,ダイ (dai); タイ (tai),おお (oo),dai
+key,char,meaning,on,kun,monId,jlpt
+on,音,Âm thanh,オン (on),おと (oto),yin,N4
+ri,日,Ngày / Mặt trời,ニチ (nichi); ジツ (jitsu),ひ (hi); か (ka),ri,N5
+ichi,一,Một,イチ (ichi); イツ (itsu),ひと (hito); ひとつ (hitotsu),bar,N5
+koku,国,Quốc gia,コク (koku),くに (kuni),kuni,N5
+nen,年,Năm,ネン (nen),とし (toshi),nen,N5
+dai,大,To / Lớn,ダイ (dai); タイ (tai),おお (oo),dai,N5
+hito,人,Người,ジン (jin); ニン (nin),ひと (hito),hito,N5
+juu,十,Mười,ジュウ (juu),とお (too),juu,N5
+ni,二,Hai,ニ (ni),ふた (futa); ふたつ (futatsu),ni,N5
+hon,本,Sách / Gốc,ホン (hon),もと (moto),hon,N5
+chuu,中,Giữa / Trong,チュウ (chuu),なか (naka),chuu,N5
+chou,長,Dài / Trưởng,チョウ (chou),なが (naga),chou,N5
+shutsu,出,Ra / Xuất,シュツ (shutsu),で (de); だ (da),shutsu,N5
+san,三,Ba,サン (san),み (mi); みっつ (mittsu),san,N5
+ji,時,Thời gian / Giờ,ジ (ji),とき (toki),ji,N5
+gyou,行,Đi / Hành,コウ (kou); ギョウ (gyou),い (i); ゆ (yu),gyou,N5
+ken,見,Nhìn / Thấy,ケン (ken),み (mi),ken,N5
+ima,今,Bây giờ / Nay,コン (kon); キン (kin),いま (ima),ima,N5
+getsu,月,Tháng / Mặt trăng,ゲツ (getsu); ガツ (gatsu),つき (tsuki),getsu,N5
+bun,分,Phần / Phút / Chia,ブン (bun); フン (fun); プン (pun),わ (wa),bun,N5
+ato,後,Sau / Phía sau,ゴ (go); コウ (kou),あと (ato); うしろ (ushiro); のち (nochi),ato,N5
+mae,前,Trước / Phía trước,ゼン (zen),まえ (mae),mae,N5
+sei,生,Sống / Sinh,セイ (sei); ショウ (shou),い (i); う (u); なま (nama),sei,N5
+go,五,Năm,ゴ (go),いつ (itsu),go,N5
+kan,間,Khoảng / Giữa,カン (kan); ケン (ken); ゲン (gen),あいだ (aida); ま (ma),kan,N5
+ue,上,Trên / Lên,ジョウ (jou); ショウ (shou),うえ (ue); あ (a); うわ (uwa),ue,N5
+higashi,東,Đông / Phía Đông,トウ (tou),ひがし (higashi),higashi,N5
+yon,四,Bốn,シ (shi),よん (yon); よ (yo); よっつ (yottsu),yon,N5
+kin,金,Vàng / Tiền,キン (kin); コン (kon),かね (kane),kin,N5
+kyuu,九,Chín,キュウ (kyuu); ク (ku),ここの (kokono); ここのつ (kokonotsu),kyuu,N5
+nyuu,入,Vào / Nhập,ニュウ (nyuu),い (i); はい (hai),nyuu,N5
+gaku,学,Học,ガク (gaku),まな (mana),gaku,N5
+kou,高,Cao / Đắt,コウ (kou),たか (taka),kou,N5
+en,円,Yên / Tròn,エン (en),まる (maru),en,N5
+ko,子,Trẻ em / Con,シ (shi); ス (su),こ (ko),ko,N5
+gai,外,Ngoài,ガイ (gai); ゲ (ge),そと (soto); ほか (hoka),gai,N5
+hachi,八,Tám,ハチ (hachi),や (ya); やっつ (yattsu),hachi,N5
+roku,六,Sáu,ロク (roku),む (mu); むっつ (muttsu),roku,N5
+shita,下,Dưới / Xuống,カ (ka); ゲ (ge),した (shita); さ (sa); くだ (kuda),shita,N5
+rai,来,Đến / Tới,ライ (rai),く (ku); き (ki),rai,N5
+ki,気,Khí / Tinh thần,キ (ki); ケ (ke),,ki,N5
+shou,小,Nhỏ / Bé,ショウ (shou),ちい (chii); こ (ko); お (o),shou,N5
+nana,七,Bảy,シチ (shichi),なな (nana); なの (nano),nana,N5
+yama,山,Núi,サン (san); ザン (zan),やま (yama),yama,N5
+hanashi,話,Nói / Câu chuyện,ワ (wa),はな (hana); はなし (hanashi),hanashi,N5
+onna,女,Nữ / Phụ nữ,ジョ (jo); ニョ (nyo),おんな (onna); め (me),onna,N5
+kita,北,Bắc / Phía Bắc,ホク (hoku),きた (kita),kita,N5
+gozen,午,Trưa / Ngọ,ゴ (go),,gozen,N5
+hyaku,百,Một trăm,ヒャク (hyaku); ビャク (byaku); ピャク (pyaku),もも (momo),hyaku,N5
+sho,書,Viết / Sách,ショ (sho),か (ka),sho,N5
+saki,先,Trước / Đi trước,セン (sen),さき (saki),saki,N5
+na,名,Tên / Danh,メイ (mei); ミョウ (myou),な (na),na,N5
+kawa,川,Sông,セン (sen),かわ (kawa),kawa,N5
+sen,千,Một nghìn,セン (sen),ち (chi),sen,N5
+mizu,水,Nước,スイ (sui),みず (mizu),mizu,N5
+han,半,Một nửa / Bán,ハン (han),なか (naka); なかば (nakaba),han,N5
+otoko,男,Nam / Đàn ông,ダン (dan); ナン (nan),おとこ (otoko),otoko,N5
+nishi,西,Tây / Phía Tây,セイ (sei); サイ (sai),にし (nishi),nishi,N5
+den,電,Điện,デン (den),,den,N5
+go_lang,語,Ngôn ngữ / Từ ngữ,ゴ (go),かた (kata),go_lang,N5
+tsuchi,土,Đất / Thổ,ド (do); ト (to),つち (tsuchi),tsuchi,N5
+moku,木,Cây / Gỗ,モク (moku); ボク (boku),き (ki); こ (ko),moku,N5
+shoku,食,Ăn / Thức ăn,ショク (shoku); ジキ (jiki),た (ta); く (ku),shoku,N5
+kuruma,車,Xe,シャ (sha),くるま (kuruma),kuruma,N5
+minami,南,Nam / Phía Nam,ナン (nan),みなみ (minami),minami,N5
+nani,何,Gì / Bao nhiêu,カ (ka),なに (nani); なん (nan),nani,N5
+man,万,Mười nghìn / Vạn,マン (man); バン (ban),よろず (yorozu),man,N5
+kou_school,校,Trường học / Hiệu,コウ (kou),,kou_school,N5
+mai,毎,Mỗi,マイ (mai),ごと (goto),mai,N5
+shiro,白,Trắng / Bạch,ハク (haku); ビャク (byaku),しろ (shiro); しら (shira),shiro,N5
+ten,天,Trời / Thiên,テン (ten),あめ (ame); あま (ama),ten,N5
+haha,母,Mẹ / Mẫu,ボ (bo),はは (haha); かあ (kaa),haha,N5
+hi_fire,火,Lửa / Hỏa,カ (ka),ひ (hi); ほ (ho),hi_fire,N5
+migi,右,Phải / Bên phải,ウ (u); ユウ (yuu),みぎ (migi),migi,N5
+yomu,読,Đọc,ドク (doku); トク (toku); トウ (tou),よ (yo),yomu,N5
+tomo,友,Bạn bè / Hữu,ユウ (yuu),とも (tomo),tomo,N5
+hidari,左,Trái / Bên trái,サ (sa),ひだり (hidari),hidari,N5
+yasumi,休,Nghỉ / Hưu,キュウ (kyuu),やす (yasu),yasumi,N5
+chichi,父,Cha / Bố / Phụ,フ (fu),ちち (chichi); とう (tou),chichi,N5
+ame,雨,Mưa / Vũ,ウ (u),あめ (ame); あま (ama),ame,N5
+aku,悪,Xấu / Ác,アク (aku); オ (o),わる (waru),aku,N4
+an,暗,Tối / Ám,アン (an),くら (kura),an,N4
+i_med,医,Y học / Bác sĩ,イ (i),,i_med,N4
+i_intent,意,Ý / Ý định,イ (i),,i_intent,N4

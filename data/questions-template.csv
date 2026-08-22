@@ -5,3 +5,219 @@ word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts
 国語,quốc ngữ (môn Văn),国,こく,koku,on,こくご,kokugo,国~こく~koku~quốc gia~target|語~ご~go~ngôn ngữ~support
 大学,đại học,大,だい,dai,on,だいがく,daigaku,大~だい~dai~lớn~target|学~がく~gaku~học~support
 大きい,to lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana
+出口,lối ra,出,で,de,kun,でぐち,deguchi,出~で~de~ra~target|口~ぐち~guchi~miệng / lối~support
+出る,đi ra / xuất hiện,出,で,de,kun,でる,deru,出~で~de~ra~target|る~る~ru~~kana
+出発,khởi hành,出,しゅっ,shu,on,しゅっぱつ,shuppatsu,出~しゅっ~shu~xuất / ra~target|発~ぱつ~patsu~phát / khởi hành~support
+三月,tháng Ba,三,さん,san,on,さんがつ,sangatsu,三~さん~san~ba~target|月~がつ~gatsu~tháng~support
+三人,ba người,三,さん,san,on,さんにん,sannin,三~さん~san~ba~target|人~にん~nin~người~support
+三つ,ba cái,三,みっ,mi,kun,みっつ,mittsu,三~みっ~mi~ba~target|つ~つ~tsu~trợ từ đếm~kana
+時間,thời gian,時,じ,ji,on,じかん,jikan,時~じ~ji~thời gian~target|間~かん~kan~khoảng~support
+六時,sáu giờ,時,じ,ji,on,ろくじ,rokuji,六~ろく~roku~sáu~support|時~じ~ji~giờ~target
+時,lúc / thời điểm,時,とき,toki,kun,とき,toki,時~とき~toki~lúc / thời điểm~target
+銀行,ngân hàng,行,こう,kou,on,ぎんこう,ginkou,銀~ぎん~gin~bạc~support|行~こう~kou~hàng / cơ quan~target
+旅行,du lịch,行,こう,kou,on,りょこう,ryokou,旅~りょ~ryo~chuyến đi~support|行~こう~kou~đi~target
+行く,đi,行,い,i,kun,いく,iku,行~い~i~đi~target|く~く~ku~~kana
+意見,ý kiến,見,けん,ken,on,いけん,iken,意~い~i~ý~support|見~けん~ken~cách nhìn~target
+見学,tham quan học tập,見,けん,ken,on,けんがく,kengaku,見~けん~ken~xem~target|学~がく~gaku~học~support
+見る,nhìn / xem,見,み,mi,kun,みる,miru,見~み~mi~nhìn~target|る~る~ru~~kana
+今月,tháng này,今,こん,kon,on,こんげつ,kongetsu,今~こん~kon~này / hiện tại~target|月~げつ~getsu~tháng~support
+今週,tuần này,今,こん,kon,on,こんしゅう,konshuu,今~こん~kon~này / hiện tại~target|週~しゅう~shuu~tuần~support
+今,bây giờ,今,いま,ima,kun,いま,ima,今~いま~ima~bây giờ~target
+月曜日,thứ Hai,月,げつ,getsu,on,げつようび,getsuyoubi,月~げつ~getsu~mặt trăng / thứ Hai~target|曜日~ようび~youbi~ngày trong tuần~support
+一月,tháng Một,月,がつ,gatsu,on,いちがつ,ichigatsu,一~いち~ichi~một~support|月~がつ~gatsu~tháng~target
+月,mặt trăng,月,つき,tsuki,kun,つき,tsuki,月~つき~tsuki~mặt trăng~target
+半分,một nửa,分,ぶん,bun,on,はんぶん,hanbun,半~はん~han~nửa~support|分~ぶん~bun~phần~target
+十分,mười phút,分,ぷん,pun,on,じゅっぷん,juppun,十~じゅっ~ju~mười~support|分~ぷん~pun~phút~target
+分かる,hiểu,分,わ,wa,kun,わかる,wakaru,分~わ~wa~hiểu / phân biệt~target|かる~かる~karu~~kana
+午後,buổi chiều,後,ご,go,on,ごご,gogo,午~ご~go~trưa~support|後~ご~go~sau~target
+後ろ,phía sau,後,うし,ushi,kun,うしろ,ushiro,後~うし~ushi~phía sau~target|ろ~ろ~ro~~kana
+後で,lát nữa / sau đó,後,あと,ato,kun,あとで,atode,後~あと~ato~sau~target|で~で~de~~kana
+午前,buổi sáng,前,ぜん,zen,on,ごぜん,gozen,午~ご~go~trưa~support|前~ぜん~zen~trước~target
+名前,tên,前,まえ,mae,kun,なまえ,namae,名~な~na~tên~support|前~まえ~mae~phần sau của từ tên~target
+前,phía trước / trước đây,前,まえ,mae,kun,まえ,mae,前~まえ~mae~phía trước~target
+学生,học sinh,生,せい,sei,on,がくせい,gakusei,学~がく~gaku~học~support|生~せい~sei~người / sinh~target
+先生,giáo viên,生,せい,sei,on,せんせい,sensei,先~せん~sen~trước~support|生~せい~sei~sinh~target
+生まれる,được sinh ra,生,う,u,kun,うまれる,umareru,生~う~u~sinh~target|まれる~まれる~mareru~~kana
+五月,tháng Năm,五,ご,go,on,ごがつ,gogatsu,五~ご~go~năm~target|月~がつ~gatsu~tháng~support
+五人,năm người,五,ご,go,on,ごにん,gonin,五~ご~go~năm~target|人~にん~nin~người~support
+五つ,năm cái,五,いつ,itsu,kun,いつつ,itsutsu,五~いつ~itsu~năm~target|つ~つ~tsu~trợ từ đếm~kana
+時間,thời gian,間,かん,kan,on,じかん,jikan,時~じ~ji~thời~support|間~かん~kan~khoảng~target
+人間,con người,間,げん,gen,on,にんげん,ningen,人~にん~nin~người~support|間~げん~gen~cõi / giới~target
+間,khoảng giữa,間,あいだ,aida,kun,あいだ,aida,間~あいだ~aida~khoảng giữa~target
+上手,giỏi / khéo,上,じょう,jou,on,じょうず,jouzu,上~じょう~jou~trên / giỏi~target|手~ず~zu~tay / kỹ năng~support
+上げる,nâng lên,上,あ,a,kun,あげる,ageru,上~あ~a~lên~target|げる~げる~geru~~kana
+上,phía trên,上,うえ,ue,kun,うえ,ue,上~うえ~ue~phía trên~target
+東京,Tokyo,東,とう,tou,on,とうきょう,toukyou,東~とう~tou~phía Đông~target|京~きょう~kyou~kinh đô~support
+東口,cửa phía Đông,東,ひがし,higashi,kun,ひがしぐち,higashiguchi,東~ひがし~higashi~phía Đông~target|口~ぐち~guchi~cửa / lối~support
+東,phía Đông,東,ひがし,higashi,kun,ひがし,higashi,東~ひがし~higashi~phía Đông~target
+四月,tháng Tư,四,し,shi,on,しがつ,shigatsu,四~し~shi~bốn~target|月~がつ~gatsu~tháng~support
+四人,bốn người,四,よ,yo,kun,よにん,yonin,四~よ~yo~bốn~target|人~にん~nin~người~support
+四つ,bốn cái,四,よっ,yo,kun,よっつ,yottsu,四~よっ~yo~bốn~target|つ~つ~tsu~trợ từ đếm~kana
+金曜日,thứ Sáu,金,きん,kin,on,きんようび,kinyoubi,金~きん~kin~vàng / thứ Sáu~target|曜日~ようび~youbi~ngày trong tuần~support
+金色,màu vàng kim,金,きん,kin,on,きんいろ,kiniro,金~きん~kin~vàng~target|色~いろ~iro~màu~support
+お金,tiền,金,かね,kane,kun,おかね,okane,お~お~o~tiền tố lịch sự~kana|金~かね~kane~tiền / vàng~target
+九月,tháng Chín,九,く,ku,on,くがつ,kugatsu,九~く~ku~chín~target|月~がつ~gatsu~tháng~support
+九人,chín người,九,きゅう,kyuu,on,きゅうにん,kyuunin,九~きゅう~kyuu~chín~target|人~にん~nin~người~support
+九つ,chín cái,九,ここの,kokono,kun,ここのつ,kokonotsu,九~ここの~kokono~chín~target|つ~つ~tsu~trợ từ đếm~kana
+入学,nhập học,入,にゅう,nyuu,on,にゅうがく,nyuugaku,入~にゅう~nyuu~nhập / vào~target|学~がく~gaku~học~support
+入る,đi vào,入,はい,hai,kun,はいる,hairu,入~はい~hai~vào~target|る~る~ru~~kana
+入口,lối vào,入,いり,iri,kun,いりぐち,iriguchi,入~いり~iri~vào~target|口~ぐち~guchi~cửa / lối~support
+学生,học sinh / sinh viên,学,がく,gaku,on,がくせい,gakusei,学~がく~gaku~học~target|生~せい~sei~sinh / người học~support
+学校,trường học,学,がっ,ga,on,がっこう,gakkou,学~がっ~ga~học~target|校~こう~kou~trường~support
+学ぶ,học hỏi,学,まな,mana,kun,まなぶ,manabu,学~まな~mana~học~target|ぶ~ぶ~bu~~kana
+高校,trường trung học phổ thông,高,こう,kou,on,こうこう,koukou,高~こう~kou~cao~target|校~こう~kou~trường~support
+高い,cao / đắt,高,たか,taka,kun,たかい,takai,高~たか~taka~cao / đắt~target|い~い~i~~kana
+高さ,độ cao,高,たか,taka,kun,たかさ,takasa,高~たか~taka~cao~target|さ~さ~sa~hậu tố chỉ mức độ~kana
+百円,một trăm yên,円,えん,en,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~support|円~えん~en~yên~target
+一円,một yên,円,えん,en,on,いちえん,ichien,一~いち~ichi~một~support|円~えん~en~yên~target
+円形,hình tròn,円,えん,en,on,えんけい,enkei,円~えん~en~tròn~target|形~けい~kei~hình dạng~support
+子供,trẻ em,子,こ,ko,kun,こども,kodomo,子~こ~ko~trẻ em~target|供~ども~domo~nhóm / cùng~support
+女子,nữ / nữ sinh,子,し,shi,on,じょし,joshi,女~じょ~jo~nữ~support|子~し~shi~người con~target
+子犬,chó con,子,こ,ko,kun,こいぬ,koinu,子~こ~ko~con / nhỏ~target|犬~いぬ~inu~chó~support
+外国,nước ngoài,外,がい,gai,on,がいこく,gaikoku,外~がい~gai~ngoài~target|国~こく~koku~quốc gia~support
+外出,đi ra ngoài,外,がい,gai,on,がいしゅつ,gaishutsu,外~がい~gai~ngoài~target|出~しゅつ~shutsu~ra~support
+外,bên ngoài,外,そと,soto,kun,そと,soto,外~そと~soto~bên ngoài~target
+八月,tháng Tám,八,はち,hachi,on,はちがつ,hachigatsu,八~はち~hachi~tám~target|月~がつ~gatsu~tháng~support
+八人,tám người,八,はち,hachi,on,はちにん,hachinin,八~はち~hachi~tám~target|人~にん~nin~người~support
+八つ,tám cái,八,やっ,ya,kun,やっつ,yattsu,八~やっ~ya~tám~target|つ~つ~tsu~trợ từ đếm~kana
+六月,tháng Sáu,六,ろく,roku,on,ろくがつ,rokugatsu,六~ろく~roku~sáu~target|月~がつ~gatsu~tháng~support
+六人,sáu người,六,ろく,roku,on,ろくにん,rokunin,六~ろく~roku~sáu~target|人~にん~nin~người~support
+六つ,sáu cái,六,むっ,mu,kun,むっつ,muttsu,六~むっ~mu~sáu~target|つ~つ~tsu~trợ từ đếm~kana
+地下,dưới lòng đất / tầng hầm,下,か,ka,on,ちか,chika,地~ち~chi~đất~support|下~か~ka~dưới~target
+下手,không giỏi / vụng,下,へ,he,kun,へた,heta,下~へ~he~dưới / kém~target|手~た~ta~tay / kỹ năng~support
+下,phía dưới,下,した,shita,kun,した,shita,下~した~shita~phía dưới~target
+来年,năm sau,来,らい,rai,on,らいねん,rainen,来~らい~rai~sắp tới~target|年~ねん~nen~năm~support
+来月,tháng sau,来,らい,rai,on,らいげつ,raigetsu,来~らい~rai~sắp tới~target|月~げつ~getsu~tháng~support
+来る,đến,来,く,ku,kun,くる,kuru,来~く~ku~đến~target|る~る~ru~~kana
+天気,thời tiết,気,き,ki,on,てんき,tenki,天~てん~ten~trời~support|気~き~ki~khí~target
+元気,khỏe mạnh / tràn đầy sức sống,気,き,ki,on,げんき,genki,元~げん~gen~nguồn / gốc~support|気~き~ki~tinh thần~target
+人気,được yêu thích / nổi tiếng,気,き,ki,on,にんき,ninki,人~にん~nin~người~support|気~き~ki~sự chú ý~target
+小学校,trường tiểu học,小,しょう,shou,on,しょうがっこう,shougakkou,小~しょう~shou~nhỏ / tiểu~target|学校~がっこう~gakkou~trường học~support
+小さい,nhỏ / bé,小,ちい,chii,kun,ちいさい,chiisai,小~ちい~chii~nhỏ~target|さい~さい~sai~~kana
+小川,con suối nhỏ,小,お,o,kun,おがわ,ogawa,小~お~o~nhỏ~target|川~がわ~gawa~sông / suối~support
+七月,tháng Bảy,七,しち,shichi,on,しちがつ,shichigatsu,七~しち~shichi~bảy~target|月~がつ~gatsu~tháng~support
+七時,bảy giờ,七,しち,shichi,on,しちじ,shichiji,七~しち~shichi~bảy~target|時~じ~ji~giờ~support
+七つ,bảy cái,七,なな,nana,kun,ななつ,nanatsu,七~なな~nana~bảy~target|つ~つ~tsu~trợ từ đếm~kana
+火山,núi lửa,山,ざん,zan,on,かざん,kazan,火~か~ka~lửa~support|山~ざん~zan~núi~target
+登山,leo núi,山,ざん,zan,on,とざん,tozan,登~と~to~leo~support|山~ざん~zan~núi~target
+山,núi,山,やま,yama,kun,やま,yama,山~やま~yama~núi~target
+会話,hội thoại,話,わ,wa,on,かいわ,kaiwa,会~かい~kai~gặp gỡ~support|話~わ~wa~lời nói~target
+電話,điện thoại,話,わ,wa,on,でんわ,denwa,電~でん~den~điện~support|話~わ~wa~nói chuyện~target
+話す,nói chuyện,話,はな,hana,kun,はなす,hanasu,話~はな~hana~nói~target|す~す~su~~kana
+女子,nữ / nữ sinh,女,じょ,jo,on,じょし,joshi,女~じょ~jo~nữ~target|子~し~shi~người con~support
+女性,phụ nữ / giới nữ,女,じょ,jo,on,じょせい,josei,女~じょ~jo~nữ~target|性~せい~sei~giới tính~support
+女,người phụ nữ,女,おんな,onna,kun,おんな,onna,女~おんな~onna~người phụ nữ~target
+東北,vùng Đông Bắc,北,ほく,hoku,on,とうほく,touhoku,東~とう~tou~đông~support|北~ほく~hoku~bắc~target
+北口,cửa phía Bắc,北,きた,kita,kun,きたぐち,kitaguchi,北~きた~kita~phía Bắc~target|口~ぐち~guchi~cửa / lối~support
+北,phía Bắc,北,きた,kita,kun,きた,kita,北~きた~kita~phía Bắc~target
+午前,buổi sáng / trước trưa,午,ご,go,on,ごぜん,gozen,午~ご~go~trưa~target|前~ぜん~zen~trước~support
+午後,buổi chiều / sau trưa,午,ご,go,on,ごご,gogo,午~ご~go~trưa~target|後~ご~go~sau~support
+正午,đúng giữa trưa,午,ご,go,on,しょうご,shougo,正~しょう~shou~đúng / chính~support|午~ご~go~trưa~target
+百円,một trăm yên,百,ひゃく,hyaku,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~target|円~えん~en~yên~support
+三百,ba trăm,百,びゃく,byaku,on,さんびゃく,sanbyaku,三~さん~san~ba~support|百~びゃく~byaku~trăm~target
+六百,sáu trăm,百,ぴゃく,pyaku,on,ろっぴゃく,roppyaku,六~ろっ~ro~sáu~support|百~ぴゃく~pyaku~trăm~target
+辞書,từ điển,書,しょ,sho,on,じしょ,jisho,辞~じ~ji~từ ngữ~support|書~しょ~sho~sách~target
+図書館,thư viện,書,しょ,sho,on,としょかん,toshokan,図~と~to~bản đồ / hình~support|書~しょ~sho~sách~target|館~かん~kan~tòa nhà~support
+書く,viết,書,か,ka,kun,かく,kaku,書~か~ka~viết~target|く~く~ku~~kana
+先生,giáo viên,先,せん,sen,on,せんせい,sensei,先~せん~sen~trước~target|生~せい~sei~sinh / người~support
+先月,tháng trước,先,せん,sen,on,せんげつ,sengetsu,先~せん~sen~trước~target|月~げつ~getsu~tháng~support
+先,phía trước / nơi đến trước,先,さき,saki,kun,さき,saki,先~さき~saki~phía trước~target
+名前,tên,名,な,na,kun,なまえ,namae,名~な~na~tên~target|前~まえ~mae~phần sau của từ tên~support
+有名,nổi tiếng,名,めい,mei,on,ゆうめい,yuumei,有~ゆう~yuu~có~support|名~めい~mei~danh tiếng~target
+名字,họ,名,みょう,myou,on,みょうじ,myouji,名~みょう~myou~tên~target|字~じ~ji~chữ~support
+小川,con suối nhỏ,川,がわ,gawa,kun,おがわ,ogawa,小~お~o~nhỏ~support|川~がわ~gawa~sông / suối~target
+川上,thượng nguồn,川,かわ,kawa,kun,かわかみ,kawakami,川~かわ~kawa~sông~target|上~かみ~kami~phía trên~support
+川,sông,川,かわ,kawa,kun,かわ,kawa,川~かわ~kawa~sông~target
+千円,một nghìn yên,千,せん,sen,on,せんえん,senen,千~せん~sen~một nghìn~target|円~えん~en~yên~support
+三千,ba nghìn,千,ぜん,zen,on,さんぜん,sanzen,三~さん~san~ba~support|千~ぜん~zen~nghìn~target
+千葉,Chiba,千,ち,chi,kun,ちば,chiba,千~ち~chi~nghìn~target|葉~ば~ba~lá~support
+水曜日,thứ Tư,水,すい,sui,on,すいようび,suiyoubi,水~すい~sui~nước / thứ Tư~target|曜日~ようび~youbi~ngày trong tuần~support
+水道,nước máy / đường ống nước,水,すい,sui,on,すいどう,suidou,水~すい~sui~nước~target|道~どう~dou~đường / hệ thống~support
+水,nước,水,みず,mizu,kun,みず,mizu,水~みず~mizu~nước~target
+半分,một nửa,半,はん,han,on,はんぶん,hanbun,半~はん~han~một nửa~target|分~ぶん~bun~phần~support
+半年,nửa năm,半,はん,han,on,はんとし,hantoshi,半~はん~han~một nửa~target|年~とし~toshi~năm~support
+半ば,giữa chừng / một nửa,半,なか,naka,kun,なかば,nakaba,半~なか~naka~nửa / giữa~target|ば~ば~ba~~kana
+男性,nam giới,男,だん,dan,on,だんせい,dansei,男~だん~dan~nam~target|性~せい~sei~giới tính~support
+長男,con trai trưởng,男,なん,nan,on,ちょうなん,chounan,長~ちょう~chou~trưởng~support|男~なん~nan~con trai~target
+男,người đàn ông,男,おとこ,otoko,kun,おとこ,otoko,男~おとこ~otoko~người đàn ông~target
+西洋,phương Tây,西,せい,sei,on,せいよう,seiyou,西~せい~sei~Tây~target|洋~よう~you~đại dương / phương Tây~support
+関西,vùng Kansai,西,さい,sai,on,かんさい,kansai,関~かん~kan~cửa ải / vùng~support|西~さい~sai~Tây~target
+西,phía Tây,西,にし,nishi,kun,にし,nishi,西~にし~nishi~phía Tây~target
+電話,điện thoại,電,でん,den,on,でんわ,denwa,電~でん~den~điện~target|話~わ~wa~nói chuyện~support
+電車,tàu điện,電,でん,den,on,でんしゃ,densha,電~でん~den~điện~target|車~しゃ~sha~xe~support
+電気,điện / điện năng,電,でん,den,on,でんき,denki,電~でん~den~điện~target|気~き~ki~khí / năng lượng~support
+日本語,tiếng Nhật,語,ご,go,on,にほんご,nihongo,日本~にほん~nihon~Nhật Bản~support|語~ご~go~ngôn ngữ~target
+国語,quốc ngữ / môn Văn,語,ご,go,on,こくご,kokugo,国~こく~koku~quốc gia~support|語~ご~go~ngôn ngữ~target
+語る,kể / thuật lại,語,かた,kata,kun,かたる,kataru,語~かた~kata~kể / nói~target|る~る~ru~~kana
+土曜日,thứ Bảy,土,ど,do,on,どようび,doyoubi,土~ど~do~đất / thứ Bảy~target|曜日~ようび~youbi~ngày trong tuần~support
+土地,đất đai,土,と,to,on,とち,tochi,土~と~to~đất~target|地~ち~chi~mặt đất~support
+土,đất,土,つち,tsuchi,kun,つち,tsuchi,土~つち~tsuchi~đất~target
+木曜日,thứ Năm,木,もく,moku,on,もくようび,mokuyoubi,木~もく~moku~cây / thứ Năm~target|曜日~ようび~youbi~ngày trong tuần~support
+大木,cây lớn,木,ぼく,boku,on,たいぼく,taiboku,大~たい~tai~lớn~support|木~ぼく~boku~cây~target
+木,cây / gỗ,木,き,ki,kun,き,ki,木~き~ki~cây / gỗ~target
+食事,bữa ăn,食,しょく,shoku,on,しょくじ,shokuji,食~しょく~shoku~ăn~target|事~じ~ji~việc~support
+食堂,nhà ăn,食,しょく,shoku,on,しょくどう,shokudou,食~しょく~shoku~ăn~target|堂~どう~dou~sảnh / nhà~support
+食べる,ăn,食,た,ta,kun,たべる,taberu,食~た~ta~ăn~target|べる~べる~beru~~kana
+電車,tàu điện,車,しゃ,sha,on,でんしゃ,densha,電~でん~den~điện~support|車~しゃ~sha~xe~target
+自転車,xe đạp,車,しゃ,sha,on,じてんしゃ,jitensha,自転~じてん~jiten~tự quay~support|車~しゃ~sha~xe~target
+車,xe,車,くるま,kuruma,kun,くるま,kuruma,車~くるま~kuruma~xe~target
+南米,Nam Mỹ,南,なん,nan,on,なんべい,nanbei,南~なん~nan~phía Nam~target|米~べい~bei~Mỹ~support
+南口,cửa phía Nam,南,みなみ,minami,kun,みなみぐち,minamiguchi,南~みなみ~minami~phía Nam~target|口~ぐち~guchi~cửa / lối~support
+南,phía Nam,南,みなみ,minami,kun,みなみ,minami,南~みなみ~minami~phía Nam~target
+何人,bao nhiêu người,何,なん,nan,kun,なんにん,nannin,何~なん~nan~bao nhiêu~target|人~にん~nin~người~support
+何時,mấy giờ,何,なん,nan,kun,なんじ,nanji,何~なん~nan~mấy~target|時~じ~ji~giờ~support
+何,cái gì,何,なに,nani,kun,なに,nani,何~なに~nani~cái gì~target
+一万円,mười nghìn yên,万,まん,man,on,いちまんえん,ichimanen,一~いち~ichi~một~support|万~まん~man~mười nghìn~target|円~えん~en~yên~support
+万人,vạn người / mọi người,万,ばん,ban,on,ばんにん,bannin,万~ばん~ban~vạn~target|人~にん~nin~người~support
+万,mười nghìn,万,まん,man,on,まん,man,万~まん~man~mười nghìn~target
+学校,trường học,校,こう,kou,on,がっこう,gakkou,学~がっ~ga~học~support|校~こう~kou~trường~target
+高校,trường trung học phổ thông,校,こう,kou,on,こうこう,koukou,高~こう~kou~cao~support|校~こう~kou~trường~target
+校長,hiệu trưởng,校,こう,kou,on,こうちょう,kouchou,校~こう~kou~trường~target|長~ちょう~chou~trưởng~support
+毎日,mỗi ngày,毎,まい,mai,on,まいにち,mainichi,毎~まい~mai~mỗi~target|日~にち~nichi~ngày~support
+毎年,mỗi năm,毎,まい,mai,on,まいねん,mainen,毎~まい~mai~mỗi~target|年~ねん~nen~năm~support
+毎朝,mỗi sáng,毎,まい,mai,on,まいあさ,maiasa,毎~まい~mai~mỗi~target|朝~あさ~asa~buổi sáng~support
+白紙,giấy trắng,白,はく,haku,on,はくし,hakushi,白~はく~haku~trắng~target|紙~し~shi~giấy~support
+白人,người da trắng,白,はく,haku,on,はくじん,hakujin,白~はく~haku~trắng~target|人~じん~jin~người~support
+白い,màu trắng,白,しろ,shiro,kun,しろい,shiroi,白~しろ~shiro~trắng~target|い~い~i~~kana
+天気,thời tiết,天,てん,ten,on,てんき,tenki,天~てん~ten~trời~target|気~き~ki~khí~support
+天国,thiên đường,天,てん,ten,on,てんごく,tengoku,天~てん~ten~trời~target|国~ごく~goku~cõi / quốc gia~support
+天の川,dải Ngân Hà,天,あま,ama,kun,あまのがわ,amanogawa,天~あま~ama~trời~target|の~の~no~của~kana|川~がわ~gawa~sông~support
+母国,quê hương / mẫu quốc,母,ぼ,bo,on,ぼこく,bokoku,母~ぼ~bo~mẹ / gốc~target|国~こく~koku~quốc gia~support
+母親,người mẹ,母,はは,haha,kun,ははおや,hahaoya,母~はは~haha~mẹ~target|親~おや~oya~cha mẹ~support
+お母さん,mẹ (cách gọi lịch sự),母,かあ,kaa,kun,おかあさん,okaasan,お~お~o~tiền tố lịch sự~kana|母~かあ~kaa~mẹ~target|さん~さん~san~kính ngữ~kana
+火曜日,thứ Ba,火,か,ka,on,かようび,kayoubi,火~か~ka~lửa / thứ Ba~target|曜日~ようび~youbi~ngày trong tuần~support
+火山,núi lửa,火,か,ka,on,かざん,kazan,火~か~ka~lửa~target|山~ざん~zan~núi~support
+火,lửa,火,ひ,hi,kun,ひ,hi,火~ひ~hi~lửa~target
+右折,rẽ phải,右,う,u,on,うせつ,usetsu,右~う~u~phải~target|折~せつ~setsu~rẽ / gập~support
+左右,trái phải / hai bên,右,ゆう,yuu,on,さゆう,sayuu,左~さ~sa~trái~support|右~ゆう~yuu~phải~target
+右,bên phải,右,みぎ,migi,kun,みぎ,migi,右~みぎ~migi~bên phải~target
+読書,đọc sách,読,どく,doku,on,どくしょ,dokusho,読~どく~doku~đọc~target|書~しょ~sho~sách~support
+音読,đọc thành tiếng,読,どく,doku,on,おんどく,ondoku,音~おん~on~âm thanh~support|読~どく~doku~đọc~target
+読む,đọc,読,よ,yo,kun,よむ,yomu,読~よ~yo~đọc~target|む~む~mu~~kana
+友人,bạn bè / người bạn,友,ゆう,yuu,on,ゆうじん,yuujin,友~ゆう~yuu~bạn~target|人~じん~jin~người~support
+親友,bạn thân,友,ゆう,yuu,on,しんゆう,shinyuu,親~しん~shin~thân thiết~support|友~ゆう~yuu~bạn~target
+友達,bạn bè,友,とも,tomo,kun,ともだち,tomodachi,友~とも~tomo~bạn~target|達~だち~dachi~nhóm người~support
+左右,trái phải / hai bên,左,さ,sa,on,さゆう,sayuu,左~さ~sa~trái~target|右~ゆう~yuu~phải~support
+左折,rẽ trái,左,さ,sa,on,させつ,sasetsu,左~さ~sa~trái~target|折~せつ~setsu~rẽ / gập~support
+左,bên trái,左,ひだり,hidari,kun,ひだり,hidari,左~ひだり~hidari~bên trái~target
+休日,ngày nghỉ,休,きゅう,kyuu,on,きゅうじつ,kyuujitsu,休~きゅう~kyuu~nghỉ~target|日~じつ~jitsu~ngày~support
+休校,trường nghỉ học,休,きゅう,kyuu,on,きゅうこう,kyuukou,休~きゅう~kyuu~nghỉ~target|校~こう~kou~trường~support
+休む,nghỉ ngơi,休,やす,yasu,kun,やすむ,yasumu,休~やす~yasu~nghỉ~target|む~む~mu~~kana
+父母,cha mẹ,父,ふ,fu,on,ふぼ,fubo,父~ふ~fu~cha~target|母~ぼ~bo~mẹ~support
+父,cha / bố của mình,父,ちち,chichi,kun,ちち,chichi,父~ちち~chichi~cha / bố~target
+お父さん,bố (cách gọi lịch sự),父,とう,tou,kun,おとうさん,otousan,お~お~o~tiền tố lịch sự~kana|父~とう~tou~bố~target|さん~さん~san~kính ngữ~kana
+雨天,trời mưa / thời tiết mưa,雨,う,u,on,うてん,uten,雨~う~u~mưa~target|天~てん~ten~trời~support
+大雨,mưa lớn,雨,あめ,ame,kun,おおあめ,ooame,大~おお~oo~lớn~support|雨~あめ~ame~mưa~target
+雨具,đồ đi mưa,雨,あま,ama,kun,あまぐ,amagu,雨~あま~ama~mưa~target|具~ぐ~gu~dụng cụ~support
+悪意,ác ý,悪,あく,aku,on,あくい,akui,悪~あく~aku~xấu / ác~target|意~い~i~ý định~support
+最悪,tệ nhất,悪,あく,aku,on,さいあく,saiaku,最~さい~sai~nhất~support|悪~あく~aku~xấu / tệ~target
+悪い,xấu / tệ,悪,わる,waru,kun,わるい,warui,悪~わる~waru~xấu~target|い~い~i~~kana
+暗記,học thuộc lòng,暗,あん,an,on,あんき,anki,暗~あん~an~ghi nhớ thầm~target|記~き~ki~ghi nhớ~support
+暗室,phòng tối,暗,あん,an,on,あんしつ,anshitsu,暗~あん~an~tối~target|室~しつ~shitsu~phòng~support
+暗い,tối,暗,くら,kura,kun,くらい,kurai,暗~くら~kura~tối~target|い~い~i~~kana
+医者,bác sĩ,医,い,i,on,いしゃ,isha,医~い~i~y học~target|者~しゃ~sha~người~support
+医学,y học,医,い,i,on,いがく,igaku,医~い~i~y khoa~target|学~がく~gaku~học~support
+医院,phòng khám,医,い,i,on,いいん,iin,医~い~i~y tế~target|院~いん~in~viện~support
+意味,ý nghĩa,意,い,i,on,いみ,imi,意~い~i~ý~target|味~み~mi~vị / nghĩa~support
+意見,ý kiến,意,い,i,on,いけん,iken,意~い~i~ý~target|見~けん~ken~cách nhìn~support
+意外,ngoài dự đoán / bất ngờ,意,い,i,on,いがい,igai,意~い~i~ý nghĩ~target|外~がい~gai~ngoài~support
