@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KanjiGO — Admin: Nhập Kanji & Câu hỏi</title>
+<style>
+  :root{--bg:#0e1430;--pnl:#141c3c;--line:#243258;--cy:#6cc0ff;--ok:#6effa1;--warn:#ffd54a;--err:#ff8a8a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:#e9eef7;font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5}
+  header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0}.go{color:var(--cy)}
+  header .src{margin-left:auto;font-size:13px;background:#0b1330;border:1px solid var(--line);padding:6px 12px;border-radius:20px}
+  main{max-width:1080px;margin:0 auto;padding:20px 24px 60px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--pnl);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h2{margin:0 0 6px;font-size:16px}
+  .card p.hint{margin:0 0 10px;font-size:12.5px;color:#9fb0cf}
+  code.cols{display:block;background:#0b1330;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px;color:#9fd8f5;margin-bottom:8px;white-space:pre-wrap}
+  textarea{width:100%;height:210px;background:#0b1330;color:#dfe8f7;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:13px;resize:vertical;tab-size:4}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+  button{background:#16558f;color:#fff;border:1px solid #2f7fc0;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:600}
+  button:hover{filter:brightness(1.12)}
+  button.ghost{background:transparent;border-color:var(--line);color:#c8d5ee;font-weight:500}
+  button.ok{background:#1f7d47;border-color:#2fae63}
+  button.danger{background:#7a2530;border-color:#a83b48}
+  #log{margin-top:14px;font-size:13px}
+  .msg{padding:8px 12px;border-radius:8px;margin:6px 0;border:1px solid}
+  .msg.ok{background:rgba(30,110,60,.25);border-color:#2fae63;color:var(--ok)}
+  .msg.warn{background:rgba(120,90,20,.25);border-color:#b7902f;color:var(--warn)}
+  .msg.err{background:rgba(110,30,36,.3);border-color:#a83b48;color:var(--err)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  th{background:#0b1330;color:#9fd8f5}
+  .jp{font-family:"Yu Gothic","Noto Sans JP",sans-serif;font-size:15px}
+  details{margin-top:8px}summary{cursor:pointer;color:var(--cy);font-size:13px}
+  pre.out{background:#0b1330;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;overflow:auto;max-height:260px}
+  a.back{color:var(--cy)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛠️ Kanji<span class="go">GO</span> · Admin nhập liệu</h1>
+  <span class="src" id="srcStatus">Đang kiểm tra nguồn dữ liệu…</span>
+</header>
+<main>
+  <p style="font-size:13.5px;color:#c8d5ee">
+    Dán trực tiếp từ <b>Excel / Google Sheets</b> (mỗi cột cách nhau bằng <b>Tab</b>) hoặc dùng <b>dấu phẩy</b> (CSV).
+    Dòng đầu có thể là tiêu đề (tự bỏ qua). Dòng bắt đầu bằng <code># là ghi chú.
+    Nhiều cách đọc On/Kun ngăn nhau bằng <code>,</code> hoặc <code>;</code>. &nbsp; ◀ <a class="back" href="index.html">Về game</a>
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>① Bảng KANJI (cho Kanji Dex)</h2>
+      <p class="hint">Thông tin từng chữ: nghĩa, âm On/Kun, và gắn với 1 monster (sprite).</p>
+      <code class="cols">key    char    meaning    on    kun    monId</code>
+      <textarea id="taKanji" spellcheck="false"></textarea>
+    </div>
+    <div class="card">
+      <h2>② Bảng CÂU HỎI (ngân hàng quiz)</h2>
+      <p class="hint">Mỗi dòng = 1 câu. <b>type</b> chỉ nhận <code>on</code> hoặc <code>kun</code>.</p>
+      <code class="cols">word    mean    target    answer    romaji    type</code>
+      <textarea id="taQ" spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="ghost" id="btnLoadDefault">↺ Nạp dữ liệu mẫu (mặc định)</button>
+    <button id="btnPreview">🔍 Xem trước &amp; Kiểm tra</button>
+    <button class="ok" id="btnApply">✅ Áp dụng vào game (lưu trình duyệt)</button>
+    <button id="btnDownload">⬇️ Tải xuống kanji.js</button>
+    <button class="danger" id="btnClear">🗑️ Xoá dữ liệu import</button>
+  </div>
+
+  <div id="log"></div>
+  <div id="preview"></div>
+
+  <details>
+    <summary>Xem nội dung kanji.js sẽ được sinh ra</summary>
+    <pre class="out" id="genOut">(bấm "Xem trước" để tạo)</pre>
+  </details>
+</main>
+
+<!-- Nạp config + dữ liệu mặc định để có sẵn danh sách monster & mẫu -->
+<script src="js/config.js"></script>
+<script src="js/kanji.js"></script>
+<script>
+const KEY = 'KANJIGO_DATA_V1';
+const MON_IDS = Object.keys((window.CONFIG && CONFIG.MONSTERS) || {});
+const DEF = window.KANJI_DB;
+const $ = (id) => document.getElementById(id);
+
+// ---------- nguồn dữ liệu hiện tại ----------
+function refreshSrc(){
+  const has = !!localStorage.getItem(KEY);
+  $('srcStatus').innerHTML = has
+    ? '🟢 Game đang dùng: <b>DỮ LIỆU IMPORT</b>'
+    : '⚪ Game đang dùng: <b>dữ liệu mặc định</b>';
+}
+
+// ---------- điền mẫu từ dữ liệu mặc định ----------
+function fillDefault(){
+  const kRows = Object.entries(DEF.KANJI).map(([key,v]) =>
+    [key, v.char, v.meaning, v.on.join(', '), v.kun.join(', '), v.monId].join('\t'));
+  $('taKanji').value = 'key\tchar\tmeaning\ton\tkun\tmonId\n' + kRows.join('\n');
+  const qRows = DEF.QUESTIONS.map(q =>
+    [q.word, q.mean, q.target, q.answer, q.romaji, q.type].join('\t'));
+  $('taQ').value = 'word\tmean\ttarget\tanswer\tromaji\ttype\n' + qRows.join('\n');
+  log('', []); $('preview').innerHTML=''; $('genOut').textContent='(bấm "Xem trước" để tạo)';
+}
+
+// ---------- parser: tab hoặc phẩy, bỏ tiêu đề/ghi chú ----------
+function parseRows(text, headerKeys){
+  const out = [];
+  text.split(/\r?\n/).forEach(line => {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) return;
+    const cells = (t.indexOf('\t') >= 0 ? t.split('\t') : t.split(',')).map(c => c.trim());
+    const low = cells.map(c => c.toLowerCase());
+    // bỏ dòng tiêu đề
+    if (headerKeys.some(h => low.includes(h))) return;
+    out.push(cells);
+  });
+  return out;
+}
+const splitReadings = (s) => (s || '').split(/[;,]/).map(x => x.trim()).filter(Boolean);
+
+// ---------- build data + validate ----------
+function build(){
+  const msgs = [];
+  const kanjiRows = parseRows($('taKanji').value, ['char','meaning','monid']);
+  const qRows     = parseRows($('taQ').value, ['word','answer','target']);
+
+  const KANJI = {}; const charSet = new Set();
+  kanjiRows.forEach((c, i) => {
+    const [key, char, meaning, on, kun, monId] = c;
+    if (!key || !char) { msgs.push(['err', `Kanji dòng ${i+1}: thiếu key hoặc char.`]); return; }
+    if (KANJI[key]) msgs.push(['warn', `Kanji key trùng: "${key}" (dòng ${i+1}) — ghi đè.`]);
+    if (monId && MON_IDS.length && !MON_IDS.includes(monId))
+      msgs.push(['warn', `Kanji "${key}": monId "${monId}" không có trong CONFIG.MONSTERS (${MON_IDS.join(', ')}). Sprite sẽ không hiện trong Dex.`]);
+    KANJI[key] = { char, meaning: meaning||'', on: splitReadings(on), kun: splitReadings(kun), monId: monId||'' };
+    charSet.add(char);
+  });
+
+  const QUESTIONS = [];
+  qRows.forEach((c, i) => {
+    const [word, mean, target, answer, romaji, type] = c;
+    if (!word || !target || !answer) { msgs.push(['err', `Câu hỏi dòng ${i+1}: thiếu word/target/answer.`]); return; }
+    const tp = (type||'').toLowerCase();
+    if (tp !== 'on' && tp !== 'kun') msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): type="${type}" không phải on/kun.`]);
+    if (charSet.size && !charSet.has(target)) msgs.push(['warn', `Câu hỏi dòng ${i+1}: chữ hỏi "${target}" chưa có trong bảng KANJI (vẫn chạy được).`]);
+    QUESTIONS.push({ word, mean: mean||'', target, answer, romaji: romaji||'', type: tp||'on' });
+  });
+
+  // distractor = kho mặc định + toàn bộ answer (khử trùng)
+  const DISTRACTORS = Array.from(new Set([...(DEF.DISTRACTORS||[]), ...QUESTIONS.map(q => q.answer)]));
+
+  if (!Object.keys(KANJI).length) msgs.push(['err', 'Chưa có Kanji nào hợp lệ.']);
+  if (!QUESTIONS.length) msgs.push(['err', 'Chưa có Câu hỏi nào hợp lệ.']);
+  return { data: { KANJI, QUESTIONS, DISTRACTORS }, msgs };
+}
+
+// ---------- log & preview ----------
+function log(title, msgs){
+  const box = $('log');
+  const errs = msgs.filter(m=>m[0]==='err').length, warns = msgs.filter(m=>m[0]==='warn').length;
+  let html = '';
+  if (title) html += `<div class="msg ${errs?'err':warns?'warn':'ok'}">${title} — ${errs} lỗi, ${warns} cảnh báo.</div>`;
+  msgs.forEach(([lv,txt]) => html += `<div class="msg ${lv}">${lv==='err'?'❌':'⚠️'} ${txt}</div>`);
+  box.innerHTML = html;
+  return errs;
+}
+function preview(data){
+  const kRows = Object.entries(data.KANJI).map(([k,v]) =>
+    `<tr><td>${k}</td><td class="jp">${v.char}</td><td>${v.meaning}</td><td class="jp">${v.on.join('・')}</td><td class="jp">${v.kun.join('・')}</td><td>${v.monId}</td></tr>`).join('');
+  const qRows = data.QUESTIONS.slice(0,200).map(q =>
+    `<tr><td class="jp">${q.word}</td><td>${q.mean}</td><td class="jp">${q.target}</td><td class="jp">${q.answer}</td><td>${q.romaji}</td><td>${q.type}</td></tr>`).join('');
+  $('preview').innerHTML =
+    `<h3>📖 KANJI (${Object.keys(data.KANJI).length})</h3>
+     <table><tr><th>key</th><th>char</th><th>meaning</th><th>on</th><th>kun</th><th>monId</th></tr>${kRows}</table>
+     <h3>❓ CÂU HỎI (${data.QUESTIONS.length})</h3>
+     <table><tr><th>word</th><th>mean</th><th>target</th><th>answer</th><th>romaji</th><th>type</th></tr>${qRows}</table>`;
+}
+function genFile(data){
+  const j = (o) => JSON.stringify(o, null, 2);
+  const txt =
+`// ============================================================
+//  KANJI.JS — Sinh tự động bởi admin.html (KanjiGO)
+//  Ngày: ${new Date().toLocaleString('vi-VN')}
+// ============================================================
+window.KANJI_DB = {
+  KANJI: ${j(data.KANJI)},
+  QUESTIONS: ${j(data.QUESTIONS)},
+  DISTRACTORS: ${j(data.DISTRACTORS)},
+};
+`;
+  $('genOut').textContent = txt;
+  return txt;
+}
+
+// ---------- actions ----------
+$('btnLoadDefault').onclick = () => { fillDefault(); refreshSrc(); };
+$('btnPreview').onclick = () => {
+  const { data, msgs } = build();
+  const errs = log('Kiểm tra', msgs);
+  if (!errs) preview(data), genFile(data);
+};
+$('btnApply').onclick = () => {
+  const { data, msgs } = build();
+  const errs = log('Kiểm tra', msgs);
+  if (errs) return;
+  localStorage.setItem(KEY, JSON.stringify(data));
+  preview(data); genFile(data); refreshSrc();
+  log('✅ ĐÃ ÁP DỤNG', [['ok', `Đã lưu ${Object.keys(data.KANJI).length} kanji & ${data.QUESTIONS.length} câu hỏi vào trình duyệt. Mở lại index.html để chơi với dữ liệu mới.`], ...msgs]);
+};
+$('btnDownload').onclick = () => {
+  const { data, msgs } = build();
+  if (log('Kiểm tra', msgs)) return;
+  const blob = new Blob([genFile(data)], { type: 'text/javascript' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'kanji.js'; a.click();
+  URL.revokeObjectURL(a.href);
+};
+$('btnClear').onclick = () => {
+  localStorage.removeItem(KEY); refreshSrc();
+  log('🗑️ Đã xoá', [['ok','Đã xoá dữ liệu import. Game quay lại dùng js/kanji.js mặc định.']]);
+};
+
+// init
+fillDefault(); refreshSrc();
+</script>
+</body>
+</html>
+ </code>
