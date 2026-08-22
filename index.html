@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KanjiGO — Học Kanji kiểu Pokémon</title>
+<!--
+  ============================================================
+   KanjiGO (offline, double-click là chơi)
+   • Combat REALTIME: đọc đúng kanji (On/Kun) mới ra đòn.
+   • Sai -> CHOÁNG 3s, khoá phím trả lời (chống spam đáp án).
+   • Kanji Dex (phím D): xem & đổi pet đi sau lưng.
+   • Admin thêm chữ/câu dễ dàng: mở admin.html (dán từ Excel) HOẶC sửa js/kanji.js.
+     js/config.js cấu hình • js/kanji.js dữ liệu mặc định
+     js/data-loader.js nạp dữ liệu admin import • js/map.js bản đồ • js/game.js engine
+  ============================================================
+-->
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#12121f;color:#eee;
+    font-family:"Segoe UI",system-ui,sans-serif}
+  body{display:block}
+  h1{font-size:20px;margin:12px 0 2px;letter-spacing:1px}
+  h1 .go{color:#6cc0ff}
+  #hint{font-size:13px;color:#9aa;margin-bottom:10px;text-align:center;line-height:1.7}
+  canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;
+    border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;background:#000}
+  #touch-controls,#touch-actions,#touch-back{display:none;position:fixed;z-index:2;touch-action:none;user-select:none}
+  #touch-controls{left:18px;bottom:18px;width:150px;height:150px}
+  #touch-controls button,#touch-actions button{position:absolute;width:50px;height:50px;padding:0;
+    border:2px solid rgba(159,216,245,.75);border-radius:14px;background:rgba(11,16,48,.78);
+    color:#fff;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.35);touch-action:none}
+  #touch-controls button:active,#touch-actions button:active{background:rgba(22,85,143,.95);transform:scale(.94)}
+  .touch-hidden{display:none!important}
+  #touch-up{left:50px;top:0}.touch-left{left:0;top:50px}.touch-right{right:0;top:50px}.touch-down{left:50px;bottom:0}
+  #touch-actions{right:18px;bottom:28px;width:138px;height:58px;gap:10px}
+  #touch-actions button{position:static;width:64px;height:52px;font-size:15px;font-weight:700}
+  #touch-actions .touch-dex{color:#ffd54a}
+  #touch-back{right:18px;top:18px;width:76px;height:42px;border:2px solid rgba(159,216,245,.75);
+    border-radius:12px;background:rgba(11,16,48,.82);color:#fff;font-size:13px;font-weight:700}
+  kbd{background:#0f3460;border-radius:4px;padding:1px 6px;
+    font-family:monospace;color:#fff;border:1px solid #16558f}
+  #admin-link{margin-top:10px;font-size:12px;color:#9fd8f5}
+  #admin-link a{color:#6cc0ff}
+  h1,#hint,#admin-link{display:none}
+  @media (pointer:coarse), (max-width:700px){#touch-controls,#touch-back{display:block}#touch-actions{display:flex}}
+</style>
+</head>
+<body>
+<h1>🎮 Kanji<span class="go">GO</span> — Học Kanji kiểu Pokémon</h1>
+<div id="hint">
+  Di chuyển <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> • Tương tác <kbd>Space</kbd> • Kanji Dex <kbd>D</kbd>
+
+  ⚔️ Trong trận: đọc đúng kanji bấm <kbd>1</kbd>–<kbd>4</kbd> để ra đòn • Sai → 😵 choáng 3s • <kbd>Esc</kbd> bỏ chạy
+</div>
+<canvas id="game" width="640" height="480"></canvas>
+<div id="touch-controls" aria-label="Điều khiển di chuyển">
+  <button id="touch-up" data-key="arrowup" aria-label="Đi lên">▲</button>
+  <button class="touch-left" data-key="arrowleft" aria-label="Đi sang trái">◀</button>
+  <button class="touch-right" data-key="arrowright" aria-label="Đi sang phải">▶</button>
+  <button class="touch-down" data-key="arrowdown" aria-label="Đi xuống">▼</button>
+</div>
+<div id="touch-actions" aria-label="Thao tác">
+  <button data-action="interact" aria-label="Tương tác">SPACE</button>
+  <button class="touch-dex" data-action="dex" aria-label="Mở Kanji Dex">DEX</button>
+</div>
+<button id="touch-back" class="touch-hidden" data-action="back" aria-label="Quay lại">← BACK</button>
+<div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
+
+<script src="js/config.js"></script>
+<script src="js/kanji.js"></script>
+<script src="js/data-loader.js"></script>
+<script src="js/map.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
+ 
