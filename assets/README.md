@@ -17,7 +17,7 @@ assets/
 
 ## Characters
 
-`player.png` và `npc.png` là spritesheet RGBA `128×128 px`, gồm `4×4` frame `32×32 px`. Thứ tự hàng phải khớp `DIR_ROW`: `down`, `left`, `right`, `up`; mỗi hàng chứa 4 frame đi bộ. Engine hiện dùng frame `down:0` cho NPC tĩnh nhưng giữ đủ sheet để có thể animate sau này.
+`player.png` và `npc.png` là spritesheet RGBA `128×128 px`, gồm `4×4` frame `32×32 px`. Thứ tự hàng phải khớp `DIR_ROW`: `down`, `left`, `right`, `up`; mỗi hàng chứa 4 frame đi bộ. Hai nhân vật dùng thiết kế nhân viên FPT áo cam, quần xanh navy và thẻ đeo; NPC được phân biệt bằng tóc/dáng đứng. Engine hiện dùng frame `down:0` cho NPC tĩnh nhưng giữ đủ sheet để có thể animate sau này.
 
 ## World
 

@@ -40,12 +40,13 @@
   const player = {
     gx: C.PLAYER.startGx, gy: C.PLAYER.startGy,
     px: C.PLAYER.startGx * TILE, py: C.PLAYER.startGy * TILE,
-    facing: 'down', moving: false, animT: 0, frame: 0,
-    fromX: 0, fromY: 0, toX: 0, toY: 0, moveT: 0,
+    facing: 'down', moving: false, running: false, animT: 0, frame: 0,
+    fromX: 0, fromY: 0, toX: 0, toY: 0, moveT: 0, moveDuration: C.MOVE_MS,
     hp: C.PLAYER.maxHp, maxHp: C.PLAYER.maxHp, onBoat: false,
   };
   let dialog = { active: false, idx: 0, npc: null };
   let toast = { text: '', t: 0 };
+  let fishing = null;
   const keys = {};
   function bindTouchControls() {
     document.querySelectorAll('#touch-controls [data-key]').forEach((button) => {
@@ -312,6 +313,18 @@
     }
   }
   migrateLegacyPetProgress();
+  // Seed pet từ config cho cả profile mới và save cũ; chỉ nâng tới mức tối thiểu đã cấu hình.
+  for (const seed of C.INITIAL_PETS || []) {
+    const id = seed && seed.monId, info = C.MONSTERS[id];
+    if (!info) continue;
+    if (!petData[id]) petData[id] = { evolveStage: 0 };
+    const s = ensureMastery(info.kanji);
+    const level = Math.max(1, Math.min(C.KLEVEL.maxLevel, Number(seed.level) || 1));
+    s.mp = Math.max(s.mp, mpFloorOfLevel(level));
+    s.level = levelFromMp(s.mp);
+    s.captured = true;
+    s.lectured = true;
+  }
   // Save cũ có pet thì xem như chữ tương ứng đã thu phục.
   for (const id of Object.keys(petData)) {
     if (C.MONSTERS[id]) ensureMastery(C.MONSTERS[id].kanji).captured = true;
@@ -389,6 +402,8 @@
     const [dx, dy] = delta(dir);
     const nx = player.gx + dx, ny = player.gy + dy;
     if (!canWalk(nx, ny)) return;
+    player.running = !player.onBoat && !!keys.shift;
+    player.moveDuration = player.running ? (C.RUN_MOVE_MS || C.MOVE_MS * 0.62) : C.MOVE_MS;
     player.moving = true; player.moveT = 0;
     player.fromX = player.px; player.fromY = player.py;
     player.toX = nx * TILE; player.toY = ny * TILE;
@@ -409,6 +424,7 @@
   function frontTile() { const [dx, dy] = delta(player.facing); return { gx: player.gx + dx, gy: player.gy + dy, t: tileAt(player.gx + dx, player.gy + dy) }; }
   function npcInFront() { const f = frontTile(); return NPCS.find((n) => n.gx === f.gx && n.gy === f.gy) || null; }
   function onSpace() {
+    if (fishing) return;
     if (dialog.active) { dialog.idx++; if (dialog.idx >= dialog.npc.lines.length) { dialog.active = false; dialog.npc = null; } return; }
     const npc = npcInFront();
     if (npc && npc.type === 'lecture') { enterLecture(); return; }
@@ -426,8 +442,28 @@
   function showNoCapturedEncounter() { showToast(C.ENCOUNTER.noCapturedMessage); }
   function fish() {
     if (!availableSpawn('water').length) { showNoCapturedEncounter(); return; }
-    if (Math.random() < C.ENCOUNTER.FISH) { showToast('🎣 Có gì cắn câu!'); setTimeout(() => startBattle('water'), 500); }
-    else showToast('🎣 ...không có gì cắn câu.');
+    const f = frontTile();
+    fishing = { t: 0, phase: 'cast', caught: Math.random() < C.ENCOUNTER.FISH, gx: f.gx, gy: f.gy };
+    // Giữ nguyên pose đứng trong suốt lượt câu; animation bước chân làm điểm cầm cần bị trượt.
+    player.frame = 0; player.animT = 0; player.running = false;
+    showToast('🎣 Vung cần...');
+  }
+
+  function updateFishing(dt) {
+    if (!fishing) return;
+    player.frame = 0;
+    const F = C.FISHING || { castMs: 320, waitMs: 900, reelMs: 420 };
+    const before = fishing.t; fishing.t += dt;
+    if (before < F.castMs && fishing.t >= F.castMs) {
+      fishing.phase = 'wait'; showToast('🎣 Phao đang rung...');
+    }
+    if (before < F.castMs + F.waitMs && fishing.t >= F.castMs + F.waitMs) {
+      fishing.phase = 'reel';
+      showToast(fishing.caught ? '🎣 Có gì cắn câu!' : '🎣 Kéo cần lên...');
+    }
+    if (fishing.t < F.castMs + F.waitMs + F.reelMs) return;
+    const caught = fishing.caught; fishing = null; player.frame = 0;
+    if (caught) startBattle('water'); else showToast('🎣 Chưa câu được gì, thử lại nhé.');
   }
 
   // ---------- 🐾 SCALE THEO MASTERY ----------
@@ -738,7 +774,7 @@
   let dex = { sel: 0, list: [] };
   function collectedList() { return Object.values(KDB.KANJI).map((info) => info.char); }
   function openDex() {
-    if (dialog.active || player.moving) return;
+    if (dialog.active || player.moving || fishing) return;
     dex.list = collectedList();
     const currentChar = C.MONSTERS[currentPetId] && C.MONSTERS[currentPetId].kanji;
     dex.sel = Math.max(0, dex.list.indexOf(currentChar));
@@ -790,12 +826,14 @@
   }
   function updateOverworld(dt) {
     if (dialog.active) return;
+    if (fishing) { updateFishing(dt); return; }
     if (player.moving) {
-      player.moveT += dt; const k = Math.min(1, player.moveT / C.MOVE_MS);
+      player.moveT += dt; const k = Math.min(1, player.moveT / player.moveDuration);
       player.px = player.fromX + (player.toX - player.fromX) * k;
       player.py = player.fromY + (player.toY - player.fromY) * k;
-      player.animT += dt; if (player.animT >= C.ANIM_MS) { player.animT = 0; player.frame = (player.frame + 1) % C.FRAMES; }
-      if (k >= 1) { player.moving = false; player.frame = 0; onStepComplete(); }
+      const animMs = player.running ? (C.RUN_ANIM_MS || C.ANIM_MS * 0.6) : C.ANIM_MS;
+      player.animT += dt; if (player.animT >= animMs) { player.animT = 0; player.frame = (player.frame + 1) % C.FRAMES; }
+      if (k >= 1) { player.moving = false; player.running = false; player.frame = 0; onStepComplete(); }
     } else {
       if (pressed('left')) tryMove('left');
       else if (pressedRight()) tryMove('right');
@@ -845,6 +883,51 @@
   // ---------- VẼ ----------
   function drawTile(idx, sx, sy) { cx.drawImage(imgs.tileset, idx * TILE, 0, TILE, TILE, sx, sy, TILE, TILE); }
   function drawSprite(img, dir, frame, sx, sy) { cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx, sy, TILE, TILE); }
+  function drawGroundDetail(idx, sx, sy, gx, gy) {
+    const now = performance.now();
+    if (idx === K.WATER) {
+      const wave = (now / 180 + gx * 7 + gy * 11) % 18;
+      cx.strokeStyle = 'rgba(180,235,255,.38)'; cx.lineWidth = 1;
+      cx.beginPath(); cx.moveTo(sx + 3 + wave, sy + 9); cx.lineTo(sx + 10 + wave, sy + 9); cx.stroke();
+      cx.beginPath(); cx.moveTo(sx + 18 - wave / 2, sy + 24); cx.lineTo(sx + 25 - wave / 2, sy + 24); cx.stroke();
+    } else if (idx === K.PATH && ((gx * 13 + gy * 7) % 5 === 0)) {
+      cx.fillStyle = 'rgba(120,92,52,.22)'; cx.fillRect(sx + 7, sy + 21, 2, 1); cx.fillRect(sx + 23, sy + 8, 1, 2);
+    } else if (idx === K.GRASS && ((gx * 17 + gy * 19) % 11 === 0)) {
+      cx.fillStyle = 'rgba(28,112,50,.24)'; cx.fillRect(sx + 8, sy + 12, 1, 3); cx.fillRect(sx + 10, sy + 13, 1, 2);
+    }
+  }
+  function drawRunDust(camX, camY) {
+    if (!player.moving || !player.running || player.onBoat) return;
+    const [dx, dy] = delta(player.facing), x = player.px - camX + 16 - dx * 11, y = player.py - camY + 27 - dy * 8;
+    const pulse = (performance.now() / 70) % 1;
+    cx.fillStyle = `rgba(235,225,190,${0.42 * (1 - pulse)})`;
+    cx.beginPath(); cx.arc(x - 5, y, 2 + pulse * 3, 0, Math.PI * 2); cx.arc(x + 4, y + 1, 1.5 + pulse * 2, 0, Math.PI * 2); cx.fill();
+  }
+  function drawFishing(camX, camY) {
+    if (!fishing) return;
+    const F = C.FISHING || { castMs: 320, waitMs: 900, reelMs: 420 };
+    const handOffset = {
+      down: [22, 17], left: [14, 16], right: [17, 16], up: [20, 16],
+    }[player.facing] || [16, 16];
+    const tipOffset = {
+      down: [7, 13], left: [-13, -7], right: [13, -7], up: [7, -14],
+    }[player.facing] || [0, -12];
+    const startX = player.px - camX + handOffset[0], startY = player.py - camY + handOffset[1];
+    const rodX = startX + tipOffset[0], rodY = startY + tipOffset[1];
+    const targetX = fishing.gx * TILE - camX + TILE / 2, targetY = fishing.gy * TILE - camY + TILE / 2;
+    let progress = Math.min(1, fishing.t / F.castMs);
+    if (fishing.phase === 'reel') progress = 1 - Math.min(1, (fishing.t - F.castMs - F.waitMs) / F.reelMs);
+    const bobX = rodX + (targetX - rodX) * progress;
+    const bobY = rodY + (targetY - rodY) * progress - Math.sin(progress * Math.PI) * 8;
+    cx.strokeStyle = '#704326'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(startX, startY); cx.lineTo(rodX, rodY); cx.stroke();
+    cx.strokeStyle = 'rgba(225,245,255,.9)'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(rodX, rodY); cx.lineTo(bobX, bobY); cx.stroke();
+    if (fishing.phase === 'wait') {
+      const ripple = 5 + Math.sin(performance.now() / 90) * 2;
+      cx.strokeStyle = 'rgba(210,245,255,.62)'; cx.beginPath(); cx.ellipse(bobX, bobY + 3, ripple, ripple * .35, 0, 0, Math.PI * 2); cx.stroke();
+    }
+    cx.fillStyle = '#fff'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY) - 2, 3, 2);
+    cx.fillStyle = '#e84b3c'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY), 3, 3);
+  }
   function syncTouchUi() {
     const hidden = state !== 'overworld';
     document.getElementById('touch-controls')?.classList.toggle('touch-hidden', hidden);
@@ -871,6 +954,7 @@
       if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
       const isAcademy = [K.ACADEMY_DOOR, K.ACADEMY_WALL, K.ACADEMY_ROOF].includes(idx);
       drawTile(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy);
+      drawGroundDetail(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy, x, y);
     }
     drawAcademy(camX, camY);
     for (const n of NPCS) {
@@ -878,11 +962,15 @@
       if (n.icon) { cx.font = '14px sans-serif'; cx.fillText(n.icon, n.gx * TILE - camX + 7, n.gy * TILE - camY - 3); }
     }
     drawPet(camX, camY);
+    drawRunDust(camX, camY);
     if (player.onBoat) drawTile(K.BOAT, Math.round(player.px - camX), Math.round(player.py - camY));
     drawSprite(imgs.player, player.facing, player.frame, Math.round(player.px - camX), Math.round(player.py - camY));
+    drawFishing(camX, camY);
     for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
       if (TILES[y][x] !== K.TREE) continue; const sx = x * TILE - camX, sy = y * TILE - camY;
-      if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue; drawTile(K.TREE, sx, sy);
+      if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
+      cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17, sy + 27, 13, 5, 0, 0, Math.PI * 2); cx.fill();
+      drawTile(K.TREE, sx, sy);
     }
   }
   function drawPet(camX, camY) {
@@ -900,13 +988,14 @@
     const a = C.ACADEMY, x = a.gx * TILE - camX, y = a.gy * TILE - camY;
     const w = a.width * TILE, h = a.height * TILE;
     const academy = imgs.academy;
+    cx.fillStyle = 'rgba(20,35,30,.22)'; cx.beginPath(); cx.ellipse(x + w / 2, y + h - 3, w * .46, 8, 0, 0, Math.PI * 2); cx.fill();
     if (academy) cx.drawImage(academy, x, y, w, h);
     cx.fillStyle = '#fff1c1'; cx.font = 'bold 10px monospace'; cx.fillText('GIẢNG ĐƯỜNG', x - 2, y - 5);
   }
   function drawHudHint() {
     const academy = frontTile().t === K.ACADEMY_DOOR;
     const compact = cv.width < 620;
-    const message = academy ? 'Space: Vào Giảng đường' : (compact ? 'D: Dex · Space: Tương tác' : '↑↓←→ Di chuyển · D: Dex · Space: Tương tác');
+    const message = fishing ? '🎣 Đang câu cá...' : academy ? 'Space: Vào Giảng đường' : (compact ? 'D: Dex · Space: Tương tác' : '↑↓←→ Di chuyển · Shift: Chạy · D: Dex · Space: Tương tác');
     const hintW = Math.min(cv.width - 16, compact ? 230 : 370);
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);

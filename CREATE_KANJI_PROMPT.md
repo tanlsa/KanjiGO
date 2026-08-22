@@ -1,0 +1,12 @@
+Japanese Kanji mascot character,
+anthropomorphic kanji creature,
+cute pixel art monster,
+Game Boy Advance RPG style,
+Pokemon-inspired without copyright infringement,
+16-bit pixel sprite,
+bold black outline,
+tiny arms and legs,
+expressive eyes embedded in the kanji,
+clean transparent background,
+retro JRPG enemy design,
+high readability of the kanji character

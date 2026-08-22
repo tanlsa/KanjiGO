@@ -7,7 +7,7 @@ Kanji mới ra đòn. Có **Kanji Dex** để đổi pet đi sau lưng; Level/MP
 Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `assets/` + `js/` cạnh `index.html`.
 
 ## 🎯 Điều khiển
-- Overworld: `↑ ↓ ← →` di chuyển • `Space` tương tác • **`D`** mở Kanji Dex.
+- Overworld: `↑ ↓ ← →` di chuyển • giữ **`Shift`** để chạy • `Space` tương tác/câu cá • **`D`** mở Kanji Dex.
 - Battle (realtime): bấm **`1–4`** chọn cách đọc • `Esc` bỏ chạy.
 - Dex: `← → ↑ ↓` chọn • `Enter` cho pet đi cùng • `Esc/D` đóng.
 - Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • mini-check sai vẫn được qua.
@@ -15,16 +15,19 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 - Kỳ thi PvE: đến NPC ⛩, nhấn `Space` • 10 câu, xếp hạng A/B/C/D.
 
 ## ✨ Cập nhật bản này
-1. **Khung học được thiết kế lại — hết đè/chèn chữ.** Câu hỏi, nghĩa, 4 đáp án và dòng
+1. **World 32×24 có nhiều phân khu:** học viện, quảng trường, hồ/bến thuyền, đồng cỏ, rừng và đấu trường được nối bằng các trục đường rõ ràng.
+2. **Chạy và câu cá có animation:** giữ `Shift` để chạy nhanh; đứng sát hồ, quay mặt về nước và nhấn `Space` để thả cần.
+3. **Player/NPC FPT mới:** spritesheet sạch viền, áo cam và thẻ nhân viên rõ ở kích thước tile `32×32`.
+4. **Khung học được thiết kế lại — hết đè/chèn chữ.** Câu hỏi, nghĩa, 4 đáp án và dòng
    trạng thái nay nằm ở các vùng riêng biệt; feedback "đúng/sai" hiển thị dạng **banner nổi**
    phía trên khung nên không chồng lên đáp án. (chỉnh chiều cao khung ở `js/config.js → UI.panelH`).
-2. **Trả lời SAI → 😵 CHOÁNG 3 giây**, khoá phím `1–4` và có **đồng hồ đếm ngược** để chống
+5. **Trả lời SAI → 😵 CHOÁNG 3 giây**, khoá phím `1–4` và có **đồng hồ đếm ngược** để chống
    spam đáp án. (chỉnh ở `js/config.js → COMBAT.wrongStun`).
-3. **Trang Admin nhập liệu** (`admin.html`): thêm chữ/câu cực nhanh, không cần đụng code.
-4. **Core gameplay loop v2**: mastery theo từng kanji, SRS Leitner, tòa giảng đường/thu phục,
+6. **Trang Admin nhập liệu** (`admin.html`): thêm chữ/câu cực nhanh, không cần đụng code.
+7. **Core gameplay loop v2**: mastery theo từng kanji, SRS Leitner, tòa giảng đường/thu phục,
    bụi cỏ weighted theo chữ gỉ và kỳ thi PvE 10 câu.
-5. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
-6. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
+8. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
+9. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
 
 ## 🛠️ Admin thêm Kanji & câu hỏi (2 cách)
 

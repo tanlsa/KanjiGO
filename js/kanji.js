@@ -21,6 +21,7 @@ window.KANJI_DB = {
     koku:{ char: '国', meaning: 'Quốc gia', on: ['コク (koku)'], kun: ['くに (kuni)'], monId: 'kuni' },
     nen: { char: '年', meaning: 'Năm', on: ['ネン (nen)'], kun: ['とし (toshi)'], monId: 'nen' },
     dai: { char: '大', meaning: 'To / Lớn', on: ['ダイ (dai)', 'タイ (tai)'], kun: ['おお (oo)'], monId: 'dai' },
+    fish:{ char: '魚', meaning: 'Cá', on: ['ギョ (gyo)'], kun: ['さかな (sakana)', 'うお (uo)'], monId: 'fish' },
   },
 
   // Ngân hàng câu hỏi. Mỗi câu:
@@ -48,10 +49,13 @@ window.KANJI_DB = {
     { word: '大学', mean: 'đại học', target: '大', answer: 'だい', romaji: 'dai', type: 'on' },
     { word: '大切', mean: 'quan trọng', target: '大', answer: 'たい', romaji: 'tai', type: 'on' },
     { word: '大きい', mean: 'to, lớn', target: '大', answer: 'おお', romaji: 'oo', type: 'kun' },
+    // 魚
+    { word: '金魚', mean: 'cá vàng', target: '魚', answer: 'ぎょ', romaji: 'gyo', type: 'on' },
+    { word: '魚 (さかな)', mean: 'cá', target: '魚', answer: 'さかな', romaji: 'sakana', type: 'kun' },
+    { word: '魚市場', mean: 'chợ cá', target: '魚', answer: 'うお', romaji: 'uo', type: 'kun' },
   ],
 
   // Kho đáp án nhiễu (distractor) — cách đọc kana thường gặp
   DISTRACTORS: ['おん', 'おと', 'にち', 'ひ', 'か', 'こく', 'くに', 'ねん', 'とし',
-    'だい', 'たい', 'おお', 'げつ', 'すい', 'もく', 'きん', 'ど', 'よう', 'せい', 'がく'],
+    'だい', 'たい', 'おお', 'ぎょ', 'さかな', 'うお', 'げつ', 'すい', 'もく', 'きん', 'ど', 'よう', 'せい', 'がく'],
 };
- 

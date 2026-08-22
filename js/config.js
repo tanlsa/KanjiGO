@@ -19,7 +19,8 @@ window.CONFIG = {
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
-  MOVE_MS: 180, ANIM_MS: 120, FRAMES: 4,
+  MOVE_MS: 180, RUN_MOVE_MS: 105,
+  ANIM_MS: 120, RUN_ANIM_MS: 72, FRAMES: 4,
   DIR_ROW: { down: 0, left: 1, right: 2, up: 3 },
 
   TILE_KEYS: {
@@ -33,6 +34,7 @@ window.CONFIG = {
     TALLGRASS: 0.22, SURF: 0.15, FISH: 0.55,
     noCapturedMessage: 'Chưa có Kanji nào để gặp ở đây — hãy tới 🏛️ Giảng đường thu phục chữ mới trước!',
   },
+  FISHING: { castMs: 320, waitMs: 900, reelMs: 420 },
 
   // --- PLAYER (là người chiến đấu, có HP) ---
   PLAYER: { name: 'Bạn', maxHp: 30, startGx: 3, startGy: 5 },
@@ -52,6 +54,10 @@ window.CONFIG = {
 
   // --- 🐾 PET đi theo + EXP/Level ---
   PET: { monId: 'kuni', size: 30, gap: 16, bob: true },
+  // Pet cấp sẵn khi khởi tạo. Level là mức tối thiểu, không làm giảm tiến độ save cũ.
+  INITIAL_PETS: [
+    { monId: 'fish', level: 10 },
+  ],
   LEVEL: {
     expPerLevel: 20,      // EXP cần mỗi cấp = level * expPerLevel
     hpPerLevel: 5,        // lên cấp: +maxHp (áp cho PLAYER khi pet lên cấp)
