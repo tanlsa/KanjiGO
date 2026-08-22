@@ -1,4 +1,4 @@
-​// ============================================================
+// ============================================================
 //  GAME.JS — ENGINE. Overworld + combat + lecture/capture + PvE.
 //  Schema learning mới: mastery theo ký tự kanji (không còn theo câu hỏi).
 //  Save cũ được migrate mềm: cộng correct/wrong theo target, thêm field SRS.
