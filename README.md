@@ -49,7 +49,7 @@ Thêm entry vào `KANJI` (Dex) và `QUESTIONS` (ngân hàng câu hỏi) theo sch
 KanjiGO/
 ├─ index.html            # màn chơi chính
 ├─ admin.html            # 🛠️ công cụ nhập Kanji/câu hỏi
-├─ assets/               # player, npc, academy, tileset, monster sprites (thay PNG là đổi hình)
+├─ assets/               # characters/, world/, monsters/<monId>/
 ├─ data/                 # file CSV mẫu cho admin
 └─ js/
    ├─ config.js          # cấu hình: UI.panelH, COMBAT.wrongStun, KLEVEL, PET, SPAWN…
@@ -60,7 +60,7 @@ KanjiGO/
 ```
 
 ### Thay hình tòa Giảng đường
-Tòa nhà dùng riêng file `assets/academy.png` kích thước khuyến nghị **96×96 px**, nền trong suốt.
+Tòa nhà dùng riêng file `assets/world/academy.png` kích thước khuyến nghị **96×96 px**, nền trong suốt.
 Chỉ cần thay file này là hình trong game được cập nhật; không cần sửa bản đồ hay engine.
 Có thể chạy `tools/make_academy.ps1` để sinh lại hình mẫu trên Windows.
 

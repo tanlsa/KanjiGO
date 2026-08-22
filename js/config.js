@@ -12,10 +12,10 @@ window.CONFIG = {
   },
 
   ASSETS: {
-    player:  'assets/player.png',
-    npc:     'assets/npc.png',
-    tileset: 'assets/tileset.png',
-    academy: 'assets/academy.png',
+    player:  'assets/characters/player.png',
+    npc:     'assets/characters/npc.png',
+    tileset: 'assets/world/tileset.png',
+    academy: 'assets/world/academy.png',
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
@@ -109,13 +109,13 @@ window.CONFIG = {
 
   // --- 📖 THƯ VIỆN MONSTER (id khớp KANJI_DB.KANJI[*].monId) ---
   MONSTERS: {
-    yin:  { name: 'Âm Thư Yêu', kanji: '音', img: 'assets/monster.png',       maxHp: 24, atk: [3, 6], exp: 15, drawW: 200, drawH: 205 },
-    ri:   { name: 'Nhật Quang',  kanji: '日', img: 'assets/mon_yellow_ri.png', maxHp: 22, atk: [3, 6], exp: 16, drawW: 205, drawH: 190 },
-    kuni: { name: 'Quốc Vương',  kanji: '国', img: 'assets/mon_blue_kuni.png', maxHp: 28, atk: [4, 7], exp: 20, drawW: 200, drawH: 200 },
-    nen:  { name: 'Niên Thú',    kanji: '年', img: 'assets/mon_purple_nen.png',maxHp: 26, atk: [4, 7], exp: 19, drawW: 210, drawH: 210 },
-    dai:  { name: 'Đại Vương',   kanji: '大', img: 'assets/mon_red_dai.png',   maxHp: 32, atk: [5, 8], exp: 25, drawW: 215, drawH: 205 },
-    fish: { name: 'Ngư Âm Tinh', kanji: '魚', img: 'assets/mon_blue_kuni.png', maxHp: 20, atk: [3, 6], exp: 18, drawW: 200, drawH: 200 },
-    bar:  { name: 'Nhất Bản',    kanji: '一', img: 'assets/mon_gray_bar.png',  maxHp: 18, atk: [3, 5], exp: 14, drawW: 220, drawH: 130 },
+    yin:  { name: 'Âm Thư Yêu', kanji: '音', img: 'assets/monsters/yin/sprite.png',  maxHp: 24, atk: [3, 6], exp: 15, drawW: 200, drawH: 205 },
+    ri:   { name: 'Nhật Quang',  kanji: '日', img: 'assets/monsters/ri/sprite.png',   maxHp: 22, atk: [3, 6], exp: 16, drawW: 205, drawH: 190 },
+    kuni: { name: 'Quốc Vương',  kanji: '国', img: 'assets/monsters/kuni/sprite.png', maxHp: 28, atk: [4, 7], exp: 20, drawW: 200, drawH: 200 },
+    nen:  { name: 'Niên Thú',    kanji: '年', img: 'assets/monsters/nen/sprite.png',  maxHp: 26, atk: [4, 7], exp: 19, drawW: 210, drawH: 210 },
+    dai:  { name: 'Đại Vương',   kanji: '大', img: 'assets/monsters/dai/sprite.png',  maxHp: 32, atk: [5, 8], exp: 25, drawW: 215, drawH: 205 },
+    fish: { name: 'Ngư Âm Tinh', kanji: '魚', img: 'assets/monsters/fish/sprite.png', maxHp: 20, atk: [3, 6], exp: 18, drawW: 200, drawH: 200 },
+    bar:  { name: 'Nhất Bản',    kanji: '一', img: 'assets/monsters/bar/sprite.png',  maxHp: 18, atk: [3, 5], exp: 14, drawW: 220, drawH: 130 },
   },
 
   // 🐾 pet id -> monster id (pet dùng chỉ số nào để chiến đấu)
