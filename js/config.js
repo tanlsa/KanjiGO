@@ -21,7 +21,7 @@ window.CONFIG = {
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
   // Canvas vẫn phủ kín cửa sổ bằng CSS, nhưng giới hạn backing buffer để
   // màn hình 2K/4K không phải render hàng triệu pixel mỗi frame.
-  RENDER: { maxWidth: 1280, maxHeight: 720 },
+  RENDER: { maxWidth: 1280, maxHeight: 720, activeFps: 60, idleFps: 30, uiFps: 30 },
   MOVE_MS: 180, RUN_MOVE_MS: 105,
   ANIM_MS: 120, RUN_ANIM_MS: 72, FRAMES: 4,
   DIR_ROW: { down: 0, left: 1, right: 2, up: 3 },

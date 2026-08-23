@@ -15,6 +15,9 @@
   const MAP_H = TILES.length, MAP_W = TILES[0].length;
   const K = C.TILE_KEYS;
   const BLOCKED = new Set(C.BLOCKED_TILES);
+  const ACADEMY_TILES = new Set([K.ACADEMY_DOOR, K.ACADEMY_WALL, K.ACADEMY_ROOF]);
+  const TREE_CELLS = [];
+  for (let gy = 0; gy < MAP_H; gy++) for (let gx = 0; gx < MAP_W; gx++) if (TILES[gy][gx] === K.TREE) TREE_CELLS.push({ gx, gy });
 
   const cv = document.getElementById('game');
   cv.width = C.CANVAS_W; cv.height = C.CANVAS_H;
@@ -1230,7 +1233,8 @@
     { id: 'level', label: 'LEVEL CAO' },
     { id: 'recall', label: 'RECALL CAO' },
   ];
-  let dex = { sel: 0, list: [], source: [], sort: 'catalog', group: true, scrollY: 0, maxScroll: 0, hitboxes: [], drag: null };
+  let dex = { sel: 0, list: [], source: [], sort: 'catalog', group: true, scrollY: 0, maxScroll: 0, hitboxes: [], drag: null,
+    indexByChar: new Map(), contentCache: null };
   // Dex dùng cùng catalog với Giảng đường: đúng thứ tự JLPT và không lộ tier chưa mở.
   function collectedList() { return academyDexList().map((info) => info.char); }
   function refreshDexList(preserveChar = '') {
@@ -1242,6 +1246,8 @@
       if (dex.sort === 'recall') return ensureMastery(b).recall - ensureMastery(a).recall || catalogIndex.get(a) - catalogIndex.get(b);
       return catalogIndex.get(a) - catalogIndex.get(b);
     });
+    dex.indexByChar = new Map(dex.list.map((char, index) => [char, index]));
+    dex.contentCache = null;
     dex.sel = Math.max(0, previous ? dex.list.indexOf(previous) : 0);
     if (dex.sel < 0) dex.sel = 0;
   }
@@ -1278,6 +1284,8 @@
     }).filter((section) => section.list.length || section.locked);
   }
   function dexContent(layout) {
+    const cacheKey = `${dex.group}|${layout.cols}|${layout.cardH}|${layout.gapY}|${dex.list.join('')}`;
+    if (dex.contentCache && dex.contentCache.key === cacheKey) return dex.contentCache.value;
     const rows = []; let y = 0;
     for (const section of dexSections()) {
       if (dex.group) { rows.push({ type: 'header', section, y, h: 30 }); y += 30; }
@@ -1287,7 +1295,9 @@
       }
       y += 8;
     }
-    return { rows, height: Math.max(0, y - 8) };
+    const value = { rows, height: Math.max(0, y - 8) };
+    dex.contentCache = { key: cacheKey, value };
+    return value;
   }
   function clampDexScroll() { dex.scrollY = Math.max(0, Math.min(dex.maxScroll || 0, Number(dex.scrollY) || 0)); }
   function ensureDexSelectionVisible() {
@@ -1312,7 +1322,7 @@
       else { const selected = dex.list[dex.sel]; dex.sort = hit.value; refreshDexList(selected); ensureDexSelectionVisible(); }
       return;
     }
-    if (hit && hit.action === 'group') { dex.group = !dex.group; dex.scrollY = 0; ensureDexSelectionVisible(); return; }
+    if (hit && hit.action === 'group') { dex.group = !dex.group; dex.contentCache = null; dex.scrollY = 0; ensureDexSelectionVisible(); return; }
     if (hit && hit.action === 'card') { dex.sel = hit.value; ensureDexSelectionVisible(); }
     const layout = dexLayout(dex.list.length);
     if (y >= layout.oy && y <= layout.gridBottom) dex.drag = { pointerId, startY: y, lastY: y, moved: false };
@@ -1330,7 +1340,7 @@
     else if (k === 'home') dex.sel = 0;
     else if (k === 'end') dex.sel = n - 1;
     else if (k === 'r') cycleDexSort();
-    else if (k === 'g') { dex.group = !dex.group; dex.scrollY = 0; ensureDexSelectionVisible(); }
+    else if (k === 'g') { dex.group = !dex.group; dex.contentCache = null; dex.scrollY = 0; ensureDexSelectionVisible(); }
     else if (k === 'enter' || k === ' ') {
       const info = kanjiInfo(dex.list[dex.sel]);
       if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) { showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return; }
@@ -1343,8 +1353,18 @@
 
   // ---------- VÒNG LẶP ----------
   let last = 0;
+  function targetFrameMs() {
+    const render = C.RENDER || {};
+    const active = state === 'battle' || state === 'capture' || (state === 'overworld' && (player.moving || fishing));
+    const fps = active ? (render.activeFps || 60) : state === 'overworld' ? (render.idleFps || 30) : (render.uiFps || 30);
+    return 1000 / Math.max(1, fps);
+  }
   function loop(t) {
-    const dt = Math.min(50, t - last); last = t;
+    if (document.hidden) { last = t; requestAnimationFrame(loop); return; }
+    if (!last) last = t - targetFrameMs();
+    const elapsed = t - last;
+    if (elapsed + 0.5 < targetFrameMs()) { requestAnimationFrame(loop); return; }
+    const dt = Math.min(50, elapsed); last = t;
     if (state === 'overworld') updateOverworld(dt);
     else if (state === 'battle') updateBattle(dt);
     else if (state === 'capture') updateCapture(dt);
@@ -1353,6 +1373,7 @@
     render();
     requestAnimationFrame(loop);
   }
+  document.addEventListener?.('visibilitychange', () => { last = 0; });
   function updateOverworld(dt) {
     if (dialog.active) return;
     if (fishing) { updateFishing(dt); return; }
@@ -1433,18 +1454,42 @@
   }
 
   // ---------- VẼ ----------
+  let worldGroundCache = null;
   function drawTile(idx, sx, sy) { cx.drawImage(imgs.tileset, idx * TILE, 0, TILE, TILE, sx, sy, TILE, TILE); }
   function drawSprite(img, dir, frame, sx, sy) { cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx, sy, TILE, TILE); }
+  function drawStaticGroundDetail(context, idx, sx, sy, gx, gy) {
+    if (idx === K.PATH && ((gx * 13 + gy * 7) % 5 === 0)) {
+      context.fillStyle = 'rgba(120,92,52,.22)'; context.fillRect(sx + 7, sy + 21, 2, 1); context.fillRect(sx + 23, sy + 8, 1, 2);
+    } else if (idx === K.GRASS && ((gx * 17 + gy * 19) % 11 === 0)) {
+      context.fillStyle = 'rgba(28,112,50,.24)'; context.fillRect(sx + 8, sy + 12, 1, 3); context.fillRect(sx + 10, sy + 13, 1, 2);
+    }
+  }
+  function ensureWorldGroundCache() {
+    if (worldGroundCache || !imgs.tileset || typeof document.createElement !== 'function') return worldGroundCache;
+    const canvas = document.createElement('canvas'); canvas.width = MAP_W * TILE; canvas.height = MAP_H * TILE;
+    const context = canvas.getContext('2d'); context.imageSmoothingEnabled = false;
+    for (let gy = 0; gy < MAP_H; gy++) for (let gx = 0; gx < MAP_W; gx++) {
+      const source = TILES[gy][gx], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
+      const sx = gx * TILE, sy = gy * TILE;
+      context.drawImage(imgs.tileset, idx * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
+      if (idx !== K.WATER) drawStaticGroundDetail(context, idx, sx, sy, gx, gy);
+    }
+    worldGroundCache = canvas;
+    return worldGroundCache;
+  }
+  function visibleTileBounds(camX, camY) {
+    return {
+      startX: Math.max(0, Math.floor(camX / TILE) - 1), startY: Math.max(0, Math.floor(camY / TILE) - 1),
+      endX: Math.min(MAP_W - 1, Math.ceil((camX + VIEW_PX_W) / TILE) + 1),
+      endY: Math.min(MAP_H - 1, Math.ceil((camY + VIEW_PX_H) / TILE) + 1),
+    };
+  }
   function drawGroundDetail(idx, sx, sy, gx, gy, now) {
     if (idx === K.WATER) {
       const wave = (now / 180 + gx * 7 + gy * 11) % 18;
       cx.strokeStyle = 'rgba(180,235,255,.38)'; cx.lineWidth = 1;
       cx.beginPath(); cx.moveTo(sx + 3 + wave, sy + 9); cx.lineTo(sx + 10 + wave, sy + 9); cx.stroke();
       cx.beginPath(); cx.moveTo(sx + 18 - wave / 2, sy + 24); cx.lineTo(sx + 25 - wave / 2, sy + 24); cx.stroke();
-    } else if (idx === K.PATH && ((gx * 13 + gy * 7) % 5 === 0)) {
-      cx.fillStyle = 'rgba(120,92,52,.22)'; cx.fillRect(sx + 7, sy + 21, 2, 1); cx.fillRect(sx + 23, sy + 8, 1, 2);
-    } else if (idx === K.GRASS && ((gx * 17 + gy * 19) % 11 === 0)) {
-      cx.fillStyle = 'rgba(28,112,50,.24)'; cx.fillRect(sx + 8, sy + 12, 1, 3); cx.fillRect(sx + 10, sy + 13, 1, 2);
     }
   }
   function drawRunDust(camX, camY) {
@@ -1504,13 +1549,13 @@
   function renderOverworld() {
     let camX = player.px + TILE / 2 - VIEW_PX_W / 2, camY = player.py + TILE / 2 - VIEW_PX_H / 2;
     camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
-    const frameNow = performance.now();
-    for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
-      const idx = TILES[y][x], sx = x * TILE - camX, sy = y * TILE - camY;
-      if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
-      const isAcademy = [K.ACADEMY_DOOR, K.ACADEMY_WALL, K.ACADEMY_ROOF].includes(idx);
-      drawTile(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy);
-      drawGroundDetail(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy, x, y, frameNow);
+    const frameNow = performance.now(), bounds = visibleTileBounds(camX, camY), ground = ensureWorldGroundCache();
+    if (ground) cx.drawImage(ground, camX, camY, VIEW_PX_W, VIEW_PX_H, 0, 0, VIEW_PX_W, VIEW_PX_H);
+    for (let y = bounds.startY; y <= bounds.endY; y++) for (let x = bounds.startX; x <= bounds.endX; x++) {
+      const source = TILES[y][x], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
+      const sx = x * TILE - camX, sy = y * TILE - camY;
+      if (!ground) { drawTile(idx, sx, sy); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
+      if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
     }
     drawAcademy(camX, camY);
     for (const n of NPCS) {
@@ -1522,8 +1567,9 @@
     if (player.onBoat) drawTile(K.BOAT, Math.round(player.px - camX), Math.round(player.py - camY));
     drawSprite(imgs.player, player.facing, player.frame, Math.round(player.px - camX), Math.round(player.py - camY));
     drawFishing(camX, camY);
-    for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
-      if (TILES[y][x] !== K.TREE) continue; const sx = x * TILE - camX, sy = y * TILE - camY;
+    for (const { gx: x, gy: y } of TREE_CELLS) {
+      if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
+      const sx = x * TILE - camX, sy = y * TILE - camY;
       if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
       cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17, sy + 27, 13, 5, 0, 0, Math.PI * 2); cx.fill();
       drawTile(K.TREE, sx, sy);
@@ -2509,7 +2555,7 @@
         cx.fillText(row.section.locked ? `${row.section.label}  🔒 CẦN HUY HIỆU N5` : `${row.section.label}  ${sectionCaptured}/${row.section.list.length}`, layout.ox + 10, y + 17); continue;
       }
       row.list.forEach((char, col) => {
-        const index = list.indexOf(char), info = kanjiInfo(char); if (!info) return;
+        const index = dex.indexByChar.get(char) ?? -1, info = kanjiInfo(char); if (!info) return;
         const id = info.monId, monster = C.MONSTERS[id]; if (!monster) return;
         const stat = ensureMastery(char), unlocked = stat.captured, selected = index === dex.sel, following = unlocked && id === currentPetId;
         const x = layout.ox + col * (layout.cardW + layout.gapX);
@@ -2609,6 +2655,7 @@
     tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, hasBadge,
     getPveResult: () => pveResult, getCanvasSize: () => ({ width: cv.width, height: cv.height }),
     resetPetTrail, recordPlayerTrail, petFollowPosition, getPetTrail: () => trail.map((point) => ({ ...point })),
+    renderOnce: render, targetFrameMs, ensureWorldGroundCache,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;
   if (typeof module !== 'undefined') module.exports = { _debug: debugApi };

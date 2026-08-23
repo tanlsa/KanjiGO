@@ -22,6 +22,7 @@ function createGame({ learningSave = null, disableTestUnlocks = false, viewportW
     addEventListener: noop,
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 640, height: 480 }),
   };
+  const createCanvas = () => ({ width: 0, height: 0, getContext: () => canvasContext });
   class MockImage {
     set src(value) { this._src = value; imageRequests.push(value); if (this.onload) queueMicrotask(() => this.onload()); }
     get src() { return this._src; }
@@ -33,6 +34,7 @@ function createGame({ learningSave = null, disableTestUnlocks = false, viewportW
     document: {
       getElementById: (id) => id === 'game' ? canvas : null,
       querySelectorAll: () => [],
+      createElement: (tag) => tag === 'canvas' ? createCanvas() : {},
     },
     localStorage: {
       getItem: (key) => storage.has(key) ? storage.get(key) : null,
@@ -71,6 +73,23 @@ test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
   assert.equal(imageRequests.length, 5);
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
+});
+
+test('world render builds and reuses one static ground layer', async () => {
+  const { debug } = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.doesNotThrow(() => debug.renderOnce());
+  const first = debug.ensureWorldGroundCache();
+  assert.ok(first);
+  debug.renderOnce();
+  assert.equal(debug.ensureWorldGroundCache(), first);
+});
+
+test('frame budget uses 60 FPS for action and 30 FPS for idle UI', () => {
+  const { debug } = createGame();
+  assert.ok(Math.abs(debug.targetFrameMs() - 1000 / 30) < 0.01);
+  debug.startBattle('grass');
+  assert.ok(Math.abs(debug.targetFrameMs() - 1000 / 60) < 0.01);
 });
 
 test('pet follow distance stays stable regardless of trail sample density', () => {
