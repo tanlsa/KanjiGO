@@ -76,10 +76,18 @@ test('render buffer is capped while preserving the viewport aspect ratio', () =>
   assert.equal(size.height, 720);
 });
 
+test('mobile overworld zooms out enough to frame the grand academy', () => {
+  const { debug } = createGame({ viewportWidth: 390, viewportHeight: 844 });
+  const zoom = debug.getWorldZoom();
+  assert.ok(zoom >= 1 && zoom < 2);
+  assert.ok(11 * 32 * zoom <= 390, 'academy footprint should fit the mobile viewport');
+});
+
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 6);
+  assert.equal(imageRequests.length, 7);
   assert.ok(imageRequests.includes('assets/characters/player-bicycle.png'));
+  assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
 });
 
@@ -146,6 +154,38 @@ test('N4 is badge-gated when the temporary QA override is disabled', () => {
   assert.equal(debug.isTierUnlocked('N4'), false);
   assert.equal(debug.tierProgress('N5').total, 79);
   assert.equal(debug.tierProgress('N4').total, 140);
+});
+
+test('themed Trainer unlocks at its collection threshold and uses at most five captured Kanji', () => {
+  const { debug, storage } = createGame();
+  assert.equal(debug.trainerStatus('gardener').state, 'locked');
+  for (const char of ['木', '山', '川']) debug.mastery()[char].captured = true;
+  const ready = debug.trainerStatus('gardener');
+  assert.equal(ready.state, 'ready');
+  assert.deepEqual([...ready.team].sort(), ['山', '川', '木'].sort());
+  assert.equal(debug.startTrainer('gardener'), true);
+  assert.equal(debug.getPve().mode, 'trainer');
+  assert.ok(debug.getPve().pool.length <= 5);
+  while (debug.getPve().phase === 'fight') {
+    debug.answerPve(debug.getPve().q.correctIndex);
+    debug.updatePve(600);
+  }
+  assert.equal(debug.trainerStatus('gardener').state, 'defeated');
+  assert.equal(debug.trainerWinsCount(), 1);
+  assert.equal(JSON.parse(storage.get('KANJIGO_LEARNING_V1')).trainerWins.gardener, true);
+});
+
+test('N5 Boss requires full N5 study and the configured Trainer win count', () => {
+  const trainerWins = Object.fromEntries(['gardener', 'parent', 'student', 'timekeeper', 'traveler', 'chef', 'conductor', 'neighbor', 'explorer', 'weather_kid'].map((id) => [id, true]));
+  const withoutWins = createGame();
+  for (const stat of Object.values(withoutWins.debug.mastery())) if (stat && typeof stat === 'object') stat.captured = true;
+  assert.equal(withoutWins.debug.startGym('N5'), false);
+
+  const qualified = createGame({ learningSave: { trainerWins } });
+  for (const stat of Object.values(qualified.debug.mastery())) if (stat && typeof stat === 'object') stat.captured = true;
+  assert.equal(qualified.debug.trainerWinsCount(), 10);
+  assert.equal(qualified.debug.startGym('N5'), true);
+  assert.equal(qualified.debug.getPve().mode, 'gym');
 });
 
 test('a wrong battle answer damages the player and keeps the same question', () => {

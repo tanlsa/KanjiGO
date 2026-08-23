@@ -139,6 +139,62 @@ test('spawn pools, assets, map, and progression references are valid', () => {
   }
 });
 
+test('N5 Trainer Arena themes are playable with valid curriculum content', () => {
+  const { CONFIG, MAP_DATA, KANJI_CATALOG, KANJI_DB } = loadDataContext();
+  const arena = CONFIG.TRAINER_ARENA, trainers = arena.trainers;
+  const n5 = new Set(KANJI_CATALOG.tiers.N5.kanji);
+  const metadata = new Map(Object.values(KANJI_DB.KANJI).map((info) => [info.char, info]));
+  const questionTargets = new Set(KANJI_DB.QUESTIONS.map((question) => question.target));
+  assert.equal(trainers.length, 15);
+  assert.equal(new Set(trainers.map((trainer) => trainer.id)).size, trainers.length, 'Trainer IDs must be unique');
+  for (const trainer of trainers) {
+    assert.ok(trainer.name && trainer.theme && trainer.icon, `${trainer.id} is missing presentation data`);
+    assert.ok(trainer.kanji.length >= arena.minCollected, `${trainer.id} cannot reach its unlock requirement`);
+    assert.ok(trainer.kanji.length <= 6, `${trainer.id} theme is too broad`);
+    for (const char of trainer.kanji) {
+      assert.ok(n5.has(char), `${trainer.id} includes non-N5 Kanji ${char}`);
+      assert.ok(metadata.has(char) && questionTargets.has(char), `${trainer.id}/${char} has incomplete learning content`);
+      assert.ok(CONFIG.MONSTERS[metadata.get(char).monId], `${trainer.id}/${char} has no mascot`);
+    }
+  }
+  const trainerNpcs = MAP_DATA.NPCS.filter((npc) => npc.type === 'trainer');
+  assert.equal(trainerNpcs.length, trainers.length);
+  assert.deepEqual(new Set(trainerNpcs.map((npc) => npc.trainerId)), new Set(trainers.map((trainer) => trainer.id)));
+  const occupied = new Set();
+  for (const npc of MAP_DATA.NPCS) {
+    const key = `${npc.gx},${npc.gy}`;
+    assert.ok(!occupied.has(key), `multiple NPCs occupy ${key}`); occupied.add(key);
+    assert.ok(!CONFIG.BLOCKED_TILES.includes(MAP_DATA.TILES[npc.gy][npc.gx]), `NPC ${key} stands on a blocked tile`);
+  }
+});
+
+test('three world zones and every NPC are reachable from the campus start', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  for (const id of ['campus', 'wilderness', 'arena']) assert.ok(MAP_DATA.AREAS[id], `missing world zone ${id}`);
+  const blocked = new Set(CONFIG.BLOCKED_TILES), height = MAP_DATA.TILES.length, width = MAP_DATA.TILES[0].length;
+  const start = [CONFIG.PLAYER.startGx, CONFIG.PLAYER.startGy], queue = [start], visited = new Set([start.join(',')]);
+  for (let cursor = 0; cursor < queue.length; cursor++) {
+    const [x, y] = queue[cursor];
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = x + dx, ny = y + dy, key = `${nx},${ny}`;
+      if (nx < 0 || ny < 0 || nx >= width || ny >= height || visited.has(key) || blocked.has(MAP_DATA.TILES[ny][nx])) continue;
+      visited.add(key); queue.push([nx, ny]);
+    }
+  }
+  const destinations = [
+    [CONFIG.ACADEMY.doorGx, CONFIG.ACADEMY.doorGy, 'academy door'],
+    [MAP_DATA.AREAS.wilderness.signGx, MAP_DATA.AREAS.wilderness.signGy, 'wilderness entrance'],
+    [MAP_DATA.ARENA.centerGx, MAP_DATA.ARENA.centerGy, 'arena boss'],
+    ...MAP_DATA.NPCS.map((npc) => [npc.gx, npc.gy, `NPC ${npc.gx},${npc.gy}`]),
+  ];
+  for (const [x, y, label] of destinations) assert.ok(visited.has(`${x},${y}`), `${label} is unreachable from player start`);
+  const wilderness = MAP_DATA.AREAS.wilderness;
+  const wildernessTiles = MAP_DATA.TILES.slice(wilderness.y, wilderness.y + wilderness.height)
+    .flatMap((row) => row.slice(wilderness.x, wilderness.x + wilderness.width));
+  assert.ok(wildernessTiles.includes(CONFIG.TILE_KEYS.WATER), 'wilderness must contain water');
+  assert.ok(wildernessTiles.includes(CONFIG.TILE_KEYS.TALLGRASS), 'wilderness must contain encounter grass');
+});
+
 test('character animation sheets use the shared transparent 4x4 layout', () => {
   const { CONFIG } = loadDataContext();
   for (const asset of [CONFIG.ASSETS.player, CONFIG.ASSETS.playerBicycle, CONFIG.ASSETS.npc]) {
@@ -147,6 +203,30 @@ test('character animation sheets use the shared transparent 4x4 layout', () => {
     assert.equal(png.height, 128, `${asset} must be 128px high`);
     assert.ok(png.colorType === 4 || png.colorType === 6, `${asset} must contain an alpha channel`);
   }
+});
+
+test('extended terrain atlas contains sixteen 32px tiles', () => {
+  const { CONFIG } = loadDataContext();
+  const png = pngInfo(CONFIG.ASSETS.terrainTiles);
+  assert.equal(png.width, 16 * CONFIG.TILE);
+  assert.equal(png.height, CONFIG.TILE);
+  assert.ok(png.colorType === 2 || png.colorType === 6, 'terrain atlas must be RGB/RGBA');
+});
+
+test('legacy world atlas contains seven 32px tiles', () => {
+  const { CONFIG } = loadDataContext();
+  const png = pngInfo(CONFIG.ASSETS.tileset);
+  assert.equal(png.width, 7 * CONFIG.TILE);
+  assert.equal(png.height, CONFIG.TILE);
+  assert.ok(png.colorType === 2 || png.colorType === 6, 'world atlas must be RGB/RGBA');
+});
+
+test('academy sprite exactly matches its configured tile footprint', () => {
+  const { CONFIG } = loadDataContext();
+  const png = pngInfo(CONFIG.ASSETS.academy);
+  assert.equal(png.width, CONFIG.ACADEMY.width * CONFIG.TILE);
+  assert.equal(png.height, CONFIG.ACADEMY.height * CONFIG.TILE);
+  assert.ok(png.colorType === 4 || png.colorType === 6, 'academy must have a transparent background');
 });
 
 test('CSV templates exactly mirror packaged runtime data', () => {

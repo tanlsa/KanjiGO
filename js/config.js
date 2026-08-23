@@ -16,7 +16,8 @@ window.CONFIG = {
     playerBicycle: 'assets/characters/player-bicycle.png',
     npc:     'assets/characters/npc.png',
     tileset: 'assets/world/tileset.png',
-    academy: 'assets/world/academy.png',
+    terrainTiles: 'assets/world/terrain-tiles.png',
+    academy: 'assets/world/academy-grand.png',
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
@@ -30,9 +31,13 @@ window.CONFIG = {
   TILE_KEYS: {
     GRASS: 0, TREE: 1, WATER: 2, PATH: 3, FLOWER: 4, TALLGRASS: 5, BOAT: 6,
     ACADEMY_DOOR: 7, ACADEMY_WALL: 8, ACADEMY_ROOF: 9,
+    PLAZA: 10, COBBLE: 11, ARENA_STONE: 12, DARK_STONE: 13,
+    GOLD_FLOOR: 14, BRICK: 15, SOIL: 16, GARDEN: 17,
+    VIVID_GRASS: 18, DARK_GRASS: 19, MOSS_STONE: 20, SHORE_STONE: 21,
+    RED_CARPET: 22, BLUE_CARPET: 23, GRAVEL: 24, WORN_PATH: 25,
   },
   BLOCKED_TILES: [1, 2, 6, 8, 9],
-  ACADEMY: { gx: 3, gy: 1, width: 5, height: 4, doorGx: 5, doorGy: 4 },
+  ACADEMY: { gx: 2, gy: 2, width: 11, height: 7, doorGx: 7, doorGy: 8 },
 
   ENCOUNTER: {
     TALLGRASS: 0.22, SURF: 0.15, FISH: 0.55,
@@ -49,7 +54,7 @@ window.CONFIG = {
   },
 
   // --- PLAYER (là người chiến đấu, có HP) ---
-  PLAYER: { name: 'Bạn', maxHp: 30, startGx: 3, startGy: 5 },
+  PLAYER: { name: 'Bạn', maxHp: 30, startGx: 7, startGy: 11 },
 
   // --- ⚔️ COMBAT REALTIME (quiz kanji) ---
   COMBAT: {
@@ -129,6 +134,33 @@ window.CONFIG = {
       { grade: 'B', min: 0.70, expMult: 1.5 },
       { grade: 'C', min: 0.50, expMult: 1.0 },
       { grade: 'D', min: 0.00, expMult: 0.5 },
+    ],
+  },
+  TRAINER_ARENA: {
+    tier: 'N5',
+    questions: 7,
+    passRatio: 0.70,
+    teamSize: 5,
+    minCollected: 3,
+    requiredTrainerWins: 10,
+    // Các roster dưới đây chỉ dùng Kanji N5 để không tạo khóa cứng trước Gym N5.
+    // Những chữ N4 trong bản brainstorm (森, 兄, 駅...) dành cho Trainer N4 sau này.
+    trainers: [
+      { id: 'gardener', icon: '🌱', name: 'Người Làm Vườn', theme: 'Thiên nhiên', kanji: ['木', '山', '川', '土', '天'] },
+      { id: 'parent', icon: '👨‍👩‍👧', name: 'Phụ Huynh', theme: 'Gia đình', kanji: ['父', '母', '子', '女', '男'] },
+      { id: 'student', icon: '🏫', name: 'Học Sinh', theme: 'Trường học', kanji: ['学', '校', '先', '生', '友'] },
+      { id: 'timekeeper', icon: '🕐', name: 'Người Giữ Giờ', theme: 'Thời gian', kanji: ['日', '月', '年', '時', '分'] },
+      { id: 'traveler', icon: '🚶', name: 'Lữ Khách', theme: 'Di chuyển', kanji: ['行', '来', '入', '出', '休'] },
+      { id: 'chef', icon: '🍚', name: 'Đầu Bếp', theme: 'Ẩm thực', kanji: ['食', '水', '火', '午'] },
+      { id: 'conductor', icon: '🚆', name: 'Trưởng Tàu', theme: 'Giao thông', kanji: ['車', '電', '行', '来', '出'] },
+      { id: 'neighbor', icon: '🏠', name: 'Hàng Xóm', theme: 'Không gian nhà', kanji: ['外', '中', '上', '下', '入'] },
+      { id: 'explorer', icon: '🗺️', name: 'Nhà Thám Hiểm', theme: 'Phương hướng', kanji: ['東', '西', '南', '北', '左', '右'] },
+      { id: 'weather_kid', icon: '🌤️', name: 'Cậu Bé Thời Tiết', theme: 'Thời tiết', kanji: ['天', '気', '雨', '日', '月'] },
+      { id: 'doctor', icon: '👨‍⚕️', name: 'Bác Sĩ', theme: 'Con người', kanji: ['人', '生', '女', '男', '子'] },
+      { id: 'citizen', icon: '🏙️', name: 'Công Dân', theme: 'Quốc gia', kanji: ['国', '東', '西', '南', '北'] },
+      { id: 'merchant', icon: '💰', name: 'Thương Nhân', theme: 'Tiền và số', kanji: ['円', '百', '千', '万', '金'] },
+      { id: 'librarian', icon: '📖', name: 'Thủ Thư', theme: 'Học tập', kanji: ['本', '書', '読', '名', '学'] },
+      { id: 'artist', icon: '🎨', name: 'Họa Sĩ', theme: 'Màu và cơ bản', kanji: ['白', '大', '小', '一', '二'] },
     ],
   },
   PROGRESSION: {

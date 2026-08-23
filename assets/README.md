@@ -10,7 +10,9 @@ assets/
 │   └── npc.png
 ├── world/
 │   ├── tileset.png
-│   └── academy.png
+│   ├── terrain-tiles.png
+│   ├── academy.png
+│   └── academy-grand.png
 └── monsters/
     └── <monId>/
         └── sprite.png
@@ -34,7 +36,36 @@ swift scripts/prepare-character-spritesheet.swift BIKE_INPUT.png assets/characte
 0 cỏ | 1 cây | 2 nước | 3 đường | 4 hoa | 5 bụi cỏ | 6 thuyền
 ```
 
-Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng `world/academy.png`, nên không cần nằm trong tileset. `academy.png` là sprite RGBA `160×128 px` (footprint `5×4` tile); cửa chính nằm giữa ô dưới cùng để khớp `ACADEMY_DOOR` tại `(5, 4)`.
+Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng `world/academy-grand.png`, nên không cần nằm trong tileset. Resource runtime mới là sprite RGBA `352×224 px` với footprint `11×7` tile; cửa chính nằm chính giữa hàng dưới cùng để khớp `ACADEMY_DOOR` tại `(7, 8)`. `academy.png` được giữ làm resource legacy tham chiếu.
+
+Chuẩn hóa ảnh nguồn Giảng đường, loại checkerboard giả và đưa về đúng footprint:
+
+```sh
+swift scripts/prepare-academy-sprite.swift INPUT.png assets/world/academy-grand.png 352 224
+```
+
+`world/terrain-tiles.png` là atlas mở rộng `512×32 px`, gồm 16 tile `32×32 px` theo thứ tự:
+
+```text
+10 quảng trường | 11 đá lát | 12 huy hiệu Arena | 13 đá xanh đậm
+14 sàn viền vàng | 15 gạch đỏ | 16 đất ấm | 17 vườn hoa
+18 cỏ sáng | 19 cỏ tối | 20 đá rêu | 21 bờ nước
+22 thảm đỏ | 23 thảm xanh | 24 sỏi | 25 đường mòn
+```
+
+Chuẩn hóa một ảnh atlas nguồn `4×4` thành strip runtime bằng nearest-neighbor:
+
+```sh
+swift scripts/prepare-terrain-atlas.swift INPUT_4X4.png assets/world/terrain-tiles.png
+```
+
+Script cũng hỗ trợ atlas có grid khác. Bộ tile gốc được chuẩn hóa từ nguồn `4×2`, lấy 7 ô đầu:
+
+```sh
+swift scripts/prepare-terrain-atlas.swift INPUT_4X2.png assets/world/tileset.png 4 2 7 legacy
+```
+
+Chế độ `legacy` phóng nhẹ silhouette của cây, bụi cỏ và bến để các object vẫn đọc rõ ở kích thước runtime `32px`.
 
 ## Monsters
 
