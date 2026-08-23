@@ -31,7 +31,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 ## ✨ Cập nhật bản này
 1. **World 32×24 có nhiều phân khu:** học viện, quảng trường, hồ/bến thuyền, đồng cỏ, rừng và đấu trường được nối bằng các trục đường rõ ràng.
 2. **Chạy và câu cá có animation:** giữ `Shift` để chạy nhanh; đứng sát hồ, quay mặt về nước và nhấn `Space` để thả cần.
-3. **Player/NPC FPT mới:** spritesheet sạch viền, áo cam và thẻ nhân viên rõ ở kích thước tile `32×32`.
+3. **Player/NPC FPT mới:** player áo cam, NPC áo xanh và thẻ nhân viên rõ ở kích thước tile `32×32`; bốn hướng dùng chung tỷ lệ, baseline và canonical head để animation không rung hình.
 4. **Khung học được thiết kế lại — hết đè/chèn chữ.** Câu hỏi, nghĩa, 4 đáp án và dòng
    trạng thái nay nằm ở các vùng riêng biệt; feedback "đúng/sai" hiển thị dạng **banner nổi**
    phía trên khung nên không chồng lên đáp án. (chỉnh chiều cao khung ở `js/config.js → UI.panelH`).

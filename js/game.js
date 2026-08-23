@@ -9,8 +9,8 @@
   const TILES = window.MAP_DATA.TILES;
   const NPCS = window.MAP_DATA.NPCS;
   const ARENA = window.MAP_DATA.ARENA || null;
-  const MAP_AREAS = window.MAP_DATA.AREAS || {};
   const MAP_SIGNS = window.MAP_DATA.SIGNS || [];
+  const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
   const KDB = window.KANJI_DB;
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
@@ -2181,7 +2181,10 @@
       const animMs = isBicycleActive() ? C.ANIM_MS * Math.max(.3, Number(C.BICYCLE && C.BICYCLE.animMultiplier) || .55)
         : player.running ? (C.RUN_ANIM_MS || C.ANIM_MS * 0.6) : C.ANIM_MS;
       player.animT += dt; if (player.animT >= animMs) { player.animT = 0; player.frame = (player.frame + 1) % C.FRAMES; }
-      if (k >= 1) { player.moving = false; player.running = false; player.frame = 0; onStepComplete(); }
+      // Preserve the animation phase at tile boundaries. Holding a direction
+      // therefore continues the same four-frame cycle instead of snapping to
+      // frame zero after every 32 px step. The idle branch resets it naturally.
+      if (k >= 1) { player.moving = false; player.running = false; onStepComplete(); }
     } else {
       const autoDirection = nextAutoRideDirection();
       if (autoDirection) tryMove(autoDirection);
@@ -2261,14 +2264,26 @@
 
   // ---------- VẼ ----------
   let worldGroundCache = null;
-  function drawTileOn(context, idx, sx, sy) {
+  function drawTileOn(context, idx, sx, sy, gx = 0, gy = 0) {
+    if (idx === K.GARDEN && imgs.tulip_tiles) {
+      const variant = (Math.abs(gx) % 2) + (Math.abs(gy) % 2) * 2;
+      context.drawImage(imgs.tulip_tiles, variant * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
+      return;
+    }
     const isTerrain = idx >= K.PLAZA && idx <= K.WORN_PATH && imgs.terrain_tiles;
     const atlas = isTerrain ? imgs.terrain_tiles : imgs.tileset;
     const atlasIndex = isTerrain ? idx - K.PLAZA : idx;
     context.drawImage(atlas, atlasIndex * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
   }
   function drawTile(idx, sx, sy) { drawTileOn(cx, idx, sx, sy); }
-  function drawSprite(img, dir, frame, sx, sy) { cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx, sy, TILE, TILE); }
+  function drawSprite(img, dir, frame, sx, sy, size = TILE) {
+    const offsetX = (size - TILE) / 2, offsetY = size - TILE;
+    cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx - offsetX, sy - offsetY, size, size);
+  }
+  function drawCharacterShadow(sx, sy, width = 18) {
+    cx.fillStyle = 'rgba(16,24,28,.22)';
+    cx.beginPath(); cx.ellipse(sx + TILE / 2, sy + TILE - 2, width / 2, 3, 0, 0, Math.PI * 2); cx.fill();
+  }
   function drawStaticGroundDetail(context, idx, sx, sy, gx, gy) {
     if (idx === K.PATH && ((gx * 13 + gy * 7) % 5 === 0)) {
       context.fillStyle = 'rgba(120,92,52,.22)'; context.fillRect(sx + 7, sy + 21, 2, 1); context.fillRect(sx + 23, sy + 8, 1, 2);
@@ -2283,7 +2298,7 @@
     for (let gy = 0; gy < MAP_H; gy++) for (let gx = 0; gx < MAP_W; gx++) {
       const source = TILES[gy][gx], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
       const sx = gx * TILE, sy = gy * TILE;
-      drawTileOn(context, idx, sx, sy);
+      drawTileOn(context, idx, sx, sy, gx, gy);
       if (idx !== K.WATER) drawStaticGroundDetail(context, idx, sx, sy, gx, gy);
     }
     worldGroundCache = canvas;
@@ -2374,28 +2389,24 @@
     if (dialog.active) drawDialog(); else if (toast.t > 0) drawToast();
   }
   function renderOverworld() {
-    let camX = player.px + TILE / 2 - VIEW_PX_W / 2;
-    let verticalAnchor = .5;
-    const campus = MAP_AREAS.campus;
-    if (campus && player.gx >= campus.x && player.gx < campus.x + campus.width && player.gy <= campus.y + campus.height + 1) {
-      const approach = Math.max(0, Math.min(1, (campus.y + campus.height + 1 - player.gy) / 4));
-      verticalAnchor += .44 * approach;
-    }
-    let camY = player.py + TILE / 2 - VIEW_PX_H * verticalAnchor;
-    camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
+    const camera = overworldCamera();
+    let camX = camera.camX, camY = camera.camY;
     const frameNow = performance.now(), bounds = visibleTileBounds(camX, camY), ground = ensureWorldGroundCache();
     if (ground) cx.drawImage(ground, camX, camY, VIEW_PX_W, VIEW_PX_H, 0, 0, VIEW_PX_W, VIEW_PX_H);
     for (let y = bounds.startY; y <= bounds.endY; y++) for (let x = bounds.startX; x <= bounds.endX; x++) {
       const source = TILES[y][x], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
       const sx = x * TILE - camX, sy = y * TILE - camY;
-      if (!ground) { drawTile(idx, sx, sy); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
+      if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
       if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
     }
     drawTrainerArena(camX, camY);
     drawAcademy(camX, camY);
+    drawTulipGardens(camX, camY, frameNow);
     drawMapSigns(camX, camY);
     for (const n of NPCS) {
-      drawSprite(imgs.npc, 'down', 0, n.gx * TILE - camX, n.gy * TILE - camY);
+      const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
+      drawCharacterShadow(npcX, npcY);
+      drawSprite(imgs.npc, 'down', 0, npcX, npcY);
       if (n.icon) { cx.font = '14px sans-serif'; cx.fillText(n.icon, n.gx * TILE - camX + 7, n.gy * TILE - camY - 3); }
       if (n.type === 'trainer') {
         const status = trainerStatus(n.trainerId), marker = status.state === 'defeated' ? '✓' : status.state === 'locked' ? '🔒' : '⚔';
@@ -2406,7 +2417,16 @@
     drawPet(camX, camY);
     drawRunDust(camX, camY);
     if (player.onBoat) drawTile(K.BOAT, Math.round(player.px - camX), Math.round(player.py - camY));
-    drawSprite(isBicycleActive() ? imgs.player_bicycle : imgs.player, player.facing, player.frame, Math.round(player.px - camX), Math.round(player.py - camY));
+    const playerX = Math.round(player.px - camX), playerY = Math.round(player.py - camY);
+    const riding = isBicycleActive();
+    if (!player.onBoat) drawCharacterShadow(playerX, playerY, riding ? 27 : 18);
+    // Keep the bicycle in the foreground and lift the canonical player behind
+    // it. Mounting never swaps the rider's face, uniform or animation source.
+    const riderY = playerY - (riding ? Math.max(0, Number(C.BICYCLE.riderLift) || 0) : 0);
+    const bicycleY = playerY + (riding && (player.facing === 'down' || player.facing === 'up')
+      ? Math.max(0, Number(C.BICYCLE.verticalOverlayDrop) || 0) : 0);
+    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY);
+    if (riding) drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY, TILE * (C.BICYCLE.spriteScale || 1));
     drawFishing(camX, camY);
     for (const { gx: x, gy: y } of TREE_CELLS) {
       if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
@@ -2416,20 +2436,34 @@
       drawTile(K.TREE, sx, sy);
     }
   }
+  function overworldCamera() {
+    let camX = player.px + TILE / 2 - VIEW_PX_W / 2;
+    let camY = player.py + TILE / 2 - VIEW_PX_H / 2;
+    camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
+    return { camX, camY };
+  }
   function drawTrainerArena(camX, camY) {
     if (!ARENA) return;
     const left = ARENA.x * TILE - camX, top = ARENA.y * TILE - camY;
     const width = ARENA.width * TILE, height = ARENA.height * TILE;
     cx.fillStyle = 'rgba(17,25,48,.12)'; cx.fillRect(left + 5, top + 7, width - 10, height - 8);
+    // Atlas runtime: ngang, dọc, bo trên-trái, trên-phải, dưới-trái, dưới-phải.
+    const wallVariant = (gx, gy) => {
+      const leftEdge = gx === ARENA.x, rightEdge = gx === ARENA.x + ARENA.width - 1;
+      const topEdge = gy === ARENA.y, bottomEdge = gy === ARENA.y + ARENA.height - 1;
+      if (topEdge && leftEdge) return 2;
+      if (topEdge && rightEdge) return 3;
+      if (bottomEdge && leftEdge) return 4;
+      if (bottomEdge && rightEdge) return 5;
+      return topEdge || bottomEdge ? 0 : 1;
+    };
     // Tường đá pixel-art, chừa bốn cổng đúng theo collision map.
     for (let gy = ARENA.y; gy < ARENA.y + ARENA.height; gy++) for (let gx = ARENA.x; gx < ARENA.x + ARENA.width; gx++) {
       if (tileAt(gx, gy) !== K.ACADEMY_WALL) continue;
       const x = gx * TILE - camX, y = gy * TILE - camY;
-      cx.fillStyle = '#243653'; cx.fillRect(x, y + 4, TILE, TILE - 4);
-      cx.fillStyle = '#55749a'; cx.fillRect(x + 2, y + 6, TILE - 4, 7);
-      cx.fillStyle = '#17243c'; cx.fillRect(x, y + TILE - 5, TILE, 5);
-      cx.fillStyle = '#d2aa48'; cx.fillRect(x + 3, y + 8, 3, 3); cx.fillRect(x + TILE - 6, y + 8, 3, 3);
-      cx.strokeStyle = 'rgba(159,216,245,.3)'; cx.lineWidth = 1; cx.strokeRect(x + 1, y + 5, TILE - 2, TILE - 6);
+      if (imgs.arena_wall_tiles) {
+        cx.drawImage(imgs.arena_wall_tiles, wallVariant(gx, gy) * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+      }
     }
     // Vòng đấu trung tâm và bệ Boss.
     const centerX = ARENA.centerGx * TILE - camX + TILE / 2, centerY = ARENA.centerGy * TILE - camY + TILE / 2;
@@ -2482,6 +2516,35 @@
     cx.strokeStyle = '#4b321f'; cx.strokeRect(plaqueX, plaqueY, plaqueW, 14);
     cx.fillStyle = '#fff1c1'; cx.font = 'bold 8px monospace'; cx.textAlign = 'center';
     cx.fillText('GIẢNG ĐƯỜNG KANJI', x + w / 2, plaqueY + 11); cx.textAlign = 'left';
+  }
+  function drawTulipGardens(camX, camY, now) {
+    if (!TULIP_GARDENS.length) return;
+    for (const garden of TULIP_GARDENS) {
+      const phase = Number(garden.phase) || 0;
+      for (let row = 0; row < garden.height; row++) for (let column = 0; column < garden.width; column++) {
+        const gx = garden.x + column, gy = garden.y + row;
+        const x = Math.round(gx * TILE - camX), y = Math.round(gy * TILE - camY);
+        const tilePhase = phase + column * 1.37 + row * 1.91;
+        const sway = Math.round(Math.sin(now / 680 + tilePhase));
+
+        // Mỗi tile có một cặp cánh hoa nhỏ đung đưa và một sparkle lệch pha.
+        // Lớp động này nằm ngoài ground cache nên cả luống hoa chuyển động nhẹ,
+        // trong khi bitmap nền liền mạch chỉ được dựng một lần.
+        cx.globalAlpha = .55;
+        cx.fillStyle = (column + row) % 2 ? '#ff8db4' : '#ffd63c';
+        cx.fillRect(x + 9 + sway, y + 12, 2, 2);
+        cx.fillStyle = '#fff4ee'; cx.fillRect(x + 22 - sway, y + 23, 2, 2);
+
+        const pulse = Math.max(0, Math.sin(now / 390 + tilePhase * 1.4));
+        if (pulse > .72) {
+          const sparkleX = x + 6 + ((gx * 11 + gy * 7) % 20), sparkleY = y + 6 + ((gx * 5 + gy * 13) % 18);
+          cx.globalAlpha = Math.min(.85, (pulse - .72) * 3.2);
+          cx.fillStyle = '#fff8b8';
+          cx.fillRect(sparkleX - 2, sparkleY, 5, 1); cx.fillRect(sparkleX, sparkleY - 2, 1, 5);
+        }
+        cx.globalAlpha = 1;
+      }
+    }
   }
   function radarSummary(now = Date.now()) {
     const entries = Object.values(KDB.KANJI).map((info) => ({ info, stat: ensureMastery(info.char) }))
@@ -3593,7 +3656,7 @@
   }
 
   // ---------- KHỞI ĐỘNG ----------
-  const toLoad = [loadImg('player', C.ASSETS.player), loadImg('player_bicycle', C.ASSETS.playerBicycle), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy)];
+  const toLoad = [loadImg('player', C.ASSETS.player), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
@@ -3636,7 +3699,8 @@
     useMeaningLens, radarSummary, cycleRadarTarget, radarEncounterMultiplier, getRadarTarget: () => radarTarget,
     toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk,
     toggleAutoRide, stopAutoRide, isAutoRideActive: () => autoRideActive, findAutoRidePath, nextAutoRideDirection,
-    getPveResult: () => pveResult, getCanvasSize: () => ({ width: cv.width, height: cv.height }), getWorldZoom: () => worldZoom, getQuizLayout: () => ({ ...quizPanelLayout(cv.width, cv.height) }),
+    getPveResult: () => pveResult, getCanvasSize: () => ({ width: cv.width, height: cv.height }), getWorldZoom: () => worldZoom,
+    getOverworldCamera: () => ({ ...overworldCamera() }), getQuizLayout: () => ({ ...quizPanelLayout(cv.width, cv.height) }),
     resetPetTrail, recordPlayerTrail, petFollowPosition, getPetTrail: () => trail.map((point) => ({ ...point })),
     renderOnce: render, targetFrameMs, ensureWorldGroundCache, updateOverworld,
   };

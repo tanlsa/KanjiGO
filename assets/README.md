@@ -7,12 +7,19 @@ assets/
 ├── characters/
 │   ├── player.png
 │   ├── player-bicycle.png
-│   └── npc.png
+│   ├── npc.png
+│   ├── player-v2.png
+│   ├── player-canonical-v2.png
+│   ├── bicycle-overlay-v2.png
+│   └── npc-v2.png
 ├── world/
 │   ├── tileset.png
 │   ├── terrain-tiles.png
 │   ├── academy.png
-│   └── academy-grand.png
+│   ├── academy-grand.png
+│   ├── arena-wall-tiles.png
+│   ├── tulip-garden.png
+│   └── tulip-tiles.png
 └── monsters/
     └── <monId>/
         └── sprite.png
@@ -20,7 +27,24 @@ assets/
 
 ## Characters
 
-`player.png`, `player-bicycle.png` và `npc.png` là spritesheet RGBA `128×128 px`, gồm `4×4` cell `32×32 px`. Thứ tự hàng phải khớp `DIR_ROW`: `down`, `left`, `right`, `up`. `player-bicycle.png` hiện là turnaround chuẩn: mỗi hàng lặp lại cùng một pose tĩnh bốn lần; hàng `right` được mirror trực tiếp từ `left` để khóa tuyệt đối tỷ lệ và hình học. Rider không lấy từ ảnh AI: pipeline ghép nguyên pixel theo từng hướng từ `player.png` lên resource xe, giữ đồng nhất tóc, khuôn mặt, đồng phục cam và thẻ FPT. Animation bàn đạp sẽ được tạo sau từ bốn canonical pose này.
+Các resource runtime `player-v2.png`, `bicycle-overlay-v2.png` và `npc-v2.png` là spritesheet RGBA `128×128 px`, gồm `4×4` cell `32×32 px`. Thứ tự hàng khớp `DIR_ROW`: `down`, `left`, `right`, `up`. Player/NPC dùng chung canonical head trước/sau từ `player-canonical-v2.png`; hai hàng trái/phải giữ nguyên animation đã duyệt. Hướng phải được mirror deterministic từ hướng trái. Player giữ áo cam và thẻ nhân viên, NPC dùng áo xanh để đọc vai trò rõ hơn trên map.
+
+Khi lên xe, renderer nâng `player-v2.png` lên theo `BICYCLE.riderLift`, sau đó chồng `bicycle-overlay-v2.png` ở foreground. Hướng trước/sau hạ riêng overlay bằng `verticalOverlayDrop` để tay lái nằm ở ngực thay vì che mặt. Riêng hàng `up` chỉ giữ một bánh sau đen/xám ở chính giữa vì hai bánh chồng trục khi nhìn từ phía sau; không có trục cam chọc vào lưng. Overlay không chứa rider, nên tóc, mặt, đồng phục và animation không đổi khi bật/tắt xe. Các file không có hậu tố `-v2` và `player-bicycle-v2.png` được giữ làm resource legacy.
+
+Nếu sheet runtime đã được duyệt và chỉ cần sửa mắt chính diện, dùng chế độ surgical để giữ nguyên toàn bộ pixel khác; mắt phải được copy đối xứng trực tiếp từ mắt trái:
+
+```sh
+swift scripts/prepare-character-spritesheet.swift INPUT.png OUTPUT.png --eye-fix-only
+```
+
+Chuẩn hóa sheet nguồn do image generator xuất theo thứ tự `up`, `left`, `right`, `down`:
+
+```sh
+swift scripts/prepare-character-spritesheet.swift INPUT.png OUTPUT.png \
+  --generated-order --mirror-right --consistent-scale --lock-head --symmetric-front-eyes
+```
+
+Pipeline flood-fill checkerboard từ mép ảnh, giữ lại màu trắng kín bên trong mắt/thẻ/xe; dùng một scale chung cho 16 frame, khóa đầu theo từng hướng và căn chung baseline để animation không bị co giãn hoặc rung mặt.
 
 Tạo lại sheet xe đạp từ turnaround xe `2×2` (`down`, `left`, `right`, `up`):
 
@@ -37,6 +61,20 @@ swift scripts/prepare-character-spritesheet.swift BIKE_INPUT.png assets/characte
 ```
 
 Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng `world/academy-grand.png`, nên không cần nằm trong tileset. Resource runtime mới là sprite RGBA `352×224 px` với footprint `11×7` tile; cửa chính nằm chính giữa hàng dưới cùng để khớp `ACADEMY_DOOR` tại `(7, 8)`. `academy.png` được giữ làm resource legacy tham chiếu.
+
+`world/tulip-tiles.png` là atlas gồm bốn biến thể tile `32×32 px`, phủ kín hai khoảnh vườn `3×4` phía dưới Giảng đường để hoa nối liền thành luống thay vì thành bụi rời. `MAP_DATA.DECORATIONS` xác định phạm vi hai luống; renderer thêm cánh hoa đung đưa và sparkle lệch pha bên ngoài ground cache. `tulip-garden.png` được giữ làm resource concept cũ và không còn dùng ở runtime.
+
+`world/arena-wall-tiles.png` là atlas `192×32 px` gồm sáu tile theo thứ tự: ngang, dọc, bo trên-trái, bo trên-phải, bo dưới-trái, bo dưới-phải. Mỗi resource phủ kín footprint `32×32` bằng đá navy để không lộ terrain bên dưới; các connector steel–gold dùng chung tâm tile để tường khép kín quanh Arena có kích thước lẻ.
+
+```sh
+swift scripts/generate-arena-wall-atlas.swift assets/world/arena-wall-tiles.png
+```
+
+Sau khi chuẩn hóa ảnh nguồn thành atlas `4×1`, đồng bộ phần nền với chính tile `VIVID_GRASS` để mép vườn không lộ hình chữ nhật:
+
+```sh
+swift scripts/prepare-tulip-atlas.swift assets/world/tulip-tiles.png assets/world/terrain-tiles.png assets/world/tulip-tiles.png
+```
 
 Chuẩn hóa ảnh nguồn Giảng đường, loại checkerboard giả và đưa về đúng footprint:
 

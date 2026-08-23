@@ -12,12 +12,14 @@ window.CONFIG = {
   },
 
   ASSETS: {
-    player:  'assets/characters/player.png',
-    playerBicycle: 'assets/characters/player-bicycle.png',
-    npc:     'assets/characters/npc.png',
+    player:  'assets/characters/player-v2.png',
+    bicycleOverlay: 'assets/characters/bicycle-overlay-v2.png',
+    npc:     'assets/characters/npc-v2.png',
     tileset: 'assets/world/tileset.png',
     terrainTiles: 'assets/world/terrain-tiles.png',
     academy: 'assets/world/academy-grand.png',
+    tulipTiles: 'assets/world/tulip-tiles.png',
+    arenaWallTiles: 'assets/world/arena-wall-tiles.png',
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
@@ -46,7 +48,7 @@ window.CONFIG = {
   FISHING: { castMs: 320, waitMs: 900, reelMs: 420 },
 
   // --- 🚲 / 📡 EXPLORATION SKILLS ---
-  BICYCLE: { moveMultiplier: 0.42, animMultiplier: 0.55 },
+  BICYCLE: { moveMultiplier: 0.42, animMultiplier: 0.55, spriteScale: 1.12, riderLift: 3, verticalOverlayDrop: 4 },
   RADAR: {
     targetMultiplier: 4,
     targets: ['balanced', 'due', 'weak', 'pet'],

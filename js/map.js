@@ -25,6 +25,12 @@
     arena: { id: 'arena', label: 'KANJI TRAINER ARENA', x: 10, y: 17, width: 21, height: 13, centerGx: 20, centerGy: 23 },
   };
   const arena = areas.arena;
+  const decorations = {
+    tulipGardens: [
+      { x: 2, y: 8, width: 3, height: 4, phase: 0 },
+      { x: 9, y: 8, width: 3, height: 4, phase: 2.4 },
+    ],
+  };
 
   // Nền màu riêng giúp người chơi nhận ra mình đang ở khu nào ngay lập tức.
   rect(areas.campus.x, areas.campus.y, areas.campus.width, areas.campus.height, T.VIVID_GRASS);
@@ -71,13 +77,13 @@
   // TRAINER ARENA: vành đai đá, bốn cổng, 15 bục Trainer và Boss giữa sân.
   rect(arena.x - 1, arena.y - 1, arena.width + 2, arena.height + 2, T.COBBLE);
   rect(arena.x + 1, arena.y + 1, arena.width - 2, arena.height - 2, T.DARK_STONE);
+  // Một trục giữa duy nhất: arena có kích thước lẻ và Boss nằm đúng tâm ô.
   lineV(arena.centerGx, arena.y + 1, arena.y + arena.height - 2, T.BLUE_CARPET);
-  lineV(arena.centerGx + 1, arena.y + 1, arena.y + arena.height - 2, T.BLUE_CARPET);
   lineH(arena.x + 1, arena.x + arena.width - 2, arena.centerGy, T.RED_CARPET);
   rect(arena.centerGx - 1, arena.centerGy - 1, 3, 3, T.GOLD);
   for (let x = arena.x; x < arena.x + arena.width; x++) { put(x, arena.y, T.WALL); put(x, arena.y + arena.height - 1, T.WALL); }
   for (let y = arena.y; y < arena.y + arena.height; y++) { put(arena.x, y, T.WALL); put(arena.x + arena.width - 1, y, T.WALL); }
-  [[arena.centerGx, arena.y], [arena.centerGx + 1, arena.y], [arena.centerGx, arena.y + arena.height - 1], [arena.centerGx + 1, arena.y + arena.height - 1],
+  [[arena.centerGx, arena.y], [arena.centerGx, arena.y + arena.height - 1],
     [arena.x, arena.centerGy], [arena.x + arena.width - 1, arena.centerGy]].forEach(([x, y]) => put(x, y, T.COBBLE));
 
   const trainerPositions = [
@@ -97,6 +103,7 @@
     TILES: tiles,
     AREAS: areas,
     ARENA: arena,
+    DECORATIONS: decorations,
     SIGNS: [{ gx: 31, gy: 9, label: 'WILDERNESS', color: '#4b9b65' }],
     NPCS: [
       {

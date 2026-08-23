@@ -197,7 +197,7 @@ test('three world zones and every NPC are reachable from the campus start', () =
 
 test('character animation sheets use the shared transparent 4x4 layout', () => {
   const { CONFIG } = loadDataContext();
-  for (const asset of [CONFIG.ASSETS.player, CONFIG.ASSETS.playerBicycle, CONFIG.ASSETS.npc]) {
+  for (const asset of [CONFIG.ASSETS.player, CONFIG.ASSETS.bicycleOverlay, CONFIG.ASSETS.npc]) {
     const png = pngInfo(asset);
     assert.equal(png.width, 128, `${asset} must be 128px wide`);
     assert.equal(png.height, 128, `${asset} must be 128px high`);
@@ -227,6 +227,40 @@ test('academy sprite exactly matches its configured tile footprint', () => {
   assert.equal(png.width, CONFIG.ACADEMY.width * CONFIG.TILE);
   assert.equal(png.height, CONFIG.ACADEMY.height * CONFIG.TILE);
   assert.ok(png.colorType === 4 || png.colorType === 6, 'academy must have a transparent background');
+});
+
+test('tulip gardens use connected tile variants and stay in the campus plots', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  const png = pngInfo(CONFIG.ASSETS.tulipTiles);
+  assert.equal(png.width, 4 * CONFIG.TILE);
+  assert.equal(png.height, CONFIG.TILE);
+  assert.ok(png.colorType === 2 || png.colorType === 6, 'tulip tile atlas must be RGB/RGBA');
+
+  const gardens = MAP_DATA.DECORATIONS?.tulipGardens || [];
+  assert.equal(gardens.length, 2, 'campus should contain two connected tulip plots');
+  for (const garden of gardens) {
+    assert.equal(garden.width, 3);
+    assert.equal(garden.height, 4);
+    assert.ok(garden.x === 2 || garden.x === 9, `tulip plot at ${garden.x},${garden.y} overlaps the campus walkway`);
+    assert.equal(garden.y, 8);
+  }
+});
+
+test('Trainer Arena has a single odd center axis and a complete wall tile atlas', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  const arena = MAP_DATA.ARENA;
+  assert.equal(arena.width % 2, 1, 'arena width must be odd');
+  assert.equal(arena.height % 2, 1, 'arena height must be odd');
+  assert.equal(arena.centerGx, arena.x + Math.floor(arena.width / 2));
+  assert.equal(arena.centerGy, arena.y + Math.floor(arena.height / 2));
+  assert.equal(MAP_DATA.TILES[arena.y + 1][arena.centerGx], CONFIG.TILE_KEYS.BLUE_CARPET);
+  assert.notEqual(MAP_DATA.TILES[arena.y + 1][arena.centerGx + 1], CONFIG.TILE_KEYS.BLUE_CARPET,
+    'center aisle must remain exactly one tile wide');
+
+  const png = pngInfo(CONFIG.ASSETS.arenaWallTiles);
+  assert.equal(png.width, 6 * CONFIG.TILE);
+  assert.equal(png.height, CONFIG.TILE);
+  assert.ok(png.colorType === 2 || png.colorType === 6, 'arena wall atlas must be RGB/RGBA');
 });
 
 test('CSV templates exactly mirror packaged runtime data', () => {

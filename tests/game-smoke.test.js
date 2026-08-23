@@ -83,11 +83,22 @@ test('mobile overworld zooms out enough to frame the grand academy', () => {
   assert.ok(11 * 32 * zoom <= 390, 'academy footprint should fit the mobile viewport');
 });
 
+test('campus camera stays centered on the player instead of jumping to frame the academy', () => {
+  const { debug } = createGame({ viewportWidth: 1280, viewportHeight: 720 });
+  const player = debug.getPlayer();
+  player.gx = 7; player.gy = 9; player.px = 7 * 32; player.py = 9 * 32;
+  const camera = debug.getOverworldCamera();
+  const viewHeight = debug.getCanvasSize().height / debug.getWorldZoom();
+  assert.equal(player.py + 16 - camera.camY, viewHeight / 2);
+});
+
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 7);
-  assert.ok(imageRequests.includes('assets/characters/player-bicycle.png'));
+  assert.equal(imageRequests.length, 9);
+  assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v2.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
+  assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
+  assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
 });
 
@@ -106,6 +117,19 @@ test('frame budget uses 60 FPS for action and 30 FPS for idle UI', () => {
   assert.ok(Math.abs(debug.targetFrameMs() - 1000 / 30) < 0.01);
   debug.startBattle('grass');
   assert.ok(Math.abs(debug.targetFrameMs() - 1000 / 60) < 0.01);
+});
+
+test('walking animation preserves its phase across connected tile steps', () => {
+  const { debug } = createGame();
+  const player = debug.getPlayer();
+  debug.tryMove('down');
+  debug.updateOverworld(130);
+  assert.equal(player.frame, 1);
+  debug.updateOverworld(50);
+  assert.equal(player.moving, false);
+  assert.equal(player.frame, 1, 'tile boundary must not snap the walk cycle to frame zero');
+  debug.updateOverworld(1);
+  assert.equal(player.frame, 0, 'idle pose should still reset to frame zero');
 });
 
 test('battle renders its HUD and quiz while a lazy enemy sprite is still loading', async () => {
