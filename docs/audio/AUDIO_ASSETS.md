@@ -2,7 +2,7 @@
 
 ## Overview
 
-KanjiGO currently contains **30 audio assets** under `assets/sounds/`, totaling **1,398,957 bytes**. Every discovered file is an MP3. There are no clearly named BGM/music files.
+KanjiGO currently contains **47 audio assets** under `assets/sounds/`, including 30 preserved assets and 17 newly generated MP3s. There are no clearly named BGM/music files.
 
 Classification in this catalog is based on filename, directory path, extension, and filesystem size. No file was played or decoded for waveform/content analysis. Duration, channel count, and sample rate were not available from the repository or available local tools and are recorded as `N/A`.
 
@@ -127,9 +127,38 @@ No files remain unclassified. Several generic files remain semantically ambiguou
 | `PROGRESSION_BONUS_01` | 47,616 B |
 | `PROGRESSION_LEVELUP_01` | 36,780 B |
 
-## Missing / Required Assets
+## Generated Assets
 
-The following requirements are derived from the current boundaries in `js/game.js`, `js/config.js`, `js/map.js`, and `index.html`. No audio is generated or integrated by this audit.
+These assets were generated locally for KanjiGO as original short one-shot effects. They are registered in `js/audio-config.js`; actual sound content should still be manually reviewed in-game.
+
+| ID | File | Category | Purpose | Status |
+|---|---|---|---|---|
+| `CAPTURE_START` | [Capture/KanjiGo_Capture_Start.mp3](../../assets/sounds/Capture/KanjiGo_Capture_Start.mp3) | Capture SFX | Begin capture attempt | GENERATED |
+| `CAPTURE_FAILURE` | [Capture/KanjiGo_Capture_Failure.mp3](../../assets/sounds/Capture/KanjiGo_Capture_Failure.mp3) | Capture SFX | Failed capture attempt | GENERATED |
+| `WORLD_FISH_CAST` | [Fishing/KanjiGo_Fishing_Cast.mp3](../../assets/sounds/Fishing/KanjiGo_Fishing_Cast.mp3) | Fishing SFX | Cast fishing line | GENERATED |
+| `WORLD_FISH_BITE` | [Fishing/KanjiGo_Fishing_Bite.mp3](../../assets/sounds/Fishing/KanjiGo_Fishing_Bite.mp3) | Fishing SFX | Fish bites hook | GENERATED |
+| `WORLD_FISH_SUCCESS` | [Fishing/KanjiGo_Fishing_Success.mp3](../../assets/sounds/Fishing/KanjiGo_Fishing_Success.mp3) | Fishing SFX | Successful catch | GENERATED |
+| `WORLD_FISH_FAILURE` | [Fishing/KanjiGo_Fishing_Failure.mp3](../../assets/sounds/Fishing/KanjiGo_Fishing_Failure.mp3) | Fishing SFX | Missed catch | GENERATED |
+| `KANJI_CORRECT` | [UI/KANJIGO_Kanji_Correct_01.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Correct_01.mp3) | Quiz SFX | Correct answer, variant 1 | GENERATED |
+| `KANJI_CORRECT` | [UI/KANJIGO_Kanji_Correct_02.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Correct_02.mp3) | Quiz SFX | Correct answer, variant 2 | GENERATED |
+| `KANJI_CORRECT` | [UI/KANJIGO_Kanji_Correct_03.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Correct_03.mp3) | Quiz SFX | Correct answer, variant 3 | GENERATED |
+| `KANJI_INCORRECT` | [UI/KANJIGO_Kanji_Incorrect_01.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Incorrect_01.mp3) | Quiz SFX | Incorrect answer, variant 1 | GENERATED |
+| `KANJI_INCORRECT` | [UI/KANJIGO_Kanji_Incorrect_02.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Incorrect_02.mp3) | Quiz SFX | Incorrect answer, variant 2 | GENERATED |
+| `KANJI_INCORRECT` | [UI/KANJIGO_Kanji_Incorrect_03.mp3](../../assets/sounds/UI/KANJIGO_Kanji_Incorrect_03.mp3) | Quiz SFX | Incorrect answer, variant 3 | GENERATED |
+| `BATTLE_PLAYER_DAMAGE` | [Battle/KANJIGO_Player_Damage_01.mp3](../../assets/sounds/Battle/KANJIGO_Player_Damage_01.mp3) | Battle SFX | Player damage, variant 1 | GENERATED |
+| `BATTLE_PLAYER_DAMAGE` | [Battle/KANJIGO_Player_Damage_02.mp3](../../assets/sounds/Battle/KANJIGO_Player_Damage_02.mp3) | Battle SFX | Player damage, variant 2 | GENERATED |
+| `BATTLE_PLAYER_DAMAGE` | [Battle/KANJIGO_Player_Damage_03.mp3](../../assets/sounds/Battle/KANJIGO_Player_Damage_03.mp3) | Battle SFX | Player damage, variant 3 | GENERATED |
+| `BATTLE_ESCAPE_SUCCESS` | [Battle/KanjiGo_Escape_Success.mp3](../../assets/sounds/Battle/KanjiGo_Escape_Success.mp3) | Battle SFX | Successful escape | GENERATED |
+| `BATTLE_ESCAPE_FAIL` | [Battle/KanjiGo_Escape_Failure.mp3](../../assets/sounds/Battle/KanjiGo_Escape_Failure.mp3) | Battle SFX | Failed escape | GENERATED |
+
+## Remaining Missing / Required Assets
+
+No additional gameplay assets were generated in this task. The remaining entries below are future requirements.
+
+| Audio ID | Category | Intended use | Suggested filename | Why existing assets are insufficient | Status |
+|---|---|---|---|---|---|
+
+The following requirements are derived from the current boundaries in `js/game.js`, `js/config.js`, `js/map.js`, and `index.html`. No audio was generated for these remaining requirements.
 
 | Audio ID | Event | Category | Priority | Existing Asset | Status |
 |---|---|---|---|---|---|

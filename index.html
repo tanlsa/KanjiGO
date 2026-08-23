@@ -48,6 +48,28 @@
   #touch-back.combat-back{top:max(116px,calc(env(safe-area-inset-top) + 116px));min-width:82px;height:44px;
     background:rgba(70,22,28,.94);border-color:rgba(255,155,155,.9)}
   #touch-back.continue-action{background:rgba(18,92,62,.95);border-color:rgba(126,255,190,.9)}
+  #audio-settings-open{display:block;position:fixed;z-index:3;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));
+    width:44px;height:44px;padding:0;border:2px solid rgba(159,216,245,.75);border-radius:12px;background:rgba(11,16,48,.9);
+    color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  #audio-settings-open:focus-visible,#audio-settings-close:focus-visible,#audio-settings-reset:focus-visible,
+  #audio-settings-panel input:focus-visible{outline:3px solid #ffd54a;outline-offset:3px}
+  #audio-settings-overlay{display:none;position:fixed;z-index:4;inset:0;align-items:center;justify-content:center;padding:24px;
+    background:rgba(5,9,24,.78);overflow:auto}
+  #audio-settings-overlay.is-open{display:flex}
+  #audio-settings-panel{width:min(460px,100%);box-sizing:border-box;padding:24px;background:#141c3c;color:#e9eef7;border:2px solid #2f7fc0;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--kanjigo-font)}
+  #audio-settings-panel h2{margin:0 0 6px;color:#fff;font-size:22px}
+  #audio-settings-panel p{margin:0 0 20px;color:#9fd8f5;font-size:13px}
+  .audio-setting-row{display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:center;margin:16px 0}
+  .audio-setting-row label{font-weight:600}
+  .audio-setting-row output{min-width:42px;color:#ffd54a;text-align:right;font-variant-numeric:tabular-nums}
+  .audio-setting-row input[type="range"]{grid-column:1 / -1;width:100%;accent-color:#6cc0ff}
+  .audio-setting-check{display:flex;align-items:center;gap:10px;margin:22px 0;font-weight:600}
+  .audio-setting-check input{width:18px;height:18px;accent-color:#6cc0ff}
+  .audio-settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+  .audio-settings-actions button{min-height:40px;padding:8px 14px;border:1px solid #2f7fc0;border-radius:8px;background:#16558f;color:#fff;font-weight:600;cursor:pointer}
+  .audio-settings-actions button.secondary{background:transparent;color:#c8d5ee;border-color:#52617b}
+  @media(max-width:700px){#audio-settings-open{top:auto;bottom:max(18px,env(safe-area-inset-bottom));right:max(166px,calc(50% - 22px))}}
   kbd{background:#0f3460;border-radius:4px;padding:1px 6px;
     font-family:monospace;color:#fff;border:1px solid #16558f}
   #admin-link{margin-top:10px;font-size:12px;color:#9fd8f5}
@@ -85,10 +107,45 @@
   <button class="touch-auto" data-action="auto-ride" aria-label="Bật hoặc tắt Auto Ride">AUTO</button>
 </div>
 <button id="touch-back" type="button" class="touch-hidden" data-action="back" aria-label="Quay lại" title="Quay lại">QUAY LẠI</button>
+<button id="audio-settings-open" type="button" aria-label="Mở cài đặt âm thanh" title="Cài đặt âm thanh">⚙</button>
+<div id="audio-settings-overlay" role="presentation">
+  <section id="audio-settings-panel" role="dialog" aria-modal="true" aria-labelledby="audio-settings-title" tabindex="-1">
+    <h2 id="audio-settings-title">Cài đặt âm thanh</h2>
+    <p>Thay đổi âm lượng ngay lập tức. Nhấn Esc để đóng.</p>
+    <div class="audio-setting-row">
+      <label for="audio-master">Master Volume</label><output id="audio-master-value" for="audio-master">100%</output>
+      <input id="audio-master" type="range" min="0" max="100" step="1" value="100" data-audio-setting="master" />
+    </div>
+    <div class="audio-setting-row">
+      <label for="audio-music">Music Volume</label><output id="audio-music-value" for="audio-music">70%</output>
+      <input id="audio-music" type="range" min="0" max="100" step="1" value="70" data-audio-setting="music" />
+    </div>
+    <div class="audio-setting-row">
+      <label for="audio-sfx">SFX Volume</label><output id="audio-sfx-value" for="audio-sfx">80%</output>
+      <input id="audio-sfx" type="range" min="0" max="100" step="1" value="80" data-audio-setting="sfx" />
+    </div>
+    <div class="audio-setting-row">
+      <label for="audio-ui">UI Volume</label><output id="audio-ui-value" for="audio-ui">80%</output>
+      <input id="audio-ui" type="range" min="0" max="100" step="1" value="80" data-audio-setting="ui" />
+    </div>
+    <div class="audio-setting-row">
+      <label for="audio-ambient">Ambient Volume</label><output id="audio-ambient-value" for="audio-ambient">60%</output>
+      <input id="audio-ambient" type="range" min="0" max="100" step="1" value="60" data-audio-setting="ambient" />
+    </div>
+    <label class="audio-setting-check" for="audio-muted"><input id="audio-muted" type="checkbox" data-audio-setting="muted" /> Mute All Audio</label>
+    <div class="audio-settings-actions">
+      <button id="audio-settings-reset" class="secondary" type="button">Reset to Defaults</button>
+      <button id="audio-settings-close" type="button">Done</button>
+    </div>
+  </section>
+</div>
 <div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
 
 <script src="js/content-catalog.js"></script>
 <script src="js/config.js"></script>
+<script src="js/audio-config.js"></script>
+<script src="js/audio-manager.js"></script>
+<script src="js/audio-settings-ui.js"></script>
 <script src="js/kanji.js"></script>
 <script src="js/data-loader.js"></script>
 <script src="js/map.js"></script>

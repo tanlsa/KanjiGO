@@ -2,7 +2,7 @@
 
 ## Audit Result
 
-The repository contains 30 MP3 files under `assets/sounds/`. The repository does not contain source URLs, download records, license files, attribution text, or per-asset provenance for these files.
+The repository contains 47 MP3 files under `assets/sounds/`. The 30 pre-existing assets do not have source URLs, download records, license files, attribution text, or per-asset provenance in the repository. The 17 new assets were generated locally during this task; project ownership and commercial-use policy still require confirmation.
 
 The assets were reported as manually collected and copied from online sources. Their presence in the repository does **not** establish permission to reuse or distribute them. Commercial use cannot be determined for any current asset from the available repository information.
 
@@ -54,3 +54,21 @@ Before shipping or using any asset in a commercial release:
 5. Replace or quarantine assets whose provenance cannot be verified.
 
 **Unknown-license asset count:** 30 of 30.
+
+## Locally Generated Assets
+
+The following 17 assets were generated locally for this project. Their technical provenance is known, but this does not by itself establish the project's copyright or commercial-use policy.
+
+| Audio ID | Files | Source | License | Commercial Use | Attribution | Status |
+|---|---|---|---|---|---|---|
+| `CAPTURE_START` | `Capture/KanjiGo_Capture_Start.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `CAPTURE_FAILURE` | `Capture/KanjiGo_Capture_Failure.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `WORLD_FISH_CAST` | `Fishing/KanjiGo_Fishing_Cast.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `WORLD_FISH_BITE` | `Fishing/KanjiGo_Fishing_Bite.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `WORLD_FISH_SUCCESS` | `Fishing/KanjiGo_Fishing_Success.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `WORLD_FISH_FAILURE` | `Fishing/KanjiGo_Fishing_Failure.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `KANJI_CORRECT` | `UI/KANJIGO_Kanji_Correct_01.mp3`, `_02.mp3`, `_03.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `KANJI_INCORRECT` | `UI/KANJIGO_Kanji_Incorrect_01.mp3`, `_02.mp3`, `_03.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `BATTLE_PLAYER_DAMAGE` | `Battle/KANJIGO_Player_Damage_01.mp3`, `_02.mp3`, `_03.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `BATTLE_ESCAPE_SUCCESS` | `Battle/KanjiGo_Escape_Success.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |
+| `BATTLE_ESCAPE_FAIL` | `Battle/KanjiGo_Escape_Failure.mp3` | Generated locally | Project policy required | UNKNOWN | None known | NEEDS_REVIEW |

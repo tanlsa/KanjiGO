@@ -12,6 +12,7 @@
   const MAP_SIGNS = window.MAP_DATA.SIGNS || [];
   const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
   const KDB = window.KANJI_DB;
+const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false; } catch (error) { return false; } };
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
   const vocabularyId = (question) => {
@@ -150,13 +151,13 @@
       const eventName = button.dataset.action === 'back' ? 'click' : 'pointerdown';
       button.addEventListener(eventName, (e) => {
         e.preventDefault();
-        if (button.dataset.action === 'back') { onBack(); return; }
+        if (button.dataset.action === 'back') { playSFX('UI_BUTTON_CLICK'); onBack(); return; }
         if (state !== 'overworld') return;
-        if (button.dataset.action === 'interact') onSpace();
-        if (button.dataset.action === 'dex') openDex();
-        if (button.dataset.action === 'skills') openSkillTree();
-        if (button.dataset.action === 'bicycle') toggleBicycle();
-        if (button.dataset.action === 'auto-ride') toggleAutoRide();
+if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
+        if (button.dataset.action === 'dex') { playSFX('UI_BUTTON_CLICK'); openDex(); }
+        if (button.dataset.action === 'skills') { playSFX('UI_BUTTON_CLICK'); openSkillTree(); }
+        if (button.dataset.action === 'bicycle') { playSFX('UI_BUTTON_CLICK'); toggleBicycle(); }
+        if (button.dataset.action === 'auto-ride') { playSFX('UI_BUTTON_CLICK'); toggleAutoRide(); }
       });
     };
     document.querySelectorAll('#touch-actions [data-action]').forEach(bindAction);
@@ -914,18 +915,18 @@
     const repeatableMovement = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's'];
     if (e.repeat && !repeatableMovement.includes(k)) return;
     if (state === 'overworld') {
-      if (k === ' ' || k === 'enter') onSpace();
-      if (k === 'd') openDex();
+if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
+      if (k === 'd') { playSFX('UI_BUTTON_CLICK'); openDex(); }
       if (k === 'k') openSkillTree();
       if (k === 'r') cycleRadarTarget();
       if (k === 'b') toggleBicycle();
       if (k === 'p') toggleAutoRide();
-    } else if (state === 'battle') onBattleKey(k);
-    else if (state === 'dex') onDexKey(k);
+    } else if (state === 'battle') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onBattleKey(k); }
+    else if (state === 'dex') { if (['escape', 'd', 'enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) playSFX('UI_BUTTON_CLICK'); onDexKey(k); }
     else if (state === 'skills') onSkillKey(k);
-    else if (state === 'lecture') onLectureKey(k);
-    else if (state === 'capture') onCaptureKey(k);
-    else if (state === 'pve') onPveKey(k);
+    else if (state === 'lecture') { if (['escape', 'enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) playSFX('UI_BUTTON_CLICK'); onLectureKey(k); }
+    else if (state === 'capture') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onCaptureKey(k); }
+    else if (state === 'pve') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onPveKey(k); }
   });
   addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
   function onBack() {
@@ -958,6 +959,7 @@
     const quiz = state === 'battle' ? battle : state === 'capture' ? capture : state === 'pve' ? pve : null;
     if (!quiz) return;
     if (quiz.phase === 'end') {
+      playSFX('UI_BUTTON_CLICK');
       if (state === 'battle') onBattleKey('enter');
       else if (state === 'capture') onCaptureKey('enter');
       else onPveKey('enter');
@@ -970,7 +972,8 @@
     const col = x >= P + bw + answerGapX ? 1 : 0;
     const row = y >= startY + bh + gap ? 1 : 0;
     const idx = row * 2 + col;
-    if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw && idx < quiz.q.options.length) {
+if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw && idx < quiz.q.options.length) {
+      playSFX('UI_BUTTON_CLICK');
       if (state === 'battle') answer(idx);
       else if (state === 'capture') answerCapture(idx);
       else answerPve(idx);
@@ -1038,6 +1041,7 @@
     x /= scale; y /= scale;
     const hit = (lecture.hitboxes || []).find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
     if (!hit) return;
+    playSFX('UI_BUTTON_CLICK');
     if (hit.action === 'menu') selectAcademyMenu(hit.value.action, hit.value.char);
     else if (hit.action === 'pick') startAcademyLesson(hit.value);
     else if (hit.action === 'picker_group') { lecture.group = hit.value; lecture.pickerSel = 0; lecture.pickerScrollY = 0; }
@@ -1156,11 +1160,13 @@
   function onStepComplete() {
     const t = tileAt(player.gx, player.gy);
     if (player.onBoat) {
+      if (t === K.WATER) playSFX('WORLD_WATER_WADE');
       if (t === K.WATER) {
         if (!availableSpawn('water').length) showNoCapturedEncounter();
         else if (Math.random() < C.ENCOUNTER.SURF) startBattle('water');
       }
     } else if (t === K.TALLGRASS) {
+      playSFX('WORLD_GRASS_RUSTLE');
       if (!availableSpawn('grass').length) showNoCapturedEncounter();
       else if (Math.random() < C.ENCOUNTER.TALLGRASS) startBattle('grass');
     }
@@ -1191,8 +1197,8 @@
     if (player.onBoat && f.t >= 0 && f.t !== K.WATER && f.t !== K.BOAT && !BLOCKED.has(f.t)) { disembark(f); return; }
     if (!player.onBoat && f.t === K.WATER) { fish(); return; }
   }
-  function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.onBoat = true; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); saveGame(); showToast('🚤 Đã lên thuyền!'); }
-  function disembark(f) { player.onBoat = false; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); showToast('🚶 Đã lên bờ.'); }
+function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.onBoat = true; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); saveGame(); playSFX('WORLD_TRANSIT'); showToast('🚤 Đã lên thuyền!'); }
+  function disembark(f) { player.onBoat = false; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); playSFX('WORLD_TRANSIT'); showToast('🚶 Đã lên bờ.'); }
   function showNoCapturedEncounter() { showToast(C.ENCOUNTER.noCapturedMessage); }
   function fish() {
     if (!availableSpawn('water').length) { showNoCapturedEncounter(); return; }
@@ -1200,6 +1206,7 @@
     fishing = { t: 0, phase: 'cast', caught: Math.random() < C.ENCOUNTER.FISH, gx: f.gx, gy: f.gy };
     // Giữ nguyên pose đứng trong suốt lượt câu; animation bước chân làm điểm cầm cần bị trượt.
     player.frame = 0; player.animT = 0; player.running = false;
+    playSFX('WORLD_FISH_CAST');
     showToast('🎣 Vung cần...');
   }
 
@@ -1209,7 +1216,7 @@
     const F = C.FISHING || { castMs: 320, waitMs: 900, reelMs: 420 };
     const before = fishing.t; fishing.t += dt;
     if (before < F.castMs && fishing.t >= F.castMs) {
-      fishing.phase = 'wait'; showToast('🎣 Phao đang rung...');
+      fishing.phase = 'wait'; playSFX('WORLD_FISH_BITE'); showToast('🎣 Phao đang rung...');
     }
     if (before < F.castMs + F.waitMs && fishing.t >= F.castMs + F.waitMs) {
       fishing.phase = 'reel';
@@ -1217,7 +1224,8 @@
     }
     if (fishing.t < F.castMs + F.waitMs + F.reelMs) return;
     const caught = fishing.caught; fishing = null; player.frame = 0;
-    if (caught) startBattle('water'); else showToast('🎣 Chưa câu được gì, thử lại nhé.');
+    if (caught) { playSFX('WORLD_FISH_SUCCESS'); startBattle('water'); }
+    else { playSFX('WORLD_FISH_FAILURE'); showToast('🎣 Chưa câu được gì, thử lại nhé.'); }
   }
 
   // ---------- 🐾 SCALE THEO MASTERY ----------
@@ -1394,8 +1402,7 @@
     const levelDamage = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (kanjiLevel - 1);
     const battleMaxHp = Math.max(m.maxHp, Math.ceil(levelDamage * (C.COMBAT.enemyHpPerDamage || 1)));
     syncPlayerScale(m.kanji, true);
-    state = 'battle'; autoRidePath = [];
-    const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
+state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
     battle = {
       kind, monId, mon: m, monHp: battleMaxHp, monMaxHp: battleMaxHp,
       grassKanji: kind === 'grass' ? m.kanji : null,
@@ -1449,6 +1456,7 @@
     const q = battle.q;
     if (idx === q.correctIndex) {
       recordAnswer(q, true, battle.learningSession, 'battle');
+      playSFX('KANJI_CORRECT'); playSFX('BATTLE_ATTACK');
       battle.retryQuestion = false;
       battle.combo++;
       battle.energy = Math.min(C.COMBAT.energyMax || 3, battle.energy + 1);
@@ -1457,6 +1465,8 @@
       const baseDmg = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (battle.kanjiLevel - 1) + battle.combo * C.COMBAT.comboBonus;
       const dmg = special ? Math.round(baseDmg * (C.COMBAT.specialMultiplier || 1.5)) : baseDmg;
       battle.monHp = Math.max(0, battle.monHp - dmg);
+      playSFX('BATTLE_CUT');
+      if (perfect) playSFX('PROGRESSION_BONUS');
       const push = perfect ? (C.COMBAT.perfectGaugePush || .35) : (C.COMBAT.gaugePush || .2);
       battle.botNextIn = Math.min(battle.botCycleMs, battle.botNextIn + battle.botCycleMs * push);
       battle.feedback = { good: true, text: `${perfect ? '⚡ PERFECT! ' : '✓ Đúng! '}${q.target} — ${q.answer}  (-${dmg} HP)` };
@@ -1467,6 +1477,7 @@
       battle.perfectT = perfect ? 800 : 0;
       battle.damageNumbers.push({ text: `-${dmg}`, side: 'enemy', t: 900, total: 900, color: special ? '#7ff7ff' : '#ffd54a' });
       if (special) {
+        playSFX('BATTLE_LIGHTNING_STRIKE');
         battle.energy = 0;
         battle.skillKanji = (C.MONSTERS[currentPetId] || {}).kanji || q.target;
         battle.skillName = `${battle.skillKanji}・${currentPetId === 'fish' ? '水流撃' : '連続撃'}`;
@@ -1477,6 +1488,7 @@
     } else {
       recordAnswer(q, false, battle.learningSession, 'battle');
       const guarded = applyComboGuard(battle);
+      playSFX('KANJI_INCORRECT'); playSFX('BATTLE_STUN');
       battle.stun = C.COMBAT.wrongStun;
       battle.qCooldown = C.COMBAT.wrongStun;
       battle.retryQuestion = true;
@@ -1492,8 +1504,10 @@
   }
   function enemyAttack(b, reason = '') {
     if (!b || b.phase !== 'fight' || b.pendingLose > 0) return;
+    playSFX('BATTLE_ATTACK');
     const dmg = rnd(b.mon.atk);
     player.hp = Math.max(0, player.hp - dmg);
+    playSFX('BATTLE_PLAYER_DAMAGE');
     b.flash = 180; b.botFlash = 320; b.enemyAttackT = 520; b.enemyAttackTotal = 520; b.playerHitT = 360;
     b.damageNumbers.push({ text: `-${dmg}`, side: 'player', t: 900, total: 900, color: '#ff8585' });
     b.playerHitMsg = `${b.mon.name} tấn công! -${dmg} HP`;
@@ -1505,6 +1519,7 @@
     if (!b || b.qCooldown > 0 || b.stun > 0) return;
     recordAnswer(b.q, false, b.learningSession, 'battle');
     const guarded = applyComboGuard(b);
+    playSFX('KANJI_INCORRECT'); playSFX('BATTLE_STUN');
     b.stun = C.COMBAT.wrongStun;
     b.qCooldown = C.COMBAT.wrongStun;
     b.retryQuestion = true;
@@ -1527,12 +1542,16 @@
     battle.counted = true;
     battle.phase = 'end'; battle.result = 'win';
     finalizeLearningSession(battle.learningSession);
+    playSFX('BATTLE_DEFEATED');
     const masteryResult = awardWin(battle.mon.kanji, { kind: battle.kind, monId: battle.monId });
     // thu thập monster vào Dex (nếu chưa có)
-    if (!isCollected(battle.monId)) collect(battle.monId);
+    const newlyCollected = !isCollected(battle.monId);
+    if (newlyCollected) { collect(battle.monId); playSFX('PROGRESSION_ACHIEVEMENT'); }
+    if (masteryResult.leveledUp) playSFX('PROGRESSION_LEVELUP');
     if (battle.kind === 'grass') {
       stamina = Math.min(C.CAPTURE.stamina, stamina + C.CAPTURE.staminaRegenPerGrassWin);
       saveGame();
+      playSFX('PROGRESSION_BONUS');
       showToast(`+${masteryResult.mpGain} MP • Thể lực +${C.CAPTURE.staminaRegenPerGrassWin}`);
     }
     const levelText = masteryResult.leveledUp ? ` — LV UP! Lv.${masteryResult.beforeLevel} → Lv.${masteryResult.level} (${levelLabel(masteryResult.level)})` : '';
@@ -1544,17 +1563,18 @@
     battle.counted = true;
     battle.phase = 'end'; battle.result = 'lose';
     finalizeLearningSession(battle.learningSession);
+    playSFX('BATTLE_GAME_OVER');
     const masteryResult = awardLoss(battle.mon.kanji);
     player.hp = player.maxHp;
     battle.endMsg = `💀 Bạn gục ngã... 「${battle.mon.kanji}」 Recall ${masteryResult.recall}% — MP/Level được bảo toàn${masteryResult.chained ? ' (đã phạt chuỗi thua)' : ''}. Hồi máu.  •  📚 Chính xác: ${learningAccuracy()}%`;
     if (autoRideActive) battle.autoResumeT = 1400;
   }
   function tryRun() {
-    // Bỏ chạy là quyết định rời vòng patrol: tắt Auto Ride ngay cả khi lần
+// Bỏ chạy là quyết định rời vòng patrol: tắt Auto Ride ngay cả khi lần
     // escape thất bại để trận hiện tại hoặc trận kế tiếp không tự resume.
     if (autoRideActive) stopAutoRide();
-    if (Math.random() < C.COMBAT.runChance) { battle.phase = 'end'; battle.result = 'run'; battle.endMsg = '💨 Chạy thoát thành công!'; }
-    else { battle.feedback = { good: false, text: '💨 Không thoát được!' }; battle.fbT = 900; }
+    if (Math.random() < C.COMBAT.runChance) { playSFX('BATTLE_ESCAPE_SUCCESS'); battle.phase = 'end'; battle.result = 'run'; battle.endMsg = '💨 Chạy thoát thành công!'; }
+    else { playSFX('BATTLE_ESCAPE_FAIL'); battle.feedback = { good: false, text: '💨 Không thoát được!' }; battle.fbT = 900; }
   }
   function endBattle() { state = 'overworld'; battle = null; }
 
@@ -1614,8 +1634,9 @@
     return true;
   }
   function enterLecture(char = '') {
-    if (!char) return openAcademyLobby();
-    return startAcademyLesson(resolveKanji(char), true);
+    const entered = char ? startAcademyLesson(resolveKanji(char), true) : openAcademyLobby();
+    if (entered) playSFX('WORLD_KNOWLEDGE_HALL');
+    return entered;
   }
   function openAcademyPicker() {
     lecture = { phase: 'picker', pickerSel: 0, pickerScrollY: 0, pickerMaxScroll: 0, pickerDrag: null,
@@ -1897,6 +1918,7 @@
       feedback: null, fbT: 0, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1,
       learningSession: createLearningSession('capture') };
     state = 'capture';
+    playSFX('CAPTURE_START');
     saveGame(); saveLearning();
     return true;
   }
@@ -1911,10 +1933,12 @@
       s.captured = true;
       const kpResult = evaluateKanjiMilestones(capture.char, { save: false, toast: true });
       collect(capture.info.monId); saveLearning(); saveGame();
-      capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}`;
+capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}`;
+      playSFX('PROGRESSION_ACHIEVEMENT');
       if (learning.academyDraft && resolveKanji(learning.academyDraft.char) === capture.char) learning.academyDraft = null;
     } else {
       capture.feedback = `Chưa đủ điểm (${capture.correct}/5). Hãy luyện chữ cũ để hồi thể lực.`;
+      playSFX('CAPTURE_FAILURE');
     }
     capture.passed = passed;
     capture.endMsg = capture.feedback;
@@ -1925,6 +1949,7 @@
     if (!capture || capture.phase !== 'fight' || capture.qCooldown > 0) return;
     const q = capture.q, correct = idx === q.correctIndex;
     recordAnswer(q, correct, capture.learningSession, 'capture');
+    playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (correct) capture.correct++;
     capture.feedback = correct ? { good: true, text: '✓ Đúng!' } : { good: false, text: `✗ ${q.answer}` };
     capture.fbT = 650; capture.burstT = correct ? 520 : 0; capture.qCooldown = 650; capture.index++;
@@ -2006,6 +2031,7 @@
       mode: options.mode || 'practice', tier, trainerId: options.trainerId || '', pool, passRatio: Number(options.passRatio) || 0,
       q: makeQuestion(target, '', '', true), seen: {}, feedback: null, pendingEnd: false,
       learningSession: createLearningSession(options.mode || 'pve') };
+    playSFX('WORLD_OPEN_ARENA');
     state = 'pve'; pveResult = null;
     return true;
   }
@@ -2053,6 +2079,7 @@
     if (!pve || pve.phase !== 'fight' || pve.qCooldown > 0) return;
     const q = pve.q, correct = idx === q.correctIndex;
     recordAnswer(q, correct, pve.learningSession, pve.mode || 'pve'); pve.seen[q.target] = (pve.seen[q.target] || 0) + 1;
+    playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (correct) { pve.correct++; pve.combo++; pve.bestCombo = Math.max(pve.bestCombo, pve.combo); }
     else pve.combo = 0;
     pve.feedback = { good: correct, text: correct ? '✓ Đúng!' : `✗ Đáp án: ${q.answer}` };
@@ -4220,6 +4247,7 @@
     }
     gameReady = true;
     render();
+    window.AudioManager?.preloadAll()?.catch(() => {});
     requestAnimationFrame(loop);
   });
 

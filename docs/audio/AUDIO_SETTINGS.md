@@ -1,6 +1,6 @@
 # Audio Settings Specification
 
-This document specifies the future user-facing Audio Settings system. It does not implement the settings UI or AudioManager.
+This document specifies the future user-facing Audio Settings system. The settings data model, persistence, volume APIs, and mute behavior are implemented in `js/audio-manager.js`; the settings UI is not implemented.
 
 ## Goals
 
@@ -84,7 +84,7 @@ The future settings UI should provide:
 - Accessible labels and keyboard operation.
 - No requirement to restart the game after changing a value.
 
-The current game is Canvas-first and has no settings screen. The future UI must define how the settings screen is entered and exited without changing existing gameplay behavior unexpectedly.
+The current game is Canvas-first and has no settings screen. The future UI must define how the settings screen is entered and exited without changing existing gameplay behavior unexpectedly. Until then, settings are available only through the `AudioManager` API.
 
 ## Browser and Playback Considerations
 

@@ -1,8 +1,10 @@
 # Audio Implementation Plan
 
-This is a future implementation plan. No phase below is implemented by this audit.
+This is the implementation plan. Phases 1 and 2 are complete; later phases remain future work.
 
 ## Phase 1: Audio Foundation
+
+**Status: IMPLEMENTED**
 
 - **Implement:** Define audio IDs, category names, asset manifest shape, loading policy, playback error handling, and browser user-gesture unlock behavior.
 - **Likely modify:** `js/config.js`, `index.html`.
@@ -12,6 +14,8 @@ This is a future implementation plan. No phase below is implemented by this audi
 
 ## Phase 2: Audio Manager
 
+**Status: IMPLEMENTED**
+
 - **Implement:** Centralized loading, caching, BGM playback, one-shot SFX playback, category routing, volume calculation, mute state, and cleanup.
 - **Likely modify:** `index.html`, possibly `js/config.js`.
 - **Likely create:** `js/audio-manager.js`.
@@ -19,6 +23,8 @@ This is a future implementation plan. No phase below is implemented by this audi
 - **Risks / verify:** Browser autoplay policy, overlapping effects, repeated playback from held input, memory use, and failed asset loads.
 
 ## Phase 3: Audio Settings
+
+**Status: PARTIALLY IMPLEMENTED: data model, persistence, volume APIs, and mute exist; the settings UI remains missing.**
 
 - **Implement:** Settings model, validation, localStorage persistence, controls for Master/Music/SFX/UI/Ambient/Mute, reset behavior, and live application.
 - **Likely modify:** `index.html`, `js/game.js`, `js/config.js`.

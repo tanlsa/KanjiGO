@@ -2,34 +2,35 @@
 
 ## Current Status
 
-KanjiGO has **no implemented audio system**. There is currently no AudioManager, playback code, audio preload path, audio event bus, audio settings UI, or gameplay audio integration.
+KanjiGO has an implemented audio foundation and AudioManager. Native playback, caching, preload, semantic asset IDs, category volumes, mute, persistence, user-gesture unlocking, and selected gameplay SFX integration are working. There is no audio event bus and no Audio Settings UI yet.
 
-The repository contains **30 existing MP3 assets** under `assets/sounds/`. They are not referenced by the game runtime.
+The repository contains **47 MP3 assets** under `assets/sounds/`: 30 manually collected assets and 17 locally generated P1 effects. Existing assets are referenced by the manifest and preloaded non-blockingly; BGM slots remain empty.
 
 ## Asset Summary
 
 | Category | Count |
 |---|---:|
 | BGM / Music | 0 |
-| UI SFX | 3 |
-| Battle SFX | 15 |
-| World / Environment SFX | 6 |
+| UI SFX | 12 |
+| Battle SFX | 20 |
+| World / Environment SFX | 10 |
 | Kanji / Creature SFX | 3 |
 | Progression / Reward SFX | 3 |
 | System / Notification SFX | 0 |
 | Other / Unknown | 0 |
-| **Total** | **30** |
+| **Total** | **47** |
 
 Battle assets are the best-covered area. BGM is entirely absent. UI, movement, fishing, capture, Kanji learning, and system notification coverage are incomplete.
 
 ## Existing vs Missing
 
-- **Existing files:** 30 MP3 assets.
+- **Existing files:** 47 MP3 assets.
+- **Locally generated P1 files:** 17 MP3 assets.
 - **Clearly identified BGM:** 0.
-- **Existing event mappings:** 14.
+- **Implemented event mappings:** 24 semantic gameplay/UI connections, including reused assets.
 - **Events needing review:** 15.
-- **Missing dedicated audio events:** 35.
-- **Assets with unknown source/license:** 30.
+- **Missing dedicated audio events:** 24.
+- **Assets with unknown source/license:** 30 manually collected assets; generated assets have known local provenance but project licensing still requires confirmation.
 
 The event counts come from [AUDIO_EVENTS.md](AUDIO_EVENTS.md) and include gameplay events rather than unique files.
 
@@ -43,25 +44,25 @@ The event counts come from [AUDIO_EVENTS.md](AUDIO_EVENTS.md) and include gamepl
 
 ## Audio Settings Status
 
-Full Audio Settings are approved as a future feature but are **not implemented**. The specification covers Master Volume, Music Volume, SFX Volume, UI Volume, Ambient Volume, and Mute All Audio, with persistence through a proposed `KANJIGO_AUDIO_SETTINGS_V1` localStorage key.
+The Audio Settings backend and user-facing UI are **implemented** through `AudioManager` and `js/audio-settings-ui.js`, including Master Volume, Music Volume, SFX Volume, UI Volume, Ambient Volume, Mute All Audio, reset, and persistence through `KANJIGO_AUDIO_SETTINGS_V1`.
 
 ## Integration Status
 
-No audio integration exists in:
+No additional audio integration exists in:
 
 - `index.html`
 - `js/config.js`
-- `js/game.js`
+- `js/game.js` (selected gameplay integration exists)
 - `js/map.js`
 - `js/data-loader.js`
 - `js/kanji.js`
 
-No gameplay code or audio asset was modified during this audit.
+No existing gameplay code or existing audio asset was modified during this asset-generation task.
 
 ## License Audit Status
 
-All 30 existing assets have `UNKNOWN` source, license, attribution, and commercial-use status. They must not be assumed legally reusable for commercial distribution solely because they are present in the repository.
+The 30 manually collected assets have `UNKNOWN` source, license, attribution, and commercial-use status. The 17 generated assets have local-generation provenance, but project ownership and commercial-use policy still require confirmation.
 
 ## Next Recommended Step
 
-Begin **Phase 1: Audio Foundation** from [AUDIO_IMPLEMENTATION_PLAN.md](AUDIO_IMPLEMENTATION_PLAN.md), after confirming the desired licensing policy and deciding which existing assets pass content and provenance review.
+Continue with audio QA and provenance review, then address the remaining unfilled event IDs. BGM remains deferred until approved music assets exist.
