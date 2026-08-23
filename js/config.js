@@ -13,6 +13,7 @@ window.CONFIG = {
 
   ASSETS: {
     player:  'assets/characters/player.png',
+    playerBicycle: 'assets/characters/player-bicycle.png',
     npc:     'assets/characters/npc.png',
     tileset: 'assets/world/tileset.png',
     academy: 'assets/world/academy.png',
@@ -38,6 +39,14 @@ window.CONFIG = {
     noCapturedMessage: 'Chưa có Kanji nào để gặp ở đây — hãy tới 🏛️ Giảng đường thu phục chữ mới trước!',
   },
   FISHING: { castMs: 320, waitMs: 900, reelMs: 420 },
+
+  // --- 🚲 / 📡 EXPLORATION SKILLS ---
+  BICYCLE: { moveMultiplier: 0.42, animMultiplier: 0.55 },
+  RADAR: {
+    targetMultiplier: 4,
+    targets: ['balanced', 'due', 'weak', 'pet'],
+    labels: { balanced: 'Cân bằng', due: 'Tới hạn', weak: 'Chữ yếu', pet: 'Pet hiện tại' },
+  },
 
   // --- PLAYER (là người chiến đấu, có HP) ---
   PLAYER: { name: 'Bạn', maxHp: 30, startGx: 3, startGy: 5 },
@@ -124,12 +133,163 @@ window.CONFIG = {
   },
   PROGRESSION: {
     order: ['N5', 'N4'],
+    // Knowledge Points chỉ đến từ milestone học thật và mỗi mốc chỉ nhận một lần.
+    // Giữ id ổn định vì chúng được ghi thẳng vào milestone ledger trong save.
+    kp: {
+      version: 1,
+      milestones: [
+        { id: 'capture', reward: 1, requiresCaptured: true },
+        { id: 'level3', reward: 1, level: 3 },
+        { id: 'level5', reward: 1, level: 5 },
+        { id: 'level7', reward: 1, level: 7 },
+        { id: 'level10', reward: 1, level: 10 },
+      ],
+    },
     // TEMP QA: mở tier để test Giảng đường/KanjiDex mà không cần huy hiệu.
     // Xóa 'N4' khỏi mảng này trước khi release để khôi phục luồng N5 -> Gym -> N4.
     testUnlockedTiers: ['N4'],
     gym: {
       N5: { questions: 10, passRatio: 0.8, badge: 'N5', unlocks: 'N4' },
     },
+  },
+
+  // --- 🌳 SKILL TREE ---
+  // Phase Foundation: node được render ở chế độ preview; chỉ bật `released`
+  // sau khi effect gameplay tương ứng đã có test và feedback rõ ràng.
+  SKILL_TREE: {
+    version: 1,
+    // TEMP QA: cấp đủ breadth/depth thật qua mastery + milestone ledger để test
+    // toàn bộ node đã release. Đổi `enabled` thành false trước khi phát hành.
+    qaSeed: { enabled: true, capturedKanji: 45, level: 5 },
+    layout: {
+      width: 1100,
+      height: 500,
+      root: { x: 550, y: 270 },
+      hubs: {
+        exploration: { x: 340, y: 270 },
+        learning: { x: 550, y: 145 },
+        combat: { x: 760, y: 300 },
+      },
+    },
+    branches: {
+      exploration: 'KHÁM PHÁ',
+      learning: 'HỌC TẬP',
+      combat: 'CHIẾN ĐẤU',
+    },
+    nodes: [
+      {
+        id: 'radar_1', name: 'Radar I', icon: '📡', branch: 'exploration', type: 'permanent', costKP: 4, released: true,
+        position: { x: 205, y: 175 },
+        prerequisites: [], requirements: { capturedKanji: 5 },
+        effect: { id: 'radarMode', value: 'summary' },
+        description: 'Hiển thị tín hiệu Kanji yếu hoặc đã tới hạn ôn tập.',
+      },
+      {
+        id: 'radar_2', name: 'Radar II', icon: '🎯', branch: 'exploration', type: 'permanent', costKP: 10, released: true,
+        position: { x: 75, y: 75 },
+        prerequisites: ['radar_1'], requirements: { capturedKanji: 20, kanjiAtLevel: { level: 5, count: 3 } },
+        effect: { id: 'radarMode', value: 'targeting' },
+        description: 'Chọn ưu tiên Cân bằng, Tới hạn, Chữ yếu hoặc Kanji của pet hiện tại.',
+      },
+      {
+        id: 'bicycle', name: 'Xe đạp', icon: '🚲', branch: 'exploration', type: 'permanent', costKP: 18, released: true,
+        position: { x: 125, y: 390 },
+        prerequisites: [], requirements: { capturedKanji: 15, kanjiAtLevel: { level: 5, count: 3 } },
+        effect: { id: 'bicycleAccess', value: true },
+        description: 'Nhấn B hoặc nút BIKE để bật/tắt; di chuyển nhanh nhưng vẫn giữ collision và encounter.',
+      },
+      {
+        id: 'bicycle_gear', name: 'Bộ số II', icon: '⚙️', branch: 'exploration', type: 'permanent', costKP: 9, released: true,
+        position: { x: 280, y: 455 },
+        prerequisites: ['bicycle'], requirements: { capturedKanji: 25, kanjiAtLevel: { level: 5, count: 5 } },
+        effect: { id: 'bicycleSpeedMultiplier', value: 0.85 },
+        description: 'Nâng bộ số xe đạp, giảm thêm 15% thời gian di chuyển nhưng vẫn giữ nguyên collision.',
+      },
+      {
+        id: 'auto_ride', name: 'Auto Ride', icon: '🧭', branch: 'exploration', type: 'permanent', costKP: 14, released: true,
+        position: { x: 430, y: 445 },
+        prerequisites: ['bicycle_gear', 'radar_1'], requirements: { capturedKanji: 35, kanjiAtLevel: { level: 5, count: 10 } },
+        effect: { id: 'autoRideAccess', value: true },
+        description: 'Nhấn P/AUTO để tự tìm bụi cỏ; dừng khi gặp Kanji và tiếp tục sau khi trận kết thúc.',
+      },
+      {
+        id: 'meaning_lens', name: 'Meaning Lens', icon: '🔍', branch: 'learning', type: 'perk', costKP: 5, released: true,
+        position: { x: 420, y: 55 },
+        prerequisites: [], requirements: { capturedKanji: 8 },
+        effect: { id: 'meaningHintCharges', value: 1 },
+        description: 'Cho một gợi ý ngữ nghĩa có giới hạn, không tự trả lời câu hỏi.',
+      },
+      {
+        id: 'meaning_lens_2', name: 'Meaning Lens II', icon: '🔎', branch: 'learning', type: 'perk', costKP: 7, released: true,
+        position: { x: 320, y: 20 },
+        prerequisites: ['meaning_lens'], requirements: { capturedKanji: 18 },
+        effect: { id: 'meaningHintCharges', value: 1 },
+        description: 'Thêm một lượt gợi ý Meaning Lens trong mỗi trận; vẫn không lộ đáp án nghĩa.',
+      },
+      {
+        id: 'review_focus', name: 'Review Focus', icon: '🧠', branch: 'learning', type: 'perk', costKP: 8, released: true,
+        position: { x: 610, y: 48 },
+        prerequisites: [], requirements: { capturedKanji: 12 },
+        effect: { id: 'reviewWeightMultiplier', value: 1.35, cap: 2 },
+        description: 'Tăng nhẹ tần suất Kanji yếu và tới hạn nhưng không làm rỗng pool.',
+      },
+      {
+        id: 'review_focus_2', name: 'Review Focus II', icon: '🧭', branch: 'learning', type: 'perk', costKP: 10, released: true,
+        position: { x: 690, y: 22 },
+        prerequisites: ['review_focus'], requirements: { capturedKanji: 25, kanjiAtLevel: { level: 5, count: 5 } },
+        effect: { id: 'reviewWeightMultiplier', value: 1.15, cap: 2 },
+        description: 'Tăng thêm ưu tiên ôn chữ yếu/tới hạn; tổng trọng số luôn bị giới hạn an toàn.',
+      },
+      {
+        id: 'compound_sense', name: 'Compound Sense', icon: '🔗', branch: 'learning', type: 'perk', costKP: 10, released: false,
+        position: { x: 755, y: 100 },
+        prerequisites: [], requirements: { feature: 'vocabularyFoundation' },
+        effect: { id: 'compoundEncounterMultiplier', value: 1.5 },
+        description: 'Tăng cơ hội gặp compound đã được mở theo level.',
+      },
+      {
+        id: 'focus_1', name: 'Focus I', icon: '⏳', branch: 'combat', type: 'perk', costKP: 5, released: true,
+        position: { x: 870, y: 205 },
+        prerequisites: [], requirements: { capturedKanji: 10 },
+        effect: { id: 'attackGaugeMultiplier', value: 0.95 },
+        description: 'Làm Attack Gauge của quái nạp chậm hơn 5%.',
+      },
+      {
+        id: 'focus_2', name: 'Focus II', icon: '⌛', branch: 'combat', type: 'perk', costKP: 9, released: true,
+        position: { x: 990, y: 245 },
+        prerequisites: ['focus_1'], requirements: { capturedKanji: 20, kanjiAtLevel: { level: 5, count: 5 } },
+        effect: { id: 'attackGaugeMultiplier', value: 0.95 },
+        description: 'Làm Attack Gauge chậm thêm 5%; tổng bonus Focus vẫn nằm dưới ngưỡng 15%.',
+      },
+      {
+        id: 'combo_guard', name: 'Combo Guard', icon: '🛡️', branch: 'combat', type: 'perk', costKP: 8, released: true,
+        position: { x: 1020, y: 120 },
+        prerequisites: ['focus_1'], requirements: { kanjiAtLevel: { level: 5, count: 3 } },
+        effect: { id: 'comboGuardCharges', value: 1 },
+        description: 'Giữ một phần combo sau một lần trả lời sai trong mỗi trận.',
+      },
+      {
+        id: 'combo_guard_2', name: 'Combo Guard II', icon: '🛡', branch: 'combat', type: 'perk', costKP: 11, released: true,
+        position: { x: 1060, y: 35 },
+        prerequisites: ['combo_guard'], requirements: { capturedKanji: 30, kanjiAtLevel: { level: 5, count: 8 } },
+        effect: { id: 'comboGuardCharges', value: 1 },
+        description: 'Thêm một lần bảo toàn một phần combo trong mỗi trận.',
+      },
+      {
+        id: 'vitality_1', name: 'Vitality I', icon: '❤', branch: 'combat', type: 'perk', costKP: 7, released: true,
+        position: { x: 960, y: 410 },
+        prerequisites: [], requirements: { capturedKanji: 10 },
+        effect: { id: 'playerHpMultiplier', value: 1.08 },
+        description: 'Tăng 8% HP tối đa của người chơi.',
+      },
+      {
+        id: 'vitality_2', name: 'Vitality II', icon: '💖', branch: 'combat', type: 'perk', costKP: 10, released: true,
+        position: { x: 820, y: 455 },
+        prerequisites: ['vitality_1'], requirements: { capturedKanji: 22, kanjiAtLevel: { level: 5, count: 5 } },
+        effect: { id: 'playerHpMultiplier', value: 1.08 },
+        description: 'Tăng thêm 8% HP tối đa; không hồi máu tức thời khi mua hoặc reset.',
+      },
+    ],
   },
 
   // --- 📖 THƯ VIỆN MONSTER (id khớp KANJI_DB.KANJI[*].monId) ---

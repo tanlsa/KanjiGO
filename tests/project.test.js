@@ -139,6 +139,16 @@ test('spawn pools, assets, map, and progression references are valid', () => {
   }
 });
 
+test('character animation sheets use the shared transparent 4x4 layout', () => {
+  const { CONFIG } = loadDataContext();
+  for (const asset of [CONFIG.ASSETS.player, CONFIG.ASSETS.playerBicycle, CONFIG.ASSETS.npc]) {
+    const png = pngInfo(asset);
+    assert.equal(png.width, 128, `${asset} must be 128px wide`);
+    assert.equal(png.height, 128, `${asset} must be 128px high`);
+    assert.ok(png.colorType === 4 || png.colorType === 6, `${asset} must contain an alpha channel`);
+  }
+});
+
 test('CSV templates exactly mirror packaged runtime data', () => {
   const { KANJI_DB } = loadDataContext();
   const kanjiRows = parseSimpleCsv('data/kanji-template.csv', 7);

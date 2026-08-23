@@ -6,6 +6,7 @@ Asset được chia theo chức năng để dễ mở rộng:
 assets/
 ├── characters/
 │   ├── player.png
+│   ├── player-bicycle.png
 │   └── npc.png
 ├── world/
 │   ├── tileset.png
@@ -17,7 +18,13 @@ assets/
 
 ## Characters
 
-`player.png` và `npc.png` là spritesheet RGBA `128×128 px`, gồm `4×4` frame `32×32 px`. Thứ tự hàng phải khớp `DIR_ROW`: `down`, `left`, `right`, `up`; mỗi hàng chứa 4 frame đi bộ. Hai nhân vật dùng thiết kế nhân viên FPT áo cam, quần xanh navy và thẻ đeo; NPC được phân biệt bằng tóc/dáng đứng. Engine hiện dùng frame `down:0` cho NPC tĩnh nhưng giữ đủ sheet để có thể animate sau này.
+`player.png`, `player-bicycle.png` và `npc.png` là spritesheet RGBA `128×128 px`, gồm `4×4` cell `32×32 px`. Thứ tự hàng phải khớp `DIR_ROW`: `down`, `left`, `right`, `up`. `player-bicycle.png` hiện là turnaround chuẩn: mỗi hàng lặp lại cùng một pose tĩnh bốn lần; hàng `right` được mirror trực tiếp từ `left` để khóa tuyệt đối tỷ lệ và hình học. Rider không lấy từ ảnh AI: pipeline ghép nguyên pixel theo từng hướng từ `player.png` lên resource xe, giữ đồng nhất tóc, khuôn mặt, đồng phục cam và thẻ FPT. Animation bàn đạp sẽ được tạo sau từ bốn canonical pose này.
+
+Tạo lại sheet xe đạp từ turnaround xe `2×2` (`down`, `left`, `right`, `up`):
+
+```sh
+swift scripts/prepare-character-spritesheet.swift BIKE_INPUT.png assets/characters/player-bicycle.png --turnaround --player assets/characters/player.png
+```
 
 ## World
 

@@ -11,7 +11,7 @@ Requires Node.js 18 or newer. Run the dependency-free test suite before publishi
 npm test
 ```
 
-The suite checks JavaScript syntax, curriculum order, Kanji/question/monster links, transparent sprite files, spawn pools, map references, progression gates, CSV templates, imported-data merging, page script order, save migration, and core battle behavior. GitHub Actions also runs it automatically on every push and pull request.
+The suite checks JavaScript syntax, curriculum order, Kanji/question/monster links, transparent sprite files, spawn pools, map references, progression gates, CSV templates, imported-data merging, page script order, save/KP migration, Skill Tree rules, and core battle behavior. GitHub Actions also runs it automatically on every push and pull request.
 
 After editing packaged content in `js/kanji.js`, regenerate both admin CSV templates with `npm run sync:data`.
 
@@ -19,9 +19,10 @@ After editing packaged content in `js/kanji.js`, regenerate both admin CSV templ
 Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `assets/` + `js/` cạnh `index.html`.
 
 ## 🎯 Điều khiển
-- Overworld: `↑ ↓ ← →` di chuyển • giữ **`Shift`** để chạy • `Space` tương tác/câu cá • **`D`** mở Kanji Dex.
+- Overworld: `↑ ↓ ← →` di chuyển • giữ **`Shift`** để chạy • `Space` tương tác/câu cá • **`D`** mở Kanji Dex • **`K`** mở Skill Tree.
 - Battle (realtime): bấm **`1–4`** chọn cách đọc • `Esc` bỏ chạy.
 - Dex: cuộn chuột hoặc kéo để xem danh sách • `← → ↑ ↓`, `Page Up/Down`, `Home/End` để chọn • `R` đổi cách sort • `G` bật/tắt nhóm JLPT N5/N4 • `Enter` cho pet đi cùng • `Esc/D` đóng.
+- Skill Tree: kéo/scroll để pan cây node • dùng phím mũi tên để chọn theo hướng • `Enter` mở node • `R` reset Perk • `Esc/K` đóng. Trên mobile dùng nút `SKILL`.
 - Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • chọn học theo thứ tự KanjiDex hoặc tự chọn một Kanji chưa unlock.
 - Nghi thức: gauntlet 5 câu, cần 4/5; thể lực hồi khi thắng bụi cỏ.
 - Kỳ thi PvE: đến NPC ⛩, nhấn `Space` • 10 câu, xếp hạng A/B/C/D.
@@ -44,6 +45,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
    bụi cỏ weighted theo chữ gỉ và kỳ thi PvE 10 câu.
 9. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
 10. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
+11. **KP & Skill Tree:** capture/Level milestone cấp KP một lần, save cũ được nhận bù an toàn. Hiện có 15 node hoạt động trên ba nhánh, gồm Radar I/II, Bicycle/Gear II/Auto Ride, Meaning Lens I/II, Review Focus I/II, Focus I/II, Combo Guard I/II và Vitality I/II.
 
 ## 🛠️ Admin thêm Kanji & câu hỏi (2 cách)
 
@@ -94,6 +96,11 @@ Có thể chạy `tools/make_academy.ps1` để sinh lại hình mẫu trên Win
   `energyMax`, `specialMultiplier` điều chỉnh PERFECT và tuyệt kỹ.
 - `KLEVEL` — threshold MP, label, Recall/streak, damage/HP/pet scaling theo Kanji.
 - `PET.monId` — pet ban đầu.
+- `PROGRESSION.kp` — milestone và lượng KP nhận được.
+- `SKILL_TREE.nodes` — cost, prerequisite, requirement và effect của từng node.
+- Radar II: nhấn `R` hoặc chạm thanh Radar để đổi ưu tiên encounter.
+- Bicycle: nhấn `B` hoặc nút `BIKE` trên thiết bị cảm ứng để bật/tắt.
+- Auto Ride: sau khi mở node, nhấn `P` hoặc nút `AUTO` để tự tìm bụi cỏ; trận đấu vẫn do người chơi trả lời và patrol tự tiếp tục sau thắng/thua. Bấm chạy thoát sẽ đồng thời tắt Auto Ride, kể cả khi escape thất bại.
 
 ## 🧩 Mở rộng tiếp
 - Bộ N4/N3 đầy đủ (dán 1 lần qua admin.html). 2) Save/Load tiến trình. 3) Thêm animation/âm thanh riêng cho từng hệ quái.
