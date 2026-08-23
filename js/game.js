@@ -10,6 +10,7 @@
   const NPCS = window.MAP_DATA.NPCS;
   const KDB = window.KANJI_DB;
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
+  const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
   const TILE = C.TILE, ZOOM = C.ZOOM || 1;
   const MAP_H = TILES.length, MAP_W = TILES[0].length;
   const K = C.TILE_KEYS;
@@ -20,8 +21,11 @@
   const cx = cv.getContext('2d');
   let VIEW_PX_W = cv.width / ZOOM, VIEW_PX_H = cv.height / ZOOM;
   function resizeCanvas() {
-    cv.width = Math.max(320, window.innerWidth);
-    cv.height = Math.max(240, window.innerHeight);
+    const viewportW = Math.max(320, window.innerWidth), viewportH = Math.max(240, window.innerHeight);
+    const render = C.RENDER || {}, maxW = Math.max(320, render.maxWidth || viewportW), maxH = Math.max(240, render.maxHeight || viewportH);
+    const renderScale = Math.min(1, maxW / viewportW, maxH / viewportH);
+    cv.width = Math.max(320, Math.round(viewportW * renderScale));
+    cv.height = Math.max(240, Math.round(viewportH * renderScale));
     VIEW_PX_W = cv.width / ZOOM;
     VIEW_PX_H = cv.height / ZOOM;
     cx.imageSmoothingEnabled = false;
@@ -31,9 +35,23 @@
   const JPFONT = '"Yu Gothic","Hiragino Kaku Gothic Pro","Noto Sans JP","MS Gothic",sans-serif';
 
   // ---------- LOAD ẢNH ----------
-  const imgs = {}; let loadError = null;
-  function loadImg(name, src) {
-    return new Promise((res) => { const im = new Image(); im.onload = () => { imgs[name] = im; res(); }; im.onerror = () => { loadError = src; res(); }; im.src = src; });
+  const imgs = {}, imageLoads = {}, failedImages = new Set(); let loadError = null;
+  function loadImg(name, src, required = true) {
+    if (imgs[name]) return Promise.resolve(imgs[name]);
+    if (failedImages.has(name)) return Promise.resolve(null);
+    if (imageLoads[name]) return imageLoads[name];
+    imageLoads[name] = new Promise((res) => {
+      const im = new Image();
+      im.onload = () => { imgs[name] = im; delete imageLoads[name]; res(im); };
+      im.onerror = () => { failedImages.add(name); if (required) loadError = src; delete imageLoads[name]; res(null); };
+      im.src = src;
+    });
+    return imageLoads[name];
+  }
+  function monsterImg(id) {
+    const name = 'mon_' + id, monster = C.MONSTERS[id];
+    if (!imgs[name] && !failedImages.has(name) && monster) loadImg(name, monster.img, false);
+    return imgs[name] || null;
   }
 
   // ---------- TRẠNG THÁI ----------
@@ -83,7 +101,7 @@
   let pveResult = null;
 
   function kanjiInfo(char) {
-    return Object.values(KDB.KANJI).find((k) => k.char === char) || null;
+    return KANJI_BY_CHAR.get(char) || null;
   }
   function resolveKanji(value) {
     if (!value) return null;
@@ -307,7 +325,49 @@
   saveLearning();
 
   // 🐾 PET + tiến trình
+  // Trail lưu theo quãng đường, không theo số frame. Nhờ vậy khoảng cách pet
+  // không đổi khi FPS thấp hoặc khi người chơi chạy nhanh bằng Shift.
   const trail = [];
+  function behindPlayerPosition() {
+    const offset = { down: [0, -1], up: [0, 1], left: [1, 0], right: [-1, 0] }[player.facing] || [0, -1];
+    return { px: player.px + offset[0] * TILE, py: player.py + offset[1] * TILE };
+  }
+  function resetPetTrail() {
+    const behind = behindPlayerPosition();
+    trail.length = 0;
+    trail.push(behind, { px: player.px, py: player.py });
+  }
+  function recordPlayerTrail(force = false) {
+    const point = { px: player.px, py: player.py }, lastPoint = trail[trail.length - 1];
+    if (!lastPoint) { resetPetTrail(); return; }
+    const distance = Math.hypot(point.px - lastPoint.px, point.py - lastPoint.py);
+    if (distance < 0.001) return;
+    if (!force && distance < (C.PET.trailStep || 2)) return;
+    if (distance > TILE * 2.5) { resetPetTrail(); return; } // teleport / lên xuống thuyền
+    trail.push(point);
+    const keepDistance = (C.PET.followDistance || TILE * 1.35) + TILE * 2;
+    let accumulated = 0;
+    for (let i = trail.length - 1; i > 0; i--) {
+      accumulated += Math.hypot(trail[i].px - trail[i - 1].px, trail[i].py - trail[i - 1].py);
+      if (accumulated > keepDistance) { trail.splice(0, Math.max(0, i - 1)); break; }
+    }
+  }
+  function petFollowPosition(distance = C.PET.followDistance || TILE * 1.35) {
+    if (trail.length < 2) return behindPlayerPosition();
+    let remaining = Math.max(TILE, distance);
+    for (let i = trail.length - 1; i > 0; i--) {
+      const newer = trail[i], older = trail[i - 1];
+      const segment = Math.hypot(newer.px - older.px, newer.py - older.py);
+      if (segment <= 0) continue;
+      if (remaining <= segment) {
+        const ratio = remaining / segment;
+        return { px: newer.px + (older.px - newer.px) * ratio, py: newer.py + (older.py - newer.py) * ratio };
+      }
+      remaining -= segment;
+    }
+    return { ...trail[0] };
+  }
+  resetPetTrail();
   let currentPetId = C.PET.monId;
   // petData[monId] = {evolveStage}. Có mặt = đã thu thập; level/MP nằm ở mastery[kanji].
   const petData = {};
@@ -537,8 +597,8 @@
     if (player.onBoat && f.t >= 0 && f.t !== K.WATER && f.t !== K.BOAT && !BLOCKED.has(f.t)) { disembark(f); return; }
     if (!player.onBoat && f.t === K.WATER) { fish(); return; }
   }
-  function board(f) { player.onBoat = true; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; showToast('🚤 Đã lên thuyền!'); }
-  function disembark(f) { player.onBoat = false; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; showToast('🚶 Đã lên bờ.'); }
+  function board(f) { player.onBoat = true; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); showToast('🚤 Đã lên thuyền!'); }
+  function disembark(f) { player.onBoat = false; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); showToast('🚶 Đã lên bờ.'); }
   function showNoCapturedEncounter() { showToast(C.ENCOUNTER.noCapturedMessage); }
   function fish() {
     if (!availableSpawn('water').length) { showNoCapturedEncounter(); return; }
@@ -685,6 +745,7 @@
   function startBattle(kind) {
     const monId = pickMonster(kind);
     if (!monId) { showNoCapturedEncounter(); return false; }
+    monsterImg(monId); // bắt đầu decode trước frame battle đầu tiên
     const m = C.MONSTERS[monId];
     const kanjiLevel = ensureMastery(m.kanji).level;
     const levelDamage = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (kanjiLevel - 1);
@@ -1040,6 +1101,7 @@
   function startCapture(char = '') {
     const target = resolveKanji(char || (lecture && lecture.char) || nextLectureKanji()), info = kanjiInfo(target);
     if (!info) return false;
+    monsterImg(info.monId);
     const s = ensureMastery(target);
     if (!s.lectured) { showToast('Hãy học chữ này ở giảng đường trước.'); return false; }
     if (s.captured) { showToast('Chữ này đã được thu phục rồi.'); return false; }
@@ -1272,7 +1334,7 @@
     else if (k === 'enter' || k === ' ') {
       const info = kanjiInfo(dex.list[dex.sel]);
       if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) { showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return; }
-      currentPetId = info.monId; trail.length = 0; saveGame();
+      currentPetId = info.monId; resetPetTrail(); saveGame();
       showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
       state = 'overworld';
     }
@@ -1308,7 +1370,8 @@
       else if (pressed('down')) tryMove('down');
       else player.frame = 0;
     }
-    if (player.moving) { trail.push({ px: player.px, py: player.py }); while (trail.length > C.PET.gap + 4) trail.shift(); }
+    if (player.moving) recordPlayerTrail();
+    else recordPlayerTrail(true);
   }
   function updateBattle(dt) {
     const b = battle; if (!b) return;
@@ -1372,8 +1435,7 @@
   // ---------- VẼ ----------
   function drawTile(idx, sx, sy) { cx.drawImage(imgs.tileset, idx * TILE, 0, TILE, TILE, sx, sy, TILE, TILE); }
   function drawSprite(img, dir, frame, sx, sy) { cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx, sy, TILE, TILE); }
-  function drawGroundDetail(idx, sx, sy, gx, gy) {
-    const now = performance.now();
+  function drawGroundDetail(idx, sx, sy, gx, gy, now) {
     if (idx === K.WATER) {
       const wave = (now / 180 + gx * 7 + gy * 11) % 18;
       cx.strokeStyle = 'rgba(180,235,255,.38)'; cx.lineWidth = 1;
@@ -1417,8 +1479,12 @@
     cx.fillStyle = '#fff'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY) - 2, 3, 2);
     cx.fillStyle = '#e84b3c'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY), 3, 3);
   }
+  let touchUiState = '';
   function syncTouchUi() {
     const hidden = state !== 'overworld';
+    const nextState = hidden ? 'hidden' : 'visible';
+    if (touchUiState === nextState) return;
+    touchUiState = nextState;
     document.getElementById('touch-controls')?.classList.toggle('touch-hidden', hidden);
     document.getElementById('touch-actions')?.classList.toggle('touch-hidden', hidden);
     document.getElementById('touch-back')?.classList.toggle('touch-hidden', !hidden);
@@ -1438,12 +1504,13 @@
   function renderOverworld() {
     let camX = player.px + TILE / 2 - VIEW_PX_W / 2, camY = player.py + TILE / 2 - VIEW_PX_H / 2;
     camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
+    const frameNow = performance.now();
     for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
       const idx = TILES[y][x], sx = x * TILE - camX, sy = y * TILE - camY;
       if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
       const isAcademy = [K.ACADEMY_DOOR, K.ACADEMY_WALL, K.ACADEMY_ROOF].includes(idx);
       drawTile(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy);
-      drawGroundDetail(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy, x, y);
+      drawGroundDetail(isAcademy || idx === K.TREE ? K.GRASS : idx, sx, sy, x, y, frameNow);
     }
     drawAcademy(camX, camY);
     for (const n of NPCS) {
@@ -1463,11 +1530,9 @@
     }
   }
   function drawPet(camX, camY) {
-    const img = imgs['mon_' + currentPetId]; if (!img) return;
-    let pos;
-    if (trail.length > C.PET.gap) pos = trail[trail.length - 1 - C.PET.gap];
-    else { const b = { down: [0, -1], up: [0, 1], left: [1, 0], right: [-1, 0] }[player.facing]; pos = { px: player.px + b[0] * TILE, py: player.py + b[1] * TILE }; }
-    const ratio = img.height / img.width, w = petSizeFor(petLevel()), h = petSizeFor(petLevel()) * ratio;
+    const img = monsterImg(currentPetId); if (!img) return;
+    const pos = petFollowPosition(), level = petLevel(), size = petSizeFor(level);
+    const ratio = img.height / img.width, w = size, h = size * ratio;
     const bob = C.PET.bob ? Math.sin(Date.now() / 220) * 1.5 : 0;
     const dx = pos.px - camX + (TILE - w) / 2, dy = pos.py - camY + (TILE - h) + bob;
     cx.fillStyle = 'rgba(0,0,0,.18)'; cx.beginPath(); cx.ellipse(dx + w / 2, pos.py - camY + TILE - 2, w * 0.38, 4, 0, 0, Math.PI * 2); cx.fill();
@@ -1488,8 +1553,8 @@
     const hintW = Math.min(cv.width - 16, compact ? 230 : 370);
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
-    const total = Object.keys(KDB.KANJI).length;
-    const captured = Object.values(KDB.KANJI).filter((k) => ensureMastery(k.char).captured).length;
+    const total = KANJI_BY_CHAR.size;
+    const captured = Object.keys(petData).length;
     const status = `Kanji ${captured}/${total} · Pet 「${C.MONSTERS[currentPetId]?.kanji || '?'}」`;
     const statusW = Math.min(cv.width - 16, compact ? 190 : 230);
     const statusX = compact ? 8 : cv.width - statusW - 8, statusY = compact ? 42 : 8;
@@ -1768,7 +1833,7 @@
     // Mini PvE chỉ hiển thị pet chiến đấu; player không xuất hiện trong sân đấu.
     const petW = 150 * actorScale;
     cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, baseY + 3, 78 * actorScale, 19 * actorScale, 0, 0, Math.PI * 2); cx.fill();
-    const petImg = imgs['mon_' + currentPetId];
+    const petImg = monsterImg(currentPetId);
     if (petImg) {
       const ph = petW * petImg.height / petImg.width, petX = plCX + petLunge + petRecoil;
       cx.drawImage(petImg, petX - petW / 2, baseY - ph + idle, petW, ph);
@@ -1776,7 +1841,7 @@
     }
 
     // Enemy cùng baseline để hai phía thực sự lao vào nhau.
-    const m = b.mon, img = imgs['mon_' + b.monId];
+    const m = b.mon, img = monsterImg(b.monId);
     const enemyW = Math.min(240, m.drawW * 1.12) * actorScale;
     const enemyH = enemyW * (m.drawH / m.drawW);
     const enemyX = monCX - enemyLunge + enemyRecoil;
@@ -1966,7 +2031,7 @@
       if (y + cardH < gridY || y > gridBottom) return;
       const problem = academyEligibility(info), selected = index === lecture.pickerSel;
       drawAcademyCard(x, y, cardW, cardH, selected, !!problem);
-      const mon = imgs['mon_' + info.monId], iw = Math.min(66, cardW * .38);
+      const mon = monsterImg(info.monId), iw = Math.min(66, cardW * .38);
       if (mon) { const ih = iw * mon.height / mon.width; cx.globalAlpha = problem ? .35 : 1; cx.drawImage(mon, x + 10, y + 20, iw, ih); cx.globalAlpha = 1; }
       const tier = tierOfKanji(info.char);
       cx.fillStyle = tier === 'N4' ? '#d7b4ff' : tier === 'BONUS' ? '#ffd98a' : '#77ddff';
@@ -1997,7 +2062,7 @@
     cx.fillStyle = '#9fd8f5'; cx.font = '11px monospace'; cx.fillText(`BƯỚC ${step}/5`, area.x, y + 23);
   }
   function drawLessonMascot(info, x, y, maxW, maxH) {
-    const img = imgs['mon_' + info.monId]; if (!img) return;
+    const img = monsterImg(info.monId); if (!img) return;
     const scale = Math.min(maxW / img.width, maxH / img.height), w = img.width * scale, h = img.height * scale;
     const bob = Math.sin(performance.now() / 260) * 4;
     cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(x + maxW / 2, y + maxH - 5, w * .38, 13, 0, 0, Math.PI * 2); cx.fill();
@@ -2150,7 +2215,7 @@
     cx.beginPath(); cx.ellipse(W / 2, ringY, 155, 34, 0, 0, Math.PI * 2); cx.stroke();
     cx.strokeStyle = `rgba(255,213,74,${pulse * .65})`; cx.lineWidth = 2;
     cx.beginPath(); cx.ellipse(W / 2, ringY, 112, 23, 0, 0, Math.PI * 2); cx.stroke();
-    const img = imgs['mon_' + capture.info.monId];
+    const img = monsterImg(capture.info.monId);
     if (img) {
       const mw = Math.min(230, W * .28, fieldH * .42), mh = mw * img.height / img.width;
       const bob = Math.sin(performance.now() / 230) * 5;
@@ -2327,7 +2392,7 @@
   const silhouetteCache = {};
   function getSilhouette(monId) {
     if (silhouetteCache[monId]) return silhouetteCache[monId];
-    const img = imgs['mon_' + monId];
+    const img = monsterImg(monId);
     if (!img || typeof document === 'undefined') return null;
     const canvas = document.createElement('canvas');
     canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
@@ -2363,7 +2428,7 @@
       cx.fillStyle = sel ? (unlocked ? 'rgba(22,85,143,.85)' : 'rgba(40,45,65,.9)') : (unlocked ? 'rgba(20,28,60,.9)' : 'rgba(12,14,24,.95)');
       cx.fillRect(x, y, layout.cardW, layout.cardH);
       cx.strokeStyle = sel ? '#6cc0ff' : (unlocked ? '#2a3a66' : '#242638'); cx.lineWidth = sel ? 3 : 1; cx.strokeRect(x, y, layout.cardW, layout.cardH);
-      const img = unlocked ? imgs['mon_' + id] : getSilhouette(id);
+      const img = unlocked ? monsterImg(id) : getSilhouette(id);
       const iw = Math.max(28, Math.min(96, layout.cardW * 0.32, layout.cardH * 0.42));
       if (img) { const ih = iw * img.height / img.width; cx.drawImage(img, x + 14, y + 14, iw, ih); }
       const kanjiSize = Math.max(28, Math.min(50, layout.cardH * 0.32));
@@ -2450,7 +2515,7 @@
         const x = layout.ox + col * (layout.cardW + layout.gapX);
         cx.fillStyle = selected ? (unlocked ? 'rgba(22,85,143,.92)' : 'rgba(40,45,65,.94)') : (unlocked ? 'rgba(20,28,60,.94)' : 'rgba(12,14,24,.97)'); cx.fillRect(x, y, layout.cardW, layout.cardH);
         cx.strokeStyle = selected ? '#6cc0ff' : unlocked ? '#2a3a66' : '#242638'; cx.lineWidth = selected ? 3 : 1; cx.strokeRect(x, y, layout.cardW, layout.cardH);
-        const image = unlocked ? imgs['mon_' + id] : getSilhouette(id), iw = Math.max(30, Math.min(68, layout.cardW * .34, layout.cardH * .4));
+        const image = unlocked ? monsterImg(id) : getSilhouette(id), iw = Math.max(30, Math.min(68, layout.cardW * .34, layout.cardH * .4));
         if (image) { const ih = iw * image.height / image.width; cx.drawImage(image, x + 11, y + 9, iw, ih); }
         const kanjiSize = Math.max(29, Math.min(44, layout.cardH * .3)); cx.fillStyle = unlocked ? '#ffd54a' : '#55586c'; cx.font = `bold ${kanjiSize}px ${JPFONT}`; cx.textAlign = 'right'; cx.fillText(unlocked ? info.char : '？', x + layout.cardW - 11, y + kanjiSize + 8); cx.textAlign = 'left';
         cx.fillStyle = unlocked ? '#fff' : '#77798a'; fitText(unlocked ? monster.name : '？？？', x + 11, y + layout.cardH - 54, layout.cardW - 22, 14, true);
@@ -2515,7 +2580,9 @@
 
   // ---------- KHỞI ĐỘNG ----------
   const toLoad = [loadImg('player', C.ASSETS.player), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('academy', C.ASSETS.academy)];
-  for (const id in C.MONSTERS) toLoad.push(loadImg('mon_' + id, C.MONSTERS[id].img));
+  // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
+  // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
+  if (C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
   Promise.all(toLoad).then(() => {
     if (loadError) {
       cx.setTransform(1, 0, 0, 1, 0, 0); cx.fillStyle = '#111'; cx.fillRect(0, 0, cv.width, cv.height);
@@ -2540,7 +2607,8 @@
     nextLectureKanji, academyLockedList, academyFilteredList, startCapture, answerCapture, onCaptureKey, updateCapture, getCapture: () => capture,
     getStamina: () => stamina, startPve, startGym, answerPve, getPve: () => pve,
     tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, hasBadge,
-    getPveResult: () => pveResult,
+    getPveResult: () => pveResult, getCanvasSize: () => ({ width: cv.width, height: cv.height }),
+    resetPetTrail, recordPlayerTrail, petFollowPosition, getPetTrail: () => trail.map((point) => ({ ...point })),
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;
   if (typeof module !== 'undefined') module.exports = { _debug: debugApi };

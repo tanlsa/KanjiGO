@@ -2,9 +2,41 @@ word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts
 音楽,âm nhạc,音,おん,on,on,おんがく,ongaku,音~おん~on~âm thanh~target|楽~がく~gaku~nhạc~support
 足音,tiếng bước chân,音,おと,oto,kun,あしおと,ashioto,足~あし~ashi~chân~support|音~おと~oto~âm thanh~target
 毎日,mỗi ngày,日,にち,nichi,on,まいにち,mainichi,毎~まい~mai~mỗi~support|日~にち~nichi~ngày~target
+日曜日,Chủ Nhật,日,にち,nichi,on,にちようび,nichiyoubi,日~にち~nichi~ngày~target|曜~よう~you~thứ~support|日~び~bi~ngày~support
+日,ngày / mặt trời,日,ひ,hi,kun,ひ,hi,日~ひ~hi~ngày / mặt trời~target
+一月,tháng Một,一,いち,ichi,on,いちがつ,ichigatsu,一~いち~ichi~một~target|月~がつ~gatsu~tháng~support
+一年,một năm,一,いち,ichi,on,いちねん,ichinen,一~いち~ichi~một~target|年~ねん~nen~năm~support
+一つ,một cái,一,ひと,hito,kun,ひとつ,hitotsu,一~ひと~hito~một~target|つ~つ~tsu~trợ từ đếm~kana
 国語,quốc ngữ (môn Văn),国,こく,koku,on,こくご,kokugo,国~こく~koku~quốc gia~target|語~ご~go~ngôn ngữ~support
+外国,nước ngoài,国,こく,koku,on,がいこく,gaikoku,外~がい~gai~ngoài~support|国~こく~koku~quốc gia~target
+国,đất nước,国,くに,kuni,kun,くに,kuni,国~くに~kuni~đất nước~target
+去年,năm ngoái,年,ねん,nen,on,きょねん,kyonen,去~きょ~kyo~đã qua~support|年~ねん~nen~năm~target
+毎年,mỗi năm,年,ねん,nen,on,まいねん,mainen,毎~まい~mai~mỗi~support|年~ねん~nen~năm~target
+年,tuổi / năm,年,とし,toshi,kun,とし,toshi,年~とし~toshi~tuổi / năm~target
 大学,đại học,大,だい,dai,on,だいがく,daigaku,大~だい~dai~lớn~target|学~がく~gaku~học~support
-大きい,to lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana
+大切,quan trọng,大,たい,tai,on,たいせつ,taisetsu,大~たい~tai~lớn~target|切~せつ~setsu~thiết yếu~support
+大きい,to / lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana
+金魚,cá vàng,魚,ぎょ,gyo,on,きんぎょ,kingyo,金~きん~kin~vàng~support|魚~ぎょ~gyo~cá~target
+魚,cá,魚,さかな,sakana,kun,さかな,sakana,魚~さかな~sakana~cá~target
+魚市場,chợ cá,魚,うお,uo,kun,うおいちば,uoichiba,魚~うお~uo~cá~target|市場~いちば~ichiba~chợ~support
+日本人,người Nhật Bản,人,じん,jin,on,にほんじん,nihonjin,日本~にほん~nihon~Nhật Bản~support|人~じん~jin~người~target
+三人,ba người,人,にん,nin,on,さんにん,sannin,三~さん~san~ba~support|人~にん~nin~người~target
+人,người,人,ひと,hito,kun,ひと,hito,人~ひと~hito~người~target
+十月,tháng Mười,十,じゅう,juu,on,じゅうがつ,juugatsu,十~じゅう~juu~mười~target|月~がつ~gatsu~tháng~support
+十円,mười yên,十,じゅう,juu,on,じゅうえん,juuen,十~じゅう~juu~mười~target|円~えん~en~yên~support
+十日,ngày mùng mười / mười ngày,十,とお,too,kun,とおか,tooka,十~とお~too~mười~target|日~か~ka~ngày~support
+二月,tháng Hai,二,に,ni,on,にがつ,nigatsu,二~に~ni~hai~target|月~がつ~gatsu~tháng~support
+二年,hai năm,二,に,ni,on,にねん,ninen,二~に~ni~hai~target|年~ねん~nen~năm~support
+二つ,hai cái,二,ふた,futa,kun,ふたつ,futatsu,二~ふた~futa~hai~target|つ~つ~tsu~trợ từ đếm~kana
+日本,Nhật Bản,本,ほん,hon,on,にほん,nihon,日~に~ni~Nhật / mặt trời~support|本~ほん~hon~gốc~target
+本当,thật sự / sự thật,本,ほん,hon,on,ほんとう,hontou,本~ほん~hon~gốc / chính~target|当~とう~tou~đúng~support
+本,gốc / căn nguyên,本,もと,moto,kun,もと,moto,本~もと~moto~gốc / căn nguyên~target
+中国,Trung Quốc,中,ちゅう,chuu,on,ちゅうごく,chuugoku,中~ちゅう~chuu~giữa~target|国~ごく~goku~quốc gia~support
+中学校,trường trung học cơ sở,中,ちゅう,chuu,on,ちゅうがっこう,chuugakkou,中~ちゅう~chuu~trung~target|学校~がっこう~gakkou~trường học~support
+中,bên trong / ở giữa,中,なか,naka,kun,なか,naka,中~なか~naka~bên trong / ở giữa~target
+社長,giám đốc công ty,長,ちょう,chou,on,しゃちょう,shachou,社~しゃ~sha~công ty~support|長~ちょう~chou~trưởng~target
+校長,hiệu trưởng,長,ちょう,chou,on,こうちょう,kouchou,校~こう~kou~trường~support|長~ちょう~chou~trưởng~target
+長い,dài,長,なが,naga,kun,ながい,nagai,長~なが~naga~dài~target|い~い~i~~kana
 出口,lối ra,出,で,de,kun,でぐち,deguchi,出~で~de~ra~target|口~ぐち~guchi~miệng / lối~support
 出る,đi ra / xuất hiện,出,で,de,kun,でる,deru,出~で~de~ra~target|る~る~ru~~kana
 出発,khởi hành,出,しゅっ,shu,on,しゅっぱつ,shuppatsu,出~しゅっ~shu~xuất / ra~target|発~ぱつ~patsu~phát / khởi hành~support

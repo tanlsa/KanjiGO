@@ -3,6 +3,18 @@
 Game 2D top-down **offline** (double-click là chơi, không cần cài gì). Đọc đúng cách đọc
 Kanji mới ra đòn. Có **Kanji Dex** để đổi pet đi sau lưng; Level/MP thuộc về Kanji đang gặp.
 
+## ✅ Automated checks
+
+Requires Node.js 18 or newer. Run the dependency-free test suite before publishing content changes:
+
+```bash
+npm test
+```
+
+The suite checks JavaScript syntax, curriculum order, Kanji/question/monster links, transparent sprite files, spawn pools, map references, progression gates, CSV templates, imported-data merging, page script order, save migration, and core battle behavior. GitHub Actions also runs it automatically on every push and pull request.
+
+After editing packaged content in `js/kanji.js`, regenerate both admin CSV templates with `npm run sync:data`.
+
 ## ▶️ Chạy
 Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `assets/` + `js/` cạnh `index.html`.
 

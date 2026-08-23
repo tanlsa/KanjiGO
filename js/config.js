@@ -19,6 +19,9 @@ window.CONFIG = {
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
+  // Canvas vẫn phủ kín cửa sổ bằng CSS, nhưng giới hạn backing buffer để
+  // màn hình 2K/4K không phải render hàng triệu pixel mỗi frame.
+  RENDER: { maxWidth: 1280, maxHeight: 720 },
   MOVE_MS: 180, RUN_MOVE_MS: 105,
   ANIM_MS: 120, RUN_ANIM_MS: 72, FRAMES: 4,
   DIR_ROW: { down: 0, left: 1, right: 2, up: 3 },
@@ -60,7 +63,7 @@ window.CONFIG = {
   },
 
   // --- 🐾 PET đi theo + EXP/Level ---
-  PET: { monId: 'kuni', size: 30, gap: 16, bob: true },
+  PET: { monId: 'kuni', size: 30, followDistance: 44, trailStep: 2, bob: true },
   // Pet cấp sẵn khi khởi tạo. Level là mức tối thiểu, không làm giảm tiến độ save cũ.
   INITIAL_PETS: [
     { monId: 'fish', level: 10 },
@@ -225,7 +228,7 @@ window.CONFIG = {
     utsu: { name: 'Ánh Chiếu Linh', kanji: '映', img: 'assets/monsters/utsu/sprite.png', maxHp: 65, atk: [12, 19], exp: 55, drawW: 225, drawH: 225, effect: 'scan' },
     tooi: { name: 'Viễn Lộ Linh', kanji: '遠', img: 'assets/monsters/tooi/sprite.png', maxHp: 66, atk: [12, 19], exp: 56, drawW: 225, drawH: 225, effect: 'approach' },
     ya: { name: 'Ốc Xá Linh', kanji: '屋', img: 'assets/monsters/ya/sprite.png', maxHp: 67, atk: [13, 19], exp: 57, drawW: 225, drawH: 225, effect: 'guardian-shield' },
-    uta: { name: 'Ca Âm Linh', kanji: '歌', img: 'assets/monsters/uta/sprite.png', maxHp: 68, atk: [13, 20], exp: 58, drawW: 225, drawH: 225, effect: 'soundwaves' },
+    uta: { name: 'Ca Âm Linh', kanji: '歌', img: 'assets/monsters/uta/sprite.png', maxHp: 68, atk: [13, 20], exp: 58, drawW: 225, drawH: 225, effect: 'sound-wave' },
     natsu: { name: 'Hạ Nhật Linh', kanji: '夏', img: 'assets/monsters/natsu/sprite.png', maxHp: 69, atk: [13, 20], exp: 59, drawW: 225, drawH: 225, effect: 'sky-rays' },
     ie: { name: 'Gia Hộ Linh', kanji: '家', img: 'assets/monsters/ie/sprite.png', maxHp: 70, atk: [13, 20], exp: 60, drawW: 225, drawH: 225, effect: 'heart-embrace' },
     ga_art: { name: 'Họa Sắc Linh', kanji: '画', img: 'assets/monsters/ga_art/sprite.png', maxHp: 71, atk: [13, 21], exp: 61, drawW: 225, drawH: 225, effect: 'ink-strokes' },
