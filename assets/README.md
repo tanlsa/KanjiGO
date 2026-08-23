@@ -33,6 +33,8 @@ Các ô học viện `7–9` trong map được phủ nền cỏ và vẽ bằng
 
 Mỗi monster có thư mục riêng theo đúng `monId` trong `CONFIG.MONSTERS`. Sprite hiện dùng tên `sprite.png`; sau này có thể đặt thêm `baby.png`, `adult.png`, `prime.png`, portrait hoặc effect trong cùng thư mục mà không làm rối asset của monster khác.
 
+Quy chuẩn khuôn mặt: mỗi mascot Kanji chỉ có đúng một cặp mắt cân đối (`2` mắt tổng cộng). Không đặt thêm mắt trên radical, đạo cụ hoặc các khoang nét khác; luôn kiểm tra cả sprite riêng lẻ và contact sheet trước khi đưa asset vào game.
+
 ```text
 monsters/yin/sprite.png  256×256 → Âm Thư Yêu 音
 monsters/ri/sprite.png   256×256 → Nhật Quang 日
@@ -119,6 +121,101 @@ monsters/aku/sprite.png     256×256 → Ác Tâm Linh 悪
 monsters/an/sprite.png      256×256 → Ám Dạ Linh 暗
 monsters/i_med/sprite.png   256×256 → Y Thuật Linh 医
 monsters/i_intent/sprite.png 256×256 → Ý Niệm Linh 意
+monsters/i_by/sprite.png     256×256 → Dĩ Dẫn Linh 以
+monsters/hiku/sprite.png     256×256 → Dẫn Lực Linh 引
+monsters/institute/sprite.png 256×256 → Viện Hộ Linh 院
+monsters/member/sprite.png   256×256 → Viên Đội Linh 員
+monsters/un/sprite.png       256×256 → Vận Luân Linh 運
+monsters/ei/sprite.png       256×256 → Anh Hoa Linh 英
+monsters/utsu/sprite.png     256×256 → Ánh Chiếu Linh 映
+monsters/tooi/sprite.png     256×256 → Viễn Lộ Linh 遠
+monsters/ya/sprite.png       256×256 → Ốc Xá Linh 屋
+monsters/uta/sprite.png      256×256 → Ca Âm Linh 歌
+monsters/natsu/sprite.png    256×256 → Hạ Nhật Linh 夏
+monsters/ie/sprite.png       256×256 → Gia Hộ Linh 家
+monsters/ga_art/sprite.png   256×256 → Họa Sắc Linh 画
+monsters/umi/sprite.png      256×256 → Hải Triều Linh 海
+monsters/kai_turn/sprite.png 256×256 → Hồi Chuyển Linh 回
+monsters/hiraku/sprite.png   256×256 → Khai Môn Linh 開
+monsters/kai_world/sprite.png 256×256 → Giới Cầu Linh 界
+monsters/tanoshi/sprite.png  256×256 → Lạc Âm Linh 楽
+monsters/kan_building/sprite.png 256×256 → Quán Hộ Linh 館
+monsters/kan_han/sprite.png  256×256 → Hán Mặc Linh 漢
+monsters/samui/sprite.png    256×256 → Hàn Băng Linh 寒
+monsters/kao/sprite.png      256×256 → Nhan Diện Linh 顔
+monsters/kaeru/sprite.png    256×256 → Quy Gia Linh 帰
+monsters/okiru/sprite.png    256×256 → Khởi Thân Linh 起
+monsters/kyuu_research/sprite.png 256×256 → Cứu Nghiên Linh 究
+monsters/isogu/sprite.png    256×256 → Cấp Tốc Linh 急
+monsters/ushi/sprite.png     256×256 → Ngưu Lực Linh 牛
+monsters/saru/sprite.png     256×256 → Khứ Hành Linh 去
+monsters/tsuyoi/sprite.png   256×256 → Cường Lực Linh 強
+monsters/oshieru/sprite.png  256×256 → Giáo Đạo Linh 教
+monsters/kyou_capital/sprite.png 256×256 → Kinh Đô Linh 京
+monsters/gyou_business/sprite.png 256×256 → Nghiệp Cơ Linh 業
+monsters/chikai/sprite.png   256×256 → Cận Lộ Linh 近
+monsters/gin/sprite.png      256×256 → Ngân Quang Linh 銀
+monsters/ku_district/sprite.png 256×256 → Khu Giới Linh 区
+monsters/kubi/sprite.png      256×256 → Thủ Cảnh Linh 首
+monsters/shu_main/sprite.png  256×256 → Chủ Vương Linh 主
+monsters/aki/sprite.png       256×256 → Thu Diệp Linh 秋
+monsters/atsumeru/sprite.png  256×256 → Tập Hợp Linh 集
+monsters/narau/sprite.png     256×256 → Tập Luyện Linh 習
+monsters/owaru/sprite.png     256×256 → Chung Kỳ Linh 終
+monsters/sumu/sprite.png      256×256 → Trú Gia Linh 住
+monsters/omoi_heavy/sprite.png 256×256 → Trọng Lực Linh 重
+monsters/haru/sprite.png      256×256 → Xuân Hoa Linh 春
+monsters/tokoro/sprite.png    256×256 → Sở Địa Linh 所
+monsters/atsui/sprite.png     256×256 → Thử Nhật Linh 暑
+monsters/ba/sprite.png        256×256 → Trường Địa Linh 場
+monsters/noru/sprite.png      256×256 → Thừa Phong Linh 乗
+monsters/iro/sprite.png       256×256 → Sắc Họa Linh 色
+monsters/mori/sprite.png      256×256 → Sâm Lâm Linh 森
+monsters/kokoro/sprite.png    256×256 → Tâm Quang Linh 心
+monsters/oya/sprite.png       256×256 → Thân Tình Linh 親
+monsters/shin_truth/sprite.png 256×256 → Chân Tinh Linh 真
+monsters/susumu/sprite.png    256×256 → Tiến Phong Linh 進
+monsters/zu/sprite.png        256×256 → Đồ Bản Linh 図
+monsters/ao/sprite.png        256×256 → Thanh Lam Linh 青
+monsters/tadashii/sprite.png  256×256 → Chính Chuẩn Linh 正
+monsters/koe/sprite.png       256×256 → Thanh Âm Linh 声
+monsters/yo/sprite.png        256×256 → Thế Giới Linh 世
+monsters/aka/sprite.png       256×256 → Xích Hỏa Linh 赤
+monsters/yuu/sprite.png       256×256 → Tịch Dương Linh 夕
+monsters/kiru/sprite.png      256×256 → Thiết Đoạn Linh 切
+monsters/toku/sprite.png      256×256 → Thuyết Ngôn Linh 説
+monsters/arau/sprite.png      256×256 → Tẩy Thủy Linh 洗
+monsters/hayai/sprite.png     256×256 → Tảo Nhật Linh 早
+monsters/hashiru/sprite.png   256×256 → Tẩu Phong Linh 走
+monsters/okuru/sprite.png     256×256 → Tống Tín Linh 送
+monsters/zoku/sprite.png      256×256 → Gia Tộc Linh 族
+monsters/mura/sprite.png      256×256 → Thôn Mộc Linh 村
+monsters/karada/sprite.png    256×256 → Thể Lực Linh 体
+monsters/futoi/sprite.png     256×256 → Thái Dương Linh 太
+monsters/matsu/sprite.png     256×256 → Đãi Thời Linh 待
+monsters/kasu/sprite.png      256×256 → Thải Dụng Linh 貸
+monsters/dai_platform/sprite.png 256×256 → Đài Tọa Linh 台
+monsters/dai_generation/sprite.png 256×256 → Đại Thế Linh 代
+monsters/dai_topic/sprite.png  256×256 → Đề Vấn Linh 題
+monsters/mijikai/sprite.png    256×256 → Đoản Xích Linh 短
+monsters/shiru/sprite.png      256×256 → Tri Tuệ Linh 知
+monsters/chi_ground/sprite.png 256×256 → Địa Mạch Linh 地
+monsters/ike/sprite.png        256×256 → Trì Thủy Linh 池
+monsters/cha/sprite.png        256×256 → Trà Hương Linh 茶
+monsters/kiru_wear/sprite.png  256×256 → Trứ Y Linh 着
+monsters/hiru/sprite.png       256×256 → Trú Nhật Linh 昼
+monsters/sosogu/sprite.png     256×256 → Chú Thủy Linh 注
+monsters/machi/sprite.png      256×256 → Phố Đăng Linh 町
+monsters/tori/sprite.png       256×256 → Điểu Vũ Linh 鳥
+monsters/asa/sprite.png        256×256 → Triêu Dương Linh 朝
+monsters/tooru/sprite.png      256×256 → Thông Lộ Linh 通
+monsters/otouto/sprite.png     256×256 → Đệ Hòa Linh 弟
+monsters/hikui/sprite.png      256×256 → Đê Vị Linh 低
+monsters/korobu/sprite.png     256×256 → Chuyển Luân Linh 転
+monsters/ta_ricefield/sprite.png 256×256 → Điền Thủy Linh 田
+monsters/miyako/sprite.png     256×256 → Đô Thành Linh 都
+monsters/do_degree/sprite.png  256×256 → Độ Lượng Linh 度
+monsters/kotaeru/sprite.png    256×256 → Đáp Án Linh 答
 ```
 
 ### Meaning effects
@@ -136,6 +233,13 @@ Monster có thể khai báo `effect` trong `CONFIG.MONSTERS`; renderer canvas d�
 - Nhóm mới `何・万・校・毎・白・天・母・火・右・読`: dấu hỏi xoay, tinh tú, chuông trường, vòng lặp, ánh trắng, tia trời, trái tim, tàn lửa, mũi tên phải và trang sách bay.
 - Nhóm hoàn tất N5 `友・左・休・父・雨`: liên kết bạn bè, mũi tên trái, lá nghỉ ngơi, khiên bảo hộ và giọt mưa.
 - Batch N4 `悪・暗・医・意`: vết nứt năng lượng tối, đèn lồng mờ, dấu chữa lành và điểm sáng tập trung ý niệm.
+- Batch N4 `以・引・院・員・運・英・映・遠・屋・歌・夏・家・画・海・回`: vệt dẫn hướng, lực kéo, dấu chữa lành, liên kết nhóm, vệt bánh xe, ánh kim, scan phản chiếu, đường xa, khiên mái nhà, sóng âm, tia nắng, vòng ôm gia đình, nét mực, gợn biển và vòng lặp.
+- Batch N4 `開・界・楽・館・漢・寒・顔・帰・起・究・急・牛・去・強・教・京・業・近・銀・区`: cổng mở, biên giới, sóng âm, khiên tòa nhà, nét mực, ánh băng, scan khuôn mặt, vệt quay về, chuyển động đi lên, trang học, tia tốc độ, xung lực, vệt rời đi, sức mạnh, tia trời, bánh răng, tiến gần, vòng đồng xu và đường biên khu vực.
+- Batch N4 `計・兄・軽・犬・研・県・建・験・元・工・広・考・光・好・合・黒・菜・作・産・紙`: nhịp đồng hồ, khiên bảo hộ, gió nhẹ, dấu chân, trang nghiên cứu, ranh giới tỉnh, chuyển động xây lên, tia scan, mầm sống, vệt bánh xe, tỏa rộng, hội tụ suy nghĩ, quầng sáng, vòng ôm trái tim, lực ghép vào, vết nứt tối, mầm rau, xung lực chế tác, sức sống và trang giấy lật.
+- Batch N4 `思・姉・止・市・仕・死・使・始・試・私・字・自・事・持・室・質・写・者・借・弱`: hội tụ suy nghĩ, khiên bảo hộ, nhịp dừng, tia đô thị, vệt công việc, vết nứt tối, vệt hành động, bình minh khởi đầu, tia kiểm tra, lực hướng vào, nét mực, scan phản chiếu, nhịp công việc, xung lực cầm giữ, khiên căn phòng, scan chất lượng, ánh chớp máy ảnh, dấu chân, vòng trao trả và vết nứt yếu điểm.
+- Batch N4 `首・主・秋・集・習・終・住・重・春・所・暑・場・乗・色・森・心・親・真・進・図`: nhịp trung tâm, ánh chủ đạo, lá thu, lực hội tụ, trang học, hoàng hôn kết thúc, khiên mái ấm, lực chìm nặng, bốn mùa, đường biên địa điểm, quầng nắng, mốc sân, vệt tiến, hạt sắc màu, lá rừng, vòng tim, khiên gia đình, ánh chân thật, vệt tiến lên và tia quét bản đồ.
+- Batch N4 `青・正・声・世・赤・夕・切・説・洗・早・走・送・族・村・体・太・待・貸・台・代`: gợn xanh, tia kiểm tra, sóng âm, tinh tú thế giới, tàn lửa đỏ, hoàng hôn, nhát cắt, bong bóng thuyết minh, gợn nước, bình minh, dấu chân, vệt gửi đi, liên kết gia tộc, sức sống làng, xung lực cơ thể, tỏa rộng, đồng hồ chờ, trao ra, bệ nâng và vòng thay thế.
+- Batch hoàn tất N4 `題・短・知・地・池・茶・着・昼・注・町・鳥・朝・通・弟・低・転・田・都・度・答`: quỹ đạo câu hỏi, thu ngắn, hội tụ tri thức, đất vụn, gợn ao, hơi trà, khiên áo, tia chính Ngọ, dòng rót, ranh giới phố, gió lông vũ, bình minh, vệt thông hành, nhịp em nhỏ, lực hạ thấp, bánh xe, sức sống đồng ruộng, tia đô thị, scan đo lường và ánh đáp án.
 
 Hiệu ứng chỉ dùng primitive canvas, không cần thêm sprite sheet và không làm thay đổi asset PNG gốc.
 
@@ -161,6 +265,141 @@ Ngoài hiệu ứng canvas, các mascot ưu tiên có thêm 1–2 đạo cụ pi
 - `川`: giọt nước và gợn dòng chảy.
 - `水`: splash nước và giọt bắn.
 - `車`: bánh xe và vệt lăn ngắn.
+- `以`: dấu mốc và mũi tên tiến.
+- `引`: dây kéo căng.
+- `院`: tòa viện và dấu y tế.
+- `員`: thẻ thành viên và nhóm người.
+- `運`: bánh xe vận chuyển.
+- `英`: lá nguyệt quế và ánh xuất sắc.
+- `映`: khung phim và ánh phản chiếu.
+- `遠`: núi xa và đường nét đứt.
+- `屋`: mái nhà và ngói nhỏ.
+- `歌`: micro và nốt nhạc.
+- `夏`: mặt trời hè và quạt xếp.
+- `家`: mái ấm và trái tim.
+- `画`: cọ, bảng màu và khung tranh.
+- `海`: sóng, giọt nước và vỏ sò.
+- `回`: mũi tên xoay vòng.
+- `開`: hai cánh cửa mở và ánh sáng.
+- `界`: địa cầu và các mốc ranh giới.
+- `楽`: chuông tay và nốt nhạc.
+- `館`: mái tòa nhà và chìa khóa.
+- `漢`: bút mực và cuộn giấy học chữ.
+- `寒`: khăn quàng, bông tuyết và tinh thể băng.
+- `顔`: gương cầm tay và ánh phản chiếu.
+- `帰`: đèn nhà và vệt quay về.
+- `起`: đồng hồ báo thức và tia chuyển động đi lên.
+- `究`: kính lúp và sách nghiên cứu.
+- `急`: đồng hồ bấm giờ và vệt tốc độ.
+- `牛`: sừng nhỏ và chuông bò.
+- `去`: dấu chân rời đi và vệt chuyển động.
+- `強`: tạ tay và hào quang sức mạnh.
+- `教`: sách mở và que chỉ bài.
+- `京`: mái chùa và ánh đèn đô thị.
+- `業`: bánh răng và dụng cụ làm việc.
+- `近`: hai mốc vị trí đặt gần nhau.
+- `銀`: đồng bạc và ánh kim loại.
+- `区`: ô bản đồ và góc đánh dấu ranh giới.
+- `計`: bàn tính và thước đo.
+- `兄`: ô bảo hộ và dải băng gia đình.
+- `軽`: lông vũ và bóng bay.
+- `犬`: vòng cổ, thẻ tên và khúc xương.
+- `研`: đá mài và kính lúp.
+- `県`: ghim vị trí và bản đồ vùng.
+- `建`: búa và bản thiết kế.
+- `験`: phiếu kiểm tra và dấu xác nhận.
+- `元`: rễ cây, mầm non và gợn nguồn.
+- `工`: bánh răng và búa chế tác.
+- `広`: tia tỏa rộng và dải băng trống.
+- `考`: đám mây suy nghĩ và bóng đèn ý tưởng.
+- `光`: đèn lồng và tia sáng.
+- `好`: trái tim và bông hoa.
+- `合`: hai mảnh ghép và tia kết nối.
+- `黒`: giọt mực và nhật thực.
+- `菜`: rau lá và giỏ thu hoạch.
+- `作`: búa và cờ lê chế tác.
+- `産`: quả trứng và mầm non.
+- `紙`: chồng giấy và hạc origami.
+- `思`: đám mây suy nghĩ và tia tim.
+- `姉`: dải băng bảo hộ và hoa cài tóc.
+- `止`: bàn tay dừng và vệt phanh.
+- `市`: đường chân trời đô thị và đèn đường.
+- `仕`: khay phục vụ và hộp dụng cụ.
+- `死`: hoa héo và linh hồn mờ dần.
+- `使`: trượng công cụ và mũi tên hành động.
+- `始`: cờ xuất phát và mặt trời mọc.
+- `試`: phiếu kiểm tra và bút chì.
+- `私`: nhật ký cá nhân và chìa khóa.
+- `字`: bút lông và sách học chữ.
+- `自`: gương soi và động tác chỉ bản thân.
+- `事`: bảng công việc và bánh răng.
+- `持`: túi xách và tia cầm giữ.
+- `室`: cửa phòng, chìa khóa và đèn nhỏ.
+- `質`: cân thăng bằng và kính soi đá quý.
+- `写`: máy ảnh và ảnh chụp tức thời.
+- `者`: thẻ nhận diện người.
+- `借`: sách mượn và mũi tên hoàn trả.
+- `弱`: khiên nứt và băng cá nhân.
+- `首`: khăn/cổ áo nhỏ.
+- `主`: vương miện chủ đạo.
+- `秋`: lá phong mùa thu.
+- `集`: các điểm sáng hội tụ.
+- `習`: vở luyện tập và mũi tên lặp.
+- `終`: cờ đích ca-rô.
+- `住`: móc khóa ngôi nhà.
+- `重`: tạ tay nặng.
+- `春`: hoa anh đào.
+- `所`: biển chỉ đường và ghim vị trí.
+- `暑`: mặt trời và giọt mồ hôi.
+- `場`: cờ đánh dấu mặt sân.
+- `乗`: vé phương tiện và vệt chuyển động.
+- `色`: bảng màu và cọ vẽ.
+- `森`: cành lá và quả thông.
+- `心`: các tia tim nhỏ.
+- `親`: ảnh gia đình được ôm giữ.
+- `真`: tinh thể trong và ánh xác nhận.
+- `進`: cờ cùng mũi tên tiến.
+- `図`: bản đồ gấp và la bàn.
+- `青`: cọ màu xanh và giọt màu.
+- `正`: dấu kiểm cùng thước chuẩn.
+- `声`: loa phát thanh và sóng âm.
+- `世`: địa cầu nhỏ và ánh sao.
+- `赤`: quả táo đỏ và bảng màu.
+- `夕`: mặt trời lặn và sao chiều.
+- `切`: kéo cắt và mẩu giấy.
+- `説`: que chỉ cùng bong bóng lời nói.
+- `洗`: xà phòng, bong bóng và splash nước.
+- `早`: đồng hồ báo thức và bình minh.
+- `走`: giày chạy, vệt tốc độ và dải đích.
+- `送`: phong bì cùng mũi tên gửi đi.
+- `族`: cờ gia huy và huy hiệu nhóm.
+- `村`: ngôi nhà nhỏ và nhành cây.
+- `体`: nhịp tim và băng tay thể lực.
+- `太`: thước đo vòng và mặt trời nhỏ.
+- `待`: đồng hồ đeo tay và đồng hồ cát.
+- `貸`: chìa khóa được trao ra.
+- `台`: bục sân khấu và micro.
+- `代`: gậy tiếp sức và mũi tên hoán đổi.
+- `題`: thẻ câu hỏi và bảng bài tập.
+- `短`: thước ngắn và thước dây.
+- `知`: sách mở và bóng đèn tri thức.
+- `地`: mô đất và ghim vị trí.
+- `池`: lá sen, nụ sen và gợn ao.
+- `茶`: tách trà nóng và lá trà.
+- `着`: áo khoác trên móc treo.
+- `昼`: mặt trời chính Ngọ và hộp cơm trưa.
+- `注`: giọt nước đang rót và biển cảnh báo.
+- `町`: nhà phố và đèn đường.
+- `鳥`: lông chim và tổ chim.
+- `朝`: mặt trời mọc và đồng hồ báo thức.
+- `通`: vé đi lại và mũi tên đường đi.
+- `弟`: cà vạt nhỏ và huy hiệu gia đình.
+- `低`: thước đo đi xuống và thanh thấp.
+- `転`: bánh xe và mũi tên xoay.
+- `田`: bông lúa và mặt ruộng ngập nước.
+- `都`: đường chân trời đô thị và vương miện thủ đô.
+- `度`: nhiệt kế và thước đo góc.
+- `答`: phiếu đáp án, dấu kiểm và bút chì.
 - `木・火・友・左・休・父・雨`: đã có sẵn lá, lửa, ánh liên kết, chỉ hướng, cây nghỉ, khiên và mây mưa trong thiết kế sprite.
 
 Để review cả catalog nhanh mà không phải mở từng file, có thể tạo contact sheet có nhãn:

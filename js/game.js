@@ -104,6 +104,8 @@
   function isTierUnlocked(tier) {
     const id = String(tier || 'BONUS').toUpperCase();
     if (id === 'BONUS') return true;
+    const testUnlockedTiers = (C.PROGRESSION && C.PROGRESSION.testUnlockedTiers) || [];
+    if (testUnlockedTiers.map((value) => String(value).toUpperCase()).includes(id)) return true;
     const definition = (CATALOG.tiers || {})[id];
     return !definition || !definition.requiresBadge || hasBadge(definition.requiresBadge);
   }
@@ -372,7 +374,7 @@
     const k = e.key.toLowerCase();
     keys[k] = true;
     if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
-    if (state === 'lecture' && k === 'backspace') e.preventDefault();
+    if (state === 'lecture' && ['backspace', 'tab'].includes(k)) e.preventDefault();
     if (state === 'overworld') {
       if (e.key === ' ') onSpace();
       if (k === 'd') openDex();
@@ -395,7 +397,7 @@
     const x = (e.clientX - r.left) * cv.width / r.width;
     const y = (e.clientY - r.top) * cv.height / r.height;
     if (state === 'dex') { e.preventDefault(); onDexPointerDown(x, y, e.pointerId); return; }
-    if (state === 'lecture') { onLecturePointer(x, y); return; }
+    if (state === 'lecture') { onLecturePointerDown(x, y, e.pointerId); return; }
     const quiz = state === 'battle' ? battle : state === 'capture' ? capture : state === 'pve' ? pve : null;
     if (!quiz) return;
     if (quiz.phase === 'end') {
@@ -419,20 +421,46 @@
     }
   });
   cv.addEventListener('pointermove', (e) => {
-    if (state !== 'dex' || !dex.drag || dex.drag.pointerId !== e.pointerId) return;
-    e.preventDefault();
-    const r = cv.getBoundingClientRect(), y = (e.clientY - r.top) * cv.height / r.height;
-    const delta = dex.drag.lastY - y;
-    if (Math.abs(y - dex.drag.startY) > 5) dex.drag.moved = true;
-    dex.scrollY += delta; dex.drag.lastY = y; clampDexScroll();
+    if (state === 'dex' && dex.drag && dex.drag.pointerId === e.pointerId) {
+      e.preventDefault();
+      const r = cv.getBoundingClientRect(), y = (e.clientY - r.top) * cv.height / r.height;
+      const delta = dex.drag.lastY - y;
+      if (Math.abs(y - dex.drag.startY) > 5) dex.drag.moved = true;
+      dex.scrollY += delta; dex.drag.lastY = y; clampDexScroll(); return;
+    }
+    if (state === 'lecture' && lecture && lecture.phase === 'picker' && lecture.pickerDrag && lecture.pickerDrag.pointerId === e.pointerId) {
+      e.preventDefault();
+      const r = cv.getBoundingClientRect(), scale = lecture.uiScale || 1;
+      const y = (e.clientY - r.top) * cv.height / r.height / scale, drag = lecture.pickerDrag;
+      if (Math.abs(y - drag.startY) > 5) drag.moved = true;
+      lecture.pickerScrollY += drag.lastY - y; drag.lastY = y; clampAcademyPickerScroll();
+    }
   });
-  const endDexDrag = (e) => { if (dex.drag && (!e || dex.drag.pointerId === e.pointerId)) dex.drag = null; };
-  cv.addEventListener('pointerup', endDexDrag);
-  cv.addEventListener('pointercancel', endDexDrag);
+  function endCanvasDrag(e, cancelled = false) {
+    if (dex.drag && (!e || dex.drag.pointerId === e.pointerId)) dex.drag = null;
+    if (!lecture || !lecture.pickerDrag || (e && lecture.pickerDrag.pointerId !== e.pointerId)) return;
+    const drag = lecture.pickerDrag; lecture.pickerDrag = null;
+    if (!cancelled && !drag.moved && drag.hit && drag.hit.action === 'pick') startAcademyLesson(drag.hit.value);
+  }
+  cv.addEventListener('pointerup', (e) => endCanvasDrag(e));
+  cv.addEventListener('pointercancel', (e) => endCanvasDrag(e, true));
   cv.addEventListener('wheel', (e) => {
-    if (state !== 'dex') return;
-    e.preventDefault(); dex.scrollY += e.deltaY; clampDexScroll();
+    if (state === 'dex') { e.preventDefault(); dex.scrollY += e.deltaY; clampDexScroll(); return; }
+    if (state === 'lecture' && lecture && lecture.phase === 'picker') {
+      e.preventDefault(); lecture.pickerScrollY += e.deltaY / (lecture.uiScale || 1); clampAcademyPickerScroll();
+    }
   }, { passive: false });
+  function onLecturePointerDown(x, y, pointerId) {
+    if (!lecture || lecture.phase !== 'picker') { onLecturePointer(x, y); return; }
+    const scale = lecture.uiScale || 1, lx = x / scale, ly = y / scale;
+    const hit = (lecture.hitboxes || []).find((box) => lx >= box.x && lx <= box.x + box.w && ly >= box.y && ly <= box.y + box.h);
+    if (hit && hit.action !== 'pick') { onLecturePointer(x, y); return; }
+    const viewport = lecture.pickerViewport;
+    if (viewport && ly >= viewport.top && ly <= viewport.bottom) {
+      lecture.pickerDrag = { pointerId, startY: ly, lastY: ly, moved: false, hit: hit && hit.action === 'pick' ? hit : null };
+      if (cv.setPointerCapture) cv.setPointerCapture(pointerId);
+    }
+  }
   function onLecturePointer(x, y) {
     if (!lecture) return;
     const scale = lecture.uiScale || 1;
@@ -441,8 +469,8 @@
     if (!hit) return;
     if (hit.action === 'menu') selectAcademyMenu(hit.value.action, hit.value.char);
     else if (hit.action === 'pick') startAcademyLesson(hit.value);
-    else if (hit.action === 'picker_prev') lecture.pickerSel = Math.max(0, (lecture.pickerSel || 0) - (lecture.pageSize || 1));
-    else if (hit.action === 'picker_next') lecture.pickerSel = Math.min(Math.max(0, academyFilteredList().length - 1), (lecture.pickerSel || 0) + (lecture.pageSize || 1));
+    else if (hit.action === 'picker_group') { lecture.group = hit.value; lecture.pickerSel = 0; lecture.pickerScrollY = 0; }
+    else if (hit.action === 'picker_sort') cycleAcademySort();
     else if (hit.action === 'answer') answerLecture(hit.value);
     else if (hit.action === 'continue') academyNextStep();
     else if (hit.action === 'back') openAcademyLobby();
@@ -854,13 +882,56 @@
     return startAcademyLesson(resolveKanji(char), true);
   }
   function openAcademyPicker() {
-    lecture = { phase: 'picker', pickerSel: 0, search: '', message: '', hitboxes: [] };
+    lecture = { phase: 'picker', pickerSel: 0, pickerScrollY: 0, pickerMaxScroll: 0, pickerDrag: null,
+      search: '', group: 'ALL', sort: 'curriculum', message: '', hitboxes: [] };
     state = 'lecture';
   }
+  const ACADEMY_SORTS = [
+    { id: 'curriculum', label: 'LỘ TRÌNH' },
+    { id: 'kanji', label: 'KANJI' },
+    { id: 'meaning', label: 'NGHĨA' },
+  ];
+  function academyPickerGroups() {
+    const present = new Set(academyLockedList().map((info) => tierOfKanji(info.char)));
+    const ordered = [...((C.PROGRESSION && C.PROGRESSION.order) || []), 'BONUS'];
+    return ['ALL', ...ordered.filter((tier, index) => present.has(tier) && ordered.indexOf(tier) === index)];
+  }
+  function cycleAcademyGroup() {
+    const groups = academyPickerGroups(), current = Math.max(0, groups.indexOf(lecture.group || 'ALL'));
+    lecture.group = groups[(current + 1) % groups.length]; lecture.pickerSel = 0; lecture.pickerScrollY = 0;
+  }
+  function cycleAcademySort() {
+    const current = Math.max(0, ACADEMY_SORTS.findIndex((mode) => mode.id === lecture.sort));
+    lecture.sort = ACADEMY_SORTS[(current + 1) % ACADEMY_SORTS.length].id; lecture.pickerSel = 0; lecture.pickerScrollY = 0;
+  }
   function academyFilteredList() {
-    const locked = academyLockedList(), query = String((lecture && lecture.search) || '').trim().toLowerCase();
-    if (!query) return locked;
-    return locked.filter((info) => [info.char, info.meaning, ...(info.on || []), ...(info.kun || [])].join(' ').toLowerCase().includes(query));
+    const group = (lecture && lecture.group) || 'ALL';
+    const query = String((lecture && lecture.search) || '').trim().toLowerCase();
+    let list = academyLockedList().filter((info) => group === 'ALL' || tierOfKanji(info.char) === group);
+    if (query) list = list.filter((info) => [info.char, info.meaning, ...(info.on || []), ...(info.kun || [])].join(' ').toLowerCase().includes(query));
+    const sort = (lecture && lecture.sort) || 'curriculum';
+    if (sort === 'kanji') list.sort((a, b) => a.char.localeCompare(b.char, 'ja'));
+    else if (sort === 'meaning') list.sort((a, b) => a.meaning.localeCompare(b.meaning, 'vi') || a.char.localeCompare(b.char, 'ja'));
+    return list;
+  }
+  function academyPickerLayout(W = cv.width / ((lecture && lecture.uiScale) || 1), H = cv.height / ((lecture && lecture.uiScale) || 1)) {
+    const area = academyContent(W), cols = academyPickerCols(), gap = 12, cardH = 132;
+    const gridY = 218, gridBottom = H - 38, availableH = Math.max(cardH, gridBottom - gridY);
+    const cardW = (area.w - gap * (cols - 1)) / cols;
+    return { area, cols, gap, cardW, cardH, gridY, gridBottom, availableH };
+  }
+  function clampAcademyPickerScroll() {
+    if (!lecture) return;
+    lecture.pickerScrollY = Math.max(0, Math.min(lecture.pickerMaxScroll || 0, Number(lecture.pickerScrollY) || 0));
+  }
+  function ensureAcademySelectionVisible() {
+    if (!lecture || lecture.phase !== 'picker') return;
+    const list = academyFilteredList(); if (!list.length) return;
+    const layout = academyPickerLayout(), row = Math.floor((lecture.pickerSel || 0) / layout.cols);
+    const top = row * (layout.cardH + layout.gap), bottom = top + layout.cardH;
+    if (top < lecture.pickerScrollY) lecture.pickerScrollY = top;
+    else if (bottom > lecture.pickerScrollY + layout.availableH) lecture.pickerScrollY = bottom - layout.availableH;
+    clampAcademyPickerScroll();
   }
   function selectAcademyMenu(action, char = '') {
     if (action === 'picker') { openAcademyPicker(); return; }
@@ -951,13 +1022,16 @@
     }
     if (lecture.phase === 'picker') {
       const list = academyFilteredList();
-      if (k === 'arrowleft') lecture.pickerSel = Math.max(0, lecture.pickerSel - 1);
+      if (k === 'tab') cycleAcademyGroup();
+      else if (k === 'f2') cycleAcademySort();
+      else if (k === 'arrowleft') lecture.pickerSel = Math.max(0, lecture.pickerSel - 1);
       else if (k === 'arrowright') lecture.pickerSel = Math.min(Math.max(0, list.length - 1), lecture.pickerSel + 1);
       else if (k === 'arrowup') lecture.pickerSel = Math.max(0, lecture.pickerSel - academyPickerCols());
       else if (k === 'arrowdown') lecture.pickerSel = Math.min(Math.max(0, list.length - 1), lecture.pickerSel + academyPickerCols());
       else if ((k === ' ' || k === 'enter') && list.length && !academyEligibility(list[lecture.pickerSel])) startAcademyLesson(list[lecture.pickerSel].char);
-      else if (k === 'backspace') { lecture.search = lecture.search.slice(0, -1); lecture.pickerSel = 0; }
-      else if (k.length === 1 && /^[\p{L}\p{N}]$/u.test(k)) { lecture.search += k; lecture.pickerSel = 0; }
+      else if (k === 'backspace') { lecture.search = lecture.search.slice(0, -1); lecture.pickerSel = 0; lecture.pickerScrollY = 0; }
+      else if (k.length === 1 && /^[\p{L}\p{N}]$/u.test(k)) { lecture.search += k; lecture.pickerSel = 0; lecture.pickerScrollY = 0; }
+      if (k.startsWith('arrow')) ensureAcademySelectionVisible();
       return;
     }
     if (lecture.phase === 'check' && ['1', '2', '3', '4'].includes(k)) { answerLecture(parseInt(k, 10) - 1); return; }
@@ -1812,7 +1886,7 @@
     for (let y = 105; y < H; y += 52) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
   }
   function drawAcademyHeader(W) {
-    const activeTier = hasBadge('N5') ? 'N4' : 'N5', progress = tierProgress(activeTier);
+    const activeTier = isTierUnlocked('N4') ? 'N4' : 'N5', progress = tierProgress(activeTier);
     const total = progress.total, unlocked = progress.captured, compact = W < 620;
     const touchBackVisible = (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) || cv.width <= 700;
     const backReserve = touchBackVisible ? 58 / (lecture.uiScale || 1) : 0;
@@ -1856,43 +1930,63 @@
     return width < 560 ? 2 : width < 860 ? 3 : width < 1180 ? 4 : 5;
   }
   function renderAcademyPicker(W, H) {
-    const area = academyContent(W), list = academyFilteredList(), cols = academyPickerCols(), gap = 12, compact = W < 620;
+    const area = academyContent(W), groups = academyPickerGroups(), compact = W < 620;
+    if (!groups.includes(lecture.group)) { lecture.group = 'ALL'; lecture.pickerScrollY = 0; }
+    const list = academyFilteredList();
     lecture.pickerSel = Math.max(0, Math.min(Math.max(0, list.length - 1), lecture.pickerSel || 0));
     cx.fillStyle = '#fff'; cx.font = `bold 25px ${JPFONT}`; cx.fillText('Chọn một Kanji chưa unlock', area.x, 108);
     cx.fillStyle = 'rgba(7,13,30,.9)'; cx.fillRect(area.x, 124, area.w, 38); cx.strokeStyle = '#275b8f'; cx.strokeRect(area.x, 124, area.w, 38);
     cx.fillStyle = lecture.search ? '#fff' : '#7183a4'; cx.font = `14px ${JPFONT}`;
     fitText(lecture.search ? `⌕ ${lecture.search}` : compact ? 'Chạm một thẻ để bắt đầu học' : '⌕ Gõ Kanji, nghĩa, ON hoặc KUN để tìm...', area.x + 14, 149, area.w - 28, 14);
-    const cardW = (area.w - gap * (cols - 1)) / cols, cardH = 132;
-    const rows = Math.max(1, Math.floor((H - 230) / (cardH + gap))), pageSize = cols * rows;
-    lecture.pageSize = pageSize;
-    const page = Math.floor((lecture.pickerSel || 0) / pageSize), pageStart = page * pageSize;
-    list.slice(pageStart, pageStart + pageSize).forEach((info, local) => {
-      const index = pageStart + local, col = local % cols, row = Math.floor(local / cols);
-      const x = area.x + col * (cardW + gap), y = 178 + row * (cardH + gap);
+    const toolbarY = 170, toolbarH = 32, toolbarGap = 10;
+    const sortW = Math.min(compact ? 128 : 190, area.w * .42), groupsW = area.w - sortW - toolbarGap;
+    const groupGap = 6, groupW = (groupsW - groupGap * (groups.length - 1)) / groups.length;
+    groups.forEach((group, index) => {
+      const x = area.x + index * (groupW + groupGap), selected = group === lecture.group;
+      drawAcademyCard(x, toolbarY, groupW, toolbarH, selected);
+      cx.fillStyle = selected ? '#7ff7ff' : '#b9c8e8'; cx.font = `bold ${compact ? 10 : 11}px monospace`; cx.textAlign = 'center';
+      cx.fillText(group === 'ALL' ? (compact ? 'TẤT' : 'TẤT CẢ') : group, x + groupW / 2, toolbarY + 21); cx.textAlign = 'left';
+      lecture.hitboxes.push({ x, y: toolbarY, w: groupW, h: toolbarH, action: 'picker_group', value: group });
+    });
+    const sortX = area.x + groupsW + toolbarGap;
+    drawAcademyCard(sortX, toolbarY, sortW, toolbarH, false);
+    const sortMode = ACADEMY_SORTS.find((mode) => mode.id === lecture.sort) || ACADEMY_SORTS[0];
+    cx.fillStyle = '#ffd54a'; cx.font = `bold ${compact ? 9 : 11}px monospace`; cx.textAlign = 'center';
+    cx.fillText(`↕ ${sortMode.label}`, sortX + sortW / 2, toolbarY + 21); cx.textAlign = 'left';
+    lecture.hitboxes.push({ x: sortX, y: toolbarY, w: sortW, h: toolbarH, action: 'picker_sort' });
+    const layout = academyPickerLayout(W, H), { cols, gap, cardW, cardH, gridY, gridBottom, availableH } = layout;
+    const contentRows = Math.ceil(list.length / cols);
+    const contentH = contentRows ? contentRows * cardH + (contentRows - 1) * gap : 0;
+    lecture.pickerMaxScroll = Math.max(0, contentH - availableH); clampAcademyPickerScroll();
+    lecture.pickerViewport = { top: gridY, bottom: gridBottom };
+    cx.save(); cx.beginPath(); cx.rect(area.x, gridY, area.w, availableH); cx.clip();
+    list.forEach((info, index) => {
+      const col = index % cols, row = Math.floor(index / cols);
+      const x = area.x + col * (cardW + gap), y = gridY + row * (cardH + gap) - lecture.pickerScrollY;
+      if (y + cardH < gridY || y > gridBottom) return;
       const problem = academyEligibility(info), selected = index === lecture.pickerSel;
       drawAcademyCard(x, y, cardW, cardH, selected, !!problem);
       const mon = imgs['mon_' + info.monId], iw = Math.min(66, cardW * .38);
-      if (mon) { const ih = iw * mon.height / mon.width; cx.globalAlpha = problem ? .35 : 1; cx.drawImage(mon, x + 10, y + 14, iw, ih); cx.globalAlpha = 1; }
+      if (mon) { const ih = iw * mon.height / mon.width; cx.globalAlpha = problem ? .35 : 1; cx.drawImage(mon, x + 10, y + 20, iw, ih); cx.globalAlpha = 1; }
+      const tier = tierOfKanji(info.char);
+      cx.fillStyle = tier === 'N4' ? '#d7b4ff' : tier === 'BONUS' ? '#ffd98a' : '#77ddff';
+      cx.font = 'bold 9px monospace'; cx.fillText(tier, x + 10, y + 13);
       cx.fillStyle = problem ? '#737b90' : '#ffd54a'; cx.font = `bold 35px ${JPFONT}`; cx.fillText(info.char, x + cardW - 48, y + 48);
       cx.fillStyle = problem ? '#737b90' : '#fff'; fitText(info.meaning, x + 12, y + 91, cardW - 24, 14, true);
       const status = problem || (ensureMastery(info.char).lectured ? 'TIẾP TỤC THU PHỤC' : 'CHƯA HỌC');
       cx.fillStyle = problem ? '#ff9d9d' : ensureMastery(info.char).lectured ? '#6effa1' : '#9fd8f5'; fitText(status, x + 12, y + 116, cardW - 24, 10, true);
       if (!problem) lecture.hitboxes.push({ x, y, w: cardW, h: cardH, action: 'pick', value: info.char });
     });
-    if (!list.length) { cx.fillStyle = '#9fd8f5'; cx.font = `18px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText('Không tìm thấy Kanji mới phù hợp.', W / 2, H / 2); cx.textAlign = 'left'; }
-    const pages = Math.max(1, Math.ceil(list.length / pageSize));
-    cx.fillStyle = '#8395b5'; cx.font = '12px monospace';
-    fitText(compact ? `Chạm để học · Trang ${page + 1}/${pages}` : `←↑↓→ chọn · Enter học · Backspace xoá tìm kiếm · Trang ${page + 1}/${pages}`, area.x, H - 20, area.w, 12);
-    if (pages > 1) {
-      const navY = H - 60, navW = 92;
-      drawAcademyCard(area.x + area.w - navW * 2 - 10, navY, navW, 30, false, page <= 0);
-      drawAcademyCard(area.x + area.w - navW, navY, navW, 30, false, page >= pages - 1);
-      cx.fillStyle = '#dce8ff'; cx.font = 'bold 11px monospace'; cx.textAlign = 'center';
-      cx.fillText('◀ TRƯỚC', area.x + area.w - navW * 1.5 - 10, navY + 20);
-      cx.fillText('SAU ▶', area.x + area.w - navW * .5, navY + 20); cx.textAlign = 'left';
-      if (page > 0) lecture.hitboxes.push({ x: area.x + area.w - navW * 2 - 10, y: navY, w: navW, h: 30, action: 'picker_prev' });
-      if (page < pages - 1) lecture.hitboxes.push({ x: area.x + area.w - navW, y: navY, w: navW, h: 30, action: 'picker_next' });
+    if (!list.length) { cx.fillStyle = '#9fd8f5'; cx.font = `18px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText('Không tìm thấy Kanji mới phù hợp.', W / 2, gridY + availableH / 2); cx.textAlign = 'left'; }
+    cx.restore();
+    if (lecture.pickerMaxScroll > 0) {
+      const trackX = area.x + area.w - 6, thumbH = Math.max(30, availableH * availableH / contentH);
+      const thumbY = gridY + (availableH - thumbH) * lecture.pickerScrollY / lecture.pickerMaxScroll;
+      cx.fillStyle = 'rgba(18,31,61,.9)'; cx.fillRect(trackX, gridY, 5, availableH);
+      cx.fillStyle = '#56eaff'; cx.fillRect(trackX, thumbY, 5, thumbH);
     }
+    cx.fillStyle = '#8395b5'; cx.font = '12px monospace';
+    fitText(compact ? `Vuốt để cuộn · ${list.length} chữ` : `Cuộn/kéo · ←↑↓→ chọn · Enter học · Tab nhóm · F2 sort · ${list.length} chữ`, area.x, H - 14, area.w, 12);
     lecture.hitboxes.push({ x: area.x + area.w - 90, y: 80, w: 90, h: 30, action: 'back' });
     cx.fillStyle = '#9fd8f5'; cx.textAlign = 'right'; cx.fillText('Esc: quay lại', area.x + area.w, 105); cx.textAlign = 'left';
   }

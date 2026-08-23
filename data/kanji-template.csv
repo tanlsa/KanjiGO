@@ -83,3 +83,138 @@ aku,悪,Xấu / Ác,アク (aku); オ (o),わる (waru),aku,N4
 an,暗,Tối / Ám,アン (an),くら (kura),an,N4
 i_med,医,Y học / Bác sĩ,イ (i),,i_med,N4
 i_intent,意,Ý / Ý định,イ (i),,i_intent,N4
+i_by,以,Từ / Bằng / Trở lên,イ (i),,i_by,N4
+hiku,引,Kéo / Dẫn,イン (in),ひ (hi),hiku,N4
+institute,院,Viện / Cơ sở,イン (in),,institute,N4
+member,員,Thành viên / Nhân viên,イン (in),,member,N4
+un,運,Vận chuyển / Vận may,ウン (un),はこ (hako),un,N4
+ei,英,Anh / Xuất sắc,エイ (ei),,ei,N4
+utsu,映,Chiếu / Phản chiếu,エイ (ei),うつ (utsu); は (ha),utsu,N4
+tooi,遠,Xa / Viễn,エン (en),とお (too),tooi,N4
+ya,屋,Nhà / Cửa hàng,オク (oku),や (ya),ya,N4
+uta,歌,Bài hát / Hát,カ (ka),うた (uta),uta,N4
+natsu,夏,Mùa hè,カ (ka),なつ (natsu),natsu,N4
+ie,家,Nhà / Gia đình,カ (ka); ケ (ke),いえ (ie); や (ya),ie,N4
+ga_art,画,Tranh / Hình / Nét,ガ (ga); カク (kaku),,ga_art,N4
+umi,海,Biển / Hải,カイ (kai),うみ (umi),umi,N4
+kai_turn,回,Lần / Xoay vòng,カイ (kai),まわ (mawa),kai_turn,N4
+hiraku,開,Mở / Khai,カイ (kai),ひら (hira); あ (a),hiraku,N4
+kai_world,界,Thế giới / Ranh giới,カイ (kai),さかい (sakai),kai_world,N4
+tanoshi,楽,Vui / Âm nhạc,ガク (gaku); ラク (raku),たの (tano),tanoshi,N4
+kan_building,館,Tòa nhà / Quán,カン (kan),やかた (yakata),kan_building,N4
+kan_han,漢,Hán / Chữ Hán,カン (kan),,kan_han,N4
+samui,寒,Lạnh / Hàn,カン (kan),さむ (samu),samui,N4
+kao,顔,Khuôn mặt,ガン (gan),かお (kao),kao,N4
+kaeru,帰,Trở về / Quy,キ (ki),かえ (kae),kaeru,N4
+okiru,起,Dậy / Khởi,キ (ki),お (o),okiru,N4
+kyuu_research,究,Nghiên cứu / Cùng,キュウ (kyuu),きわ (kiwa),kyuu_research,N4
+isogu,急,Gấp / Khẩn cấp,キュウ (kyuu),いそ (iso),isogu,N4
+ushi,牛,Bò / Ngưu,ギュウ (gyuu),うし (ushi),ushi,N4
+saru,去,Rời đi / Quá khứ,キョ (kyo); コ (ko),さ (sa),saru,N4
+tsuyoi,強,Mạnh / Cường,キョウ (kyou); ゴウ (gou),つよ (tsuyo); し (shi),tsuyoi,N4
+oshieru,教,Dạy / Giáo,キョウ (kyou),おし (oshi); おそ (oso),oshieru,N4
+kyou_capital,京,Kinh đô / Thủ đô,キョウ (kyou); ケイ (kei); キン (kin),みやこ (miyako),kyou_capital,N4
+gyou_business,業,Nghiệp / Công việc,ギョウ (gyou); ゴウ (gou),わざ (waza),gyou_business,N4
+chikai,近,Gần / Cận,キン (kin),ちか (chika),chikai,N4
+gin,銀,Bạc / Ngân,ギン (gin),しろがね (shirogane),gin,N4
+ku_district,区,Khu / Quận,ク (ku),,ku_district,N4
+hakaru,計,Tính / Đo lường,ケイ (kei),はか (haka),hakaru,N4
+ani,兄,Anh trai,ケイ (kei); キョウ (kyou),あに (ani),ani,N4
+karui,軽,Nhẹ / Khinh,ケイ (kei),かる (karu),karui,N4
+inu,犬,Chó / Khuyển,ケン (ken),いぬ (inu),inu,N4
+ken_research,研,Nghiên cứu / Mài,ケン (ken),と (to),ken_research,N4
+ken_prefecture,県,Tỉnh / Huyện,ケン (ken),,ken_prefecture,N4
+tateru,建,Xây dựng / Kiến,ケン (ken); コン (kon),た (ta),tateru,N4
+ken_test,験,Kiểm tra / Trải nghiệm,ケン (ken); ゲン (gen),,ken_test,N4
+moto,元,Gốc / Nguyên,ゲン (gen); ガン (gan),もと (moto),moto,N4
+kou_craft,工,Công / Chế tác,コウ (kou); ク (ku); グ (gu),,kou_craft,N4
+hiroi,広,Rộng / Quảng,コウ (kou),ひろ (hiro),hiroi,N4
+kangaeru,考,Suy nghĩ / Khảo,コウ (kou),かんが (kanga),kangaeru,N4
+hikari,光,Ánh sáng / Quang,コウ (kou),ひかり (hikari); ひか (hika),hikari,N4
+suki,好,Thích / Hảo,コウ (kou),この (kono); す (su),suki,N4
+au,合,Hợp / Gặp / Ghép,ゴウ (gou); ガッ (ga); カッ (ka),あ (a),au,N4
+kuro,黒,Đen / Hắc,コク (koku),くろ (kuro),kuro,N4
+na_vegetable,菜,Rau / Thái,サイ (sai),な (na),na_vegetable,N4
+tsukuru,作,Làm / Tạo,サク (saku); サ (sa),つく (tsuku),tsukuru,N4
+umu,産,Sinh / Sản xuất,サン (san),う (u); うぶ (ubu),umu,N4
+kami_paper,紙,Giấy,シ (shi),かみ (kami),kami_paper,N4
+omou,思,Nghĩ / Tư,シ (shi),おも (omo),omou,N4
+ane,姉,Chị gái,シ (shi),あね (ane),ane,N4
+tomaru,止,Dừng / Chỉ,シ (shi),と (to); とど (todo); や (ya),tomaru,N4
+shi_city,市,Thành phố / Chợ,シ (shi),いち (ichi),shi_city,N4
+shi_work,仕,Làm việc / Phụng sự,シ (shi); ジ (ji),つか (tsuka),shi_work,N4
+shi_death,死,Chết / Tử,シ (shi),し (shi),shi_death,N4
+tsukau,使,Dùng / Sử,シ (shi),つか (tsuka),tsukau,N4
+hajimeru,始,Bắt đầu / Thủy,シ (shi),はじ (haji),hajimeru,N4
+shi_try,試,Thử / Thi,シ (shi),こころ (kokoro); ため (tame),shi_try,N4
+watashi,私,Tôi / Riêng tư,シ (shi),わたくし (watakushi); わたし (watashi),watashi,N4
+ji_letter,字,Chữ / Tự,ジ (ji),あざ (aza),ji_letter,N4
+mizukara,自,Tự mình,ジ (ji); シ (shi),みずか (mizuka),mizukara,N4
+koto,事,Việc / Sự,ジ (ji); ズ (zu),こと (koto),koto,N4
+motsu,持,Cầm / Giữ,ジ (ji),も (mo),motsu,N4
+shitsu_room,室,Phòng / Thất,シツ (shitsu),むろ (muro),shitsu_room,N4
+shitsu_quality,質,Chất / Chất lượng,シツ (shitsu); シチ (shichi); チ (chi),たち (tachi); ただ (tada),shitsu_quality,N4
+utsusu,写,Chụp / Sao chép,シャ (sha); ジャ (ja),うつ (utsu),utsusu,N4
+mono_person,者,Người / Giả,シャ (sha),もの (mono),mono_person,N4
+kariru,借,Mượn / Tá,シャク (shaku),か (ka),kariru,N4
+yowai,弱,Yếu / Nhược,ジャク (jaku),よわ (yowa),yowai,N4
+kubi,首,Cổ / Đầu / Thủ,シュ (shu),くび (kubi),kubi,N4
+shu_main,主,Chính / Chủ,シュ (shu); ス (su),ぬし (nushi); おも (omo),shu_main,N4
+aki,秋,Mùa thu,シュウ (shuu),あき (aki),aki,N4
+atsumeru,集,Tập hợp / Thu thập,シュウ (shuu),あつ (atsu),atsumeru,N4
+narau,習,Học / Luyện tập,シュウ (shuu),なら (nara),narau,N4
+owaru,終,Kết thúc,シュウ (shuu),お (o),owaru,N4
+sumu,住,Sống / Cư trú,ジュウ (juu),す (su),sumu,N4
+omoi_heavy,重,Nặng / Quan trọng,ジュウ (juu); チョウ (chou),おも (omo); かさ (kasa),omoi_heavy,N4
+haru,春,Mùa xuân,シュン (shun),はる (haru),haru,N4
+tokoro,所,Nơi / Chỗ,ショ (sho),ところ (tokoro),tokoro,N4
+atsui,暑,Nóng (thời tiết),ショ (sho),あつ (atsu),atsui,N4
+ba,場,Nơi / Sân / Trường,ジョウ (jou),ば (ba),ba,N4
+noru,乗,Lên / Đi (phương tiện),ジョウ (jou),の (no),noru,N4
+iro,色,Màu sắc,ショク (shoku); シキ (shiki),いろ (iro),iro,N4
+mori,森,Rừng,シン (shin),もり (mori),mori,N4
+kokoro,心,Tim / Tâm trí,シン (shin),こころ (kokoro),kokoro,N4
+oya,親,Cha mẹ / Thân thiết,シン (shin),おや (oya); した (shita),oya,N4
+shin_truth,真,Thật / Chân,シン (shin),ま (ma); まこと (makoto),shin_truth,N4
+susumu,進,Tiến / Đi tới,シン (shin),すす (susu),susumu,N4
+zu,図,Sơ đồ / Bản đồ,ズ (zu); ト (to),はか (haka),zu,N4
+ao,青,Xanh / Thanh,セイ (sei); ショウ (shou),あお (ao),ao,N4
+tadashii,正,Đúng / Chính,セイ (sei); ショウ (shou),ただ (tada); まさ (masa),tadashii,N4
+koe,声,Giọng / Tiếng,セイ (sei); ショウ (shou),こえ (koe),koe,N4
+yo,世,Thế giới / Đời,セイ (sei); セ (se),よ (yo),yo,N4
+aka,赤,Đỏ / Xích,セキ (seki); シャク (shaku),あか (aka),aka,N4
+yuu,夕,Buổi tối / Tịch,セキ (seki),ゆう (yuu),yuu,N4
+kiru,切,Cắt / Quan trọng,セツ (setsu); サイ (sai),き (ki),kiru,N4
+toku,説,Giải thích / Thuyết,セツ (setsu); ゼイ (zei),と (to),toku,N4
+arau,洗,Rửa / Tẩy,セン (sen),あら (ara),arau,N4
+hayai,早,Sớm / Nhanh,ソウ (sou); サッ (sa),はや (haya),hayai,N4
+hashiru,走,Chạy / Tẩu,ソウ (sou),はし (hashi),hashiru,N4
+okuru,送,Gửi / Tiễn,ソウ (sou),おく (oku),okuru,N4
+zoku,族,Gia tộc / Nhóm,ゾク (zoku),,zoku,N4
+mura,村,Làng / Thôn,ソン (son),むら (mura),mura,N4
+karada,体,Cơ thể / Thể,タイ (tai); テイ (tei),からだ (karada),karada,N4
+futoi,太,To / Dày / Thái,タイ (tai); タ (ta),ふと (futo),futoi,N4
+matsu,待,Chờ / Đợi,タイ (tai),ま (ma),matsu,N4
+kasu,貸,Cho mượn,タイ (tai),か (ka),kasu,N4
+dai_platform,台,Bệ / Đài,ダイ (dai); タイ (tai),,dai_platform,N4
+dai_generation,代,Thay thế / Đời,ダイ (dai); タイ (tai),か (ka); よ (yo),dai_generation,N4
+dai_topic,題,Đề tài / Câu hỏi,ダイ (dai),,dai_topic,N4
+mijikai,短,Ngắn / Đoản,タン (tan),みじか (mijika),mijikai,N4
+shiru,知,Biết / Tri,チ (chi),し (shi),shiru,N4
+chi_ground,地,Đất / Địa,チ (chi); ジ (ji),,chi_ground,N4
+ike,池,Ao / Hồ,チ (chi),いけ (ike),ike,N4
+cha,茶,Trà,チャ (cha); サ (sa),,cha,N4
+kiru_wear,着,Mặc / Đến nơi,チャク (chaku); ジャク (jaku),き (ki); つ (tsu),kiru_wear,N4
+hiru,昼,Ban trưa,チュウ (chuu),ひる (hiru),hiru,N4
+sosogu,注,Chú ý / Rót,チュウ (chuu),そそ (soso),sosogu,N4
+machi,町,Phố / Thị trấn,チョウ (chou),まち (machi),machi,N4
+tori,鳥,Chim / Điểu,チョウ (chou),とり (tori),tori,N4
+asa,朝,Buổi sáng / Triều,チョウ (chou),あさ (asa),asa,N4
+tooru,通,Đi qua / Thông,ツウ (tsuu); ツ (tsu),とお (too); かよ (kayo),tooru,N4
+otouto,弟,Em trai / Đệ,テイ (tei); ダイ (dai); デ (de),おとうと (otouto),otouto,N4
+hikui,低,Thấp,テイ (tei),ひく (hiku),hikui,N4
+korobu,転,Chuyển / Ngã,テン (ten),ころ (koro),korobu,N4
+ta_ricefield,田,Ruộng / Điền,デン (den),た (ta),ta_ricefield,N4
+miyako,都,Thủ đô / Đô thị,ト (to); ツ (tsu),みやこ (miyako),miyako,N4
+do_degree,度,Mức độ / Lần,ド (do); ト (to); タク (taku),たび (tabi),do_degree,N4
+kotaeru,答,Trả lời / Đáp,トウ (tou),こた (kota),kotaeru,N4

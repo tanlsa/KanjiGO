@@ -102,6 +102,141 @@ window.KANJI_DB = {
     an:{ char: '暗', meaning: 'Tối / Ám', on: ['アン (an)'], kun: ['くら (kura)'], monId: 'an', jlpt: 'N4' },
     i_med:{ char: '医', meaning: 'Y học / Bác sĩ', on: ['イ (i)'], kun: [], monId: 'i_med', jlpt: 'N4' },
     i_intent:{ char: '意', meaning: 'Ý / Ý định', on: ['イ (i)'], kun: [], monId: 'i_intent', jlpt: 'N4' },
+    i_by:{ char: '以', meaning: 'Từ / Bằng / Trở lên', on: ['イ (i)'], kun: [], monId: 'i_by', jlpt: 'N4' },
+    hiku:{ char: '引', meaning: 'Kéo / Dẫn', on: ['イン (in)'], kun: ['ひ (hi)'], monId: 'hiku', jlpt: 'N4' },
+    institute:{ char: '院', meaning: 'Viện / Cơ sở', on: ['イン (in)'], kun: [], monId: 'institute', jlpt: 'N4' },
+    member:{ char: '員', meaning: 'Thành viên / Nhân viên', on: ['イン (in)'], kun: [], monId: 'member', jlpt: 'N4' },
+    un:{ char: '運', meaning: 'Vận chuyển / Vận may', on: ['ウン (un)'], kun: ['はこ (hako)'], monId: 'un', jlpt: 'N4' },
+    ei:{ char: '英', meaning: 'Anh / Xuất sắc', on: ['エイ (ei)'], kun: [], monId: 'ei', jlpt: 'N4' },
+    utsu:{ char: '映', meaning: 'Chiếu / Phản chiếu', on: ['エイ (ei)'], kun: ['うつ (utsu)', 'は (ha)'], monId: 'utsu', jlpt: 'N4' },
+    tooi:{ char: '遠', meaning: 'Xa / Viễn', on: ['エン (en)'], kun: ['とお (too)'], monId: 'tooi', jlpt: 'N4' },
+    ya:{ char: '屋', meaning: 'Nhà / Cửa hàng', on: ['オク (oku)'], kun: ['や (ya)'], monId: 'ya', jlpt: 'N4' },
+    uta:{ char: '歌', meaning: 'Bài hát / Hát', on: ['カ (ka)'], kun: ['うた (uta)'], monId: 'uta', jlpt: 'N4' },
+    natsu:{ char: '夏', meaning: 'Mùa hè', on: ['カ (ka)'], kun: ['なつ (natsu)'], monId: 'natsu', jlpt: 'N4' },
+    ie:{ char: '家', meaning: 'Nhà / Gia đình', on: ['カ (ka)', 'ケ (ke)'], kun: ['いえ (ie)', 'や (ya)'], monId: 'ie', jlpt: 'N4' },
+    ga_art:{ char: '画', meaning: 'Tranh / Hình / Nét', on: ['ガ (ga)', 'カク (kaku)'], kun: [], monId: 'ga_art', jlpt: 'N4' },
+    umi:{ char: '海', meaning: 'Biển / Hải', on: ['カイ (kai)'], kun: ['うみ (umi)'], monId: 'umi', jlpt: 'N4' },
+    kai_turn:{ char: '回', meaning: 'Lần / Xoay vòng', on: ['カイ (kai)'], kun: ['まわ (mawa)'], monId: 'kai_turn', jlpt: 'N4' },
+    hiraku:{ char: '開', meaning: 'Mở / Khai', on: ['カイ (kai)'], kun: ['ひら (hira)', 'あ (a)'], monId: 'hiraku', jlpt: 'N4' },
+    kai_world:{ char: '界', meaning: 'Thế giới / Ranh giới', on: ['カイ (kai)'], kun: ['さかい (sakai)'], monId: 'kai_world', jlpt: 'N4' },
+    tanoshi:{ char: '楽', meaning: 'Vui / Âm nhạc', on: ['ガク (gaku)', 'ラク (raku)'], kun: ['たの (tano)'], monId: 'tanoshi', jlpt: 'N4' },
+    kan_building:{ char: '館', meaning: 'Tòa nhà / Quán', on: ['カン (kan)'], kun: ['やかた (yakata)'], monId: 'kan_building', jlpt: 'N4' },
+    kan_han:{ char: '漢', meaning: 'Hán / Chữ Hán', on: ['カン (kan)'], kun: [], monId: 'kan_han', jlpt: 'N4' },
+    samui:{ char: '寒', meaning: 'Lạnh / Hàn', on: ['カン (kan)'], kun: ['さむ (samu)'], monId: 'samui', jlpt: 'N4' },
+    kao:{ char: '顔', meaning: 'Khuôn mặt', on: ['ガン (gan)'], kun: ['かお (kao)'], monId: 'kao', jlpt: 'N4' },
+    kaeru:{ char: '帰', meaning: 'Trở về / Quy', on: ['キ (ki)'], kun: ['かえ (kae)'], monId: 'kaeru', jlpt: 'N4' },
+    okiru:{ char: '起', meaning: 'Dậy / Khởi', on: ['キ (ki)'], kun: ['お (o)'], monId: 'okiru', jlpt: 'N4' },
+    kyuu_research:{ char: '究', meaning: 'Nghiên cứu / Cùng', on: ['キュウ (kyuu)'], kun: ['きわ (kiwa)'], monId: 'kyuu_research', jlpt: 'N4' },
+    isogu:{ char: '急', meaning: 'Gấp / Khẩn cấp', on: ['キュウ (kyuu)'], kun: ['いそ (iso)'], monId: 'isogu', jlpt: 'N4' },
+    ushi:{ char: '牛', meaning: 'Bò / Ngưu', on: ['ギュウ (gyuu)'], kun: ['うし (ushi)'], monId: 'ushi', jlpt: 'N4' },
+    saru:{ char: '去', meaning: 'Rời đi / Quá khứ', on: ['キョ (kyo)', 'コ (ko)'], kun: ['さ (sa)'], monId: 'saru', jlpt: 'N4' },
+    tsuyoi:{ char: '強', meaning: 'Mạnh / Cường', on: ['キョウ (kyou)', 'ゴウ (gou)'], kun: ['つよ (tsuyo)', 'し (shi)'], monId: 'tsuyoi', jlpt: 'N4' },
+    oshieru:{ char: '教', meaning: 'Dạy / Giáo', on: ['キョウ (kyou)'], kun: ['おし (oshi)', 'おそ (oso)'], monId: 'oshieru', jlpt: 'N4' },
+    kyou_capital:{ char: '京', meaning: 'Kinh đô / Thủ đô', on: ['キョウ (kyou)', 'ケイ (kei)', 'キン (kin)'], kun: ['みやこ (miyako)'], monId: 'kyou_capital', jlpt: 'N4' },
+    gyou_business:{ char: '業', meaning: 'Nghiệp / Công việc', on: ['ギョウ (gyou)', 'ゴウ (gou)'], kun: ['わざ (waza)'], monId: 'gyou_business', jlpt: 'N4' },
+    chikai:{ char: '近', meaning: 'Gần / Cận', on: ['キン (kin)'], kun: ['ちか (chika)'], monId: 'chikai', jlpt: 'N4' },
+    gin:{ char: '銀', meaning: 'Bạc / Ngân', on: ['ギン (gin)'], kun: ['しろがね (shirogane)'], monId: 'gin', jlpt: 'N4' },
+    ku_district:{ char: '区', meaning: 'Khu / Quận', on: ['ク (ku)'], kun: [], monId: 'ku_district', jlpt: 'N4' },
+    hakaru:{ char: '計', meaning: 'Tính / Đo lường', on: ['ケイ (kei)'], kun: ['はか (haka)'], monId: 'hakaru', jlpt: 'N4' },
+    ani:{ char: '兄', meaning: 'Anh trai', on: ['ケイ (kei)', 'キョウ (kyou)'], kun: ['あに (ani)'], monId: 'ani', jlpt: 'N4' },
+    karui:{ char: '軽', meaning: 'Nhẹ / Khinh', on: ['ケイ (kei)'], kun: ['かる (karu)'], monId: 'karui', jlpt: 'N4' },
+    inu:{ char: '犬', meaning: 'Chó / Khuyển', on: ['ケン (ken)'], kun: ['いぬ (inu)'], monId: 'inu', jlpt: 'N4' },
+    ken_research:{ char: '研', meaning: 'Nghiên cứu / Mài', on: ['ケン (ken)'], kun: ['と (to)'], monId: 'ken_research', jlpt: 'N4' },
+    ken_prefecture:{ char: '県', meaning: 'Tỉnh / Huyện', on: ['ケン (ken)'], kun: [], monId: 'ken_prefecture', jlpt: 'N4' },
+    tateru:{ char: '建', meaning: 'Xây dựng / Kiến', on: ['ケン (ken)', 'コン (kon)'], kun: ['た (ta)'], monId: 'tateru', jlpt: 'N4' },
+    ken_test:{ char: '験', meaning: 'Kiểm tra / Trải nghiệm', on: ['ケン (ken)', 'ゲン (gen)'], kun: [], monId: 'ken_test', jlpt: 'N4' },
+    moto:{ char: '元', meaning: 'Gốc / Nguyên', on: ['ゲン (gen)', 'ガン (gan)'], kun: ['もと (moto)'], monId: 'moto', jlpt: 'N4' },
+    kou_craft:{ char: '工', meaning: 'Công / Chế tác', on: ['コウ (kou)', 'ク (ku)', 'グ (gu)'], kun: [], monId: 'kou_craft', jlpt: 'N4' },
+    hiroi:{ char: '広', meaning: 'Rộng / Quảng', on: ['コウ (kou)'], kun: ['ひろ (hiro)'], monId: 'hiroi', jlpt: 'N4' },
+    kangaeru:{ char: '考', meaning: 'Suy nghĩ / Khảo', on: ['コウ (kou)'], kun: ['かんが (kanga)'], monId: 'kangaeru', jlpt: 'N4' },
+    hikari:{ char: '光', meaning: 'Ánh sáng / Quang', on: ['コウ (kou)'], kun: ['ひかり (hikari)', 'ひか (hika)'], monId: 'hikari', jlpt: 'N4' },
+    suki:{ char: '好', meaning: 'Thích / Hảo', on: ['コウ (kou)'], kun: ['この (kono)', 'す (su)'], monId: 'suki', jlpt: 'N4' },
+    au:{ char: '合', meaning: 'Hợp / Gặp / Ghép', on: ['ゴウ (gou)', 'ガッ (ga)', 'カッ (ka)'], kun: ['あ (a)'], monId: 'au', jlpt: 'N4' },
+    kuro:{ char: '黒', meaning: 'Đen / Hắc', on: ['コク (koku)'], kun: ['くろ (kuro)'], monId: 'kuro', jlpt: 'N4' },
+    na_vegetable:{ char: '菜', meaning: 'Rau / Thái', on: ['サイ (sai)'], kun: ['な (na)'], monId: 'na_vegetable', jlpt: 'N4' },
+    tsukuru:{ char: '作', meaning: 'Làm / Tạo', on: ['サク (saku)', 'サ (sa)'], kun: ['つく (tsuku)'], monId: 'tsukuru', jlpt: 'N4' },
+    umu:{ char: '産', meaning: 'Sinh / Sản xuất', on: ['サン (san)'], kun: ['う (u)', 'うぶ (ubu)'], monId: 'umu', jlpt: 'N4' },
+    kami_paper:{ char: '紙', meaning: 'Giấy', on: ['シ (shi)'], kun: ['かみ (kami)'], monId: 'kami_paper', jlpt: 'N4' },
+    omou:{ char: '思', meaning: 'Nghĩ / Tư', on: ['シ (shi)'], kun: ['おも (omo)'], monId: 'omou', jlpt: 'N4' },
+    ane:{ char: '姉', meaning: 'Chị gái', on: ['シ (shi)'], kun: ['あね (ane)'], monId: 'ane', jlpt: 'N4' },
+    tomaru:{ char: '止', meaning: 'Dừng / Chỉ', on: ['シ (shi)'], kun: ['と (to)', 'とど (todo)', 'や (ya)'], monId: 'tomaru', jlpt: 'N4' },
+    shi_city:{ char: '市', meaning: 'Thành phố / Chợ', on: ['シ (shi)'], kun: ['いち (ichi)'], monId: 'shi_city', jlpt: 'N4' },
+    shi_work:{ char: '仕', meaning: 'Làm việc / Phụng sự', on: ['シ (shi)', 'ジ (ji)'], kun: ['つか (tsuka)'], monId: 'shi_work', jlpt: 'N4' },
+    shi_death:{ char: '死', meaning: 'Chết / Tử', on: ['シ (shi)'], kun: ['し (shi)'], monId: 'shi_death', jlpt: 'N4' },
+    tsukau:{ char: '使', meaning: 'Dùng / Sử', on: ['シ (shi)'], kun: ['つか (tsuka)'], monId: 'tsukau', jlpt: 'N4' },
+    hajimeru:{ char: '始', meaning: 'Bắt đầu / Thủy', on: ['シ (shi)'], kun: ['はじ (haji)'], monId: 'hajimeru', jlpt: 'N4' },
+    shi_try:{ char: '試', meaning: 'Thử / Thi', on: ['シ (shi)'], kun: ['こころ (kokoro)', 'ため (tame)'], monId: 'shi_try', jlpt: 'N4' },
+    watashi:{ char: '私', meaning: 'Tôi / Riêng tư', on: ['シ (shi)'], kun: ['わたくし (watakushi)', 'わたし (watashi)'], monId: 'watashi', jlpt: 'N4' },
+    ji_letter:{ char: '字', meaning: 'Chữ / Tự', on: ['ジ (ji)'], kun: ['あざ (aza)'], monId: 'ji_letter', jlpt: 'N4' },
+    mizukara:{ char: '自', meaning: 'Tự mình', on: ['ジ (ji)', 'シ (shi)'], kun: ['みずか (mizuka)'], monId: 'mizukara', jlpt: 'N4' },
+    koto:{ char: '事', meaning: 'Việc / Sự', on: ['ジ (ji)', 'ズ (zu)'], kun: ['こと (koto)'], monId: 'koto', jlpt: 'N4' },
+    motsu:{ char: '持', meaning: 'Cầm / Giữ', on: ['ジ (ji)'], kun: ['も (mo)'], monId: 'motsu', jlpt: 'N4' },
+    shitsu_room:{ char: '室', meaning: 'Phòng / Thất', on: ['シツ (shitsu)'], kun: ['むろ (muro)'], monId: 'shitsu_room', jlpt: 'N4' },
+    shitsu_quality:{ char: '質', meaning: 'Chất / Chất lượng', on: ['シツ (shitsu)', 'シチ (shichi)', 'チ (chi)'], kun: ['たち (tachi)', 'ただ (tada)'], monId: 'shitsu_quality', jlpt: 'N4' },
+    utsusu:{ char: '写', meaning: 'Chụp / Sao chép', on: ['シャ (sha)', 'ジャ (ja)'], kun: ['うつ (utsu)'], monId: 'utsusu', jlpt: 'N4' },
+    mono_person:{ char: '者', meaning: 'Người / Giả', on: ['シャ (sha)'], kun: ['もの (mono)'], monId: 'mono_person', jlpt: 'N4' },
+    kariru:{ char: '借', meaning: 'Mượn / Tá', on: ['シャク (shaku)'], kun: ['か (ka)'], monId: 'kariru', jlpt: 'N4' },
+    yowai:{ char: '弱', meaning: 'Yếu / Nhược', on: ['ジャク (jaku)'], kun: ['よわ (yowa)'], monId: 'yowai', jlpt: 'N4' },
+    kubi:{ char: '首', meaning: 'Cổ / Đầu / Thủ', on: ['シュ (shu)'], kun: ['くび (kubi)'], monId: 'kubi', jlpt: 'N4' },
+    shu_main:{ char: '主', meaning: 'Chính / Chủ', on: ['シュ (shu)', 'ス (su)'], kun: ['ぬし (nushi)', 'おも (omo)'], monId: 'shu_main', jlpt: 'N4' },
+    aki:{ char: '秋', meaning: 'Mùa thu', on: ['シュウ (shuu)'], kun: ['あき (aki)'], monId: 'aki', jlpt: 'N4' },
+    atsumeru:{ char: '集', meaning: 'Tập hợp / Thu thập', on: ['シュウ (shuu)'], kun: ['あつ (atsu)'], monId: 'atsumeru', jlpt: 'N4' },
+    narau:{ char: '習', meaning: 'Học / Luyện tập', on: ['シュウ (shuu)'], kun: ['なら (nara)'], monId: 'narau', jlpt: 'N4' },
+    owaru:{ char: '終', meaning: 'Kết thúc', on: ['シュウ (shuu)'], kun: ['お (o)'], monId: 'owaru', jlpt: 'N4' },
+    sumu:{ char: '住', meaning: 'Sống / Cư trú', on: ['ジュウ (juu)'], kun: ['す (su)'], monId: 'sumu', jlpt: 'N4' },
+    omoi_heavy:{ char: '重', meaning: 'Nặng / Quan trọng', on: ['ジュウ (juu)', 'チョウ (chou)'], kun: ['おも (omo)', 'かさ (kasa)'], monId: 'omoi_heavy', jlpt: 'N4' },
+    haru:{ char: '春', meaning: 'Mùa xuân', on: ['シュン (shun)'], kun: ['はる (haru)'], monId: 'haru', jlpt: 'N4' },
+    tokoro:{ char: '所', meaning: 'Nơi / Chỗ', on: ['ショ (sho)'], kun: ['ところ (tokoro)'], monId: 'tokoro', jlpt: 'N4' },
+    atsui:{ char: '暑', meaning: 'Nóng (thời tiết)', on: ['ショ (sho)'], kun: ['あつ (atsu)'], monId: 'atsui', jlpt: 'N4' },
+    ba:{ char: '場', meaning: 'Nơi / Sân / Trường', on: ['ジョウ (jou)'], kun: ['ば (ba)'], monId: 'ba', jlpt: 'N4' },
+    noru:{ char: '乗', meaning: 'Lên / Đi (phương tiện)', on: ['ジョウ (jou)'], kun: ['の (no)'], monId: 'noru', jlpt: 'N4' },
+    iro:{ char: '色', meaning: 'Màu sắc', on: ['ショク (shoku)', 'シキ (shiki)'], kun: ['いろ (iro)'], monId: 'iro', jlpt: 'N4' },
+    mori:{ char: '森', meaning: 'Rừng', on: ['シン (shin)'], kun: ['もり (mori)'], monId: 'mori', jlpt: 'N4' },
+    kokoro:{ char: '心', meaning: 'Tim / Tâm trí', on: ['シン (shin)'], kun: ['こころ (kokoro)'], monId: 'kokoro', jlpt: 'N4' },
+    oya:{ char: '親', meaning: 'Cha mẹ / Thân thiết', on: ['シン (shin)'], kun: ['おや (oya)', 'した (shita)'], monId: 'oya', jlpt: 'N4' },
+    shin_truth:{ char: '真', meaning: 'Thật / Chân', on: ['シン (shin)'], kun: ['ま (ma)', 'まこと (makoto)'], monId: 'shin_truth', jlpt: 'N4' },
+    susumu:{ char: '進', meaning: 'Tiến / Đi tới', on: ['シン (shin)'], kun: ['すす (susu)'], monId: 'susumu', jlpt: 'N4' },
+    zu:{ char: '図', meaning: 'Sơ đồ / Bản đồ', on: ['ズ (zu)', 'ト (to)'], kun: ['はか (haka)'], monId: 'zu', jlpt: 'N4' },
+    ao:{ char: '青', meaning: 'Xanh / Thanh', on: ['セイ (sei)', 'ショウ (shou)'], kun: ['あお (ao)'], monId: 'ao', jlpt: 'N4' },
+    tadashii:{ char: '正', meaning: 'Đúng / Chính', on: ['セイ (sei)', 'ショウ (shou)'], kun: ['ただ (tada)', 'まさ (masa)'], monId: 'tadashii', jlpt: 'N4' },
+    koe:{ char: '声', meaning: 'Giọng / Tiếng', on: ['セイ (sei)', 'ショウ (shou)'], kun: ['こえ (koe)'], monId: 'koe', jlpt: 'N4' },
+    yo:{ char: '世', meaning: 'Thế giới / Đời', on: ['セイ (sei)', 'セ (se)'], kun: ['よ (yo)'], monId: 'yo', jlpt: 'N4' },
+    aka:{ char: '赤', meaning: 'Đỏ / Xích', on: ['セキ (seki)', 'シャク (shaku)'], kun: ['あか (aka)'], monId: 'aka', jlpt: 'N4' },
+    yuu:{ char: '夕', meaning: 'Buổi tối / Tịch', on: ['セキ (seki)'], kun: ['ゆう (yuu)'], monId: 'yuu', jlpt: 'N4' },
+    kiru:{ char: '切', meaning: 'Cắt / Quan trọng', on: ['セツ (setsu)', 'サイ (sai)'], kun: ['き (ki)'], monId: 'kiru', jlpt: 'N4' },
+    toku:{ char: '説', meaning: 'Giải thích / Thuyết', on: ['セツ (setsu)', 'ゼイ (zei)'], kun: ['と (to)'], monId: 'toku', jlpt: 'N4' },
+    arau:{ char: '洗', meaning: 'Rửa / Tẩy', on: ['セン (sen)'], kun: ['あら (ara)'], monId: 'arau', jlpt: 'N4' },
+    hayai:{ char: '早', meaning: 'Sớm / Nhanh', on: ['ソウ (sou)', 'サッ (sa)'], kun: ['はや (haya)'], monId: 'hayai', jlpt: 'N4' },
+    hashiru:{ char: '走', meaning: 'Chạy / Tẩu', on: ['ソウ (sou)'], kun: ['はし (hashi)'], monId: 'hashiru', jlpt: 'N4' },
+    okuru:{ char: '送', meaning: 'Gửi / Tiễn', on: ['ソウ (sou)'], kun: ['おく (oku)'], monId: 'okuru', jlpt: 'N4' },
+    zoku:{ char: '族', meaning: 'Gia tộc / Nhóm', on: ['ゾク (zoku)'], kun: [], monId: 'zoku', jlpt: 'N4' },
+    mura:{ char: '村', meaning: 'Làng / Thôn', on: ['ソン (son)'], kun: ['むら (mura)'], monId: 'mura', jlpt: 'N4' },
+    karada:{ char: '体', meaning: 'Cơ thể / Thể', on: ['タイ (tai)', 'テイ (tei)'], kun: ['からだ (karada)'], monId: 'karada', jlpt: 'N4' },
+    futoi:{ char: '太', meaning: 'To / Dày / Thái', on: ['タイ (tai)', 'タ (ta)'], kun: ['ふと (futo)'], monId: 'futoi', jlpt: 'N4' },
+    matsu:{ char: '待', meaning: 'Chờ / Đợi', on: ['タイ (tai)'], kun: ['ま (ma)'], monId: 'matsu', jlpt: 'N4' },
+    kasu:{ char: '貸', meaning: 'Cho mượn', on: ['タイ (tai)'], kun: ['か (ka)'], monId: 'kasu', jlpt: 'N4' },
+    dai_platform:{ char: '台', meaning: 'Bệ / Đài', on: ['ダイ (dai)', 'タイ (tai)'], kun: [], monId: 'dai_platform', jlpt: 'N4' },
+    dai_generation:{ char: '代', meaning: 'Thay thế / Đời', on: ['ダイ (dai)', 'タイ (tai)'], kun: ['か (ka)', 'よ (yo)'], monId: 'dai_generation', jlpt: 'N4' },
+    dai_topic:{ char: '題', meaning: 'Đề tài / Câu hỏi', on: ['ダイ (dai)'], kun: [], monId: 'dai_topic', jlpt: 'N4' },
+    mijikai:{ char: '短', meaning: 'Ngắn / Đoản', on: ['タン (tan)'], kun: ['みじか (mijika)'], monId: 'mijikai', jlpt: 'N4' },
+    shiru:{ char: '知', meaning: 'Biết / Tri', on: ['チ (chi)'], kun: ['し (shi)'], monId: 'shiru', jlpt: 'N4' },
+    chi_ground:{ char: '地', meaning: 'Đất / Địa', on: ['チ (chi)', 'ジ (ji)'], kun: [], monId: 'chi_ground', jlpt: 'N4' },
+    ike:{ char: '池', meaning: 'Ao / Hồ', on: ['チ (chi)'], kun: ['いけ (ike)'], monId: 'ike', jlpt: 'N4' },
+    cha:{ char: '茶', meaning: 'Trà', on: ['チャ (cha)', 'サ (sa)'], kun: [], monId: 'cha', jlpt: 'N4' },
+    kiru_wear:{ char: '着', meaning: 'Mặc / Đến nơi', on: ['チャク (chaku)', 'ジャク (jaku)'], kun: ['き (ki)', 'つ (tsu)'], monId: 'kiru_wear', jlpt: 'N4' },
+    hiru:{ char: '昼', meaning: 'Ban trưa', on: ['チュウ (chuu)'], kun: ['ひる (hiru)'], monId: 'hiru', jlpt: 'N4' },
+    sosogu:{ char: '注', meaning: 'Chú ý / Rót', on: ['チュウ (chuu)'], kun: ['そそ (soso)'], monId: 'sosogu', jlpt: 'N4' },
+    machi:{ char: '町', meaning: 'Phố / Thị trấn', on: ['チョウ (chou)'], kun: ['まち (machi)'], monId: 'machi', jlpt: 'N4' },
+    tori:{ char: '鳥', meaning: 'Chim / Điểu', on: ['チョウ (chou)'], kun: ['とり (tori)'], monId: 'tori', jlpt: 'N4' },
+    asa:{ char: '朝', meaning: 'Buổi sáng / Triều', on: ['チョウ (chou)'], kun: ['あさ (asa)'], monId: 'asa', jlpt: 'N4' },
+    tooru:{ char: '通', meaning: 'Đi qua / Thông', on: ['ツウ (tsuu)', 'ツ (tsu)'], kun: ['とお (too)', 'かよ (kayo)'], monId: 'tooru', jlpt: 'N4' },
+    otouto:{ char: '弟', meaning: 'Em trai / Đệ', on: ['テイ (tei)', 'ダイ (dai)', 'デ (de)'], kun: ['おとうと (otouto)'], monId: 'otouto', jlpt: 'N4' },
+    hikui:{ char: '低', meaning: 'Thấp', on: ['テイ (tei)'], kun: ['ひく (hiku)'], monId: 'hikui', jlpt: 'N4' },
+    korobu:{ char: '転', meaning: 'Chuyển / Ngã', on: ['テン (ten)'], kun: ['ころ (koro)'], monId: 'korobu', jlpt: 'N4' },
+    ta_ricefield:{ char: '田', meaning: 'Ruộng / Điền', on: ['デン (den)'], kun: ['た (ta)'], monId: 'ta_ricefield', jlpt: 'N4' },
+    miyako:{ char: '都', meaning: 'Thủ đô / Đô thị', on: ['ト (to)', 'ツ (tsu)'], kun: ['みやこ (miyako)'], monId: 'miyako', jlpt: 'N4' },
+    do_degree:{ char: '度', meaning: 'Mức độ / Lần', on: ['ド (do)', 'ト (to)', 'タク (taku)'], kun: ['たび (tabi)'], monId: 'do_degree', jlpt: 'N4' },
+    kotaeru:{ char: '答', meaning: 'Trả lời / Đáp', on: ['トウ (tou)'], kun: ['こた (kota)'], monId: 'kotaeru', jlpt: 'N4' },
   },
 
   // Ngân hàng câu hỏi. Mỗi câu:
@@ -703,6 +838,681 @@ window.KANJI_DB = {
       { text: '意', reading: 'い', romaji: 'i', meaning: 'ý', role: 'target' }, { text: '見', reading: 'けん', romaji: 'ken', meaning: 'cách nhìn', role: 'support' }] },
     { word: '意外', mean: 'ngoài dự đoán / bất ngờ', target: '意', answer: 'い', romaji: 'i', type: 'on', wordReading: 'いがい', wordRomaji: 'igai', parts: [
       { text: '意', reading: 'い', romaji: 'i', meaning: 'ý nghĩ', role: 'target' }, { text: '外', reading: 'がい', romaji: 'gai', meaning: 'ngoài', role: 'support' }] },
+    // 以
+    { word: '以上', mean: 'trở lên / hơn nữa', target: '以', answer: 'い', romaji: 'i', type: 'on', wordReading: 'いじょう', wordRomaji: 'ijou', parts: [
+      { text: '以', reading: 'い', romaji: 'i', meaning: 'từ / trở lên', role: 'target' }, { text: '上', reading: 'じょう', romaji: 'jou', meaning: 'trên', role: 'support' }] },
+    { word: '以前', mean: 'trước đây / trước khi', target: '以', answer: 'い', romaji: 'i', type: 'on', wordReading: 'いぜん', wordRomaji: 'izen', parts: [
+      { text: '以', reading: 'い', romaji: 'i', meaning: 'từ / mốc', role: 'target' }, { text: '前', reading: 'ぜん', romaji: 'zen', meaning: 'trước', role: 'support' }] },
+    // 引
+    { word: '引用', mean: 'trích dẫn', target: '引', answer: 'いん', romaji: 'in', type: 'on', wordReading: 'いんよう', wordRomaji: 'inyou', parts: [
+      { text: '引', reading: 'いん', romaji: 'in', meaning: 'dẫn', role: 'target' }, { text: '用', reading: 'よう', romaji: 'you', meaning: 'dùng', role: 'support' }] },
+    { word: '引く', mean: 'kéo / rút', target: '引', answer: 'ひ', romaji: 'hi', type: 'kun', wordReading: 'ひく', wordRomaji: 'hiku', parts: [
+      { text: '引', reading: 'ひ', romaji: 'hi', meaning: 'kéo', role: 'target' }, { text: 'く', reading: 'く', romaji: 'ku', meaning: '', role: 'kana' }] },
+    // 院
+    { word: '病院', mean: 'bệnh viện', target: '院', answer: 'いん', romaji: 'in', type: 'on', wordReading: 'びょういん', wordRomaji: 'byouin', parts: [
+      { text: '病', reading: 'びょう', romaji: 'byou', meaning: 'bệnh', role: 'support' }, { text: '院', reading: 'いん', romaji: 'in', meaning: 'viện', role: 'target' }] },
+    { word: '入院', mean: 'nhập viện', target: '院', answer: 'いん', romaji: 'in', type: 'on', wordReading: 'にゅういん', wordRomaji: 'nyuuin', parts: [
+      { text: '入', reading: 'にゅう', romaji: 'nyuu', meaning: 'vào', role: 'support' }, { text: '院', reading: 'いん', romaji: 'in', meaning: 'viện', role: 'target' }] },
+    // 員
+    { word: '店員', mean: 'nhân viên cửa hàng', target: '員', answer: 'いん', romaji: 'in', type: 'on', wordReading: 'てんいん', wordRomaji: 'tenin', parts: [
+      { text: '店', reading: 'てん', romaji: 'ten', meaning: 'cửa hàng', role: 'support' }, { text: '員', reading: 'いん', romaji: 'in', meaning: 'nhân viên', role: 'target' }] },
+    { word: '会社員', mean: 'nhân viên công ty', target: '員', answer: 'いん', romaji: 'in', type: 'on', wordReading: 'かいしゃいん', wordRomaji: 'kaishain', parts: [
+      { text: '会社', reading: 'かいしゃ', romaji: 'kaisha', meaning: 'công ty', role: 'support' }, { text: '員', reading: 'いん', romaji: 'in', meaning: 'nhân viên', role: 'target' }] },
+    // 運
+    { word: '運動', mean: 'vận động / tập thể dục', target: '運', answer: 'うん', romaji: 'un', type: 'on', wordReading: 'うんどう', wordRomaji: 'undou', parts: [
+      { text: '運', reading: 'うん', romaji: 'un', meaning: 'vận động', role: 'target' }, { text: '動', reading: 'どう', romaji: 'dou', meaning: 'chuyển động', role: 'support' }] },
+    { word: '運ぶ', mean: 'vận chuyển / mang', target: '運', answer: 'はこ', romaji: 'hako', type: 'kun', wordReading: 'はこぶ', wordRomaji: 'hakobu', parts: [
+      { text: '運', reading: 'はこ', romaji: 'hako', meaning: 'vận chuyển', role: 'target' }, { text: 'ぶ', reading: 'ぶ', romaji: 'bu', meaning: '', role: 'kana' }] },
+    // 英
+    { word: '英語', mean: 'tiếng Anh', target: '英', answer: 'えい', romaji: 'ei', type: 'on', wordReading: 'えいご', wordRomaji: 'eigo', parts: [
+      { text: '英', reading: 'えい', romaji: 'ei', meaning: 'Anh', role: 'target' }, { text: '語', reading: 'ご', romaji: 'go', meaning: 'ngôn ngữ', role: 'support' }] },
+    { word: '英国', mean: 'nước Anh', target: '英', answer: 'えい', romaji: 'ei', type: 'on', wordReading: 'えいこく', wordRomaji: 'eikoku', parts: [
+      { text: '英', reading: 'えい', romaji: 'ei', meaning: 'Anh', role: 'target' }, { text: '国', reading: 'こく', romaji: 'koku', meaning: 'quốc gia', role: 'support' }] },
+    // 映
+    { word: '映画', mean: 'phim điện ảnh', target: '映', answer: 'えい', romaji: 'ei', type: 'on', wordReading: 'えいが', wordRomaji: 'eiga', parts: [
+      { text: '映', reading: 'えい', romaji: 'ei', meaning: 'chiếu', role: 'target' }, { text: '画', reading: 'が', romaji: 'ga', meaning: 'hình ảnh', role: 'support' }] },
+    { word: '映る', mean: 'được chiếu / phản chiếu', target: '映', answer: 'うつ', romaji: 'utsu', type: 'kun', wordReading: 'うつる', wordRomaji: 'utsuru', parts: [
+      { text: '映', reading: 'うつ', romaji: 'utsu', meaning: 'phản chiếu', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 遠
+    { word: '遠足', mean: 'chuyến dã ngoại', target: '遠', answer: 'えん', romaji: 'en', type: 'on', wordReading: 'えんそく', wordRomaji: 'ensoku', parts: [
+      { text: '遠', reading: 'えん', romaji: 'en', meaning: 'xa', role: 'target' }, { text: '足', reading: 'そく', romaji: 'soku', meaning: 'chân / chuyến đi', role: 'support' }] },
+    { word: '遠い', mean: 'xa', target: '遠', answer: 'とお', romaji: 'too', type: 'kun', wordReading: 'とおい', wordRomaji: 'tooi', parts: [
+      { text: '遠', reading: 'とお', romaji: 'too', meaning: 'xa', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 屋
+    { word: '屋上', mean: 'sân thượng / mái nhà', target: '屋', answer: 'おく', romaji: 'oku', type: 'on', wordReading: 'おくじょう', wordRomaji: 'okujou', parts: [
+      { text: '屋', reading: 'おく', romaji: 'oku', meaning: 'mái / nhà', role: 'target' }, { text: '上', reading: 'じょう', romaji: 'jou', meaning: 'trên', role: 'support' }] },
+    { word: '本屋', mean: 'hiệu sách', target: '屋', answer: 'や', romaji: 'ya', type: 'kun', wordReading: 'ほんや', wordRomaji: 'honya', parts: [
+      { text: '本', reading: 'ほん', romaji: 'hon', meaning: 'sách', role: 'support' }, { text: '屋', reading: 'や', romaji: 'ya', meaning: 'cửa hàng', role: 'target' }] },
+    // 歌
+    { word: '歌手', mean: 'ca sĩ', target: '歌', answer: 'か', romaji: 'ka', type: 'on', wordReading: 'かしゅ', wordRomaji: 'kashu', parts: [
+      { text: '歌', reading: 'か', romaji: 'ka', meaning: 'bài hát', role: 'target' }, { text: '手', reading: 'しゅ', romaji: 'shu', meaning: 'người làm', role: 'support' }] },
+    { word: '歌う', mean: 'hát', target: '歌', answer: 'うた', romaji: 'uta', type: 'kun', wordReading: 'うたう', wordRomaji: 'utau', parts: [
+      { text: '歌', reading: 'うた', romaji: 'uta', meaning: 'hát', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 夏
+    { word: '夏季', mean: 'mùa hè / mùa hạ', target: '夏', answer: 'か', romaji: 'ka', type: 'on', wordReading: 'かき', wordRomaji: 'kaki', parts: [
+      { text: '夏', reading: 'か', romaji: 'ka', meaning: 'mùa hè', role: 'target' }, { text: '季', reading: 'き', romaji: 'ki', meaning: 'mùa', role: 'support' }] },
+    { word: '夏休み', mean: 'kỳ nghỉ hè', target: '夏', answer: 'なつ', romaji: 'natsu', type: 'kun', wordReading: 'なつやすみ', wordRomaji: 'natsuyasumi', parts: [
+      { text: '夏', reading: 'なつ', romaji: 'natsu', meaning: 'mùa hè', role: 'target' }, { text: '休', reading: 'やす', romaji: 'yasu', meaning: 'nghỉ', role: 'support' }, { text: 'み', reading: 'み', romaji: 'mi', meaning: '', role: 'kana' }] },
+    // 家
+    { word: '家族', mean: 'gia đình', target: '家', answer: 'か', romaji: 'ka', type: 'on', wordReading: 'かぞく', wordRomaji: 'kazoku', parts: [
+      { text: '家', reading: 'か', romaji: 'ka', meaning: 'gia đình', role: 'target' }, { text: '族', reading: 'ぞく', romaji: 'zoku', meaning: 'nhóm / tộc', role: 'support' }] },
+    { word: '家', mean: 'ngôi nhà', target: '家', answer: 'いえ', romaji: 'ie', type: 'kun', wordReading: 'いえ', wordRomaji: 'ie', parts: [
+      { text: '家', reading: 'いえ', romaji: 'ie', meaning: 'nhà', role: 'target' }] },
+    // 画
+    { word: '映画', mean: 'phim điện ảnh', target: '画', answer: 'が', romaji: 'ga', type: 'on', wordReading: 'えいが', wordRomaji: 'eiga', parts: [
+      { text: '映', reading: 'えい', romaji: 'ei', meaning: 'chiếu', role: 'support' }, { text: '画', reading: 'が', romaji: 'ga', meaning: 'hình ảnh', role: 'target' }] },
+    { word: '計画', mean: 'kế hoạch', target: '画', answer: 'かく', romaji: 'kaku', type: 'on', wordReading: 'けいかく', wordRomaji: 'keikaku', parts: [
+      { text: '計', reading: 'けい', romaji: 'kei', meaning: 'tính toán', role: 'support' }, { text: '画', reading: 'かく', romaji: 'kaku', meaning: 'kế hoạch / nét', role: 'target' }] },
+    // 海
+    { word: '海外', mean: 'hải ngoại / nước ngoài', target: '海', answer: 'かい', romaji: 'kai', type: 'on', wordReading: 'かいがい', wordRomaji: 'kaigai', parts: [
+      { text: '海', reading: 'かい', romaji: 'kai', meaning: 'biển', role: 'target' }, { text: '外', reading: 'がい', romaji: 'gai', meaning: 'ngoài', role: 'support' }] },
+    { word: '海', mean: 'biển', target: '海', answer: 'うみ', romaji: 'umi', type: 'kun', wordReading: 'うみ', wordRomaji: 'umi', parts: [
+      { text: '海', reading: 'うみ', romaji: 'umi', meaning: 'biển', role: 'target' }] },
+    // 回
+    { word: '今回', mean: 'lần này', target: '回', answer: 'かい', romaji: 'kai', type: 'on', wordReading: 'こんかい', wordRomaji: 'konkai', parts: [
+      { text: '今', reading: 'こん', romaji: 'kon', meaning: 'lần này / hiện tại', role: 'support' }, { text: '回', reading: 'かい', romaji: 'kai', meaning: 'lần', role: 'target' }] },
+    { word: '回る', mean: 'xoay / đi vòng', target: '回', answer: 'まわ', romaji: 'mawa', type: 'kun', wordReading: 'まわる', wordRomaji: 'mawaru', parts: [
+      { text: '回', reading: 'まわ', romaji: 'mawa', meaning: 'xoay vòng', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 開
+    { word: '開会', mean: 'khai mạc / mở cuộc họp', target: '開', answer: 'かい', romaji: 'kai', type: 'on', wordReading: 'かいかい', wordRomaji: 'kaikai', parts: [
+      { text: '開', reading: 'かい', romaji: 'kai', meaning: 'mở', role: 'target' }, { text: '会', reading: 'かい', romaji: 'kai', meaning: 'cuộc họp', role: 'support' }] },
+    { word: '開く', mean: 'mở ra', target: '開', answer: 'ひら', romaji: 'hira', type: 'kun', wordReading: 'ひらく', wordRomaji: 'hiraku', parts: [
+      { text: '開', reading: 'ひら', romaji: 'hira', meaning: 'mở', role: 'target' }, { text: 'く', reading: 'く', romaji: 'ku', meaning: '', role: 'kana' }] },
+    // 界
+    { word: '世界', mean: 'thế giới', target: '界', answer: 'かい', romaji: 'kai', type: 'on', wordReading: 'せかい', wordRomaji: 'sekai', parts: [
+      { text: '世', reading: 'せ', romaji: 'se', meaning: 'đời / thế', role: 'support' }, { text: '界', reading: 'かい', romaji: 'kai', meaning: 'thế giới', role: 'target' }] },
+    { word: '業界', mean: 'ngành nghề / giới kinh doanh', target: '界', answer: 'かい', romaji: 'kai', type: 'on', wordReading: 'ぎょうかい', wordRomaji: 'gyoukai', parts: [
+      { text: '業', reading: 'ぎょう', romaji: 'gyou', meaning: 'ngành nghề', role: 'support' }, { text: '界', reading: 'かい', romaji: 'kai', meaning: 'giới', role: 'target' }] },
+    // 楽
+    { word: '音楽', mean: 'âm nhạc', target: '楽', answer: 'がく', romaji: 'gaku', type: 'on', wordReading: 'おんがく', wordRomaji: 'ongaku', parts: [
+      { text: '音', reading: 'おん', romaji: 'on', meaning: 'âm thanh', role: 'support' }, { text: '楽', reading: 'がく', romaji: 'gaku', meaning: 'nhạc', role: 'target' }] },
+    { word: '楽しい', mean: 'vui vẻ', target: '楽', answer: 'たの', romaji: 'tano', type: 'kun', wordReading: 'たのしい', wordRomaji: 'tanoshii', parts: [
+      { text: '楽', reading: 'たの', romaji: 'tano', meaning: 'vui', role: 'target' }, { text: 'しい', reading: 'しい', romaji: 'shii', meaning: '', role: 'kana' }] },
+    // 館
+    { word: '図書館', mean: 'thư viện', target: '館', answer: 'かん', romaji: 'kan', type: 'on', wordReading: 'としょかん', wordRomaji: 'toshokan', parts: [
+      { text: '図書', reading: 'としょ', romaji: 'tosho', meaning: 'sách', role: 'support' }, { text: '館', reading: 'かん', romaji: 'kan', meaning: 'tòa nhà', role: 'target' }] },
+    { word: '映画館', mean: 'rạp chiếu phim', target: '館', answer: 'かん', romaji: 'kan', type: 'on', wordReading: 'えいがかん', wordRomaji: 'eigakan', parts: [
+      { text: '映画', reading: 'えいが', romaji: 'eiga', meaning: 'phim', role: 'support' }, { text: '館', reading: 'かん', romaji: 'kan', meaning: 'tòa nhà / rạp', role: 'target' }] },
+    // 漢
+    { word: '漢字', mean: 'chữ Kanji / Hán tự', target: '漢', answer: 'かん', romaji: 'kan', type: 'on', wordReading: 'かんじ', wordRomaji: 'kanji', parts: [
+      { text: '漢', reading: 'かん', romaji: 'kan', meaning: 'Hán', role: 'target' }, { text: '字', reading: 'じ', romaji: 'ji', meaning: 'chữ', role: 'support' }] },
+    { word: '漢語', mean: 'từ Hán Nhật', target: '漢', answer: 'かん', romaji: 'kan', type: 'on', wordReading: 'かんご', wordRomaji: 'kango', parts: [
+      { text: '漢', reading: 'かん', romaji: 'kan', meaning: 'Hán', role: 'target' }, { text: '語', reading: 'ご', romaji: 'go', meaning: 'từ ngữ', role: 'support' }] },
+    // 寒
+    { word: '寒気', mean: 'khí lạnh / cảm giác ớn lạnh', target: '寒', answer: 'かん', romaji: 'kan', type: 'on', wordReading: 'かんき', wordRomaji: 'kanki', parts: [
+      { text: '寒', reading: 'かん', romaji: 'kan', meaning: 'lạnh', role: 'target' }, { text: '気', reading: 'き', romaji: 'ki', meaning: 'khí', role: 'support' }] },
+    { word: '寒い', mean: 'lạnh', target: '寒', answer: 'さむ', romaji: 'samu', type: 'kun', wordReading: 'さむい', wordRomaji: 'samui', parts: [
+      { text: '寒', reading: 'さむ', romaji: 'samu', meaning: 'lạnh', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 顔
+    { word: '顔面', mean: 'khuôn mặt / vùng mặt', target: '顔', answer: 'がん', romaji: 'gan', type: 'on', wordReading: 'がんめん', wordRomaji: 'ganmen', parts: [
+      { text: '顔', reading: 'がん', romaji: 'gan', meaning: 'mặt', role: 'target' }, { text: '面', reading: 'めん', romaji: 'men', meaning: 'bề mặt', role: 'support' }] },
+    { word: '顔', mean: 'khuôn mặt', target: '顔', answer: 'かお', romaji: 'kao', type: 'kun', wordReading: 'かお', wordRomaji: 'kao', parts: [
+      { text: '顔', reading: 'かお', romaji: 'kao', meaning: 'khuôn mặt', role: 'target' }] },
+    // 帰
+    { word: '帰国', mean: 'về nước', target: '帰', answer: 'き', romaji: 'ki', type: 'on', wordReading: 'きこく', wordRomaji: 'kikoku', parts: [
+      { text: '帰', reading: 'き', romaji: 'ki', meaning: 'trở về', role: 'target' }, { text: '国', reading: 'こく', romaji: 'koku', meaning: 'đất nước', role: 'support' }] },
+    { word: '帰る', mean: 'trở về', target: '帰', answer: 'かえ', romaji: 'kae', type: 'kun', wordReading: 'かえる', wordRomaji: 'kaeru', parts: [
+      { text: '帰', reading: 'かえ', romaji: 'kae', meaning: 'trở về', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 起
+    { word: '起立', mean: 'đứng dậy', target: '起', answer: 'き', romaji: 'ki', type: 'on', wordReading: 'きりつ', wordRomaji: 'kiritsu', parts: [
+      { text: '起', reading: 'き', romaji: 'ki', meaning: 'đứng lên', role: 'target' }, { text: '立', reading: 'りつ', romaji: 'ritsu', meaning: 'đứng', role: 'support' }] },
+    { word: '起きる', mean: 'thức dậy', target: '起', answer: 'お', romaji: 'o', type: 'kun', wordReading: 'おきる', wordRomaji: 'okiru', parts: [
+      { text: '起', reading: 'お', romaji: 'o', meaning: 'dậy', role: 'target' }, { text: 'きる', reading: 'きる', romaji: 'kiru', meaning: '', role: 'kana' }] },
+    // 究
+    { word: '研究', mean: 'nghiên cứu', target: '究', answer: 'きゅう', romaji: 'kyuu', type: 'on', wordReading: 'けんきゅう', wordRomaji: 'kenkyuu', parts: [
+      { text: '研', reading: 'けん', romaji: 'ken', meaning: 'mài giũa / nghiên cứu', role: 'support' }, { text: '究', reading: 'きゅう', romaji: 'kyuu', meaning: 'nghiên cứu đến cùng', role: 'target' }] },
+    { word: '究明', mean: 'điều tra làm rõ', target: '究', answer: 'きゅう', romaji: 'kyuu', type: 'on', wordReading: 'きゅうめい', wordRomaji: 'kyuumei', parts: [
+      { text: '究', reading: 'きゅう', romaji: 'kyuu', meaning: 'truy cứu', role: 'target' }, { text: '明', reading: 'めい', romaji: 'mei', meaning: 'làm rõ', role: 'support' }] },
+    // 急
+    { word: '急行', mean: 'tàu tốc hành', target: '急', answer: 'きゅう', romaji: 'kyuu', type: 'on', wordReading: 'きゅうこう', wordRomaji: 'kyuukou', parts: [
+      { text: '急', reading: 'きゅう', romaji: 'kyuu', meaning: 'nhanh / gấp', role: 'target' }, { text: '行', reading: 'こう', romaji: 'kou', meaning: 'chạy / đi', role: 'support' }] },
+    { word: '急ぐ', mean: 'vội / nhanh lên', target: '急', answer: 'いそ', romaji: 'iso', type: 'kun', wordReading: 'いそぐ', wordRomaji: 'isogu', parts: [
+      { text: '急', reading: 'いそ', romaji: 'iso', meaning: 'vội', role: 'target' }, { text: 'ぐ', reading: 'ぐ', romaji: 'gu', meaning: '', role: 'kana' }] },
+    // 牛
+    { word: '牛肉', mean: 'thịt bò', target: '牛', answer: 'ぎゅう', romaji: 'gyuu', type: 'on', wordReading: 'ぎゅうにく', wordRomaji: 'gyuuniku', parts: [
+      { text: '牛', reading: 'ぎゅう', romaji: 'gyuu', meaning: 'bò', role: 'target' }, { text: '肉', reading: 'にく', romaji: 'niku', meaning: 'thịt', role: 'support' }] },
+    { word: '牛', mean: 'con bò', target: '牛', answer: 'うし', romaji: 'ushi', type: 'kun', wordReading: 'うし', wordRomaji: 'ushi', parts: [
+      { text: '牛', reading: 'うし', romaji: 'ushi', meaning: 'bò', role: 'target' }] },
+    // 去
+    { word: '去年', mean: 'năm ngoái', target: '去', answer: 'きょ', romaji: 'kyo', type: 'on', wordReading: 'きょねん', wordRomaji: 'kyonen', parts: [
+      { text: '去', reading: 'きょ', romaji: 'kyo', meaning: 'đã qua', role: 'target' }, { text: '年', reading: 'ねん', romaji: 'nen', meaning: 'năm', role: 'support' }] },
+    { word: '去る', mean: 'rời đi', target: '去', answer: 'さ', romaji: 'sa', type: 'kun', wordReading: 'さる', wordRomaji: 'saru', parts: [
+      { text: '去', reading: 'さ', romaji: 'sa', meaning: 'rời đi', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 強
+    { word: '強力', mean: 'mạnh mẽ / cường lực', target: '強', answer: 'きょう', romaji: 'kyou', type: 'on', wordReading: 'きょうりょく', wordRomaji: 'kyouryoku', parts: [
+      { text: '強', reading: 'きょう', romaji: 'kyou', meaning: 'mạnh', role: 'target' }, { text: '力', reading: 'りょく', romaji: 'ryoku', meaning: 'sức lực', role: 'support' }] },
+    { word: '強い', mean: 'mạnh', target: '強', answer: 'つよ', romaji: 'tsuyo', type: 'kun', wordReading: 'つよい', wordRomaji: 'tsuyoi', parts: [
+      { text: '強', reading: 'つよ', romaji: 'tsuyo', meaning: 'mạnh', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 教
+    { word: '教室', mean: 'lớp học', target: '教', answer: 'きょう', romaji: 'kyou', type: 'on', wordReading: 'きょうしつ', wordRomaji: 'kyoushitsu', parts: [
+      { text: '教', reading: 'きょう', romaji: 'kyou', meaning: 'dạy / giáo', role: 'target' }, { text: '室', reading: 'しつ', romaji: 'shitsu', meaning: 'phòng', role: 'support' }] },
+    { word: '教える', mean: 'dạy / chỉ bảo', target: '教', answer: 'おし', romaji: 'oshi', type: 'kun', wordReading: 'おしえる', wordRomaji: 'oshieru', parts: [
+      { text: '教', reading: 'おし', romaji: 'oshi', meaning: 'dạy', role: 'target' }, { text: 'える', reading: 'える', romaji: 'eru', meaning: '', role: 'kana' }] },
+    // 京
+    { word: '東京', mean: 'Tokyo / Đông Kinh', target: '京', answer: 'きょう', romaji: 'kyou', type: 'on', wordReading: 'とうきょう', wordRomaji: 'toukyou', parts: [
+      { text: '東', reading: 'とう', romaji: 'tou', meaning: 'phía đông', role: 'support' }, { text: '京', reading: 'きょう', romaji: 'kyou', meaning: 'kinh đô', role: 'target' }] },
+    { word: '京都', mean: 'Kyoto / kinh đô Kyoto', target: '京', answer: 'きょう', romaji: 'kyou', type: 'on', wordReading: 'きょうと', wordRomaji: 'kyouto', parts: [
+      { text: '京', reading: 'きょう', romaji: 'kyou', meaning: 'kinh đô', role: 'target' }, { text: '都', reading: 'と', romaji: 'to', meaning: 'đô thị', role: 'support' }] },
+    // 業
+    { word: '授業', mean: 'buổi học / tiết học', target: '業', answer: 'ぎょう', romaji: 'gyou', type: 'on', wordReading: 'じゅぎょう', wordRomaji: 'jugyou', parts: [
+      { text: '授', reading: 'じゅ', romaji: 'ju', meaning: 'truyền dạy', role: 'support' }, { text: '業', reading: 'ぎょう', romaji: 'gyou', meaning: 'việc học', role: 'target' }] },
+    { word: '産業', mean: 'công nghiệp', target: '業', answer: 'ぎょう', romaji: 'gyou', type: 'on', wordReading: 'さんぎょう', wordRomaji: 'sangyou', parts: [
+      { text: '産', reading: 'さん', romaji: 'san', meaning: 'sản xuất', role: 'support' }, { text: '業', reading: 'ぎょう', romaji: 'gyou', meaning: 'ngành nghề', role: 'target' }] },
+    // 近
+    { word: '近所', mean: 'hàng xóm / khu vực gần nhà', target: '近', answer: 'きん', romaji: 'kin', type: 'on', wordReading: 'きんじょ', wordRomaji: 'kinjo', parts: [
+      { text: '近', reading: 'きん', romaji: 'kin', meaning: 'gần', role: 'target' }, { text: '所', reading: 'じょ', romaji: 'jo', meaning: 'nơi', role: 'support' }] },
+    { word: '近い', mean: 'gần', target: '近', answer: 'ちか', romaji: 'chika', type: 'kun', wordReading: 'ちかい', wordRomaji: 'chikai', parts: [
+      { text: '近', reading: 'ちか', romaji: 'chika', meaning: 'gần', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 銀
+    { word: '銀行', mean: 'ngân hàng', target: '銀', answer: 'ぎん', romaji: 'gin', type: 'on', wordReading: 'ぎんこう', wordRomaji: 'ginkou', parts: [
+      { text: '銀', reading: 'ぎん', romaji: 'gin', meaning: 'bạc / ngân', role: 'target' }, { text: '行', reading: 'こう', romaji: 'kou', meaning: 'cơ sở', role: 'support' }] },
+    { word: '銀色', mean: 'màu bạc', target: '銀', answer: 'ぎん', romaji: 'gin', type: 'on', wordReading: 'ぎんいろ', wordRomaji: 'giniro', parts: [
+      { text: '銀', reading: 'ぎん', romaji: 'gin', meaning: 'bạc', role: 'target' }, { text: '色', reading: 'いろ', romaji: 'iro', meaning: 'màu sắc', role: 'support' }] },
+    // 区
+    { word: '区役所', mean: 'văn phòng hành chính quận', target: '区', answer: 'く', romaji: 'ku', type: 'on', wordReading: 'くやくしょ', wordRomaji: 'kuyakusho', parts: [
+      { text: '区', reading: 'く', romaji: 'ku', meaning: 'quận / khu', role: 'target' }, { text: '役所', reading: 'やくしょ', romaji: 'yakusho', meaning: 'cơ quan hành chính', role: 'support' }] },
+    { word: '地区', mean: 'khu vực', target: '区', answer: 'く', romaji: 'ku', type: 'on', wordReading: 'ちく', wordRomaji: 'chiku', parts: [
+      { text: '地', reading: 'ち', romaji: 'chi', meaning: 'đất / vùng', role: 'support' }, { text: '区', reading: 'く', romaji: 'ku', meaning: 'khu vực', role: 'target' }] },
+    // 計
+    { word: '計画', mean: 'kế hoạch', target: '計', answer: 'けい', romaji: 'kei', type: 'on', wordReading: 'けいかく', wordRomaji: 'keikaku', parts: [
+      { text: '計', reading: 'けい', romaji: 'kei', meaning: 'tính toán', role: 'target' }, { text: '画', reading: 'かく', romaji: 'kaku', meaning: 'kế hoạch', role: 'support' }] },
+    { word: '計る', mean: 'đo / tính', target: '計', answer: 'はか', romaji: 'haka', type: 'kun', wordReading: 'はかる', wordRomaji: 'hakaru', parts: [
+      { text: '計', reading: 'はか', romaji: 'haka', meaning: 'đo', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 兄
+    { word: '兄弟', mean: 'anh em', target: '兄', answer: 'きょう', romaji: 'kyou', type: 'on', wordReading: 'きょうだい', wordRomaji: 'kyoudai', parts: [
+      { text: '兄', reading: 'きょう', romaji: 'kyou', meaning: 'anh trai', role: 'target' }, { text: '弟', reading: 'だい', romaji: 'dai', meaning: 'em trai', role: 'support' }] },
+    { word: '兄', mean: 'anh trai', target: '兄', answer: 'あに', romaji: 'ani', type: 'kun', wordReading: 'あに', wordRomaji: 'ani', parts: [
+      { text: '兄', reading: 'あに', romaji: 'ani', meaning: 'anh trai', role: 'target' }] },
+    // 軽
+    { word: '軽食', mean: 'bữa ăn nhẹ', target: '軽', answer: 'けい', romaji: 'kei', type: 'on', wordReading: 'けいしょく', wordRomaji: 'keishoku', parts: [
+      { text: '軽', reading: 'けい', romaji: 'kei', meaning: 'nhẹ', role: 'target' }, { text: '食', reading: 'しょく', romaji: 'shoku', meaning: 'thức ăn', role: 'support' }] },
+    { word: '軽い', mean: 'nhẹ', target: '軽', answer: 'かる', romaji: 'karu', type: 'kun', wordReading: 'かるい', wordRomaji: 'karui', parts: [
+      { text: '軽', reading: 'かる', romaji: 'karu', meaning: 'nhẹ', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 犬
+    { word: '番犬', mean: 'chó canh', target: '犬', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'ばんけん', wordRomaji: 'banken', parts: [
+      { text: '番', reading: 'ばん', romaji: 'ban', meaning: 'canh gác', role: 'support' }, { text: '犬', reading: 'けん', romaji: 'ken', meaning: 'chó', role: 'target' }] },
+    { word: '犬', mean: 'con chó', target: '犬', answer: 'いぬ', romaji: 'inu', type: 'kun', wordReading: 'いぬ', wordRomaji: 'inu', parts: [
+      { text: '犬', reading: 'いぬ', romaji: 'inu', meaning: 'chó', role: 'target' }] },
+    // 研
+    { word: '研究', mean: 'nghiên cứu', target: '研', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'けんきゅう', wordRomaji: 'kenkyuu', parts: [
+      { text: '研', reading: 'けん', romaji: 'ken', meaning: 'nghiên cứu', role: 'target' }, { text: '究', reading: 'きゅう', romaji: 'kyuu', meaning: 'đến cùng', role: 'support' }] },
+    { word: '研ぐ', mean: 'mài / đánh bóng', target: '研', answer: 'と', romaji: 'to', type: 'kun', wordReading: 'とぐ', wordRomaji: 'togu', parts: [
+      { text: '研', reading: 'と', romaji: 'to', meaning: 'mài', role: 'target' }, { text: 'ぐ', reading: 'ぐ', romaji: 'gu', meaning: '', role: 'kana' }] },
+    // 県
+    { word: '県立', mean: 'do tỉnh quản lý', target: '県', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'けんりつ', wordRomaji: 'kenritsu', parts: [
+      { text: '県', reading: 'けん', romaji: 'ken', meaning: 'tỉnh', role: 'target' }, { text: '立', reading: 'りつ', romaji: 'ritsu', meaning: 'lập', role: 'support' }] },
+    { word: '県庁', mean: 'trụ sở hành chính tỉnh', target: '県', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'けんちょう', wordRomaji: 'kenchou', parts: [
+      { text: '県', reading: 'けん', romaji: 'ken', meaning: 'tỉnh', role: 'target' }, { text: '庁', reading: 'ちょう', romaji: 'chou', meaning: 'cơ quan', role: 'support' }] },
+    // 建
+    { word: '建設', mean: 'xây dựng', target: '建', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'けんせつ', wordRomaji: 'kensetsu', parts: [
+      { text: '建', reading: 'けん', romaji: 'ken', meaning: 'xây', role: 'target' }, { text: '設', reading: 'せつ', romaji: 'setsu', meaning: 'thiết lập', role: 'support' }] },
+    { word: '建てる', mean: 'xây lên', target: '建', answer: 'た', romaji: 'ta', type: 'kun', wordReading: 'たてる', wordRomaji: 'tateru', parts: [
+      { text: '建', reading: 'た', romaji: 'ta', meaning: 'xây', role: 'target' }, { text: 'てる', reading: 'てる', romaji: 'teru', meaning: '', role: 'kana' }] },
+    // 験
+    { word: '試験', mean: 'kỳ thi / kiểm tra', target: '験', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'しけん', wordRomaji: 'shiken', parts: [
+      { text: '試', reading: 'し', romaji: 'shi', meaning: 'thử', role: 'support' }, { text: '験', reading: 'けん', romaji: 'ken', meaning: 'kiểm nghiệm', role: 'target' }] },
+    { word: '経験', mean: 'kinh nghiệm', target: '験', answer: 'けん', romaji: 'ken', type: 'on', wordReading: 'けいけん', wordRomaji: 'keiken', parts: [
+      { text: '経', reading: 'けい', romaji: 'kei', meaning: 'trải qua', role: 'support' }, { text: '験', reading: 'けん', romaji: 'ken', meaning: 'kinh nghiệm', role: 'target' }] },
+    // 元
+    { word: '元気', mean: 'khỏe mạnh / tràn đầy năng lượng', target: '元', answer: 'げん', romaji: 'gen', type: 'on', wordReading: 'げんき', wordRomaji: 'genki', parts: [
+      { text: '元', reading: 'げん', romaji: 'gen', meaning: 'nguồn / gốc', role: 'target' }, { text: '気', reading: 'き', romaji: 'ki', meaning: 'khí lực', role: 'support' }] },
+    { word: '元', mean: 'gốc / nguồn', target: '元', answer: 'もと', romaji: 'moto', type: 'kun', wordReading: 'もと', wordRomaji: 'moto', parts: [
+      { text: '元', reading: 'もと', romaji: 'moto', meaning: 'gốc', role: 'target' }] },
+    // 工
+    { word: '工場', mean: 'nhà máy', target: '工', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'こうじょう', wordRomaji: 'koujou', parts: [
+      { text: '工', reading: 'こう', romaji: 'kou', meaning: 'công nghiệp', role: 'target' }, { text: '場', reading: 'じょう', romaji: 'jou', meaning: 'nơi', role: 'support' }] },
+    { word: '工事', mean: 'công trình / thi công', target: '工', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'こうじ', wordRomaji: 'kouji', parts: [
+      { text: '工', reading: 'こう', romaji: 'kou', meaning: 'thi công', role: 'target' }, { text: '事', reading: 'じ', romaji: 'ji', meaning: 'việc', role: 'support' }] },
+    // 広
+    { word: '広告', mean: 'quảng cáo', target: '広', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'こうこく', wordRomaji: 'koukoku', parts: [
+      { text: '広', reading: 'こう', romaji: 'kou', meaning: 'rộng / quảng', role: 'target' }, { text: '告', reading: 'こく', romaji: 'koku', meaning: 'báo', role: 'support' }] },
+    { word: '広い', mean: 'rộng', target: '広', answer: 'ひろ', romaji: 'hiro', type: 'kun', wordReading: 'ひろい', wordRomaji: 'hiroi', parts: [
+      { text: '広', reading: 'ひろ', romaji: 'hiro', meaning: 'rộng', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 考
+    { word: '考察', mean: 'suy xét / khảo sát', target: '考', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'こうさつ', wordRomaji: 'kousatsu', parts: [
+      { text: '考', reading: 'こう', romaji: 'kou', meaning: 'suy nghĩ', role: 'target' }, { text: '察', reading: 'さつ', romaji: 'satsu', meaning: 'xem xét', role: 'support' }] },
+    { word: '考える', mean: 'suy nghĩ', target: '考', answer: 'かんが', romaji: 'kanga', type: 'kun', wordReading: 'かんがえる', wordRomaji: 'kangaeru', parts: [
+      { text: '考', reading: 'かんが', romaji: 'kanga', meaning: 'suy nghĩ', role: 'target' }, { text: 'える', reading: 'える', romaji: 'eru', meaning: '', role: 'kana' }] },
+    // 光
+    { word: '観光', mean: 'tham quan / du lịch', target: '光', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'かんこう', wordRomaji: 'kankou', parts: [
+      { text: '観', reading: 'かん', romaji: 'kan', meaning: 'ngắm', role: 'support' }, { text: '光', reading: 'こう', romaji: 'kou', meaning: 'ánh sáng / cảnh sắc', role: 'target' }] },
+    { word: '光', mean: 'ánh sáng', target: '光', answer: 'ひかり', romaji: 'hikari', type: 'kun', wordReading: 'ひかり', wordRomaji: 'hikari', parts: [
+      { text: '光', reading: 'ひかり', romaji: 'hikari', meaning: 'ánh sáng', role: 'target' }] },
+    // 好
+    { word: '好物', mean: 'món yêu thích', target: '好', answer: 'こう', romaji: 'kou', type: 'on', wordReading: 'こうぶつ', wordRomaji: 'koubutsu', parts: [
+      { text: '好', reading: 'こう', romaji: 'kou', meaning: 'yêu thích', role: 'target' }, { text: '物', reading: 'ぶつ', romaji: 'butsu', meaning: 'vật / món', role: 'support' }] },
+    { word: '好き', mean: 'thích', target: '好', answer: 'す', romaji: 'su', type: 'kun', wordReading: 'すき', wordRomaji: 'suki', parts: [
+      { text: '好', reading: 'す', romaji: 'su', meaning: 'thích', role: 'target' }, { text: 'き', reading: 'き', romaji: 'ki', meaning: '', role: 'kana' }] },
+    // 合
+    { word: '合計', mean: 'tổng cộng', target: '合', answer: 'ごう', romaji: 'gou', type: 'on', wordReading: 'ごうけい', wordRomaji: 'goukei', parts: [
+      { text: '合', reading: 'ごう', romaji: 'gou', meaning: 'gộp', role: 'target' }, { text: '計', reading: 'けい', romaji: 'kei', meaning: 'tính', role: 'support' }] },
+    { word: '合う', mean: 'hợp / khớp', target: '合', answer: 'あ', romaji: 'a', type: 'kun', wordReading: 'あう', wordRomaji: 'au', parts: [
+      { text: '合', reading: 'あ', romaji: 'a', meaning: 'hợp', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 黒
+    { word: '黒板', mean: 'bảng đen', target: '黒', answer: 'こく', romaji: 'koku', type: 'on', wordReading: 'こくばん', wordRomaji: 'kokuban', parts: [
+      { text: '黒', reading: 'こく', romaji: 'koku', meaning: 'đen', role: 'target' }, { text: '板', reading: 'ばん', romaji: 'ban', meaning: 'tấm bảng', role: 'support' }] },
+    { word: '黒い', mean: 'màu đen', target: '黒', answer: 'くろ', romaji: 'kuro', type: 'kun', wordReading: 'くろい', wordRomaji: 'kuroi', parts: [
+      { text: '黒', reading: 'くろ', romaji: 'kuro', meaning: 'đen', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 菜
+    { word: '野菜', mean: 'rau củ', target: '菜', answer: 'さい', romaji: 'sai', type: 'on', wordReading: 'やさい', wordRomaji: 'yasai', parts: [
+      { text: '野', reading: 'や', romaji: 'ya', meaning: 'đồng / hoang', role: 'support' }, { text: '菜', reading: 'さい', romaji: 'sai', meaning: 'rau', role: 'target' }] },
+    { word: '菜の花', mean: 'hoa cải', target: '菜', answer: 'な', romaji: 'na', type: 'kun', wordReading: 'なのはな', wordRomaji: 'nanohana', parts: [
+      { text: '菜', reading: 'な', romaji: 'na', meaning: 'rau cải', role: 'target' }, { text: 'の', reading: 'の', romaji: 'no', meaning: '', role: 'kana' }, { text: '花', reading: 'はな', romaji: 'hana', meaning: 'hoa', role: 'support' }] },
+    // 作
+    { word: '作文', mean: 'bài văn', target: '作', answer: 'さく', romaji: 'saku', type: 'on', wordReading: 'さくぶん', wordRomaji: 'sakubun', parts: [
+      { text: '作', reading: 'さく', romaji: 'saku', meaning: 'làm / sáng tác', role: 'target' }, { text: '文', reading: 'ぶん', romaji: 'bun', meaning: 'văn', role: 'support' }] },
+    { word: '作る', mean: 'làm / tạo ra', target: '作', answer: 'つく', romaji: 'tsuku', type: 'kun', wordReading: 'つくる', wordRomaji: 'tsukuru', parts: [
+      { text: '作', reading: 'つく', romaji: 'tsuku', meaning: 'làm', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 産
+    { word: '生産', mean: 'sản xuất', target: '産', answer: 'さん', romaji: 'san', type: 'on', wordReading: 'せいさん', wordRomaji: 'seisan', parts: [
+      { text: '生', reading: 'せい', romaji: 'sei', meaning: 'sinh ra', role: 'support' }, { text: '産', reading: 'さん', romaji: 'san', meaning: 'sản xuất', role: 'target' }] },
+    { word: '産む', mean: 'sinh / đẻ', target: '産', answer: 'う', romaji: 'u', type: 'kun', wordReading: 'うむ', wordRomaji: 'umu', parts: [
+      { text: '産', reading: 'う', romaji: 'u', meaning: 'sinh', role: 'target' }, { text: 'む', reading: 'む', romaji: 'mu', meaning: '', role: 'kana' }] },
+    // 紙
+    { word: '用紙', mean: 'giấy dùng cho một mục đích', target: '紙', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'ようし', wordRomaji: 'youshi', parts: [
+      { text: '用', reading: 'よう', romaji: 'you', meaning: 'sử dụng', role: 'support' }, { text: '紙', reading: 'し', romaji: 'shi', meaning: 'giấy', role: 'target' }] },
+    { word: '紙', mean: 'giấy', target: '紙', answer: 'かみ', romaji: 'kami', type: 'kun', wordReading: 'かみ', wordRomaji: 'kami', parts: [
+      { text: '紙', reading: 'かみ', romaji: 'kami', meaning: 'giấy', role: 'target' }] },
+    // 思
+    { word: '思考', mean: 'suy nghĩ / tư duy', target: '思', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しこう', wordRomaji: 'shikou', parts: [
+      { text: '思', reading: 'し', romaji: 'shi', meaning: 'suy nghĩ', role: 'target' }, { text: '考', reading: 'こう', romaji: 'kou', meaning: 'xem xét', role: 'support' }] },
+    { word: '思う', mean: 'nghĩ / cảm thấy', target: '思', answer: 'おも', romaji: 'omo', type: 'kun', wordReading: 'おもう', wordRomaji: 'omou', parts: [
+      { text: '思', reading: 'おも', romaji: 'omo', meaning: 'nghĩ', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 姉
+    { word: '姉妹', mean: 'chị em gái', target: '姉', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しまい', wordRomaji: 'shimai', parts: [
+      { text: '姉', reading: 'し', romaji: 'shi', meaning: 'chị gái', role: 'target' }, { text: '妹', reading: 'まい', romaji: 'mai', meaning: 'em gái', role: 'support' }] },
+    { word: '姉', mean: 'chị gái', target: '姉', answer: 'あね', romaji: 'ane', type: 'kun', wordReading: 'あね', wordRomaji: 'ane', parts: [
+      { text: '姉', reading: 'あね', romaji: 'ane', meaning: 'chị gái', role: 'target' }] },
+    // 止
+    { word: '停止', mean: 'dừng lại / đình chỉ', target: '止', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'ていし', wordRomaji: 'teishi', parts: [
+      { text: '停', reading: 'てい', romaji: 'tei', meaning: 'dừng', role: 'support' }, { text: '止', reading: 'し', romaji: 'shi', meaning: 'dừng', role: 'target' }] },
+    { word: '止まる', mean: 'dừng lại', target: '止', answer: 'と', romaji: 'to', type: 'kun', wordReading: 'とまる', wordRomaji: 'tomaru', parts: [
+      { text: '止', reading: 'と', romaji: 'to', meaning: 'dừng', role: 'target' }, { text: 'まる', reading: 'まる', romaji: 'maru', meaning: '', role: 'kana' }] },
+    // 市
+    { word: '市場', mean: 'chợ / thị trường', target: '市', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しじょう', wordRomaji: 'shijou', parts: [
+      { text: '市', reading: 'し', romaji: 'shi', meaning: 'chợ', role: 'target' }, { text: '場', reading: 'じょう', romaji: 'jou', meaning: 'nơi', role: 'support' }] },
+    { word: '市', mean: 'chợ phiên', target: '市', answer: 'いち', romaji: 'ichi', type: 'kun', wordReading: 'いち', wordRomaji: 'ichi', parts: [
+      { text: '市', reading: 'いち', romaji: 'ichi', meaning: 'chợ', role: 'target' }] },
+    // 仕
+    { word: '仕事', mean: 'công việc', target: '仕', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しごと', wordRomaji: 'shigoto', parts: [
+      { text: '仕', reading: 'し', romaji: 'shi', meaning: 'làm việc', role: 'target' }, { text: '事', reading: 'ごと', romaji: 'goto', meaning: 'việc', role: 'support' }] },
+    { word: '仕える', mean: 'phụng sự / phục vụ', target: '仕', answer: 'つか', romaji: 'tsuka', type: 'kun', wordReading: 'つかえる', wordRomaji: 'tsukaeru', parts: [
+      { text: '仕', reading: 'つか', romaji: 'tsuka', meaning: 'phụng sự', role: 'target' }, { text: 'える', reading: 'える', romaji: 'eru', meaning: '', role: 'kana' }] },
+    // 死
+    { word: '死亡', mean: 'tử vong', target: '死', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しぼう', wordRomaji: 'shibou', parts: [
+      { text: '死', reading: 'し', romaji: 'shi', meaning: 'chết', role: 'target' }, { text: '亡', reading: 'ぼう', romaji: 'bou', meaning: 'mất', role: 'support' }] },
+    { word: '死ぬ', mean: 'chết', target: '死', answer: 'し', romaji: 'shi', type: 'kun', wordReading: 'しぬ', wordRomaji: 'shinu', parts: [
+      { text: '死', reading: 'し', romaji: 'shi', meaning: 'chết', role: 'target' }, { text: 'ぬ', reading: 'ぬ', romaji: 'nu', meaning: '', role: 'kana' }] },
+    // 使
+    { word: '使用', mean: 'sử dụng', target: '使', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しよう', wordRomaji: 'shiyou', parts: [
+      { text: '使', reading: 'し', romaji: 'shi', meaning: 'dùng', role: 'target' }, { text: '用', reading: 'よう', romaji: 'you', meaning: 'sử dụng', role: 'support' }] },
+    { word: '使う', mean: 'dùng / sử dụng', target: '使', answer: 'つか', romaji: 'tsuka', type: 'kun', wordReading: 'つかう', wordRomaji: 'tsukau', parts: [
+      { text: '使', reading: 'つか', romaji: 'tsuka', meaning: 'dùng', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 始
+    { word: '開始', mean: 'bắt đầu / khai mạc', target: '始', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'かいし', wordRomaji: 'kaishi', parts: [
+      { text: '開', reading: 'かい', romaji: 'kai', meaning: 'mở', role: 'support' }, { text: '始', reading: 'し', romaji: 'shi', meaning: 'bắt đầu', role: 'target' }] },
+    { word: '始める', mean: 'bắt đầu', target: '始', answer: 'はじ', romaji: 'haji', type: 'kun', wordReading: 'はじめる', wordRomaji: 'hajimeru', parts: [
+      { text: '始', reading: 'はじ', romaji: 'haji', meaning: 'bắt đầu', role: 'target' }, { text: 'める', reading: 'める', romaji: 'meru', meaning: '', role: 'kana' }] },
+    // 試
+    { word: '試験', mean: 'kỳ thi / kiểm tra', target: '試', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しけん', wordRomaji: 'shiken', parts: [
+      { text: '試', reading: 'し', romaji: 'shi', meaning: 'thử', role: 'target' }, { text: '験', reading: 'けん', romaji: 'ken', meaning: 'kiểm nghiệm', role: 'support' }] },
+    { word: '試す', mean: 'thử', target: '試', answer: 'ため', romaji: 'tame', type: 'kun', wordReading: 'ためす', wordRomaji: 'tamesu', parts: [
+      { text: '試', reading: 'ため', romaji: 'tame', meaning: 'thử', role: 'target' }, { text: 'す', reading: 'す', romaji: 'su', meaning: '', role: 'kana' }] },
+    // 私
+    { word: '私立', mean: 'tư lập', target: '私', answer: 'し', romaji: 'shi', type: 'on', wordReading: 'しりつ', wordRomaji: 'shiritsu', parts: [
+      { text: '私', reading: 'し', romaji: 'shi', meaning: 'tư nhân', role: 'target' }, { text: '立', reading: 'りつ', romaji: 'ritsu', meaning: 'lập', role: 'support' }] },
+    { word: '私', mean: 'tôi', target: '私', answer: 'わたし', romaji: 'watashi', type: 'kun', wordReading: 'わたし', wordRomaji: 'watashi', parts: [
+      { text: '私', reading: 'わたし', romaji: 'watashi', meaning: 'tôi', role: 'target' }] },
+    // 字
+    { word: '文字', mean: 'chữ viết / ký tự', target: '字', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'もじ', wordRomaji: 'moji', parts: [
+      { text: '文', reading: 'も', romaji: 'mo', meaning: 'văn', role: 'support' }, { text: '字', reading: 'じ', romaji: 'ji', meaning: 'chữ', role: 'target' }] },
+    { word: '漢字', mean: 'chữ Kanji', target: '字', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'かんじ', wordRomaji: 'kanji', parts: [
+      { text: '漢', reading: 'かん', romaji: 'kan', meaning: 'Hán', role: 'support' }, { text: '字', reading: 'じ', romaji: 'ji', meaning: 'chữ', role: 'target' }] },
+    // 自
+    { word: '自分', mean: 'bản thân', target: '自', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'じぶん', wordRomaji: 'jibun', parts: [
+      { text: '自', reading: 'じ', romaji: 'ji', meaning: 'tự mình', role: 'target' }, { text: '分', reading: 'ぶん', romaji: 'bun', meaning: 'phần', role: 'support' }] },
+    { word: '自ら', mean: 'tự mình', target: '自', answer: 'みずか', romaji: 'mizuka', type: 'kun', wordReading: 'みずから', wordRomaji: 'mizukara', parts: [
+      { text: '自', reading: 'みずか', romaji: 'mizuka', meaning: 'tự mình', role: 'target' }, { text: 'ら', reading: 'ら', romaji: 'ra', meaning: '', role: 'kana' }] },
+    // 事
+    { word: '事故', mean: 'sự cố / tai nạn', target: '事', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'じこ', wordRomaji: 'jiko', parts: [
+      { text: '事', reading: 'じ', romaji: 'ji', meaning: 'sự việc', role: 'target' }, { text: '故', reading: 'こ', romaji: 'ko', meaning: 'sự cố', role: 'support' }] },
+    { word: '仕事', mean: 'công việc', target: '事', answer: 'ごと', romaji: 'goto', type: 'kun', wordReading: 'しごと', wordRomaji: 'shigoto', parts: [
+      { text: '仕', reading: 'し', romaji: 'shi', meaning: 'làm', role: 'support' }, { text: '事', reading: 'ごと', romaji: 'goto', meaning: 'việc', role: 'target' }] },
+    // 持
+    { word: '持参', mean: 'mang theo', target: '持', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'じさん', wordRomaji: 'jisan', parts: [
+      { text: '持', reading: 'じ', romaji: 'ji', meaning: 'mang', role: 'target' }, { text: '参', reading: 'さん', romaji: 'san', meaning: 'đến / tham gia', role: 'support' }] },
+    { word: '持つ', mean: 'cầm / giữ', target: '持', answer: 'も', romaji: 'mo', type: 'kun', wordReading: 'もつ', wordRomaji: 'motsu', parts: [
+      { text: '持', reading: 'も', romaji: 'mo', meaning: 'cầm', role: 'target' }, { text: 'つ', reading: 'つ', romaji: 'tsu', meaning: '', role: 'kana' }] },
+    // 室
+    { word: '教室', mean: 'lớp học', target: '室', answer: 'しつ', romaji: 'shitsu', type: 'on', wordReading: 'きょうしつ', wordRomaji: 'kyoushitsu', parts: [
+      { text: '教', reading: 'きょう', romaji: 'kyou', meaning: 'dạy', role: 'support' }, { text: '室', reading: 'しつ', romaji: 'shitsu', meaning: 'phòng', role: 'target' }] },
+    { word: '室内', mean: 'trong phòng', target: '室', answer: 'しつ', romaji: 'shitsu', type: 'on', wordReading: 'しつない', wordRomaji: 'shitsunai', parts: [
+      { text: '室', reading: 'しつ', romaji: 'shitsu', meaning: 'phòng', role: 'target' }, { text: '内', reading: 'ない', romaji: 'nai', meaning: 'bên trong', role: 'support' }] },
+    // 質
+    { word: '品質', mean: 'chất lượng', target: '質', answer: 'しつ', romaji: 'shitsu', type: 'on', wordReading: 'ひんしつ', wordRomaji: 'hinshitsu', parts: [
+      { text: '品', reading: 'ひん', romaji: 'hin', meaning: 'sản phẩm', role: 'support' }, { text: '質', reading: 'しつ', romaji: 'shitsu', meaning: 'chất lượng', role: 'target' }] },
+    { word: '質問', mean: 'câu hỏi', target: '質', answer: 'しつ', romaji: 'shitsu', type: 'on', wordReading: 'しつもん', wordRomaji: 'shitsumon', parts: [
+      { text: '質', reading: 'しつ', romaji: 'shitsu', meaning: 'hỏi / chất vấn', role: 'target' }, { text: '問', reading: 'もん', romaji: 'mon', meaning: 'hỏi', role: 'support' }] },
+    // 写
+    { word: '写真', mean: 'ảnh chụp', target: '写', answer: 'しゃ', romaji: 'sha', type: 'on', wordReading: 'しゃしん', wordRomaji: 'shashin', parts: [
+      { text: '写', reading: 'しゃ', romaji: 'sha', meaning: 'chụp / sao', role: 'target' }, { text: '真', reading: 'しん', romaji: 'shin', meaning: 'thật', role: 'support' }] },
+    { word: '写す', mean: 'chụp / sao chép', target: '写', answer: 'うつ', romaji: 'utsu', type: 'kun', wordReading: 'うつす', wordRomaji: 'utsusu', parts: [
+      { text: '写', reading: 'うつ', romaji: 'utsu', meaning: 'chụp / sao', role: 'target' }, { text: 'す', reading: 'す', romaji: 'su', meaning: '', role: 'kana' }] },
+    // 者
+    { word: '記者', mean: 'phóng viên', target: '者', answer: 'しゃ', romaji: 'sha', type: 'on', wordReading: 'きしゃ', wordRomaji: 'kisha', parts: [
+      { text: '記', reading: 'き', romaji: 'ki', meaning: 'ghi chép', role: 'support' }, { text: '者', reading: 'しゃ', romaji: 'sha', meaning: 'người', role: 'target' }] },
+    { word: '若者', mean: 'người trẻ', target: '者', answer: 'もの', romaji: 'mono', type: 'kun', wordReading: 'わかもの', wordRomaji: 'wakamono', parts: [
+      { text: '若', reading: 'わか', romaji: 'waka', meaning: 'trẻ', role: 'support' }, { text: '者', reading: 'もの', romaji: 'mono', meaning: 'người', role: 'target' }] },
+    // 借
+    { word: '借金', mean: 'khoản nợ / tiền vay', target: '借', answer: 'しゃっ', romaji: 'sha', type: 'on', wordReading: 'しゃっきん', wordRomaji: 'shakkin', parts: [
+      { text: '借', reading: 'しゃっ', romaji: 'sha', meaning: 'vay', role: 'target' }, { text: '金', reading: 'きん', romaji: 'kin', meaning: 'tiền', role: 'support' }] },
+    { word: '借りる', mean: 'mượn / vay', target: '借', answer: 'か', romaji: 'ka', type: 'kun', wordReading: 'かりる', wordRomaji: 'kariru', parts: [
+      { text: '借', reading: 'か', romaji: 'ka', meaning: 'mượn', role: 'target' }, { text: 'りる', reading: 'りる', romaji: 'riru', meaning: '', role: 'kana' }] },
+    // 弱
+    { word: '弱点', mean: 'điểm yếu', target: '弱', answer: 'じゃく', romaji: 'jaku', type: 'on', wordReading: 'じゃくてん', wordRomaji: 'jakuten', parts: [
+      { text: '弱', reading: 'じゃく', romaji: 'jaku', meaning: 'yếu', role: 'target' }, { text: '点', reading: 'てん', romaji: 'ten', meaning: 'điểm', role: 'support' }] },
+    { word: '弱い', mean: 'yếu', target: '弱', answer: 'よわ', romaji: 'yowa', type: 'kun', wordReading: 'よわい', wordRomaji: 'yowai', parts: [
+      { text: '弱', reading: 'よわ', romaji: 'yowa', meaning: 'yếu', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 首
+    { word: '首都', mean: 'thủ đô', target: '首', answer: 'しゅ', romaji: 'shu', type: 'on', wordReading: 'しゅと', wordRomaji: 'shuto', parts: [
+      { text: '首', reading: 'しゅ', romaji: 'shu', meaning: 'đầu / chính', role: 'target' }, { text: '都', reading: 'と', romaji: 'to', meaning: 'đô thị', role: 'support' }] },
+    { word: '首', mean: 'cổ', target: '首', answer: 'くび', romaji: 'kubi', type: 'kun', wordReading: 'くび', wordRomaji: 'kubi', parts: [
+      { text: '首', reading: 'くび', romaji: 'kubi', meaning: 'cổ', role: 'target' }] },
+    // 主
+    { word: '主人', mean: 'chủ nhà / chồng', target: '主', answer: 'しゅ', romaji: 'shu', type: 'on', wordReading: 'しゅじん', wordRomaji: 'shujin', parts: [
+      { text: '主', reading: 'しゅ', romaji: 'shu', meaning: 'chủ', role: 'target' }, { text: '人', reading: 'じん', romaji: 'jin', meaning: 'người', role: 'support' }] },
+    { word: '主な', mean: 'chính / chủ yếu', target: '主', answer: 'おも', romaji: 'omo', type: 'kun', wordReading: 'おもな', wordRomaji: 'omona', parts: [
+      { text: '主', reading: 'おも', romaji: 'omo', meaning: 'chính', role: 'target' }, { text: 'な', reading: 'な', romaji: 'na', meaning: '', role: 'kana' }] },
+    // 秋
+    { word: '秋分', mean: 'thu phân', target: '秋', answer: 'しゅう', romaji: 'shuu', type: 'on', wordReading: 'しゅうぶん', wordRomaji: 'shuubun', parts: [
+      { text: '秋', reading: 'しゅう', romaji: 'shuu', meaning: 'mùa thu', role: 'target' }, { text: '分', reading: 'ぶん', romaji: 'bun', meaning: 'phân chia', role: 'support' }] },
+    { word: '秋', mean: 'mùa thu', target: '秋', answer: 'あき', romaji: 'aki', type: 'kun', wordReading: 'あき', wordRomaji: 'aki', parts: [
+      { text: '秋', reading: 'あき', romaji: 'aki', meaning: 'mùa thu', role: 'target' }] },
+    // 集
+    { word: '集合', mean: 'tập hợp', target: '集', answer: 'しゅう', romaji: 'shuu', type: 'on', wordReading: 'しゅうごう', wordRomaji: 'shuugou', parts: [
+      { text: '集', reading: 'しゅう', romaji: 'shuu', meaning: 'tụ họp', role: 'target' }, { text: '合', reading: 'ごう', romaji: 'gou', meaning: 'hợp lại', role: 'support' }] },
+    { word: '集める', mean: 'thu thập / tập hợp', target: '集', answer: 'あつ', romaji: 'atsu', type: 'kun', wordReading: 'あつめる', wordRomaji: 'atsumeru', parts: [
+      { text: '集', reading: 'あつ', romaji: 'atsu', meaning: 'tập hợp', role: 'target' }, { text: 'める', reading: 'める', romaji: 'meru', meaning: '', role: 'kana' }] },
+    // 習
+    { word: '学習', mean: 'học tập', target: '習', answer: 'しゅう', romaji: 'shuu', type: 'on', wordReading: 'がくしゅう', wordRomaji: 'gakushuu', parts: [
+      { text: '学', reading: 'がく', romaji: 'gaku', meaning: 'học', role: 'support' }, { text: '習', reading: 'しゅう', romaji: 'shuu', meaning: 'luyện tập', role: 'target' }] },
+    { word: '習う', mean: 'học / luyện', target: '習', answer: 'なら', romaji: 'nara', type: 'kun', wordReading: 'ならう', wordRomaji: 'narau', parts: [
+      { text: '習', reading: 'なら', romaji: 'nara', meaning: 'học', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 終
+    { word: '終了', mean: 'kết thúc / hoàn tất', target: '終', answer: 'しゅう', romaji: 'shuu', type: 'on', wordReading: 'しゅうりょう', wordRomaji: 'shuuryou', parts: [
+      { text: '終', reading: 'しゅう', romaji: 'shuu', meaning: 'kết thúc', role: 'target' }, { text: '了', reading: 'りょう', romaji: 'ryou', meaning: 'hoàn tất', role: 'support' }] },
+    { word: '終わる', mean: 'kết thúc', target: '終', answer: 'お', romaji: 'o', type: 'kun', wordReading: 'おわる', wordRomaji: 'owaru', parts: [
+      { text: '終', reading: 'お', romaji: 'o', meaning: 'kết thúc', role: 'target' }, { text: 'わる', reading: 'わる', romaji: 'waru', meaning: '', role: 'kana' }] },
+    // 住
+    { word: '住所', mean: 'địa chỉ', target: '住', answer: 'じゅう', romaji: 'juu', type: 'on', wordReading: 'じゅうしょ', wordRomaji: 'juusho', parts: [
+      { text: '住', reading: 'じゅう', romaji: 'juu', meaning: 'cư trú', role: 'target' }, { text: '所', reading: 'しょ', romaji: 'sho', meaning: 'nơi', role: 'support' }] },
+    { word: '住む', mean: 'sống / cư trú', target: '住', answer: 'す', romaji: 'su', type: 'kun', wordReading: 'すむ', wordRomaji: 'sumu', parts: [
+      { text: '住', reading: 'す', romaji: 'su', meaning: 'sống', role: 'target' }, { text: 'む', reading: 'む', romaji: 'mu', meaning: '', role: 'kana' }] },
+    // 重
+    { word: '重要', mean: 'quan trọng', target: '重', answer: 'じゅう', romaji: 'juu', type: 'on', wordReading: 'じゅうよう', wordRomaji: 'juuyou', parts: [
+      { text: '重', reading: 'じゅう', romaji: 'juu', meaning: 'quan trọng', role: 'target' }, { text: '要', reading: 'よう', romaji: 'you', meaning: 'thiết yếu', role: 'support' }] },
+    { word: '重い', mean: 'nặng', target: '重', answer: 'おも', romaji: 'omo', type: 'kun', wordReading: 'おもい', wordRomaji: 'omoi', parts: [
+      { text: '重', reading: 'おも', romaji: 'omo', meaning: 'nặng', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 春
+    { word: '青春', mean: 'tuổi thanh xuân', target: '春', answer: 'しゅん', romaji: 'shun', type: 'on', wordReading: 'せいしゅん', wordRomaji: 'seishun', parts: [
+      { text: '青', reading: 'せい', romaji: 'sei', meaning: 'xanh / trẻ', role: 'support' }, { text: '春', reading: 'しゅん', romaji: 'shun', meaning: 'mùa xuân', role: 'target' }] },
+    { word: '春', mean: 'mùa xuân', target: '春', answer: 'はる', romaji: 'haru', type: 'kun', wordReading: 'はる', wordRomaji: 'haru', parts: [
+      { text: '春', reading: 'はる', romaji: 'haru', meaning: 'mùa xuân', role: 'target' }] },
+    // 所
+    { word: '場所', mean: 'địa điểm / nơi chốn', target: '所', answer: 'しょ', romaji: 'sho', type: 'on', wordReading: 'ばしょ', wordRomaji: 'basho', parts: [
+      { text: '場', reading: 'ば', romaji: 'ba', meaning: 'nơi', role: 'support' }, { text: '所', reading: 'しょ', romaji: 'sho', meaning: 'chỗ', role: 'target' }] },
+    { word: '所', mean: 'nơi / chỗ', target: '所', answer: 'ところ', romaji: 'tokoro', type: 'kun', wordReading: 'ところ', wordRomaji: 'tokoro', parts: [
+      { text: '所', reading: 'ところ', romaji: 'tokoro', meaning: 'nơi', role: 'target' }] },
+    // 暑
+    { word: '残暑', mean: 'cái nóng cuối hè', target: '暑', answer: 'しょ', romaji: 'sho', type: 'on', wordReading: 'ざんしょ', wordRomaji: 'zansho', parts: [
+      { text: '残', reading: 'ざん', romaji: 'zan', meaning: 'còn lại', role: 'support' }, { text: '暑', reading: 'しょ', romaji: 'sho', meaning: 'nóng', role: 'target' }] },
+    { word: '暑い', mean: 'nóng (thời tiết)', target: '暑', answer: 'あつ', romaji: 'atsu', type: 'kun', wordReading: 'あつい', wordRomaji: 'atsui', parts: [
+      { text: '暑', reading: 'あつ', romaji: 'atsu', meaning: 'nóng', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 場
+    { word: '会場', mean: 'hội trường / địa điểm tổ chức', target: '場', answer: 'じょう', romaji: 'jou', type: 'on', wordReading: 'かいじょう', wordRomaji: 'kaijou', parts: [
+      { text: '会', reading: 'かい', romaji: 'kai', meaning: 'cuộc họp', role: 'support' }, { text: '場', reading: 'じょう', romaji: 'jou', meaning: 'địa điểm', role: 'target' }] },
+    { word: '場所', mean: 'địa điểm / nơi chốn', target: '場', answer: 'ば', romaji: 'ba', type: 'kun', wordReading: 'ばしょ', wordRomaji: 'basho', parts: [
+      { text: '場', reading: 'ば', romaji: 'ba', meaning: 'nơi', role: 'target' }, { text: '所', reading: 'しょ', romaji: 'sho', meaning: 'chỗ', role: 'support' }] },
+    // 乗
+    { word: '乗車', mean: 'lên xe', target: '乗', answer: 'じょう', romaji: 'jou', type: 'on', wordReading: 'じょうしゃ', wordRomaji: 'jousha', parts: [
+      { text: '乗', reading: 'じょう', romaji: 'jou', meaning: 'lên', role: 'target' }, { text: '車', reading: 'しゃ', romaji: 'sha', meaning: 'xe', role: 'support' }] },
+    { word: '乗る', mean: 'lên / đi bằng phương tiện', target: '乗', answer: 'の', romaji: 'no', type: 'kun', wordReading: 'のる', wordRomaji: 'noru', parts: [
+      { text: '乗', reading: 'の', romaji: 'no', meaning: 'lên xe', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 色
+    { word: '色彩', mean: 'màu sắc / sắc thái', target: '色', answer: 'しき', romaji: 'shiki', type: 'on', wordReading: 'しきさい', wordRomaji: 'shikisai', parts: [
+      { text: '色', reading: 'しき', romaji: 'shiki', meaning: 'màu sắc', role: 'target' }, { text: '彩', reading: 'さい', romaji: 'sai', meaning: 'sắc màu', role: 'support' }] },
+    { word: '色', mean: 'màu sắc', target: '色', answer: 'いろ', romaji: 'iro', type: 'kun', wordReading: 'いろ', wordRomaji: 'iro', parts: [
+      { text: '色', reading: 'いろ', romaji: 'iro', meaning: 'màu sắc', role: 'target' }] },
+    // 森
+    { word: '森林', mean: 'rừng cây', target: '森', answer: 'しん', romaji: 'shin', type: 'on', wordReading: 'しんりん', wordRomaji: 'shinrin', parts: [
+      { text: '森', reading: 'しん', romaji: 'shin', meaning: 'rừng', role: 'target' }, { text: '林', reading: 'りん', romaji: 'rin', meaning: 'lùm cây', role: 'support' }] },
+    { word: '森', mean: 'rừng', target: '森', answer: 'もり', romaji: 'mori', type: 'kun', wordReading: 'もり', wordRomaji: 'mori', parts: [
+      { text: '森', reading: 'もり', romaji: 'mori', meaning: 'rừng', role: 'target' }] },
+    // 心
+    { word: '心配', mean: 'lo lắng', target: '心', answer: 'しん', romaji: 'shin', type: 'on', wordReading: 'しんぱい', wordRomaji: 'shinpai', parts: [
+      { text: '心', reading: 'しん', romaji: 'shin', meaning: 'tâm trí', role: 'target' }, { text: '配', reading: 'ぱい', romaji: 'pai', meaning: 'quan tâm', role: 'support' }] },
+    { word: '心', mean: 'trái tim / tâm hồn', target: '心', answer: 'こころ', romaji: 'kokoro', type: 'kun', wordReading: 'こころ', wordRomaji: 'kokoro', parts: [
+      { text: '心', reading: 'こころ', romaji: 'kokoro', meaning: 'trái tim', role: 'target' }] },
+    // 親
+    { word: '親切', mean: 'tử tế / tốt bụng', target: '親', answer: 'しん', romaji: 'shin', type: 'on', wordReading: 'しんせつ', wordRomaji: 'shinsetsu', parts: [
+      { text: '親', reading: 'しん', romaji: 'shin', meaning: 'thân thiết', role: 'target' }, { text: '切', reading: 'せつ', romaji: 'setsu', meaning: 'tận tình', role: 'support' }] },
+    { word: '親', mean: 'cha mẹ', target: '親', answer: 'おや', romaji: 'oya', type: 'kun', wordReading: 'おや', wordRomaji: 'oya', parts: [
+      { text: '親', reading: 'おや', romaji: 'oya', meaning: 'cha mẹ', role: 'target' }] },
+    // 真
+    { word: '写真', mean: 'ảnh chụp', target: '真', answer: 'しん', romaji: 'shin', type: 'on', wordReading: 'しゃしん', wordRomaji: 'shashin', parts: [
+      { text: '写', reading: 'しゃ', romaji: 'sha', meaning: 'chụp', role: 'support' }, { text: '真', reading: 'しん', romaji: 'shin', meaning: 'thật', role: 'target' }] },
+    { word: '真っ白', mean: 'trắng tinh', target: '真', answer: 'ま', romaji: 'ma', type: 'kun', wordReading: 'まっしろ', wordRomaji: 'masshiro', parts: [
+      { text: '真', reading: 'ま', romaji: 'ma', meaning: 'hoàn toàn', role: 'target' }, { text: 'っ', reading: 'っ', romaji: '', meaning: '', role: 'kana' }, { text: '白', reading: 'しろ', romaji: 'shiro', meaning: 'trắng', role: 'support' }] },
+    // 進
+    { word: '進学', mean: 'học lên', target: '進', answer: 'しん', romaji: 'shin', type: 'on', wordReading: 'しんがく', wordRomaji: 'shingaku', parts: [
+      { text: '進', reading: 'しん', romaji: 'shin', meaning: 'tiến lên', role: 'target' }, { text: '学', reading: 'がく', romaji: 'gaku', meaning: 'học', role: 'support' }] },
+    { word: '進む', mean: 'tiến lên', target: '進', answer: 'すす', romaji: 'susu', type: 'kun', wordReading: 'すすむ', wordRomaji: 'susumu', parts: [
+      { text: '進', reading: 'すす', romaji: 'susu', meaning: 'tiến', role: 'target' }, { text: 'む', reading: 'む', romaji: 'mu', meaning: '', role: 'kana' }] },
+    // 図
+    { word: '地図', mean: 'bản đồ', target: '図', answer: 'ず', romaji: 'zu', type: 'on', wordReading: 'ちず', wordRomaji: 'chizu', parts: [
+      { text: '地', reading: 'ち', romaji: 'chi', meaning: 'đất', role: 'support' }, { text: '図', reading: 'ず', romaji: 'zu', meaning: 'bản đồ', role: 'target' }] },
+    { word: '図書館', mean: 'thư viện', target: '図', answer: 'と', romaji: 'to', type: 'on', wordReading: 'としょかん', wordRomaji: 'toshokan', parts: [
+      { text: '図', reading: 'と', romaji: 'to', meaning: 'sách / sơ đồ', role: 'target' }, { text: '書館', reading: 'しょかん', romaji: 'shokan', meaning: 'thư quán', role: 'support' }] },
+    // 青
+    { word: '青年', mean: 'thanh niên', target: '青', answer: 'せい', romaji: 'sei', type: 'on', wordReading: 'せいねん', wordRomaji: 'seinen', parts: [
+      { text: '青', reading: 'せい', romaji: 'sei', meaning: 'xanh / trẻ', role: 'target' }, { text: '年', reading: 'ねん', romaji: 'nen', meaning: 'năm / tuổi', role: 'support' }] },
+    { word: '青い', mean: 'màu xanh', target: '青', answer: 'あお', romaji: 'ao', type: 'kun', wordReading: 'あおい', wordRomaji: 'aoi', parts: [
+      { text: '青', reading: 'あお', romaji: 'ao', meaning: 'xanh', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 正
+    { word: '正解', mean: 'đáp án đúng', target: '正', answer: 'せい', romaji: 'sei', type: 'on', wordReading: 'せいかい', wordRomaji: 'seikai', parts: [
+      { text: '正', reading: 'せい', romaji: 'sei', meaning: 'đúng', role: 'target' }, { text: '解', reading: 'かい', romaji: 'kai', meaning: 'giải', role: 'support' }] },
+    { word: '正しい', mean: 'đúng đắn', target: '正', answer: 'ただ', romaji: 'tada', type: 'kun', wordReading: 'ただしい', wordRomaji: 'tadashii', parts: [
+      { text: '正', reading: 'ただ', romaji: 'tada', meaning: 'đúng', role: 'target' }, { text: 'しい', reading: 'しい', romaji: 'shii', meaning: '', role: 'kana' }] },
+    // 声
+    { word: '音声', mean: 'âm thanh / giọng nói', target: '声', answer: 'せい', romaji: 'sei', type: 'on', wordReading: 'おんせい', wordRomaji: 'onsei', parts: [
+      { text: '音', reading: 'おん', romaji: 'on', meaning: 'âm thanh', role: 'support' }, { text: '声', reading: 'せい', romaji: 'sei', meaning: 'giọng', role: 'target' }] },
+    { word: '声', mean: 'giọng nói', target: '声', answer: 'こえ', romaji: 'koe', type: 'kun', wordReading: 'こえ', wordRomaji: 'koe', parts: [
+      { text: '声', reading: 'こえ', romaji: 'koe', meaning: 'giọng nói', role: 'target' }] },
+    // 世
+    { word: '世界', mean: 'thế giới', target: '世', answer: 'せ', romaji: 'se', type: 'on', wordReading: 'せかい', wordRomaji: 'sekai', parts: [
+      { text: '世', reading: 'せ', romaji: 'se', meaning: 'thế giới', role: 'target' }, { text: '界', reading: 'かい', romaji: 'kai', meaning: 'cõi / giới', role: 'support' }] },
+    { word: '世の中', mean: 'xã hội / thế gian', target: '世', answer: 'よ', romaji: 'yo', type: 'kun', wordReading: 'よのなか', wordRomaji: 'yononaka', parts: [
+      { text: '世', reading: 'よ', romaji: 'yo', meaning: 'thế gian', role: 'target' }, { text: 'の', reading: 'の', romaji: 'no', meaning: '', role: 'kana' }, { text: '中', reading: 'なか', romaji: 'naka', meaning: 'bên trong', role: 'support' }] },
+    // 赤
+    { word: '赤道', mean: 'xích đạo', target: '赤', answer: 'せき', romaji: 'seki', type: 'on', wordReading: 'せきどう', wordRomaji: 'sekidou', parts: [
+      { text: '赤', reading: 'せき', romaji: 'seki', meaning: 'đỏ / xích', role: 'target' }, { text: '道', reading: 'どう', romaji: 'dou', meaning: 'đường', role: 'support' }] },
+    { word: '赤い', mean: 'màu đỏ', target: '赤', answer: 'あか', romaji: 'aka', type: 'kun', wordReading: 'あかい', wordRomaji: 'akai', parts: [
+      { text: '赤', reading: 'あか', romaji: 'aka', meaning: 'đỏ', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 夕
+    { word: '夕食', mean: 'bữa tối', target: '夕', answer: 'ゆう', romaji: 'yuu', type: 'kun', wordReading: 'ゆうしょく', wordRomaji: 'yuushoku', parts: [
+      { text: '夕', reading: 'ゆう', romaji: 'yuu', meaning: 'buổi tối', role: 'target' }, { text: '食', reading: 'しょく', romaji: 'shoku', meaning: 'bữa ăn', role: 'support' }] },
+    { word: '夕方', mean: 'chiều tối', target: '夕', answer: 'ゆう', romaji: 'yuu', type: 'kun', wordReading: 'ゆうがた', wordRomaji: 'yuugata', parts: [
+      { text: '夕', reading: 'ゆう', romaji: 'yuu', meaning: 'buổi tối', role: 'target' }, { text: '方', reading: 'がた', romaji: 'gata', meaning: 'phía / khoảng', role: 'support' }] },
+    // 切
+    { word: '大切', mean: 'quan trọng / quý giá', target: '切', answer: 'せつ', romaji: 'setsu', type: 'on', wordReading: 'たいせつ', wordRomaji: 'taisetsu', parts: [
+      { text: '大', reading: 'たい', romaji: 'tai', meaning: 'lớn', role: 'support' }, { text: '切', reading: 'せつ', romaji: 'setsu', meaning: 'quan trọng', role: 'target' }] },
+    { word: '切る', mean: 'cắt', target: '切', answer: 'き', romaji: 'ki', type: 'kun', wordReading: 'きる', wordRomaji: 'kiru', parts: [
+      { text: '切', reading: 'き', romaji: 'ki', meaning: 'cắt', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 説
+    { word: '説明', mean: 'giải thích', target: '説', answer: 'せつ', romaji: 'setsu', type: 'on', wordReading: 'せつめい', wordRomaji: 'setsumei', parts: [
+      { text: '説', reading: 'せつ', romaji: 'setsu', meaning: 'giải thích', role: 'target' }, { text: '明', reading: 'めい', romaji: 'mei', meaning: 'rõ', role: 'support' }] },
+    { word: '説く', mean: 'giảng giải / thuyết phục', target: '説', answer: 'と', romaji: 'to', type: 'kun', wordReading: 'とく', wordRomaji: 'toku', parts: [
+      { text: '説', reading: 'と', romaji: 'to', meaning: 'giảng giải', role: 'target' }, { text: 'く', reading: 'く', romaji: 'ku', meaning: '', role: 'kana' }] },
+    // 洗
+    { word: '洗面所', mean: 'phòng rửa mặt', target: '洗', answer: 'せん', romaji: 'sen', type: 'on', wordReading: 'せんめんじょ', wordRomaji: 'senmenjo', parts: [
+      { text: '洗', reading: 'せん', romaji: 'sen', meaning: 'rửa', role: 'target' }, { text: '面所', reading: 'めんじょ', romaji: 'menjo', meaning: 'nơi rửa mặt', role: 'support' }] },
+    { word: '洗う', mean: 'rửa', target: '洗', answer: 'あら', romaji: 'ara', type: 'kun', wordReading: 'あらう', wordRomaji: 'arau', parts: [
+      { text: '洗', reading: 'あら', romaji: 'ara', meaning: 'rửa', role: 'target' }, { text: 'う', reading: 'う', romaji: 'u', meaning: '', role: 'kana' }] },
+    // 早
+    { word: '早朝', mean: 'sáng sớm', target: '早', answer: 'そう', romaji: 'sou', type: 'on', wordReading: 'そうちょう', wordRomaji: 'souchou', parts: [
+      { text: '早', reading: 'そう', romaji: 'sou', meaning: 'sớm', role: 'target' }, { text: '朝', reading: 'ちょう', romaji: 'chou', meaning: 'buổi sáng', role: 'support' }] },
+    { word: '早い', mean: 'sớm / nhanh', target: '早', answer: 'はや', romaji: 'haya', type: 'kun', wordReading: 'はやい', wordRomaji: 'hayai', parts: [
+      { text: '早', reading: 'はや', romaji: 'haya', meaning: 'sớm / nhanh', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 走
+    { word: '競走', mean: 'cuộc chạy đua', target: '走', answer: 'そう', romaji: 'sou', type: 'on', wordReading: 'きょうそう', wordRomaji: 'kyousou', parts: [
+      { text: '競', reading: 'きょう', romaji: 'kyou', meaning: 'thi đấu', role: 'support' }, { text: '走', reading: 'そう', romaji: 'sou', meaning: 'chạy', role: 'target' }] },
+    { word: '走る', mean: 'chạy', target: '走', answer: 'はし', romaji: 'hashi', type: 'kun', wordReading: 'はしる', wordRomaji: 'hashiru', parts: [
+      { text: '走', reading: 'はし', romaji: 'hashi', meaning: 'chạy', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 送
+    { word: '送信', mean: 'gửi đi / truyền tin', target: '送', answer: 'そう', romaji: 'sou', type: 'on', wordReading: 'そうしん', wordRomaji: 'soushin', parts: [
+      { text: '送', reading: 'そう', romaji: 'sou', meaning: 'gửi', role: 'target' }, { text: '信', reading: 'しん', romaji: 'shin', meaning: 'tin', role: 'support' }] },
+    { word: '送る', mean: 'gửi / tiễn', target: '送', answer: 'おく', romaji: 'oku', type: 'kun', wordReading: 'おくる', wordRomaji: 'okuru', parts: [
+      { text: '送', reading: 'おく', romaji: 'oku', meaning: 'gửi', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 族
+    { word: '家族', mean: 'gia đình', target: '族', answer: 'ぞく', romaji: 'zoku', type: 'on', wordReading: 'かぞく', wordRomaji: 'kazoku', parts: [
+      { text: '家', reading: 'か', romaji: 'ka', meaning: 'nhà', role: 'support' }, { text: '族', reading: 'ぞく', romaji: 'zoku', meaning: 'gia tộc', role: 'target' }] },
+    { word: '民族', mean: 'dân tộc', target: '族', answer: 'ぞく', romaji: 'zoku', type: 'on', wordReading: 'みんぞく', wordRomaji: 'minzoku', parts: [
+      { text: '民', reading: 'みん', romaji: 'min', meaning: 'người dân', role: 'support' }, { text: '族', reading: 'ぞく', romaji: 'zoku', meaning: 'nhóm / tộc', role: 'target' }] },
+    // 村
+    { word: '村民', mean: 'dân làng', target: '村', answer: 'そん', romaji: 'son', type: 'on', wordReading: 'そんみん', wordRomaji: 'sonmin', parts: [
+      { text: '村', reading: 'そん', romaji: 'son', meaning: 'làng', role: 'target' }, { text: '民', reading: 'みん', romaji: 'min', meaning: 'người dân', role: 'support' }] },
+    { word: '村', mean: 'ngôi làng', target: '村', answer: 'むら', romaji: 'mura', type: 'kun', wordReading: 'むら', wordRomaji: 'mura', parts: [
+      { text: '村', reading: 'むら', romaji: 'mura', meaning: 'làng', role: 'target' }] },
+    // 体
+    { word: '体育', mean: 'thể dục', target: '体', answer: 'たい', romaji: 'tai', type: 'on', wordReading: 'たいいく', wordRomaji: 'taiiku', parts: [
+      { text: '体', reading: 'たい', romaji: 'tai', meaning: 'cơ thể', role: 'target' }, { text: '育', reading: 'いく', romaji: 'iku', meaning: 'rèn luyện', role: 'support' }] },
+    { word: '体', mean: 'cơ thể', target: '体', answer: 'からだ', romaji: 'karada', type: 'kun', wordReading: 'からだ', wordRomaji: 'karada', parts: [
+      { text: '体', reading: 'からだ', romaji: 'karada', meaning: 'cơ thể', role: 'target' }] },
+    // 太
+    { word: '太陽', mean: 'mặt trời', target: '太', answer: 'たい', romaji: 'tai', type: 'on', wordReading: 'たいよう', wordRomaji: 'taiyou', parts: [
+      { text: '太', reading: 'たい', romaji: 'tai', meaning: 'lớn / thái', role: 'target' }, { text: '陽', reading: 'よう', romaji: 'you', meaning: 'mặt trời', role: 'support' }] },
+    { word: '太い', mean: 'to / dày', target: '太', answer: 'ふと', romaji: 'futo', type: 'kun', wordReading: 'ふとい', wordRomaji: 'futoi', parts: [
+      { text: '太', reading: 'ふと', romaji: 'futo', meaning: 'to / dày', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 待
+    { word: '待機', mean: 'chờ sẵn / đợi lệnh', target: '待', answer: 'たい', romaji: 'tai', type: 'on', wordReading: 'たいき', wordRomaji: 'taiki', parts: [
+      { text: '待', reading: 'たい', romaji: 'tai', meaning: 'chờ', role: 'target' }, { text: '機', reading: 'き', romaji: 'ki', meaning: 'thời cơ / máy', role: 'support' }] },
+    { word: '待つ', mean: 'chờ đợi', target: '待', answer: 'ま', romaji: 'ma', type: 'kun', wordReading: 'まつ', wordRomaji: 'matsu', parts: [
+      { text: '待', reading: 'ま', romaji: 'ma', meaning: 'chờ', role: 'target' }, { text: 'つ', reading: 'つ', romaji: 'tsu', meaning: '', role: 'kana' }] },
+    // 貸
+    { word: '賃貸', mean: 'cho thuê / thuê nhà', target: '貸', answer: 'たい', romaji: 'tai', type: 'on', wordReading: 'ちんたい', wordRomaji: 'chintai', parts: [
+      { text: '賃', reading: 'ちん', romaji: 'chin', meaning: 'tiền thuê', role: 'support' }, { text: '貸', reading: 'たい', romaji: 'tai', meaning: 'cho thuê', role: 'target' }] },
+    { word: '貸す', mean: 'cho mượn', target: '貸', answer: 'か', romaji: 'ka', type: 'kun', wordReading: 'かす', wordRomaji: 'kasu', parts: [
+      { text: '貸', reading: 'か', romaji: 'ka', meaning: 'cho mượn', role: 'target' }, { text: 'す', reading: 'す', romaji: 'su', meaning: '', role: 'kana' }] },
+    // 台
+    { word: '台風', mean: 'bão', target: '台', answer: 'たい', romaji: 'tai', type: 'on', wordReading: 'たいふう', wordRomaji: 'taifuu', parts: [
+      { text: '台', reading: 'たい', romaji: 'tai', meaning: 'đài / bệ', role: 'target' }, { text: '風', reading: 'ふう', romaji: 'fuu', meaning: 'gió', role: 'support' }] },
+    { word: '台所', mean: 'nhà bếp', target: '台', answer: 'だい', romaji: 'dai', type: 'on', wordReading: 'だいどころ', wordRomaji: 'daidokoro', parts: [
+      { text: '台', reading: 'だい', romaji: 'dai', meaning: 'bệ / khu', role: 'target' }, { text: '所', reading: 'どころ', romaji: 'dokoro', meaning: 'nơi', role: 'support' }] },
+    // 代
+    { word: '時代', mean: 'thời đại', target: '代', answer: 'だい', romaji: 'dai', type: 'on', wordReading: 'じだい', wordRomaji: 'jidai', parts: [
+      { text: '時', reading: 'じ', romaji: 'ji', meaning: 'thời gian', role: 'support' }, { text: '代', reading: 'だい', romaji: 'dai', meaning: 'đời / thời đại', role: 'target' }] },
+    { word: '代わる', mean: 'thay thế', target: '代', answer: 'か', romaji: 'ka', type: 'kun', wordReading: 'かわる', wordRomaji: 'kawaru', parts: [
+      { text: '代', reading: 'か', romaji: 'ka', meaning: 'thay thế', role: 'target' }, { text: 'わる', reading: 'わる', romaji: 'waru', meaning: '', role: 'kana' }] },
+    // 題
+    { word: '問題', mean: 'vấn đề / câu hỏi', target: '題', answer: 'だい', romaji: 'dai', type: 'on', wordReading: 'もんだい', wordRomaji: 'mondai', parts: [
+      { text: '問', reading: 'もん', romaji: 'mon', meaning: 'hỏi', role: 'support' }, { text: '題', reading: 'だい', romaji: 'dai', meaning: 'đề bài', role: 'target' }] },
+    { word: '宿題', mean: 'bài tập về nhà', target: '題', answer: 'だい', romaji: 'dai', type: 'on', wordReading: 'しゅくだい', wordRomaji: 'shukudai', parts: [
+      { text: '宿', reading: 'しゅく', romaji: 'shuku', meaning: 'ở trọ / bài về nhà', role: 'support' }, { text: '題', reading: 'だい', romaji: 'dai', meaning: 'đề bài', role: 'target' }] },
+    // 短
+    { word: '短所', mean: 'khuyết điểm', target: '短', answer: 'たん', romaji: 'tan', type: 'on', wordReading: 'たんしょ', wordRomaji: 'tansho', parts: [
+      { text: '短', reading: 'たん', romaji: 'tan', meaning: 'ngắn / điểm yếu', role: 'target' }, { text: '所', reading: 'しょ', romaji: 'sho', meaning: 'chỗ', role: 'support' }] },
+    { word: '短い', mean: 'ngắn', target: '短', answer: 'みじか', romaji: 'mijika', type: 'kun', wordReading: 'みじかい', wordRomaji: 'mijikai', parts: [
+      { text: '短', reading: 'みじか', romaji: 'mijika', meaning: 'ngắn', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 知
+    { word: '知識', mean: 'kiến thức', target: '知', answer: 'ち', romaji: 'chi', type: 'on', wordReading: 'ちしき', wordRomaji: 'chishiki', parts: [
+      { text: '知', reading: 'ち', romaji: 'chi', meaning: 'biết', role: 'target' }, { text: '識', reading: 'しき', romaji: 'shiki', meaning: 'nhận thức', role: 'support' }] },
+    { word: '知る', mean: 'biết', target: '知', answer: 'し', romaji: 'shi', type: 'kun', wordReading: 'しる', wordRomaji: 'shiru', parts: [
+      { text: '知', reading: 'し', romaji: 'shi', meaning: 'biết', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 地
+    { word: '地下', mean: 'dưới lòng đất', target: '地', answer: 'ち', romaji: 'chi', type: 'on', wordReading: 'ちか', wordRomaji: 'chika', parts: [
+      { text: '地', reading: 'ち', romaji: 'chi', meaning: 'đất', role: 'target' }, { text: '下', reading: 'か', romaji: 'ka', meaning: 'bên dưới', role: 'support' }] },
+    { word: '地面', mean: 'mặt đất', target: '地', answer: 'じ', romaji: 'ji', type: 'on', wordReading: 'じめん', wordRomaji: 'jimen', parts: [
+      { text: '地', reading: 'じ', romaji: 'ji', meaning: 'đất', role: 'target' }, { text: '面', reading: 'めん', romaji: 'men', meaning: 'bề mặt', role: 'support' }] },
+    // 池
+    { word: '電池', mean: 'pin điện', target: '池', answer: 'ち', romaji: 'chi', type: 'on', wordReading: 'でんち', wordRomaji: 'denchi', parts: [
+      { text: '電', reading: 'でん', romaji: 'den', meaning: 'điện', role: 'support' }, { text: '池', reading: 'ち', romaji: 'chi', meaning: 'bể chứa', role: 'target' }] },
+    { word: '池', mean: 'ao / hồ nhỏ', target: '池', answer: 'いけ', romaji: 'ike', type: 'kun', wordReading: 'いけ', wordRomaji: 'ike', parts: [
+      { text: '池', reading: 'いけ', romaji: 'ike', meaning: 'ao', role: 'target' }] },
+    // 茶
+    { word: 'お茶', mean: 'trà', target: '茶', answer: 'ちゃ', romaji: 'cha', type: 'on', wordReading: 'おちゃ', wordRomaji: 'ocha', parts: [
+      { text: 'お', reading: 'お', romaji: 'o', meaning: 'tiền tố lịch sự', role: 'kana' }, { text: '茶', reading: 'ちゃ', romaji: 'cha', meaning: 'trà', role: 'target' }] },
+    { word: '茶道', mean: 'trà đạo', target: '茶', answer: 'さ', romaji: 'sa', type: 'on', wordReading: 'さどう', wordRomaji: 'sadou', parts: [
+      { text: '茶', reading: 'さ', romaji: 'sa', meaning: 'trà', role: 'target' }, { text: '道', reading: 'どう', romaji: 'dou', meaning: 'đạo / con đường', role: 'support' }] },
+    // 着
+    { word: '到着', mean: 'đến nơi', target: '着', answer: 'ちゃく', romaji: 'chaku', type: 'on', wordReading: 'とうちゃく', wordRomaji: 'touchaku', parts: [
+      { text: '到', reading: 'とう', romaji: 'tou', meaning: 'đến', role: 'support' }, { text: '着', reading: 'ちゃく', romaji: 'chaku', meaning: 'tới nơi', role: 'target' }] },
+    { word: '着る', mean: 'mặc', target: '着', answer: 'き', romaji: 'ki', type: 'kun', wordReading: 'きる', wordRomaji: 'kiru', parts: [
+      { text: '着', reading: 'き', romaji: 'ki', meaning: 'mặc', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 昼
+    { word: '昼食', mean: 'bữa trưa', target: '昼', answer: 'ちゅう', romaji: 'chuu', type: 'on', wordReading: 'ちゅうしょく', wordRomaji: 'chuushoku', parts: [
+      { text: '昼', reading: 'ちゅう', romaji: 'chuu', meaning: 'buổi trưa', role: 'target' }, { text: '食', reading: 'しょく', romaji: 'shoku', meaning: 'bữa ăn', role: 'support' }] },
+    { word: '昼', mean: 'ban trưa', target: '昼', answer: 'ひる', romaji: 'hiru', type: 'kun', wordReading: 'ひる', wordRomaji: 'hiru', parts: [
+      { text: '昼', reading: 'ひる', romaji: 'hiru', meaning: 'ban trưa', role: 'target' }] },
+    // 注
+    { word: '注意', mean: 'chú ý', target: '注', answer: 'ちゅう', romaji: 'chuu', type: 'on', wordReading: 'ちゅうい', wordRomaji: 'chuui', parts: [
+      { text: '注', reading: 'ちゅう', romaji: 'chuu', meaning: 'chú ý', role: 'target' }, { text: '意', reading: 'い', romaji: 'i', meaning: 'ý', role: 'support' }] },
+    { word: '注ぐ', mean: 'rót / đổ vào', target: '注', answer: 'そそ', romaji: 'soso', type: 'kun', wordReading: 'そそぐ', wordRomaji: 'sosogu', parts: [
+      { text: '注', reading: 'そそ', romaji: 'soso', meaning: 'rót', role: 'target' }, { text: 'ぐ', reading: 'ぐ', romaji: 'gu', meaning: '', role: 'kana' }] },
+    // 町
+    { word: '町長', mean: 'thị trưởng', target: '町', answer: 'ちょう', romaji: 'chou', type: 'on', wordReading: 'ちょうちょう', wordRomaji: 'chouchou', parts: [
+      { text: '町', reading: 'ちょう', romaji: 'chou', meaning: 'thị trấn', role: 'target' }, { text: '長', reading: 'ちょう', romaji: 'chou', meaning: 'người đứng đầu', role: 'support' }] },
+    { word: '町', mean: 'phố / thị trấn', target: '町', answer: 'まち', romaji: 'machi', type: 'kun', wordReading: 'まち', wordRomaji: 'machi', parts: [
+      { text: '町', reading: 'まち', romaji: 'machi', meaning: 'phố', role: 'target' }] },
+    // 鳥
+    { word: '野鳥', mean: 'chim hoang dã', target: '鳥', answer: 'ちょう', romaji: 'chou', type: 'on', wordReading: 'やちょう', wordRomaji: 'yachou', parts: [
+      { text: '野', reading: 'や', romaji: 'ya', meaning: 'hoang dã', role: 'support' }, { text: '鳥', reading: 'ちょう', romaji: 'chou', meaning: 'chim', role: 'target' }] },
+    { word: '鳥', mean: 'con chim', target: '鳥', answer: 'とり', romaji: 'tori', type: 'kun', wordReading: 'とり', wordRomaji: 'tori', parts: [
+      { text: '鳥', reading: 'とり', romaji: 'tori', meaning: 'chim', role: 'target' }] },
+    // 朝
+    { word: '朝食', mean: 'bữa sáng', target: '朝', answer: 'ちょう', romaji: 'chou', type: 'on', wordReading: 'ちょうしょく', wordRomaji: 'choushoku', parts: [
+      { text: '朝', reading: 'ちょう', romaji: 'chou', meaning: 'buổi sáng', role: 'target' }, { text: '食', reading: 'しょく', romaji: 'shoku', meaning: 'bữa ăn', role: 'support' }] },
+    { word: '朝', mean: 'buổi sáng', target: '朝', answer: 'あさ', romaji: 'asa', type: 'kun', wordReading: 'あさ', wordRomaji: 'asa', parts: [
+      { text: '朝', reading: 'あさ', romaji: 'asa', meaning: 'buổi sáng', role: 'target' }] },
+    // 通
+    { word: '通学', mean: 'đi học', target: '通', answer: 'つう', romaji: 'tsuu', type: 'on', wordReading: 'つうがく', wordRomaji: 'tsuugaku', parts: [
+      { text: '通', reading: 'つう', romaji: 'tsuu', meaning: 'đi lại', role: 'target' }, { text: '学', reading: 'がく', romaji: 'gaku', meaning: 'học', role: 'support' }] },
+    { word: '通る', mean: 'đi qua', target: '通', answer: 'とお', romaji: 'too', type: 'kun', wordReading: 'とおる', wordRomaji: 'tooru', parts: [
+      { text: '通', reading: 'とお', romaji: 'too', meaning: 'đi qua', role: 'target' }, { text: 'る', reading: 'る', romaji: 'ru', meaning: '', role: 'kana' }] },
+    // 弟
+    { word: '兄弟', mean: 'anh em', target: '弟', answer: 'だい', romaji: 'dai', type: 'on', wordReading: 'きょうだい', wordRomaji: 'kyoudai', parts: [
+      { text: '兄', reading: 'きょう', romaji: 'kyou', meaning: 'anh', role: 'support' }, { text: '弟', reading: 'だい', romaji: 'dai', meaning: 'em', role: 'target' }] },
+    { word: '弟', mean: 'em trai', target: '弟', answer: 'おとうと', romaji: 'otouto', type: 'kun', wordReading: 'おとうと', wordRomaji: 'otouto', parts: [
+      { text: '弟', reading: 'おとうと', romaji: 'otouto', meaning: 'em trai', role: 'target' }] },
+    // 低
+    { word: '低温', mean: 'nhiệt độ thấp', target: '低', answer: 'てい', romaji: 'tei', type: 'on', wordReading: 'ていおん', wordRomaji: 'teion', parts: [
+      { text: '低', reading: 'てい', romaji: 'tei', meaning: 'thấp', role: 'target' }, { text: '温', reading: 'おん', romaji: 'on', meaning: 'nhiệt độ', role: 'support' }] },
+    { word: '低い', mean: 'thấp', target: '低', answer: 'ひく', romaji: 'hiku', type: 'kun', wordReading: 'ひくい', wordRomaji: 'hikui', parts: [
+      { text: '低', reading: 'ひく', romaji: 'hiku', meaning: 'thấp', role: 'target' }, { text: 'い', reading: 'い', romaji: 'i', meaning: '', role: 'kana' }] },
+    // 転
+    { word: '運転', mean: 'lái xe / vận hành', target: '転', answer: 'てん', romaji: 'ten', type: 'on', wordReading: 'うんてん', wordRomaji: 'unten', parts: [
+      { text: '運', reading: 'うん', romaji: 'un', meaning: 'vận hành', role: 'support' }, { text: '転', reading: 'てん', romaji: 'ten', meaning: 'chuyển động', role: 'target' }] },
+    { word: '転ぶ', mean: 'ngã', target: '転', answer: 'ころ', romaji: 'koro', type: 'kun', wordReading: 'ころぶ', wordRomaji: 'korobu', parts: [
+      { text: '転', reading: 'ころ', romaji: 'koro', meaning: 'ngã', role: 'target' }, { text: 'ぶ', reading: 'ぶ', romaji: 'bu', meaning: '', role: 'kana' }] },
+    // 田
+    { word: '水田', mean: 'ruộng lúa nước', target: '田', answer: 'でん', romaji: 'den', type: 'on', wordReading: 'すいでん', wordRomaji: 'suiden', parts: [
+      { text: '水', reading: 'すい', romaji: 'sui', meaning: 'nước', role: 'support' }, { text: '田', reading: 'でん', romaji: 'den', meaning: 'ruộng', role: 'target' }] },
+    { word: '田んぼ', mean: 'ruộng lúa', target: '田', answer: 'た', romaji: 'ta', type: 'kun', wordReading: 'たんぼ', wordRomaji: 'tanbo', parts: [
+      { text: '田', reading: 'た', romaji: 'ta', meaning: 'ruộng', role: 'target' }, { text: 'んぼ', reading: 'んぼ', romaji: 'nbo', meaning: '', role: 'kana' }] },
+    // 都
+    { word: '都会', mean: 'thành thị', target: '都', answer: 'と', romaji: 'to', type: 'on', wordReading: 'とかい', wordRomaji: 'tokai', parts: [
+      { text: '都', reading: 'と', romaji: 'to', meaning: 'đô thị', role: 'target' }, { text: '会', reading: 'かい', romaji: 'kai', meaning: 'tụ họp', role: 'support' }] },
+    { word: '都', mean: 'kinh đô', target: '都', answer: 'みやこ', romaji: 'miyako', type: 'kun', wordReading: 'みやこ', wordRomaji: 'miyako', parts: [
+      { text: '都', reading: 'みやこ', romaji: 'miyako', meaning: 'kinh đô', role: 'target' }] },
+    // 度
+    { word: '温度', mean: 'nhiệt độ', target: '度', answer: 'ど', romaji: 'do', type: 'on', wordReading: 'おんど', wordRomaji: 'ondo', parts: [
+      { text: '温', reading: 'おん', romaji: 'on', meaning: 'ấm / nhiệt', role: 'support' }, { text: '度', reading: 'ど', romaji: 'do', meaning: 'mức độ', role: 'target' }] },
+    { word: '度々', mean: 'nhiều lần / thường xuyên', target: '度', answer: 'たび', romaji: 'tabi', type: 'kun', wordReading: 'たびたび', wordRomaji: 'tabitabi', parts: [
+      { text: '度', reading: 'たび', romaji: 'tabi', meaning: 'lần', role: 'target' }, { text: '々', reading: 'たび', romaji: 'tabi', meaning: 'lặp lại', role: 'support' }] },
+    // 答
+    { word: '回答', mean: 'câu trả lời', target: '答', answer: 'とう', romaji: 'tou', type: 'on', wordReading: 'かいとう', wordRomaji: 'kaitou', parts: [
+      { text: '回', reading: 'かい', romaji: 'kai', meaning: 'phản hồi', role: 'support' }, { text: '答', reading: 'とう', romaji: 'tou', meaning: 'đáp án', role: 'target' }] },
+    { word: '答える', mean: 'trả lời', target: '答', answer: 'こた', romaji: 'kota', type: 'kun', wordReading: 'こたえる', wordRomaji: 'kotaeru', parts: [
+      { text: '答', reading: 'こた', romaji: 'kota', meaning: 'trả lời', role: 'target' }, { text: 'える', reading: 'える', romaji: 'eru', meaning: '', role: 'kana' }] },
   ],
 
   // Kho đáp án nhiễu (distractor) — cách đọc kana thường gặp
@@ -721,5 +1531,14 @@ window.KANJI_DB = {
     'でん', 'かた', 'ど', 'と', 'つち', 'もく', 'ぼく', 'き', 'しょく', 'じき', 'た', 'しゃ', 'くるま', 'みなみ',
     'げつ', 'すい', 'もく', 'きん', 'ど', 'よう', 'せい', 'がく',
     'なに', 'なん', 'まん', 'ばん', 'まい', 'はく', 'しろ', 'しら', 'てん', 'あめ', 'あま', 'ぼ', 'はは', 'かあ', 'ひ', 'ほ', 'う', 'ゆう', 'みぎ', 'どく', 'とく', 'よ',
-    'とも', 'さ', 'ひだり', 'きゅう', 'やす', 'ふ', 'ちち', 'とう', 'あく', 'わる', 'あん', 'くら'],
+    'とも', 'さ', 'ひだり', 'きゅう', 'やす', 'ふ', 'ちち', 'とう', 'あく', 'わる', 'あん', 'くら',
+    'いん', 'うん', 'はこ', 'えい', 'うつ', 'えん', 'とお', 'おく', 'うた', 'なつ', 'いえ', 'が', 'かく', 'かい', 'うみ', 'まわ',
+    'ひら', 'さかい', 'らく', 'たの', 'やかた', 'かん', 'さむ', 'がん', 'かお', 'かえ', 'きわ', 'いそ', 'ぎゅう', 'きょ', 'つよ', 'きょう', 'ごう', 'おし', 'おそ', 'けい', 'みやこ', 'わざ', 'ちか', 'ぎん',
+    'はか', 'あに', 'かる', 'いぬ', 'ひろ', 'かんが', 'ひかり', 'くろ', 'つく', 'かみ',
+    'おも', 'あね', 'わたし', 'じ', 'みずか', 'ごと', 'も', 'しつ', 'しゃ', 'もの', 'しゃっ', 'よわ',
+    'しゅ', 'くび', 'ぬし', 'しゅう', 'あつ', 'なら', 'じゅう', 'はる', 'ところ', 'ば', 'じょう', 'いろ', 'しき', 'もり',
+    'こころ', 'おや', 'しん', 'まこと', 'すす', 'ず', 'あお', 'ただ', 'こえ', 'せ', 'せき', 'あか', 'ゆう', 'せつ',
+    'あら', 'そう', 'はや', 'はし', 'おく', 'ぞく', 'そん', 'むら', 'からだ', 'ふと', 'たい', 'だい', 'たん', 'みじか',
+    'ち', 'いけ', 'ちゃ', 'さ', 'ちゃく', 'ひる', 'ちゅう', 'そそ', 'まち', 'ちょう', 'とり', 'あさ', 'つう', 'とお',
+    'てい', 'おとうと', 'ひく', 'てん', 'ころ', 'た', 'みやこ', 'ど', 'たび', 'とう', 'こた'],
 };

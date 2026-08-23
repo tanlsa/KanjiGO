@@ -221,3 +221,273 @@ word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts
 意味,ý nghĩa,意,い,i,on,いみ,imi,意~い~i~ý~target|味~み~mi~vị / nghĩa~support
 意見,ý kiến,意,い,i,on,いけん,iken,意~い~i~ý~target|見~けん~ken~cách nhìn~support
 意外,ngoài dự đoán / bất ngờ,意,い,i,on,いがい,igai,意~い~i~ý nghĩ~target|外~がい~gai~ngoài~support
+以上,trở lên / hơn nữa,以,い,i,on,いじょう,ijou,以~い~i~từ / trở lên~target|上~じょう~jou~trên~support
+以前,trước đây / trước khi,以,い,i,on,いぜん,izen,以~い~i~từ / mốc~target|前~ぜん~zen~trước~support
+引用,trích dẫn,引,いん,in,on,いんよう,inyou,引~いん~in~dẫn~target|用~よう~you~dùng~support
+引く,kéo / rút,引,ひ,hi,kun,ひく,hiku,引~ひ~hi~kéo~target|く~く~ku~~kana
+病院,bệnh viện,院,いん,in,on,びょういん,byouin,病~びょう~byou~bệnh~support|院~いん~in~viện~target
+入院,nhập viện,院,いん,in,on,にゅういん,nyuuin,入~にゅう~nyuu~vào~support|院~いん~in~viện~target
+店員,nhân viên cửa hàng,員,いん,in,on,てんいん,tenin,店~てん~ten~cửa hàng~support|員~いん~in~nhân viên~target
+会社員,nhân viên công ty,員,いん,in,on,かいしゃいん,kaishain,会社~かいしゃ~kaisha~công ty~support|員~いん~in~nhân viên~target
+運動,vận động / tập thể dục,運,うん,un,on,うんどう,undou,運~うん~un~vận động~target|動~どう~dou~chuyển động~support
+運ぶ,vận chuyển / mang,運,はこ,hako,kun,はこぶ,hakobu,運~はこ~hako~vận chuyển~target|ぶ~ぶ~bu~~kana
+英語,tiếng Anh,英,えい,ei,on,えいご,eigo,英~えい~ei~Anh~target|語~ご~go~ngôn ngữ~support
+英国,nước Anh,英,えい,ei,on,えいこく,eikoku,英~えい~ei~Anh~target|国~こく~koku~quốc gia~support
+映画,phim điện ảnh,映,えい,ei,on,えいが,eiga,映~えい~ei~chiếu~target|画~が~ga~hình ảnh~support
+映る,được chiếu / phản chiếu,映,うつ,utsu,kun,うつる,utsuru,映~うつ~utsu~phản chiếu~target|る~る~ru~~kana
+遠足,chuyến dã ngoại,遠,えん,en,on,えんそく,ensoku,遠~えん~en~xa~target|足~そく~soku~chân / chuyến đi~support
+遠い,xa,遠,とお,too,kun,とおい,tooi,遠~とお~too~xa~target|い~い~i~~kana
+屋上,sân thượng / mái nhà,屋,おく,oku,on,おくじょう,okujou,屋~おく~oku~mái / nhà~target|上~じょう~jou~trên~support
+本屋,hiệu sách,屋,や,ya,kun,ほんや,honya,本~ほん~hon~sách~support|屋~や~ya~cửa hàng~target
+歌手,ca sĩ,歌,か,ka,on,かしゅ,kashu,歌~か~ka~bài hát~target|手~しゅ~shu~người làm~support
+歌う,hát,歌,うた,uta,kun,うたう,utau,歌~うた~uta~hát~target|う~う~u~~kana
+夏季,mùa hè / mùa hạ,夏,か,ka,on,かき,kaki,夏~か~ka~mùa hè~target|季~き~ki~mùa~support
+夏休み,kỳ nghỉ hè,夏,なつ,natsu,kun,なつやすみ,natsuyasumi,夏~なつ~natsu~mùa hè~target|休~やす~yasu~nghỉ~support|み~み~mi~~kana
+家族,gia đình,家,か,ka,on,かぞく,kazoku,家~か~ka~gia đình~target|族~ぞく~zoku~nhóm / tộc~support
+家,ngôi nhà,家,いえ,ie,kun,いえ,ie,家~いえ~ie~nhà~target
+映画,phim điện ảnh,画,が,ga,on,えいが,eiga,映~えい~ei~chiếu~support|画~が~ga~hình ảnh~target
+計画,kế hoạch,画,かく,kaku,on,けいかく,keikaku,計~けい~kei~tính toán~support|画~かく~kaku~kế hoạch / nét~target
+海外,hải ngoại / nước ngoài,海,かい,kai,on,かいがい,kaigai,海~かい~kai~biển~target|外~がい~gai~ngoài~support
+海,biển,海,うみ,umi,kun,うみ,umi,海~うみ~umi~biển~target
+今回,lần này,回,かい,kai,on,こんかい,konkai,今~こん~kon~lần này / hiện tại~support|回~かい~kai~lần~target
+回る,xoay / đi vòng,回,まわ,mawa,kun,まわる,mawaru,回~まわ~mawa~xoay vòng~target|る~る~ru~~kana
+開会,khai mạc / mở cuộc họp,開,かい,kai,on,かいかい,kaikai,開~かい~kai~mở~target|会~かい~kai~cuộc họp~support
+開く,mở ra,開,ひら,hira,kun,ひらく,hiraku,開~ひら~hira~mở~target|く~く~ku~~kana
+世界,thế giới,界,かい,kai,on,せかい,sekai,世~せ~se~đời / thế~support|界~かい~kai~thế giới~target
+業界,ngành nghề / giới kinh doanh,界,かい,kai,on,ぎょうかい,gyoukai,業~ぎょう~gyou~ngành nghề~support|界~かい~kai~giới~target
+音楽,âm nhạc,楽,がく,gaku,on,おんがく,ongaku,音~おん~on~âm thanh~support|楽~がく~gaku~nhạc~target
+楽しい,vui vẻ,楽,たの,tano,kun,たのしい,tanoshii,楽~たの~tano~vui~target|しい~しい~shii~~kana
+図書館,thư viện,館,かん,kan,on,としょかん,toshokan,図書~としょ~tosho~sách~support|館~かん~kan~tòa nhà~target
+映画館,rạp chiếu phim,館,かん,kan,on,えいがかん,eigakan,映画~えいが~eiga~phim~support|館~かん~kan~tòa nhà / rạp~target
+漢字,chữ Kanji / Hán tự,漢,かん,kan,on,かんじ,kanji,漢~かん~kan~Hán~target|字~じ~ji~chữ~support
+漢語,từ Hán Nhật,漢,かん,kan,on,かんご,kango,漢~かん~kan~Hán~target|語~ご~go~từ ngữ~support
+寒気,khí lạnh / cảm giác ớn lạnh,寒,かん,kan,on,かんき,kanki,寒~かん~kan~lạnh~target|気~き~ki~khí~support
+寒い,lạnh,寒,さむ,samu,kun,さむい,samui,寒~さむ~samu~lạnh~target|い~い~i~~kana
+顔面,khuôn mặt / vùng mặt,顔,がん,gan,on,がんめん,ganmen,顔~がん~gan~mặt~target|面~めん~men~bề mặt~support
+顔,khuôn mặt,顔,かお,kao,kun,かお,kao,顔~かお~kao~khuôn mặt~target
+帰国,về nước,帰,き,ki,on,きこく,kikoku,帰~き~ki~trở về~target|国~こく~koku~đất nước~support
+帰る,trở về,帰,かえ,kae,kun,かえる,kaeru,帰~かえ~kae~trở về~target|る~る~ru~~kana
+起立,đứng dậy,起,き,ki,on,きりつ,kiritsu,起~き~ki~đứng lên~target|立~りつ~ritsu~đứng~support
+起きる,thức dậy,起,お,o,kun,おきる,okiru,起~お~o~dậy~target|きる~きる~kiru~~kana
+研究,nghiên cứu,究,きゅう,kyuu,on,けんきゅう,kenkyuu,研~けん~ken~mài giũa / nghiên cứu~support|究~きゅう~kyuu~nghiên cứu đến cùng~target
+究明,điều tra làm rõ,究,きゅう,kyuu,on,きゅうめい,kyuumei,究~きゅう~kyuu~truy cứu~target|明~めい~mei~làm rõ~support
+急行,tàu tốc hành,急,きゅう,kyuu,on,きゅうこう,kyuukou,急~きゅう~kyuu~nhanh / gấp~target|行~こう~kou~chạy / đi~support
+急ぐ,vội / nhanh lên,急,いそ,iso,kun,いそぐ,isogu,急~いそ~iso~vội~target|ぐ~ぐ~gu~~kana
+牛肉,thịt bò,牛,ぎゅう,gyuu,on,ぎゅうにく,gyuuniku,牛~ぎゅう~gyuu~bò~target|肉~にく~niku~thịt~support
+牛,con bò,牛,うし,ushi,kun,うし,ushi,牛~うし~ushi~bò~target
+去年,năm ngoái,去,きょ,kyo,on,きょねん,kyonen,去~きょ~kyo~đã qua~target|年~ねん~nen~năm~support
+去る,rời đi,去,さ,sa,kun,さる,saru,去~さ~sa~rời đi~target|る~る~ru~~kana
+強力,mạnh mẽ / cường lực,強,きょう,kyou,on,きょうりょく,kyouryoku,強~きょう~kyou~mạnh~target|力~りょく~ryoku~sức lực~support
+強い,mạnh,強,つよ,tsuyo,kun,つよい,tsuyoi,強~つよ~tsuyo~mạnh~target|い~い~i~~kana
+教室,lớp học,教,きょう,kyou,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy / giáo~target|室~しつ~shitsu~phòng~support
+教える,dạy / chỉ bảo,教,おし,oshi,kun,おしえる,oshieru,教~おし~oshi~dạy~target|える~える~eru~~kana
+東京,Tokyo / Đông Kinh,京,きょう,kyou,on,とうきょう,toukyou,東~とう~tou~phía đông~support|京~きょう~kyou~kinh đô~target
+京都,Kyoto / kinh đô Kyoto,京,きょう,kyou,on,きょうと,kyouto,京~きょう~kyou~kinh đô~target|都~と~to~đô thị~support
+授業,buổi học / tiết học,業,ぎょう,gyou,on,じゅぎょう,jugyou,授~じゅ~ju~truyền dạy~support|業~ぎょう~gyou~việc học~target
+産業,công nghiệp,業,ぎょう,gyou,on,さんぎょう,sangyou,産~さん~san~sản xuất~support|業~ぎょう~gyou~ngành nghề~target
+近所,hàng xóm / khu vực gần nhà,近,きん,kin,on,きんじょ,kinjo,近~きん~kin~gần~target|所~じょ~jo~nơi~support
+近い,gần,近,ちか,chika,kun,ちかい,chikai,近~ちか~chika~gần~target|い~い~i~~kana
+銀行,ngân hàng,銀,ぎん,gin,on,ぎんこう,ginkou,銀~ぎん~gin~bạc / ngân~target|行~こう~kou~cơ sở~support
+銀色,màu bạc,銀,ぎん,gin,on,ぎんいろ,giniro,銀~ぎん~gin~bạc~target|色~いろ~iro~màu sắc~support
+区役所,văn phòng hành chính quận,区,く,ku,on,くやくしょ,kuyakusho,区~く~ku~quận / khu~target|役所~やくしょ~yakusho~cơ quan hành chính~support
+地区,khu vực,区,く,ku,on,ちく,chiku,地~ち~chi~đất / vùng~support|区~く~ku~khu vực~target
+計画,kế hoạch,計,けい,kei,on,けいかく,keikaku,計~けい~kei~tính toán~target|画~かく~kaku~kế hoạch~support
+計る,đo / tính,計,はか,haka,kun,はかる,hakaru,計~はか~haka~đo~target|る~る~ru~~kana
+兄弟,anh em,兄,きょう,kyou,on,きょうだい,kyoudai,兄~きょう~kyou~anh trai~target|弟~だい~dai~em trai~support
+兄,anh trai,兄,あに,ani,kun,あに,ani,兄~あに~ani~anh trai~target
+軽食,bữa ăn nhẹ,軽,けい,kei,on,けいしょく,keishoku,軽~けい~kei~nhẹ~target|食~しょく~shoku~thức ăn~support
+軽い,nhẹ,軽,かる,karu,kun,かるい,karui,軽~かる~karu~nhẹ~target|い~い~i~~kana
+番犬,chó canh,犬,けん,ken,on,ばんけん,banken,番~ばん~ban~canh gác~support|犬~けん~ken~chó~target
+犬,con chó,犬,いぬ,inu,kun,いぬ,inu,犬~いぬ~inu~chó~target
+研究,nghiên cứu,研,けん,ken,on,けんきゅう,kenkyuu,研~けん~ken~nghiên cứu~target|究~きゅう~kyuu~đến cùng~support
+研ぐ,mài / đánh bóng,研,と,to,kun,とぐ,togu,研~と~to~mài~target|ぐ~ぐ~gu~~kana
+県立,do tỉnh quản lý,県,けん,ken,on,けんりつ,kenritsu,県~けん~ken~tỉnh~target|立~りつ~ritsu~lập~support
+県庁,trụ sở hành chính tỉnh,県,けん,ken,on,けんちょう,kenchou,県~けん~ken~tỉnh~target|庁~ちょう~chou~cơ quan~support
+建設,xây dựng,建,けん,ken,on,けんせつ,kensetsu,建~けん~ken~xây~target|設~せつ~setsu~thiết lập~support
+建てる,xây lên,建,た,ta,kun,たてる,tateru,建~た~ta~xây~target|てる~てる~teru~~kana
+試験,kỳ thi / kiểm tra,験,けん,ken,on,しけん,shiken,試~し~shi~thử~support|験~けん~ken~kiểm nghiệm~target
+経験,kinh nghiệm,験,けん,ken,on,けいけん,keiken,経~けい~kei~trải qua~support|験~けん~ken~kinh nghiệm~target
+元気,khỏe mạnh / tràn đầy năng lượng,元,げん,gen,on,げんき,genki,元~げん~gen~nguồn / gốc~target|気~き~ki~khí lực~support
+元,gốc / nguồn,元,もと,moto,kun,もと,moto,元~もと~moto~gốc~target
+工場,nhà máy,工,こう,kou,on,こうじょう,koujou,工~こう~kou~công nghiệp~target|場~じょう~jou~nơi~support
+工事,công trình / thi công,工,こう,kou,on,こうじ,kouji,工~こう~kou~thi công~target|事~じ~ji~việc~support
+広告,quảng cáo,広,こう,kou,on,こうこく,koukoku,広~こう~kou~rộng / quảng~target|告~こく~koku~báo~support
+広い,rộng,広,ひろ,hiro,kun,ひろい,hiroi,広~ひろ~hiro~rộng~target|い~い~i~~kana
+考察,suy xét / khảo sát,考,こう,kou,on,こうさつ,kousatsu,考~こう~kou~suy nghĩ~target|察~さつ~satsu~xem xét~support
+考える,suy nghĩ,考,かんが,kanga,kun,かんがえる,kangaeru,考~かんが~kanga~suy nghĩ~target|える~える~eru~~kana
+観光,tham quan / du lịch,光,こう,kou,on,かんこう,kankou,観~かん~kan~ngắm~support|光~こう~kou~ánh sáng / cảnh sắc~target
+光,ánh sáng,光,ひかり,hikari,kun,ひかり,hikari,光~ひかり~hikari~ánh sáng~target
+好物,món yêu thích,好,こう,kou,on,こうぶつ,koubutsu,好~こう~kou~yêu thích~target|物~ぶつ~butsu~vật / món~support
+好き,thích,好,す,su,kun,すき,suki,好~す~su~thích~target|き~き~ki~~kana
+合計,tổng cộng,合,ごう,gou,on,ごうけい,goukei,合~ごう~gou~gộp~target|計~けい~kei~tính~support
+合う,hợp / khớp,合,あ,a,kun,あう,au,合~あ~a~hợp~target|う~う~u~~kana
+黒板,bảng đen,黒,こく,koku,on,こくばん,kokuban,黒~こく~koku~đen~target|板~ばん~ban~tấm bảng~support
+黒い,màu đen,黒,くろ,kuro,kun,くろい,kuroi,黒~くろ~kuro~đen~target|い~い~i~~kana
+野菜,rau củ,菜,さい,sai,on,やさい,yasai,野~や~ya~đồng / hoang~support|菜~さい~sai~rau~target
+菜の花,hoa cải,菜,な,na,kun,なのはな,nanohana,菜~な~na~rau cải~target|の~の~no~~kana|花~はな~hana~hoa~support
+作文,bài văn,作,さく,saku,on,さくぶん,sakubun,作~さく~saku~làm / sáng tác~target|文~ぶん~bun~văn~support
+作る,làm / tạo ra,作,つく,tsuku,kun,つくる,tsukuru,作~つく~tsuku~làm~target|る~る~ru~~kana
+生産,sản xuất,産,さん,san,on,せいさん,seisan,生~せい~sei~sinh ra~support|産~さん~san~sản xuất~target
+産む,sinh / đẻ,産,う,u,kun,うむ,umu,産~う~u~sinh~target|む~む~mu~~kana
+用紙,giấy dùng cho một mục đích,紙,し,shi,on,ようし,youshi,用~よう~you~sử dụng~support|紙~し~shi~giấy~target
+紙,giấy,紙,かみ,kami,kun,かみ,kami,紙~かみ~kami~giấy~target
+思考,suy nghĩ / tư duy,思,し,shi,on,しこう,shikou,思~し~shi~suy nghĩ~target|考~こう~kou~xem xét~support
+思う,nghĩ / cảm thấy,思,おも,omo,kun,おもう,omou,思~おも~omo~nghĩ~target|う~う~u~~kana
+姉妹,chị em gái,姉,し,shi,on,しまい,shimai,姉~し~shi~chị gái~target|妹~まい~mai~em gái~support
+姉,chị gái,姉,あね,ane,kun,あね,ane,姉~あね~ane~chị gái~target
+停止,dừng lại / đình chỉ,止,し,shi,on,ていし,teishi,停~てい~tei~dừng~support|止~し~shi~dừng~target
+止まる,dừng lại,止,と,to,kun,とまる,tomaru,止~と~to~dừng~target|まる~まる~maru~~kana
+市場,chợ / thị trường,市,し,shi,on,しじょう,shijou,市~し~shi~chợ~target|場~じょう~jou~nơi~support
+市,chợ phiên,市,いち,ichi,kun,いち,ichi,市~いち~ichi~chợ~target
+仕事,công việc,仕,し,shi,on,しごと,shigoto,仕~し~shi~làm việc~target|事~ごと~goto~việc~support
+仕える,phụng sự / phục vụ,仕,つか,tsuka,kun,つかえる,tsukaeru,仕~つか~tsuka~phụng sự~target|える~える~eru~~kana
+死亡,tử vong,死,し,shi,on,しぼう,shibou,死~し~shi~chết~target|亡~ぼう~bou~mất~support
+死ぬ,chết,死,し,shi,kun,しぬ,shinu,死~し~shi~chết~target|ぬ~ぬ~nu~~kana
+使用,sử dụng,使,し,shi,on,しよう,shiyou,使~し~shi~dùng~target|用~よう~you~sử dụng~support
+使う,dùng / sử dụng,使,つか,tsuka,kun,つかう,tsukau,使~つか~tsuka~dùng~target|う~う~u~~kana
+開始,bắt đầu / khai mạc,始,し,shi,on,かいし,kaishi,開~かい~kai~mở~support|始~し~shi~bắt đầu~target
+始める,bắt đầu,始,はじ,haji,kun,はじめる,hajimeru,始~はじ~haji~bắt đầu~target|める~める~meru~~kana
+試験,kỳ thi / kiểm tra,試,し,shi,on,しけん,shiken,試~し~shi~thử~target|験~けん~ken~kiểm nghiệm~support
+試す,thử,試,ため,tame,kun,ためす,tamesu,試~ため~tame~thử~target|す~す~su~~kana
+私立,tư lập,私,し,shi,on,しりつ,shiritsu,私~し~shi~tư nhân~target|立~りつ~ritsu~lập~support
+私,tôi,私,わたし,watashi,kun,わたし,watashi,私~わたし~watashi~tôi~target
+文字,chữ viết / ký tự,字,じ,ji,on,もじ,moji,文~も~mo~văn~support|字~じ~ji~chữ~target
+漢字,chữ Kanji,字,じ,ji,on,かんじ,kanji,漢~かん~kan~Hán~support|字~じ~ji~chữ~target
+自分,bản thân,自,じ,ji,on,じぶん,jibun,自~じ~ji~tự mình~target|分~ぶん~bun~phần~support
+自ら,tự mình,自,みずか,mizuka,kun,みずから,mizukara,自~みずか~mizuka~tự mình~target|ら~ら~ra~~kana
+事故,sự cố / tai nạn,事,じ,ji,on,じこ,jiko,事~じ~ji~sự việc~target|故~こ~ko~sự cố~support
+仕事,công việc,事,ごと,goto,kun,しごと,shigoto,仕~し~shi~làm~support|事~ごと~goto~việc~target
+持参,mang theo,持,じ,ji,on,じさん,jisan,持~じ~ji~mang~target|参~さん~san~đến / tham gia~support
+持つ,cầm / giữ,持,も,mo,kun,もつ,motsu,持~も~mo~cầm~target|つ~つ~tsu~~kana
+教室,lớp học,室,しつ,shitsu,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy~support|室~しつ~shitsu~phòng~target
+室内,trong phòng,室,しつ,shitsu,on,しつない,shitsunai,室~しつ~shitsu~phòng~target|内~ない~nai~bên trong~support
+品質,chất lượng,質,しつ,shitsu,on,ひんしつ,hinshitsu,品~ひん~hin~sản phẩm~support|質~しつ~shitsu~chất lượng~target
+質問,câu hỏi,質,しつ,shitsu,on,しつもん,shitsumon,質~しつ~shitsu~hỏi / chất vấn~target|問~もん~mon~hỏi~support
+写真,ảnh chụp,写,しゃ,sha,on,しゃしん,shashin,写~しゃ~sha~chụp / sao~target|真~しん~shin~thật~support
+写す,chụp / sao chép,写,うつ,utsu,kun,うつす,utsusu,写~うつ~utsu~chụp / sao~target|す~す~su~~kana
+記者,phóng viên,者,しゃ,sha,on,きしゃ,kisha,記~き~ki~ghi chép~support|者~しゃ~sha~người~target
+若者,người trẻ,者,もの,mono,kun,わかもの,wakamono,若~わか~waka~trẻ~support|者~もの~mono~người~target
+借金,khoản nợ / tiền vay,借,しゃっ,sha,on,しゃっきん,shakkin,借~しゃっ~sha~vay~target|金~きん~kin~tiền~support
+借りる,mượn / vay,借,か,ka,kun,かりる,kariru,借~か~ka~mượn~target|りる~りる~riru~~kana
+弱点,điểm yếu,弱,じゃく,jaku,on,じゃくてん,jakuten,弱~じゃく~jaku~yếu~target|点~てん~ten~điểm~support
+弱い,yếu,弱,よわ,yowa,kun,よわい,yowai,弱~よわ~yowa~yếu~target|い~い~i~~kana
+首都,thủ đô,首,しゅ,shu,on,しゅと,shuto,首~しゅ~shu~đầu / chính~target|都~と~to~đô thị~support
+首,cổ,首,くび,kubi,kun,くび,kubi,首~くび~kubi~cổ~target
+主人,chủ nhà / chồng,主,しゅ,shu,on,しゅじん,shujin,主~しゅ~shu~chủ~target|人~じん~jin~người~support
+主な,chính / chủ yếu,主,おも,omo,kun,おもな,omona,主~おも~omo~chính~target|な~な~na~~kana
+秋分,thu phân,秋,しゅう,shuu,on,しゅうぶん,shuubun,秋~しゅう~shuu~mùa thu~target|分~ぶん~bun~phân chia~support
+秋,mùa thu,秋,あき,aki,kun,あき,aki,秋~あき~aki~mùa thu~target
+集合,tập hợp,集,しゅう,shuu,on,しゅうごう,shuugou,集~しゅう~shuu~tụ họp~target|合~ごう~gou~hợp lại~support
+集める,thu thập / tập hợp,集,あつ,atsu,kun,あつめる,atsumeru,集~あつ~atsu~tập hợp~target|める~める~meru~~kana
+学習,học tập,習,しゅう,shuu,on,がくしゅう,gakushuu,学~がく~gaku~học~support|習~しゅう~shuu~luyện tập~target
+習う,học / luyện,習,なら,nara,kun,ならう,narau,習~なら~nara~học~target|う~う~u~~kana
+終了,kết thúc / hoàn tất,終,しゅう,shuu,on,しゅうりょう,shuuryou,終~しゅう~shuu~kết thúc~target|了~りょう~ryou~hoàn tất~support
+終わる,kết thúc,終,お,o,kun,おわる,owaru,終~お~o~kết thúc~target|わる~わる~waru~~kana
+住所,địa chỉ,住,じゅう,juu,on,じゅうしょ,juusho,住~じゅう~juu~cư trú~target|所~しょ~sho~nơi~support
+住む,sống / cư trú,住,す,su,kun,すむ,sumu,住~す~su~sống~target|む~む~mu~~kana
+重要,quan trọng,重,じゅう,juu,on,じゅうよう,juuyou,重~じゅう~juu~quan trọng~target|要~よう~you~thiết yếu~support
+重い,nặng,重,おも,omo,kun,おもい,omoi,重~おも~omo~nặng~target|い~い~i~~kana
+青春,tuổi thanh xuân,春,しゅん,shun,on,せいしゅん,seishun,青~せい~sei~xanh / trẻ~support|春~しゅん~shun~mùa xuân~target
+春,mùa xuân,春,はる,haru,kun,はる,haru,春~はる~haru~mùa xuân~target
+場所,địa điểm / nơi chốn,所,しょ,sho,on,ばしょ,basho,場~ば~ba~nơi~support|所~しょ~sho~chỗ~target
+所,nơi / chỗ,所,ところ,tokoro,kun,ところ,tokoro,所~ところ~tokoro~nơi~target
+残暑,cái nóng cuối hè,暑,しょ,sho,on,ざんしょ,zansho,残~ざん~zan~còn lại~support|暑~しょ~sho~nóng~target
+暑い,nóng (thời tiết),暑,あつ,atsu,kun,あつい,atsui,暑~あつ~atsu~nóng~target|い~い~i~~kana
+会場,hội trường / địa điểm tổ chức,場,じょう,jou,on,かいじょう,kaijou,会~かい~kai~cuộc họp~support|場~じょう~jou~địa điểm~target
+場所,địa điểm / nơi chốn,場,ば,ba,kun,ばしょ,basho,場~ば~ba~nơi~target|所~しょ~sho~chỗ~support
+乗車,lên xe,乗,じょう,jou,on,じょうしゃ,jousha,乗~じょう~jou~lên~target|車~しゃ~sha~xe~support
+乗る,lên / đi bằng phương tiện,乗,の,no,kun,のる,noru,乗~の~no~lên xe~target|る~る~ru~~kana
+色彩,màu sắc / sắc thái,色,しき,shiki,on,しきさい,shikisai,色~しき~shiki~màu sắc~target|彩~さい~sai~sắc màu~support
+色,màu sắc,色,いろ,iro,kun,いろ,iro,色~いろ~iro~màu sắc~target
+森林,rừng cây,森,しん,shin,on,しんりん,shinrin,森~しん~shin~rừng~target|林~りん~rin~lùm cây~support
+森,rừng,森,もり,mori,kun,もり,mori,森~もり~mori~rừng~target
+心配,lo lắng,心,しん,shin,on,しんぱい,shinpai,心~しん~shin~tâm trí~target|配~ぱい~pai~quan tâm~support
+心,trái tim / tâm hồn,心,こころ,kokoro,kun,こころ,kokoro,心~こころ~kokoro~trái tim~target
+親切,tử tế / tốt bụng,親,しん,shin,on,しんせつ,shinsetsu,親~しん~shin~thân thiết~target|切~せつ~setsu~tận tình~support
+親,cha mẹ,親,おや,oya,kun,おや,oya,親~おや~oya~cha mẹ~target
+写真,ảnh chụp,真,しん,shin,on,しゃしん,shashin,写~しゃ~sha~chụp~support|真~しん~shin~thật~target
+真っ白,trắng tinh,真,ま,ma,kun,まっしろ,masshiro,真~ま~ma~hoàn toàn~target|っ~っ~~~kana|白~しろ~shiro~trắng~support
+進学,học lên,進,しん,shin,on,しんがく,shingaku,進~しん~shin~tiến lên~target|学~がく~gaku~học~support
+進む,tiến lên,進,すす,susu,kun,すすむ,susumu,進~すす~susu~tiến~target|む~む~mu~~kana
+地図,bản đồ,図,ず,zu,on,ちず,chizu,地~ち~chi~đất~support|図~ず~zu~bản đồ~target
+図書館,thư viện,図,と,to,on,としょかん,toshokan,図~と~to~sách / sơ đồ~target|書館~しょかん~shokan~thư quán~support
+青年,thanh niên,青,せい,sei,on,せいねん,seinen,青~せい~sei~xanh / trẻ~target|年~ねん~nen~năm / tuổi~support
+青い,màu xanh,青,あお,ao,kun,あおい,aoi,青~あお~ao~xanh~target|い~い~i~~kana
+正解,đáp án đúng,正,せい,sei,on,せいかい,seikai,正~せい~sei~đúng~target|解~かい~kai~giải~support
+正しい,đúng đắn,正,ただ,tada,kun,ただしい,tadashii,正~ただ~tada~đúng~target|しい~しい~shii~~kana
+音声,âm thanh / giọng nói,声,せい,sei,on,おんせい,onsei,音~おん~on~âm thanh~support|声~せい~sei~giọng~target
+声,giọng nói,声,こえ,koe,kun,こえ,koe,声~こえ~koe~giọng nói~target
+世界,thế giới,世,せ,se,on,せかい,sekai,世~せ~se~thế giới~target|界~かい~kai~cõi / giới~support
+世の中,xã hội / thế gian,世,よ,yo,kun,よのなか,yononaka,世~よ~yo~thế gian~target|の~の~no~~kana|中~なか~naka~bên trong~support
+赤道,xích đạo,赤,せき,seki,on,せきどう,sekidou,赤~せき~seki~đỏ / xích~target|道~どう~dou~đường~support
+赤い,màu đỏ,赤,あか,aka,kun,あかい,akai,赤~あか~aka~đỏ~target|い~い~i~~kana
+夕食,bữa tối,夕,ゆう,yuu,kun,ゆうしょく,yuushoku,夕~ゆう~yuu~buổi tối~target|食~しょく~shoku~bữa ăn~support
+夕方,chiều tối,夕,ゆう,yuu,kun,ゆうがた,yuugata,夕~ゆう~yuu~buổi tối~target|方~がた~gata~phía / khoảng~support
+大切,quan trọng / quý giá,切,せつ,setsu,on,たいせつ,taisetsu,大~たい~tai~lớn~support|切~せつ~setsu~quan trọng~target
+切る,cắt,切,き,ki,kun,きる,kiru,切~き~ki~cắt~target|る~る~ru~~kana
+説明,giải thích,説,せつ,setsu,on,せつめい,setsumei,説~せつ~setsu~giải thích~target|明~めい~mei~rõ~support
+説く,giảng giải / thuyết phục,説,と,to,kun,とく,toku,説~と~to~giảng giải~target|く~く~ku~~kana
+洗面所,phòng rửa mặt,洗,せん,sen,on,せんめんじょ,senmenjo,洗~せん~sen~rửa~target|面所~めんじょ~menjo~nơi rửa mặt~support
+洗う,rửa,洗,あら,ara,kun,あらう,arau,洗~あら~ara~rửa~target|う~う~u~~kana
+早朝,sáng sớm,早,そう,sou,on,そうちょう,souchou,早~そう~sou~sớm~target|朝~ちょう~chou~buổi sáng~support
+早い,sớm / nhanh,早,はや,haya,kun,はやい,hayai,早~はや~haya~sớm / nhanh~target|い~い~i~~kana
+競走,cuộc chạy đua,走,そう,sou,on,きょうそう,kyousou,競~きょう~kyou~thi đấu~support|走~そう~sou~chạy~target
+走る,chạy,走,はし,hashi,kun,はしる,hashiru,走~はし~hashi~chạy~target|る~る~ru~~kana
+送信,gửi đi / truyền tin,送,そう,sou,on,そうしん,soushin,送~そう~sou~gửi~target|信~しん~shin~tin~support
+送る,gửi / tiễn,送,おく,oku,kun,おくる,okuru,送~おく~oku~gửi~target|る~る~ru~~kana
+家族,gia đình,族,ぞく,zoku,on,かぞく,kazoku,家~か~ka~nhà~support|族~ぞく~zoku~gia tộc~target
+民族,dân tộc,族,ぞく,zoku,on,みんぞく,minzoku,民~みん~min~người dân~support|族~ぞく~zoku~nhóm / tộc~target
+村民,dân làng,村,そん,son,on,そんみん,sonmin,村~そん~son~làng~target|民~みん~min~người dân~support
+村,ngôi làng,村,むら,mura,kun,むら,mura,村~むら~mura~làng~target
+体育,thể dục,体,たい,tai,on,たいいく,taiiku,体~たい~tai~cơ thể~target|育~いく~iku~rèn luyện~support
+体,cơ thể,体,からだ,karada,kun,からだ,karada,体~からだ~karada~cơ thể~target
+太陽,mặt trời,太,たい,tai,on,たいよう,taiyou,太~たい~tai~lớn / thái~target|陽~よう~you~mặt trời~support
+太い,to / dày,太,ふと,futo,kun,ふとい,futoi,太~ふと~futo~to / dày~target|い~い~i~~kana
+待機,chờ sẵn / đợi lệnh,待,たい,tai,on,たいき,taiki,待~たい~tai~chờ~target|機~き~ki~thời cơ / máy~support
+待つ,chờ đợi,待,ま,ma,kun,まつ,matsu,待~ま~ma~chờ~target|つ~つ~tsu~~kana
+賃貸,cho thuê / thuê nhà,貸,たい,tai,on,ちんたい,chintai,賃~ちん~chin~tiền thuê~support|貸~たい~tai~cho thuê~target
+貸す,cho mượn,貸,か,ka,kun,かす,kasu,貸~か~ka~cho mượn~target|す~す~su~~kana
+台風,bão,台,たい,tai,on,たいふう,taifuu,台~たい~tai~đài / bệ~target|風~ふう~fuu~gió~support
+台所,nhà bếp,台,だい,dai,on,だいどころ,daidokoro,台~だい~dai~bệ / khu~target|所~どころ~dokoro~nơi~support
+時代,thời đại,代,だい,dai,on,じだい,jidai,時~じ~ji~thời gian~support|代~だい~dai~đời / thời đại~target
+代わる,thay thế,代,か,ka,kun,かわる,kawaru,代~か~ka~thay thế~target|わる~わる~waru~~kana
+問題,vấn đề / câu hỏi,題,だい,dai,on,もんだい,mondai,問~もん~mon~hỏi~support|題~だい~dai~đề bài~target
+宿題,bài tập về nhà,題,だい,dai,on,しゅくだい,shukudai,宿~しゅく~shuku~ở trọ / bài về nhà~support|題~だい~dai~đề bài~target
+短所,khuyết điểm,短,たん,tan,on,たんしょ,tansho,短~たん~tan~ngắn / điểm yếu~target|所~しょ~sho~chỗ~support
+短い,ngắn,短,みじか,mijika,kun,みじかい,mijikai,短~みじか~mijika~ngắn~target|い~い~i~~kana
+知識,kiến thức,知,ち,chi,on,ちしき,chishiki,知~ち~chi~biết~target|識~しき~shiki~nhận thức~support
+知る,biết,知,し,shi,kun,しる,shiru,知~し~shi~biết~target|る~る~ru~~kana
+地下,dưới lòng đất,地,ち,chi,on,ちか,chika,地~ち~chi~đất~target|下~か~ka~bên dưới~support
+地面,mặt đất,地,じ,ji,on,じめん,jimen,地~じ~ji~đất~target|面~めん~men~bề mặt~support
+電池,pin điện,池,ち,chi,on,でんち,denchi,電~でん~den~điện~support|池~ち~chi~bể chứa~target
+池,ao / hồ nhỏ,池,いけ,ike,kun,いけ,ike,池~いけ~ike~ao~target
+お茶,trà,茶,ちゃ,cha,on,おちゃ,ocha,お~お~o~tiền tố lịch sự~kana|茶~ちゃ~cha~trà~target
+茶道,trà đạo,茶,さ,sa,on,さどう,sadou,茶~さ~sa~trà~target|道~どう~dou~đạo / con đường~support
+到着,đến nơi,着,ちゃく,chaku,on,とうちゃく,touchaku,到~とう~tou~đến~support|着~ちゃく~chaku~tới nơi~target
+着る,mặc,着,き,ki,kun,きる,kiru,着~き~ki~mặc~target|る~る~ru~~kana
+昼食,bữa trưa,昼,ちゅう,chuu,on,ちゅうしょく,chuushoku,昼~ちゅう~chuu~buổi trưa~target|食~しょく~shoku~bữa ăn~support
+昼,ban trưa,昼,ひる,hiru,kun,ひる,hiru,昼~ひる~hiru~ban trưa~target
+注意,chú ý,注,ちゅう,chuu,on,ちゅうい,chuui,注~ちゅう~chuu~chú ý~target|意~い~i~ý~support
+注ぐ,rót / đổ vào,注,そそ,soso,kun,そそぐ,sosogu,注~そそ~soso~rót~target|ぐ~ぐ~gu~~kana
+町長,thị trưởng,町,ちょう,chou,on,ちょうちょう,chouchou,町~ちょう~chou~thị trấn~target|長~ちょう~chou~người đứng đầu~support
+町,phố / thị trấn,町,まち,machi,kun,まち,machi,町~まち~machi~phố~target
+野鳥,chim hoang dã,鳥,ちょう,chou,on,やちょう,yachou,野~や~ya~hoang dã~support|鳥~ちょう~chou~chim~target
+鳥,con chim,鳥,とり,tori,kun,とり,tori,鳥~とり~tori~chim~target
+朝食,bữa sáng,朝,ちょう,chou,on,ちょうしょく,choushoku,朝~ちょう~chou~buổi sáng~target|食~しょく~shoku~bữa ăn~support
+朝,buổi sáng,朝,あさ,asa,kun,あさ,asa,朝~あさ~asa~buổi sáng~target
+通学,đi học,通,つう,tsuu,on,つうがく,tsuugaku,通~つう~tsuu~đi lại~target|学~がく~gaku~học~support
+通る,đi qua,通,とお,too,kun,とおる,tooru,通~とお~too~đi qua~target|る~る~ru~~kana
+兄弟,anh em,弟,だい,dai,on,きょうだい,kyoudai,兄~きょう~kyou~anh~support|弟~だい~dai~em~target
+弟,em trai,弟,おとうと,otouto,kun,おとうと,otouto,弟~おとうと~otouto~em trai~target
+低温,nhiệt độ thấp,低,てい,tei,on,ていおん,teion,低~てい~tei~thấp~target|温~おん~on~nhiệt độ~support
+低い,thấp,低,ひく,hiku,kun,ひくい,hikui,低~ひく~hiku~thấp~target|い~い~i~~kana
+運転,lái xe / vận hành,転,てん,ten,on,うんてん,unten,運~うん~un~vận hành~support|転~てん~ten~chuyển động~target
+転ぶ,ngã,転,ころ,koro,kun,ころぶ,korobu,転~ころ~koro~ngã~target|ぶ~ぶ~bu~~kana
+水田,ruộng lúa nước,田,でん,den,on,すいでん,suiden,水~すい~sui~nước~support|田~でん~den~ruộng~target
+田んぼ,ruộng lúa,田,た,ta,kun,たんぼ,tanbo,田~た~ta~ruộng~target|んぼ~んぼ~nbo~~kana
+都会,thành thị,都,と,to,on,とかい,tokai,都~と~to~đô thị~target|会~かい~kai~tụ họp~support
+都,kinh đô,都,みやこ,miyako,kun,みやこ,miyako,都~みやこ~miyako~kinh đô~target
+温度,nhiệt độ,度,ど,do,on,おんど,ondo,温~おん~on~ấm / nhiệt~support|度~ど~do~mức độ~target
+度々,nhiều lần / thường xuyên,度,たび,tabi,kun,たびたび,tabitabi,度~たび~tabi~lần~target|々~たび~tabi~lặp lại~support
+回答,câu trả lời,答,とう,tou,on,かいとう,kaitou,回~かい~kai~phản hồi~support|答~とう~tou~đáp án~target
+答える,trả lời,答,こた,kota,kun,こたえる,kotaeru,答~こた~kota~trả lời~target|える~える~eru~~kana

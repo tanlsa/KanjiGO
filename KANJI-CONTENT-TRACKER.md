@@ -17,7 +17,7 @@ Một Kanji chỉ được đánh dấu `READY` khi có đủ:
 1. N5 mở mặc định và đi đúng thứ tự trong catalog.
 2. Gym N5 chỉ mở khi đã thu phục đủ **79/79 Kanji N5**.
 3. Vượt Gym N5 với ít nhất **80%** câu đúng sẽ nhận huy hiệu N5.
-4. N4 chỉ xuất hiện trong Giảng đường và encounter sau khi có huy hiệu N5.
+4. N4 chỉ xuất hiện trong Giảng đường và encounter sau khi có huy hiệu N5. Hiện có `PROGRESSION.testUnlockedTiers: ['N4']` để QA tạm thời.
 5. `魚` là content bonus, không tính vào điều kiện hoàn thành N5/N4.
 
 ## Current snapshot
@@ -25,7 +25,7 @@ Một Kanji chỉ được đánh dấu `READY` khi có đủ:
 | Tier | Canonical | Ready | Partial | Missing | Runtime gate |
 |---|---:|---:|---:|---:|---|
 | N5 | 79 | 79 | 0 | 0 | Open; Gym after 79 captured |
-| N4 | 140 | 5 | 0 | 135 | Requires N5 badge |
+| N4 | 140 | 140 | 0 | 0 | Requires N5 badge; temporary QA override active |
 | Bonus | 1 | 1 | 0 | 0 | Not tier-gated |
 
 Catalog hiện khớp đủ danh sách nguồn: 79 chữ N5 và 140 chữ N4, không có chữ trùng.
@@ -124,24 +124,152 @@ Không còn chữ N5 thiếu content.
 
 ## N4
 
-### Ready (5/140)
+### Ready (140/140)
 
 - [x] `悪` — aku
 - [x] `暗` — an
 - [x] `医` — i_med
 - [x] `意` — i_intent
+- [x] `以` — i_by
+- [x] `引` — hiku
+- [x] `院` — institute
+- [x] `員` — member
+- [x] `運` — un
+- [x] `英` — ei
+- [x] `映` — utsu
+- [x] `遠` — tooi
+- [x] `屋` — ya
 - [x] `音` — yin
+- [x] `歌` — uta
+- [x] `夏` — natsu
+- [x] `家` — ie
+- [x] `画` — ga_art
+- [x] `海` — umi
+- [x] `回` — kai_turn
+- [x] `開` — hiraku
+- [x] `界` — kai_world
+- [x] `楽` — tanoshi
+- [x] `館` — kan_building
+- [x] `漢` — kan_han
+- [x] `寒` — samui
+- [x] `顔` — kao
+- [x] `帰` — kaeru
+- [x] `起` — okiru
+- [x] `究` — kyuu_research
+- [x] `急` — isogu
+- [x] `牛` — ushi
+- [x] `去` — saru
+- [x] `強` — tsuyoi
+- [x] `教` — oshieru
+- [x] `京` — kyou_capital
+- [x] `業` — gyou_business
+- [x] `近` — chikai
+- [x] `銀` — gin
+- [x] `区` — ku_district
+- [x] `計` — hakaru
+- [x] `兄` — ani
+- [x] `軽` — karui
+- [x] `犬` — inu
+- [x] `研` — ken_research
+- [x] `県` — ken_prefecture
+- [x] `建` — tateru
+- [x] `験` — ken_test
+- [x] `元` — moto
+- [x] `工` — kou_craft
+- [x] `広` — hiroi
+- [x] `考` — kangaeru
+- [x] `光` — hikari
+- [x] `好` — suki
+- [x] `合` — au
+- [x] `黒` — kuro
+- [x] `菜` — na_vegetable
+- [x] `作` — tsukuru
+- [x] `産` — umu
+- [x] `紙` — kami_paper
+- [x] `思` — omou
+- [x] `姉` — ane
+- [x] `止` — tomaru
+- [x] `市` — shi_city
+- [x] `仕` — shi_work
+- [x] `死` — shi_death
+- [x] `使` — tsukau
+- [x] `始` — hajimeru
+- [x] `試` — shi_try
+- [x] `私` — watashi
+- [x] `字` — ji_letter
+- [x] `自` — mizukara
+- [x] `事` — koto
+- [x] `持` — motsu
+- [x] `室` — shitsu_room
+- [x] `質` — shitsu_quality
+- [x] `写` — utsusu
+- [x] `者` — mono_person
+- [x] `借` — kariru
+- [x] `弱` — yowai
+- [x] `首` — kubi
+- [x] `主` — shu_main
+- [x] `秋` — aki
+- [x] `集` — atsumeru
+- [x] `習` — narau
+- [x] `終` — owaru
+- [x] `住` — sumu
+- [x] `重` — omoi_heavy
+- [x] `春` — haru
+- [x] `所` — tokoro
+- [x] `暑` — atsui
+- [x] `場` — ba
+- [x] `乗` — noru
+- [x] `色` — iro
+- [x] `森` — mori
+- [x] `心` — kokoro
+- [x] `親` — oya
+- [x] `真` — shin_truth
+- [x] `進` — susumu
+- [x] `図` — zu
+- [x] `青` — ao
+- [x] `正` — tadashii
+- [x] `声` — koe
+- [x] `世` — yo
+- [x] `赤` — aka
+- [x] `夕` — yuu
+- [x] `切` — kiru
+- [x] `説` — toku
+- [x] `洗` — arau
+- [x] `早` — hayai
+- [x] `走` — hashiru
+- [x] `送` — okuru
+- [x] `族` — zoku
+- [x] `村` — mura
+- [x] `体` — karada
+- [x] `太` — futoi
+- [x] `待` — matsu
+- [x] `貸` — kasu
+- [x] `台` — dai_platform
+- [x] `代` — dai_generation
+- [x] `題` — dai_topic
+- [x] `短` — mijikai
+- [x] `知` — shiru
+- [x] `地` — chi_ground
+- [x] `池` — ike
+- [x] `茶` — cha
+- [x] `着` — kiru_wear
+- [x] `昼` — hiru
+- [x] `注` — sosogu
+- [x] `町` — machi
+- [x] `鳥` — tori
+- [x] `朝` — asa
+- [x] `通` — tooru
+- [x] `弟` — otouto
+- [x] `低` — hikui
+- [x] `転` — korobu
+- [x] `田` — ta_ricefield
+- [x] `都` — miyako
+- [x] `度` — do_degree
+- [x] `答` — kotaeru
 
-### Missing (135/140)
+### Missing (0/140)
 
-- [ ] `以 引 院 員 運 英 映 遠 屋 歌 夏 家 画 海`
-- [ ] `回 開 界 楽 館 漢 寒 顔 帰 起 究 急 牛 去 強 教 京 業 近`
-- [ ] `銀 区 計 兄 軽 犬 研 県 建 験 元 工 広 考 光 好 合 黒 菜`
-- [ ] `作 産 紙 思 姉 止 市 仕 死 使 始 試 私 字 自 事 持 室 質`
-- [ ] `写 者 借 弱 首 主 秋 集 習 終 住 重 春 所 暑 場 乗 色 森`
-- [ ] `心 親 真 進 図 青 正 声 世 赤 夕 切 説 洗 早 走 送 族 村`
-- [ ] `体 太 待 貸 台 代 題 短 知 地 池 茶 着 昼 注 町 鳥 朝 通`
-- [ ] `弟 低 転 田 都 度 答`
+Không còn chữ N4 thiếu content.
 
 ## Bonus
 
@@ -157,4 +285,4 @@ Mỗi batch nên gồm 5–10 chữ và hoàn tất trọn bộ theo thứ tự:
 4. test Giảng đường, capture, Dex và battle;
 5. cập nhật số liệu/checklist trong file này.
 
-Việc tiếp theo: tiếp tục N4 theo thứ tự với `以 引 院 員`.
+Việc tiếp theo: QA toàn bộ flow N4 sau huy hiệu N5 và tắt `PROGRESSION.testUnlockedTiers` khi kết thúc kiểm thử.
