@@ -89,6 +89,11 @@ test('every curriculum Kanji has metadata, questions, monster config, and a tran
     assert.ok(monster, `${char} references missing monster ${info.monId}`);
     assert.equal(monster.kanji, char, `${info.monId} uses the wrong Kanji`);
     assert.ok(monster.name && monster.maxHp > 0 && monster.atk[0] > 0 && monster.atk[1] >= monster.atk[0], `${info.monId} has invalid stats`);
+    const nameParts = monster.name.trim().split(/\s+/);
+    assert.ok(
+      (typeof monster.hanViet === 'string' && monster.hanViet.trim() && monster.name.includes(monster.hanViet.trim())) || nameParts.length >= 2,
+      `${info.monId} needs a Hán Việt name prefix or an explicit hanViet override`,
+    );
     assert.ok(fs.existsSync(path.join(ROOT, monster.img)), `missing sprite ${monster.img}`);
     const png = pngInfo(monster.img);
     assert.ok(png.width > 0 && png.height > 0, `${monster.img} has invalid dimensions`);
@@ -109,6 +114,9 @@ test('question data is internally consistent and supports vocabulary highlightin
     assert.ok(['on', 'kun'].includes(q.type), `${label} has invalid reading type`);
     assert.ok(typeof q.id === 'string' && q.id.trim(), `${label} has no stable vocabulary id`);
     assert.ok(!ids.has(q.id), `${label} duplicates vocabulary id ${q.id}`); ids.add(q.id);
+    assert.ok(q.sentence && q.sentence.includes(q.target), `${label} context sentence must contain its target Kanji`);
+    assert.ok(q.sentenceReading && q.sentenceReading.includes(q.answer), `${label} kana sentence must contain the target reading`);
+    assert.ok(q.sentenceMeaning, `${label} context sentence needs a Vietnamese meaning`);
     assert.ok(Array.isArray(q.parts) && q.parts.length > 0, `${label} has no vocabulary parts`);
     assert.equal(q.parts.map((part) => part.text).join(''), q.word, `${label} parts do not rebuild the word`);
     const targets = q.parts.filter((part) => part.role === 'target');
@@ -282,13 +290,32 @@ test('Trainer Arena has a single odd center axis and a complete wall tile atlas'
 test('CSV templates exactly mirror packaged runtime data', () => {
   const { KANJI_DB } = loadDataContext();
   const kanjiRows = parseSimpleCsv('data/kanji-template.csv', 7);
-  const questionRows = parseSimpleCsv('data/questions-template.csv', 9);
+  const questionRows = parseSimpleCsv('data/questions-template.csv', 13);
   const runtimeKanji = new Set(Object.values(KANJI_DB.KANJI).map((info) => info.char));
   const runtimeQuestions = new Set(KANJI_DB.QUESTIONS.map((q) => `${q.word}|${q.target}|${q.answer}|${q.type}`));
   assert.equal(kanjiRows.length, runtimeKanji.size, 'Kanji CSV is not synchronized; run npm run sync:data');
   assert.equal(questionRows.length, runtimeQuestions.size, 'question CSV is not synchronized; run npm run sync:data');
   kanjiRows.forEach((row) => assert.ok(runtimeKanji.has(row[1]), `CSV contains unknown Kanji ${row[1]}`));
   questionRows.forEach((row) => assert.ok(runtimeQuestions.has(`${row[0]}|${row[2]}|${row[3]}|${row[5]}`), `CSV contains stale question ${row[0]}/${row[2]}`));
+});
+
+test('Admin ships offline Excel import/export and the workbook engine round-trips Japanese content', () => {
+  const admin = read('admin.html');
+  assert.match(admin, /id="btnImportExcel"/);
+  assert.match(admin, /id="btnExportExcel"/);
+  assert.match(admin, /js\/vendor\/xlsx\.full\.min\.js/);
+  assert.ok(fs.existsSync(path.join(ROOT, 'js/vendor/SHEETJS-LICENSE.txt')));
+  const XLSX = require(path.join(ROOT, 'js/vendor/xlsx.full.min.js'));
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+    ['word', 'sentence', 'sentenceReading', 'sentenceMeaning'],
+    ['水', 'まいにち 水を のみます。', 'まいにち みずを のみます。', 'Hằng ngày tôi uống nước.'],
+  ]), 'QUESTIONS');
+  const bytes = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  const restored = XLSX.read(bytes, { type: 'buffer' });
+  const rows = XLSX.utils.sheet_to_json(restored.Sheets.QUESTIONS, { header: 1 });
+  assert.equal(rows[1][1], 'まいにち 水を のみます。');
+  assert.equal(rows[1][3], 'Hằng ngày tôi uống nước.');
 });
 
 test('imported browser data merges safely without hiding packaged content', () => {

@@ -40,11 +40,14 @@
   #touch-actions .touch-skills{color:#7ff7ff}
   #touch-actions .touch-bike{color:#ffcf6c}
   #touch-actions .touch-auto{color:#8fffb0}
-  #touch-back{right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:46px;height:42px;
-    border:2px solid rgba(159,216,245,.75);border-radius:12px;background:rgba(11,16,48,.9);
-    color:#fff;font-size:20px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.35)}
-  #touch-back.combat-back{top:max(112px,calc(env(safe-area-inset-top) + 112px));width:42px;height:38px;
-    background:rgba(70,22,28,.9);border-color:rgba(255,155,155,.85)}
+  #touch-back{right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:10;
+    width:auto;min-width:88px;height:46px;padding:0 14px;border:2px solid rgba(159,216,245,.82);
+    border-radius:23px;background:rgba(11,16,48,.94);color:#fff;font-size:13px;font-weight:800;
+    letter-spacing:.35px;box-shadow:0 4px 12px rgba(0,0,0,.4);touch-action:manipulation}
+  #touch-back:active{background:rgba(22,85,143,.98);transform:scale(.95)}
+  #touch-back.combat-back{top:max(116px,calc(env(safe-area-inset-top) + 116px));min-width:82px;height:44px;
+    background:rgba(70,22,28,.94);border-color:rgba(255,155,155,.9)}
+  #touch-back.continue-action{background:rgba(18,92,62,.95);border-color:rgba(126,255,190,.9)}
   kbd{background:#0f3460;border-radius:4px;padding:1px 6px;
     font-family:monospace;color:#fff;border:1px solid #16558f}
   #admin-link{margin-top:10px;font-size:12px;color:#9fd8f5}
@@ -81,7 +84,7 @@
   <button class="touch-bike" data-action="bicycle" aria-label="Bật hoặc tắt xe đạp">BIKE</button>
   <button class="touch-auto" data-action="auto-ride" aria-label="Bật hoặc tắt Auto Ride">AUTO</button>
 </div>
-<button id="touch-back" class="touch-hidden" data-action="back" aria-label="Quay lại" title="Quay lại">←</button>
+<button id="touch-back" type="button" class="touch-hidden" data-action="back" aria-label="Quay lại" title="Quay lại">QUAY LẠI</button>
 <div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
 
 <script src="js/content-catalog.js"></script>

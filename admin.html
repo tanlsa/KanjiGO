@@ -26,6 +26,7 @@
   button.ghost{background:transparent;border-color:var(--line);color:#c8d5ee;font-weight:500}
   button.ok{background:#1f7d47;border-color:#2fae63}
   button.danger{background:#7a2530;border-color:#a83b48}
+  input[type=file]{display:none}
   #log{margin-top:14px;font-size:13px}
   .msg{padding:8px 12px;border-radius:8px;margin:6px 0;border:1px solid}
   .msg.ok{background:rgba(30,110,60,.25);border-color:#2fae63;color:var(--ok)}
@@ -48,7 +49,7 @@
 </header>
 <main>
   <p style="font-size:13.5px;color:#c8d5ee">
-    Dán trực tiếp từ <b>Excel / Google Sheets</b> (mỗi cột cách nhau bằng <b>Tab</b>) hoặc dùng <b>dấu phẩy</b> (CSV).
+    Nhập/xuất trực tiếp file <b>Excel (.xlsx)</b>, dán từ <b>Excel / Google Sheets</b> (mỗi cột cách nhau bằng <b>Tab</b>) hoặc dùng <b>dấu phẩy</b> (CSV).
     Dòng đầu có thể là tiêu đề (tự bỏ qua). Dòng bắt đầu bằng <code># là ghi chú.
     Nhiều cách đọc On/Kun ngăn nhau bằng <code>,</code> hoặc <code>;</code>. &nbsp; ◀ <a class="back" href="index.html">Về game</a>
   </p>
@@ -62,14 +63,17 @@
     </div>
     <div class="card">
       <h2>② Bảng CÂU HỎI (ngân hàng quiz)</h2>
-      <p class="hint">Mỗi dòng = 1 câu. <b>parts</b>: <code>text~reading~romaji~meaning~role</code>, nhiều phần ngăn bằng <code>|</code>.</p>
-      <code class="cols">word    mean    target    answer    romaji    type    wordReading    wordRomaji    parts</code>
+      <p class="hint">Mỗi dòng = 1 mục từ. Ba cột <b>sentence*</b> dùng cho đề theo ngữ cảnh; bỏ trống thì game tự sinh fallback.</p>
+      <code class="cols">word    mean    target    answer    romaji    type    wordReading    wordRomaji    parts    sentence    sentenceReading    sentenceMeaning    id</code>
       <textarea id="taQ" spellcheck="false"></textarea>
     </div>
   </div>
 
   <div class="toolbar">
     <button class="ghost" id="btnLoadDefault">↺ Nạp dữ liệu mẫu (mặc định)</button>
+    <button id="btnImportExcel">📥 Nhập Excel</button>
+    <input id="fileExcel" type="file" accept=".xlsx,.xls,.xlsb,.ods,.csv,.tsv" />
+    <button id="btnExportExcel">📊 Xuất Excel</button>
     <button id="btnPreview">🔍 Xem trước &amp; Kiểm tra</button>
     <button class="ok" id="btnApply">✅ Áp dụng vào game (lưu trình duyệt)</button>
     <button id="btnDownload">⬇️ Tải xuống kanji.js</button>
@@ -89,11 +93,22 @@
 <script src="js/content-catalog.js"></script>
 <script src="js/config.js"></script>
 <script src="js/kanji.js"></script>
+<script src="js/vendor/xlsx.full.min.js"></script>
 <script>
 const KEY = 'KANJIGO_DATA_V1';
 const MON_IDS = Object.keys((window.CONFIG && CONFIG.MONSTERS) || {});
 const DEF = window.KANJI_DB;
 const $ = (id) => document.getElementById(id);
+const KANJI_HEADERS = ['key','char','meaning','on','kun','monId','jlpt'];
+const QUESTION_HEADERS = ['word','mean','target','answer','romaji','type','wordReading','wordRomaji','parts','sentence','sentenceReading','sentenceMeaning','id'];
+const vocabularyId = (q) => q.id || `v1:${[q.target,q.word,q.type,q.answer].map(v => encodeURIComponent(String(v||'').trim())).join(':')}`;
+const withContextDefaults = (q) => ({
+  ...q,
+  sentence: String(q.sentence || `ことば「${q.word || ''}」を よみます。`).trim(),
+  sentenceReading: String(q.sentenceReading || `ことば「${q.wordReading || q.answer || ''}」を よみます。`).trim(),
+  sentenceMeaning: String(q.sentenceMeaning || `Tôi đọc từ “${q.mean || ''}”.`).trim(),
+  id: vocabularyId(q),
+});
 
 // ---------- nguồn dữ liệu hiện tại ----------
 function refreshSrc(){
@@ -108,9 +123,12 @@ function fillDefault(){
   const kRows = Object.entries(DEF.KANJI).map(([key,v]) =>
     [key, v.char, v.meaning, v.on.join(', '), v.kun.join(', '), v.monId, v.jlpt||''].join('\t'));
   $('taKanji').value = 'key\tchar\tmeaning\ton\tkun\tmonId\tjlpt\n' + kRows.join('\n');
-  const qRows = DEF.QUESTIONS.map(q =>
-    [q.word, q.mean, q.target, q.answer, q.romaji, q.type, q.wordReading||'', q.wordRomaji||'', encodeParts(q.parts)].join('\t'));
-  $('taQ').value = 'word\tmean\ttarget\tanswer\tromaji\ttype\twordReading\twordRomaji\tparts\n' + qRows.join('\n');
+  const qRows = DEF.QUESTIONS.map(raw => {
+    const q = withContextDefaults(raw);
+    return [q.word, q.mean, q.target, q.answer, q.romaji, q.type, q.wordReading||'', q.wordRomaji||'', encodeParts(q.parts),
+      q.sentence, q.sentenceReading, q.sentenceMeaning, q.id].join('\t');
+  });
+  $('taQ').value = QUESTION_HEADERS.join('\t') + '\n' + qRows.join('\n');
   log('', []); $('preview').innerHTML=''; $('genOut').textContent='(bấm "Xem trước" để tạo)';
 }
 
@@ -157,9 +175,10 @@ function build(){
     charSet.add(char);
   });
 
-  const QUESTIONS = [];
+  const QUESTIONS = [], questionIds = new Set();
   qRows.forEach((c, i) => {
-    const [word, mean, target, answer, romaji, type, wordReading, wordRomaji, rawParts] = c;
+    const [word, mean, target, answer, romaji, type, wordReading, wordRomaji, rawParts,
+      sentence, sentenceReading, sentenceMeaning, id] = c;
     if (!word || !target || !answer) { msgs.push(['err', `Câu hỏi dòng ${i+1}: thiếu word/target/answer.`]); return; }
     const tp = (type||'').toLowerCase();
     if (tp !== 'on' && tp !== 'kun') msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): type="${type}" không phải on/kun.`]);
@@ -171,11 +190,20 @@ function build(){
     if (parts.length && !parts.some((part) => part.role === 'target')) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): parts chưa có role=target.`]);
     if (parts.length && !wordReading) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): thiếu wordReading; quiz đọc toàn từ sẽ fallback về câu hỏi Kanji.`]);
     if (wordReading && !parts.length) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): có wordReading nhưng chưa khai báo parts; game sẽ dùng hiển thị tương thích.`]);
+    if (sentence && !sentence.includes(target)) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): sentence không chứa target "${target}" để highlight.`]);
+    if (sentenceReading && answer && !sentenceReading.includes(answer)) msgs.push(['warn', `Câu hỏi dòng ${i+1} ("${word}"): sentenceReading không chứa cách đọc "${answer}".`]);
     const question = { word, mean: mean||'', target, answer, romaji: romaji||'', type: tp||'on' };
     if (wordReading) question.wordReading = wordReading;
     if (wordRomaji) question.wordRomaji = wordRomaji;
     if (parts.length) question.parts = parts;
-    QUESTIONS.push(question);
+    if (sentence) question.sentence = sentence;
+    if (sentenceReading) question.sentenceReading = sentenceReading;
+    if (sentenceMeaning) question.sentenceMeaning = sentenceMeaning;
+    if (id) question.id = id;
+    const normalized = withContextDefaults(question);
+    if (questionIds.has(normalized.id)) msgs.push(['err', `Câu hỏi dòng ${i+1}: id trùng "${normalized.id}".`]);
+    questionIds.add(normalized.id);
+    QUESTIONS.push(normalized);
   });
 
   // distractor = kho mặc định + toàn bộ answer (khử trùng)
@@ -192,7 +220,7 @@ function log(title, msgs){
   const errs = msgs.filter(m=>m[0]==='err').length, warns = msgs.filter(m=>m[0]==='warn').length;
   let html = '';
   if (title) html += `<div class="msg ${errs?'err':warns?'warn':'ok'}">${title} — ${errs} lỗi, ${warns} cảnh báo.</div>`;
-  msgs.forEach(([lv,txt]) => html += `<div class="msg ${lv}">${lv==='err'?'❌':'⚠️'} ${txt}</div>`);
+  msgs.forEach(([lv,txt]) => html += `<div class="msg ${lv}">${lv==='err'?'❌':lv==='warn'?'⚠️':'✅'} ${txt}</div>`);
   box.innerHTML = html;
   return errs;
 }
@@ -200,12 +228,12 @@ function preview(data){
   const kRows = Object.entries(data.KANJI).map(([k,v]) =>
     `<tr><td>${k}</td><td class="jp">${v.char}</td><td>${v.meaning}</td><td class="jp">${v.on.join('・')}</td><td class="jp">${v.kun.join('・')}</td><td>${v.monId}</td><td>${v.jlpt||'BONUS'}</td></tr>`).join('');
   const qRows = data.QUESTIONS.slice(0,200).map(q =>
-    `<tr><td class="jp">${q.word}</td><td>${q.mean}</td><td class="jp">${q.target}</td><td class="jp">${q.answer}</td><td class="jp">${q.wordReading||'—'}</td><td>${q.wordRomaji||'—'}</td><td>${q.parts?.length||0}</td><td>${q.type}</td></tr>`).join('');
+    `<tr><td class="jp">${q.word}</td><td>${q.mean}</td><td class="jp">${q.target}</td><td class="jp">${q.answer}</td><td class="jp">${q.wordReading||'—'}</td><td>${q.wordRomaji||'—'}</td><td>${q.parts?.length||0}</td><td>${q.type}</td><td class="jp">${q.sentence}</td><td>${q.sentenceMeaning}</td></tr>`).join('');
   $('preview').innerHTML =
     `<h3>📖 KANJI (${Object.keys(data.KANJI).length})</h3>
      <table><tr><th>key</th><th>char</th><th>meaning</th><th>on</th><th>kun</th><th>monId</th><th>jlpt</th></tr>${kRows}</table>
      <h3>❓ CÂU HỎI (${data.QUESTIONS.length})</h3>
-     <table><tr><th>word</th><th>mean</th><th>target</th><th>answer</th><th>wordReading</th><th>wordRomaji</th><th>parts</th><th>type</th></tr>${qRows}</table>`;
+     <table><tr><th>word</th><th>mean</th><th>target</th><th>answer</th><th>wordReading</th><th>wordRomaji</th><th>parts</th><th>type</th><th>sentence</th><th>sentenceMeaning</th></tr>${qRows}</table>`;
 }
 function genFile(data){
   const j = (o) => JSON.stringify(o, null, 2);
@@ -224,8 +252,91 @@ window.KANJI_DB = {
   return txt;
 }
 
+// ---------- Excel (.xlsx) import / export ----------
+const excelCell = (value) => String(value ?? '').replace(/[\t\r\n]+/g, ' ').trim();
+function kanjiExcelRows(data){
+  return [KANJI_HEADERS, ...Object.entries(data.KANJI).map(([key, v]) => [
+    key, v.char, v.meaning, (v.on||[]).join('; '), (v.kun||[]).join('; '), v.monId, v.jlpt||'BONUS',
+  ])];
+}
+function questionExcelRows(data){
+  return [QUESTION_HEADERS, ...data.QUESTIONS.map(raw => {
+    const q = withContextDefaults(raw);
+    return [q.word, q.mean, q.target, q.answer, q.romaji, q.type, q.wordReading||'', q.wordRomaji||'', encodeParts(q.parts),
+      q.sentence, q.sentenceReading, q.sentenceMeaning, q.id];
+  })];
+}
+function addWorkbookSheet(workbook, name, rows, widths){
+  const sheet = XLSX.utils.aoa_to_sheet(rows);
+  sheet['!cols'] = widths.map(wch => ({ wch }));
+  sheet['!autofilter'] = { ref: sheet['!ref'] };
+  XLSX.utils.book_append_sheet(workbook, sheet, name);
+}
+function exportExcel(data){
+  if (!window.XLSX) throw new Error('Không tải được bộ đọc Excel. Hãy tải lại admin.html.');
+  const workbook = XLSX.utils.book_new();
+  addWorkbookSheet(workbook, 'KANJI', kanjiExcelRows(data), [14,8,24,28,28,16,10]);
+  addWorkbookSheet(workbook, 'QUESTIONS', questionExcelRows(data), [18,24,8,12,12,8,18,18,48,38,38,34,42]);
+  const guide = [
+    ['KanjiGO Content Workbook'],
+    ['Sheet KANJI', 'Thông tin Kanji và mascot trong KanjiDex.'],
+    ['Sheet QUESTIONS', 'Mỗi dòng là một mục từ và nguồn sinh nhiều dạng câu hỏi.'],
+    ['sentence', 'Câu có Kanji, ví dụ: まいにち 水を のみます。'],
+    ['sentenceReading', 'Cùng câu nhưng thay từ mục tiêu bằng kana.'],
+    ['sentenceMeaning', 'Bản dịch tiếng Việt của câu.'],
+    ['id', 'ID ổn định của vocabulary; không đổi sau khi đã phát hành.'],
+    ['Ghi chú', 'Có thể bỏ trống ba cột sentence*; game sẽ tự sinh câu fallback.'],
+  ];
+  addWorkbookSheet(workbook, 'HUONG_DAN', guide, [22,82]);
+  XLSX.writeFile(workbook, 'KanjiGO-content.xlsx', { compression: true });
+}
+function worksheetAsTextarea(workbook, requiredHeaders, headers){
+  const normalizedHeaders = headers.map(h => h.toLowerCase());
+  for (const sheetName of workbook.SheetNames) {
+    const matrix = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '', raw: false });
+    const headerIndex = matrix.findIndex(row => {
+      const cells = row.map(value => excelCell(value).toLowerCase());
+      return requiredHeaders.every(header => cells.includes(header.toLowerCase()));
+    });
+    if (headerIndex < 0) continue;
+    const sourceHeaders = matrix[headerIndex].map(value => excelCell(value).toLowerCase());
+    const indexes = normalizedHeaders.map(header => sourceHeaders.indexOf(header));
+    const rows = matrix.slice(headerIndex + 1).filter(row => row.some(value => excelCell(value))).map(row =>
+      indexes.map(index => index < 0 ? '' : excelCell(row[index])).join('\t'));
+    return headers.join('\t') + (rows.length ? `\n${rows.join('\n')}` : '');
+  }
+  return '';
+}
+async function importExcel(file){
+  if (!window.XLSX) throw new Error('Không tải được bộ đọc Excel. Hãy tải lại admin.html.');
+  const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+  const kanjiText = worksheetAsTextarea(workbook, ['key','char','monid'], KANJI_HEADERS);
+  const questionText = worksheetAsTextarea(workbook, ['word','target','answer'], QUESTION_HEADERS);
+  if (!kanjiText && !questionText) throw new Error('Không tìm thấy bảng KANJI hoặc QUESTIONS hợp lệ trong file Excel.');
+  if (kanjiText) $('taKanji').value = kanjiText;
+  if (questionText) $('taQ').value = questionText;
+  const { data, msgs } = build();
+  const notices = [['ok', `Đã nhập ${file.name}: ${Object.keys(data.KANJI).length} Kanji, ${data.QUESTIONS.length} mục từ.`], ...msgs];
+  const errs = log('📥 NHẬP EXCEL', notices);
+  if (!errs) preview(data), genFile(data);
+}
+
 // ---------- actions ----------
 $('btnLoadDefault').onclick = () => { fillDefault(); refreshSrc(); };
+$('btnImportExcel').onclick = () => $('fileExcel').click();
+$('fileExcel').onchange = async (event) => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  try { await importExcel(file); }
+  catch (error) { log('📥 NHẬP EXCEL', [['err', error.message || String(error)]]); }
+  finally { event.target.value = ''; }
+};
+$('btnExportExcel').onclick = () => {
+  const { data, msgs } = build();
+  if (log('Kiểm tra trước khi xuất Excel', msgs)) return;
+  try { exportExcel(data); log('📊 ĐÃ XUẤT EXCEL', [['ok', `Đã tạo KanjiGO-content.xlsx với ${Object.keys(data.KANJI).length} Kanji và ${data.QUESTIONS.length} mục từ.`]]); }
+  catch (error) { log('📊 XUẤT EXCEL', [['err', error.message || String(error)]]); }
+};
 $('btnPreview').onclick = () => {
   const { data, msgs } = build();
   const errs = log('Kiểm tra', msgs);

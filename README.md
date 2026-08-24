@@ -53,10 +53,12 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 
 ### Cách 1 — Dùng `admin.html` (khuyên dùng, không cần sửa code)
 1. Mở **admin.html**.
-2. Dán bảng từ **Excel/Google Sheets** vào 2 ô (mỗi cột cách nhau bằng **Tab**), hoặc dán CSV.
+2. Bấm **📥 Nhập Excel** để mở workbook `.xlsx/.xls/.ods/.csv`, hoặc dán bảng từ **Excel/Google Sheets** vào 2 ô.
    - Bảng **KANJI**: `key, char, meaning, on, kun, monId, jlpt`
-   - Bảng **CÂU HỎI**: `word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts`
+   - Bảng **CÂU HỎI**: `word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts, sentence, sentenceReading, sentenceMeaning, id`
    - `parts`: `text~reading~romaji~meaning~role`, nhiều segment ngăn bằng `|`.
+   - `sentence`: câu ngữ cảnh có Kanji; `sentenceReading`: cùng câu bằng kana; `sentenceMeaning`: bản dịch tiếng Việt. Bỏ trống thì game tự sinh fallback cho cả ba dạng đề ngữ cảnh.
+   - `id`: mã vocabulary ổn định. Không nên đổi sau khi nội dung đã phát hành vì tiến độ từng từ được gắn với ID này.
    - Nhiều cách đọc On/Kun ngăn nhau bằng `,` hoặc `;`.
    - `monId` phải khớp một id trong `CONFIG.MONSTERS`; xem danh sách hiện hành tại `assets/README.md`.
    - `jlpt` nhận `N5`, `N4` hoặc `BONUS`. Nếu bỏ trống, game tự đối chiếu `js/content-catalog.js`.
@@ -64,7 +66,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 Danh sách chuẩn và tiến độ sản xuất content nằm tại [KANJI-CONTENT-TRACKER.md](KANJI-CONTENT-TRACKER.md). N4 chỉ mở sau khi người chơi thu phục đủ 79 chữ N5 và vượt Gym N5 với tối thiểu 80% câu đúng.
 3. Bấm **🔍 Xem trước & Kiểm tra** để soát lỗi/cảnh báo.
 4. Bấm **✅ Áp dụng vào game** → lưu vào trình duyệt, mở lại `index.html` là chơi ngay.
-   Hoặc **⬇️ Tải xuống kanji.js** để thay file vĩnh viễn (dùng cho bản đóng gói/chia sẻ).
+   Có thể bấm **📊 Xuất Excel** để tải workbook gồm `KANJI`, `QUESTIONS`, `HUONG_DAN`; hoặc **⬇️ Tải xuống kanji.js** để thay file vĩnh viễn.
 
 > File mẫu để dán/nhập sẵn ở thư mục `data/`: `kanji-template.csv`, `questions-template.csv`.
 

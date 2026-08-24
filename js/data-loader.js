@@ -17,7 +17,20 @@
       .map((value) => encodeURIComponent(String(value || '').trim()));
     return `v1:${parts.join(':')}`;
   };
-  const withVocabularyIds = (questions) => (questions || []).map((question) => ({ ...question, id: vocabularyId(question) }));
+  const withVocabularyMetadata = (questions) => (questions || []).map((question) => {
+    const word = String(question.word || '').trim();
+    const wordReading = String(question.wordReading || question.answer || '').trim();
+    const mean = String(question.mean || '').trim();
+    return {
+      ...question,
+      id: vocabularyId(question),
+      // Optional author-written context wins. These fallbacks ensure every
+      // packaged/imported vocabulary row supports the contextual quiz modes.
+      sentence: String(question.sentence || `ことば「${word}」を よみます。`).trim(),
+      sentenceReading: String(question.sentenceReading || `ことば「${wordReading}」を よみます。`).trim(),
+      sentenceMeaning: String(question.sentenceMeaning || `Tôi đọc từ “${mean}”.`).trim(),
+    };
+  });
   window.__KANJIGO_SOURCE = 'default';
   try {
     const raw = localStorage.getItem(KEY);
@@ -30,7 +43,7 @@
         for (const question of data.QUESTIONS) questions.set(questionKey(question), question);
         const merged = {
           KANJI: { ...(DEFAULT.KANJI || {}), ...data.KANJI },
-          QUESTIONS: withVocabularyIds(Array.from(questions.values())),
+          QUESTIONS: withVocabularyMetadata(Array.from(questions.values())),
           DISTRACTORS: Array.from(new Set([...(DEFAULT.DISTRACTORS || []), ...(data.DISTRACTORS || [])])),
         };
         window.KANJI_DB = merged;
@@ -44,5 +57,5 @@
   }
   // The default bundle also goes through normalization when no ADMIN import
   // exists. This keeps the runtime schema identical in both launch paths.
-  window.KANJI_DB.QUESTIONS = withVocabularyIds(window.KANJI_DB.QUESTIONS);
+  window.KANJI_DB.QUESTIONS = withVocabularyMetadata(window.KANJI_DB.QUESTIONS);
 })();

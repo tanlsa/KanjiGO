@@ -147,7 +147,8 @@
       button.addEventListener('lostpointercapture', release);
     });
     const bindAction = (button) => {
-      button.addEventListener('pointerdown', (e) => {
+      const eventName = button.dataset.action === 'back' ? 'click' : 'pointerdown';
+      button.addEventListener(eventName, (e) => {
         e.preventDefault();
         if (button.dataset.action === 'back') { onBack(); return; }
         if (state !== 'overworld') return;
@@ -928,12 +929,15 @@
   });
   addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
   function onBack() {
-    if (state === 'battle') tryRun();
+    if (state === 'battle') {
+      if (battle && battle.phase === 'end') endBattle();
+      else tryRun();
+    }
     else if (state === 'dex') onDexKey('escape');
     else if (state === 'skills') onSkillKey('escape');
     else if (state === 'lecture') onLectureKey('escape');
-    else if (state === 'capture') onCaptureKey('escape');
-    else if (state === 'pve') onPveKey('escape');
+    else if (state === 'capture') onCaptureKey(capture && capture.phase === 'end' ? 'enter' : 'escape');
+    else if (state === 'pve') onPveKey(pve && pve.phase === 'end' ? 'enter' : 'escape');
   }
   function clientToLogical(clientX, clientY, rect = cv.getBoundingClientRect()) {
     const width = Math.max(1, rect.width || SCREEN_W), height = Math.max(1, rect.height || SCREEN_H);
@@ -1302,7 +1306,7 @@
   // Sinh câu hỏi đa hướng; SRS vẫn chỉ ghi nhận theo q.target.
   function makeQuestion(monKanji, previousKey = '', modeOverride = '', fair = false, sourcePool = null) {
     if (typeof previousKey === 'number') { modeOverride = `m${previousKey}`; previousKey = ''; }
-    if (typeof previousKey === 'string' && /^m[1-5]$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
+    if (typeof previousKey === 'string' && /^m(?:[1-9]|10)$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
     let pool = (Array.isArray(sourcePool) && sourcePool.length ? sourcePool : KDB.QUESTIONS).filter((q) => q.target === monKanji);
     if (pool.length === 0) pool = KDB.QUESTIONS;
     if (C.LEARNING && C.LEARNING.avoidRepeat && pool.length > 1) {
@@ -1318,6 +1322,7 @@
     let mode = modeOverride || chooseMode();
     const infos = Object.values(KDB.KANJI);
     const otherInfos = infos.filter((info) => info.char !== q.target && ensureMastery(info.char).captured);
+    const targetReading = q.answer;
     let answer = q.answer, options, word = q.word, mean = q.mean, type = q.type;
     if (mode === 'm2') {
       if (otherInfos.length < 3) mode = 'm1';
@@ -1343,15 +1348,35 @@
       if (!q.mean || new Set(meanings).size < 3) mode = 'm1';
       else { answer = q.mean; options = optionSet(answer, meanings); }
     }
+    if (mode === 'm8') {
+      answer = q.answer;
+      options = optionSet(answer, KDB.DISTRACTORS.slice());
+    }
+    if (mode === 'm9') {
+      const tier = (kanjiInfo(q.target) || {}).jlpt;
+      let chars = infos.filter((info) => info.char !== q.target && (!tier || info.jlpt === tier)).map((info) => info.char);
+      if (new Set(chars).size < 3) chars = infos.filter((info) => info.char !== q.target).map((info) => info.char);
+      answer = q.target; options = optionSet(answer, chars);
+    }
+    if (mode === 'm10') {
+      const tier = (kanjiInfo(q.target) || {}).jlpt;
+      let meanings = KDB.QUESTIONS.filter((item) => item !== q && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.mean);
+      if (new Set(meanings).size < 3) meanings = KDB.QUESTIONS.filter((item) => item !== q).map((item) => item.mean);
+      answer = q.mean; options = optionSet(answer, meanings);
+    }
     if (mode === 'm1') { answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
     const result = { word, mean, target: q.target, answer, romaji: q.romaji, type, mode, options, correctIndex: options.indexOf(answer), vocabId: q.id,
-      wordReading: q.wordReading || '', wordRomaji: q.wordRomaji || '', parts: Array.isArray(q.parts) ? q.parts.map((part) => ({ ...part })) : [] };
+      targetReading, wordReading: q.wordReading || '', wordRomaji: q.wordRomaji || '',
+      sentence: q.sentence || '', sentenceReading: q.sentenceReading || '', sentenceMeaning: q.sentenceMeaning || '',
+      parts: Array.isArray(q.parts) ? q.parts.map((part) => ({ ...part })) : [] };
     result.key = `${mode}|${q.id}`;
     return result;
   }
   function questionCorrection(q) {
     if (q.mode === 'm6') return `「${q.word}」 đọc là「${q.answer}」${q.wordRomaji ? ` (${q.wordRomaji})` : ''}`;
-    if (q.mode === 'm7') return `「${q.word}」 nghĩa là “${q.answer}”`;
+    if (q.mode === 'm7' || q.mode === 'm10') return `「${q.word}」 nghĩa là “${q.answer}”`;
+    if (q.mode === 'm9') return `Trong câu này, 「${q.targetReading}」 được viết là「${q.answer}」`;
+    if (q.mode === 'm8') return `Trong câu này, 「${q.target}」 đọc là「${q.answer}」${q.romaji ? ` (${q.romaji})` : ''}`;
     return `${q.target} ở đây đọc「${q.answer}」${q.romaji ? ` (${q.romaji})` : ''} — âm ${q.type.toUpperCase()}`;
   }
   function nextAttackCycleMs() {
@@ -1401,7 +1426,7 @@
   function useMeaningLens() {
     if (!battle || battle.phase !== 'fight' || battle.stun > 0 || battle.qCooldown > 0) return { ok: false, reason: 'unavailable' };
     if (battle.meaningLensRemaining <= 0) return { ok: false, reason: 'no_charges' };
-    if (['m3', 'm7'].includes(battle.q.mode)) {
+    if (['m3', 'm7', 'm10'].includes(battle.q.mode)) {
       battle.feedback = { good: false, text: '🔍 Meaning Lens tạm khóa vì nghĩa chính là đáp án.' }; battle.fbT = 1200;
       return { ok: false, reason: 'would_reveal_answer' };
     }
@@ -1876,7 +1901,7 @@
     return true;
   }
   function captureQuestion(target, index, previousKey = '', sourcePool = null) {
-    const modes = ['m1', 'm6', 'm7', 'm6', 'm1'];
+    const modes = ['m8', 'm9', 'm10', 'm6', 'm1'];
     return makeQuestion(target, previousKey, modes[index % modes.length], false, sourcePool);
   }
   function finishCapture() {
@@ -2668,11 +2693,44 @@
     cx.fillStyle = '#e84b3c'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY), 3, 3);
   }
   let touchUiState = '';
+  function touchBackPresentation() {
+    if (state === 'battle') {
+      if (battle && battle.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau trận đấu', continues: true };
+      const chance = Math.round(Math.max(0, Math.min(1, Number(C.COMBAT.runChance) || 0)) * 100);
+      return { label: `CHẠY ${chance}%`, title: `Thử bỏ chạy khỏi trận đấu (tỉ lệ ${chance}%)` };
+    }
+    if (state === 'capture') {
+      if (capture && capture.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau kết quả thu phục', continues: true };
+      return { label: 'HỦY', title: 'Hủy lượt thu phục và quay lại bản đồ' };
+    }
+    if (state === 'pve') {
+      if (pve && pve.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau kết quả thử thách', continues: true };
+      return { label: 'RỜI', title: 'Rời thử thách và quay lại bản đồ' };
+    }
+    if (state === 'dex') return { label: 'ĐÓNG', title: 'Đóng KanjiDex' };
+    if (state === 'skills') {
+      const confirming = skillUi.purchaseConfirmId || skillUi.resetConfirm;
+      return confirming ? { label: 'HỦY', title: 'Hủy xác nhận hiện tại' } : { label: 'ĐÓNG', title: 'Đóng Skill Tree' };
+    }
+    if (state === 'lecture') {
+      return lecture && lecture.phase === 'lobby'
+        ? { label: 'THOÁT', title: 'Rời Giảng đường' }
+        : { label: 'QUAY LẠI', title: 'Quay lại sảnh Giảng đường' };
+    }
+    return { label: 'QUAY LẠI', title: 'Quay lại' };
+  }
   function syncTouchUi() {
     const hidden = state !== 'overworld';
     const nextState = hidden ? 'hidden' : 'visible';
     const backButton = document.getElementById('touch-back');
     backButton?.classList.toggle('combat-back', state === 'battle' || state === 'capture' || state === 'pve');
+    if (backButton) {
+      const presentation = touchBackPresentation();
+      backButton.textContent = presentation.label;
+      backButton.title = presentation.title;
+      backButton.setAttribute('aria-label', presentation.title);
+      backButton.classList.toggle('continue-action', Boolean(presentation.continues));
+    }
     const bikeButton = document.querySelector?.('#touch-actions [data-action="bicycle"]');
     if (bikeButton) {
       bikeButton.classList.toggle('touch-hidden', hidden || !bicycleAvailable());
@@ -3225,8 +3283,8 @@
     const hudY = stageY + 18, petHudX = stageX + 18, enemyHudX = stageX + stageW - hpW - 18;
     const pet = C.MONSTERS[currentPetId], petKanji = pet ? pet.kanji : '?';
     const mobileHud = stageW < 520;
-    drawHpBar(petHudX, hudY, mobileHud ? `Pet「${petKanji}」` : `Pet của bạn · ${pet ? pet.name : ''} 「${petKanji}」`, player.hp, player.maxHp, '#43d17a', hpW);
-    drawHpBar(enemyHudX, hudY, mobileHud ? `${m.name}「${m.kanji}」 Lv.${b.kanjiLevel}` : `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW);
+    drawHpBar(petHudX, hudY, mobileHud ? `${pet ? monsterHanViet(pet) : 'Pet'}「${petKanji}」` : `Pet của bạn · ${pet ? pet.name : ''} 「${petKanji}」`, player.hp, player.maxHp, '#43d17a', hpW, pet);
+    drawHpBar(enemyHudX, hudY, mobileHud ? `${m.name}「${m.kanji}」 Lv.${b.kanjiLevel}` : `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW, m);
     drawEnergyGauge(b, petHudX, hudY + 53, hpW);
     drawAttackGauge(b, enemyHudX, hudY + 53, hpW);
     if (stageW >= 620) drawPetMastery(petKanji, petHudX, hudY + 87, hpW, true);
@@ -3324,7 +3382,7 @@
     const progress = tierProgress(activeTier);
     const total = progress.total, unlocked = progress.captured, compact = W < 620;
     const touchBackVisible = (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) || SCREEN_W <= 700;
-    const backReserve = touchBackVisible ? 58 / (lecture.uiScale || 1) : 0;
+    const backReserve = touchBackVisible ? 110 / (lecture.uiScale || 1) : 0;
     cx.fillStyle = 'rgba(8,13,31,.94)'; cx.fillRect(0, 0, W, 72);
     cx.strokeStyle = '#244f80'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, 71); cx.lineTo(W, 71); cx.stroke();
     cx.fillStyle = '#6cc0ff'; cx.font = `bold ${compact ? 17 : 24}px ${JPFONT}`; cx.fillText(compact ? '📖 GIẢNG ĐƯỜNG' : '📖 GIẢNG ĐƯỜNG KANJI', compact ? 14 : 24, compact ? 27 : 34);
@@ -3449,7 +3507,8 @@
       cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText('KANJI MỚI', area.x + 28, bodyY + 34);
       cx.fillStyle = '#ffd54a'; cx.font = `bold ${compact ? 82 : 126}px ${JPFONT}`; cx.fillText(info.char, area.x + 28, bodyY + (compact ? 118 : 162));
       cx.fillStyle = '#fff'; fitText(info.meaning, area.x + 30, bodyY + (compact ? 153 : 205), split - 46, compact ? 21 : 28, true);
-      cx.fillStyle = '#a9bad8'; cx.font = `14px ${JPFONT}`; wrap('Quan sát hình dáng, đọc nghĩa và làm quen với mascot trước khi học cách đọc.', area.x + 30, bodyY + (compact ? 181 : 238), split - 48, 22);
+      drawMonsterName(C.MONSTERS[info.monId], area.x + 30, bodyY + (compact ? 177 : 235), split - 46, compact ? 15 : 18, { label: true });
+      cx.fillStyle = '#a9bad8'; cx.font = `14px ${JPFONT}`; wrap('Quan sát hình dáng, đọc nghĩa và làm quen với mascot trước khi học cách đọc.', area.x + 30, bodyY + (compact ? 205 : 266), split - 48, 22);
       drawLessonMascot(info, area.x + split, bodyY + 20, area.w - split - 18, bodyH - 35);
     } else if (lecture.phase === 'readings') {
       cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 23 : 27}px ${JPFONT}`; fitText(`Cách đọc của 「${info.char}」`, area.x + 28, bodyY + 42, area.w - 56, compact ? 23 : 27, true);
@@ -3677,7 +3736,7 @@
     cx.fillStyle = '#6effa1'; fitText('🎉 UNLOCK THÀNH CÔNG!', area.x + 30, 148, area.w - 60, narrow ? 21 : 27, true);
     cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 76 : 92}px ${JPFONT}`; cx.fillText(info.char, area.x + 34, narrow ? 242 : 248);
     const textX = narrow ? area.x + 28 : area.x + 142, textY = narrow ? 326 : 205, textW = narrow ? area.w - 56 : area.w * .42;
-    cx.fillStyle = '#fff'; cx.font = `bold ${narrow ? 21 : 24}px ${JPFONT}`; fitText(C.MONSTERS[info.monId].name, textX, textY, textW, narrow ? 21 : 24, true);
+    drawMonsterName(C.MONSTERS[info.monId], textX, textY, textW, narrow ? 18 : 21, { label: true });
     cx.fillStyle = '#b9c8e8'; cx.font = `${narrow ? 14 : 15}px ${JPFONT}`; wrap(`${info.meaning} đã được thêm vào KanjiDex và từ giờ có thể xuất hiện ngoài thế giới.`, textX, textY + 31, narrow ? area.w - 56 : area.w * .48, narrow ? 22 : 25);
     drawLessonMascot(info, narrow ? area.x + area.w * .52 : area.x + area.w * .62, narrow ? 160 : 126, narrow ? area.w * .42 : area.w * .34, narrow ? 130 : H - 210);
     cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText(`Nghi thức: ${lecture.score}/5 câu đúng`, area.x + 34, H - 105);
@@ -3803,6 +3862,30 @@
     cx.fillStyle = s.recall > 70 ? '#6effa1' : s.recall >= 30 ? '#ffd54a' : '#ff7777';
     fitText(`Recall ${s.recall}% · 🔥${s.winStreak}`, bx, by + (w < 220 ? 30 : 16), Math.min(140, w), 10);
   }
+  function quizPresentation(q, compact = false) {
+    if (q.mode === 'm8') return {
+      instruction: compact ? 'Đọc KANJI trong câu:' : 'Chọn cách đọc của KANJI được nhấn trong câu:',
+      prompt: q.sentence || q.word,
+      support: `(${q.sentenceMeaning || q.mean}) · chữ cần đọc: 「${q.target}」`,
+    };
+    if (q.mode === 'm9') return {
+      instruction: compact ? 'Chọn KANJI trong câu:' : 'Chọn KANJI đúng cho phần cách đọc trong câu:',
+      prompt: q.sentenceReading || q.wordReading || q.word,
+      support: `(${q.sentenceMeaning || q.mean}) · cách đọc cần đổi: 「${q.targetReading || ''}」`,
+    };
+    if (q.mode === 'm10') return {
+      instruction: compact ? 'Chọn nghĩa của từ:' : 'Chọn nghĩa đúng của từ/cụm có furigana:',
+      prompt: `${q.word}（${q.wordReading || '—'}）`,
+      support: 'Dựa vào mặt chữ và cách đọc để chọn nghĩa phù hợp.',
+    };
+    const instruction = q.mode === 'm2' ? (compact ? 'Chọn KANJI:' : 'Chọn KANJI đúng theo nghĩa:') : q.mode === 'm3' ? (compact ? 'Chọn nghĩa:' : 'Chọn nghĩa đúng của KANJI:') :
+      q.mode === 'm4' ? 'Chữ này trong từ đọc theo âm ON hay KUN?' : q.mode === 'm5' ? `Từ nào chứa chữ 「${q.target}」?` :
+      q.mode === 'm6' ? 'Chọn cách đọc của TOÀN BỘ từ:' : q.mode === 'm7' ? 'Chọn nghĩa của TOÀN BỘ từ:' : 'Chọn đúng cách đọc (phím 1–4 hoặc chạm nút):';
+    const prompt = q.mode === 'm3' ? q.target : q.mode === 'm2' ? q.mean : q.word;
+    const support = q.mode === 'm3' ? `Chọn nghĩa của 「${q.target}」` : q.mode === 'm4' ? `「${q.word}」 — ${q.mean}` : q.mode === 'm5' ? `Chữ cần tìm: 「${q.target}」` :
+      q.mode === 'm6' ? `Gợi ý nghĩa: ${q.mean}` : q.mode === 'm7' ? `Đọc là: ${q.wordReading || '—'}` : `（${q.mean}）   ·   chữ cần đọc: 「${q.target}」`;
+    return { instruction, prompt, support };
+  }
   function drawQuizPanel(b, W, H) {
     const layout = quizPanelLayout(W, H);
     const h = layout.panelH, x = 0, y = layout.y;
@@ -3824,18 +3907,18 @@
     cx.textAlign = 'left';
     cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif';
     const compact = W < 620, narrow = layout.narrow;
-    const instruction = q.mode === 'm2' ? (compact ? 'Chọn KANJI:' : 'Chọn KANJI đúng theo nghĩa:') : q.mode === 'm3' ? (compact ? 'Chọn nghĩa:' : 'Chọn nghĩa đúng của KANJI:') :
-      q.mode === 'm4' ? 'Chữ này trong từ đọc theo âm ON hay KUN?' : q.mode === 'm5' ? `Từ nào chứa chữ 「${q.target}」?` :
-      q.mode === 'm6' ? 'Chọn cách đọc của TOÀN BỘ từ:' : q.mode === 'm7' ? 'Chọn nghĩa của TOÀN BỘ từ:' : 'Chọn đúng cách đọc (phím 1–4 hoặc chạm nút):';
-    fitText(instruction, x + P, y + 24, narrow ? W - P * 2 : W * .62, 13, true);
+    const presentation = quizPresentation(q, compact);
+    fitText(presentation.instruction, x + P, y + 24, narrow ? W - P * 2 : W * .62, 13, true);
     cx.fillStyle = '#6effa1'; cx.font = '12px "KanjiGo UI",sans-serif'; cx.textAlign = 'right';
     cx.fillText(compact ? `${learning.correct}/${learning.total} đúng · ${learningAccuracy()}%` : `Học: ${learning.correct}/${learning.total} đúng  •  ${learningAccuracy()}%  •  🔥${learning.streak}`, W - P, y + (narrow ? 45 : 24));
     cx.textAlign = 'left';
     cx.fillStyle = '#fff'; cx.font = `bold ${narrow ? 27 : 30}px ${JPFONT}`;
-    fitText(q.mode === 'm3' ? q.target : q.mode === 'm2' ? q.mean : q.word, x + P, y + (narrow ? 76 : 58), W - P * 2, narrow ? 27 : 30, true);
+    const promptY = y + (narrow ? 76 : 58), promptW = W - P * 2, promptSize = narrow ? 27 : 30;
+    if (q.mode === 'm8') drawHighlightedText(presentation.prompt, q.target, x + P, promptY, promptW, promptSize);
+    else if (q.mode === 'm9') drawHighlightedText(presentation.prompt, q.targetReading, x + P, promptY, promptW, promptSize);
+    else fitText(presentation.prompt, x + P, promptY, promptW, promptSize, true);
     cx.fillStyle = '#ffd54a'; cx.font = `15px ${JPFONT}`;
-    fitText(q.mode === 'm3' ? `Chọn nghĩa của 「${q.target}」` : q.mode === 'm4' ? `「${q.word}」 — ${q.mean}` : q.mode === 'm5' ? `Chữ cần tìm: 「${q.target}」` :
-      q.mode === 'm6' ? `Gợi ý nghĩa: ${q.mean}` : q.mode === 'm7' ? `Đọc là: ${q.wordReading || '—'}` : `（${q.mean}）   ·   chữ cần đọc: 「${q.target}」`, x + P, y + (narrow ? 103 : 82), W - P * 2, narrow ? 13 : 15);
+    fitText(presentation.support, x + P, y + (narrow ? 103 : 82), W - P * 2, narrow ? 13 : 15);
 
     // ── VÙNG 2: 4 ĐÁP ÁN (2×2) — giãn cách rộng, mờ đi khi bị khoá ──
     const ans = q.options;
@@ -3885,10 +3968,11 @@
       cx.fillStyle = 'rgba(255,255,255,.15)'; cx.fillRect(0, fieldH * .62 - 2, W, 3);
     }
   }
-  function drawHpBar(x, y, name, hp, max, col, w = 260) {
+  function drawHpBar(x, y, name, hp, max, col, w = 260, monster = null) {
     cx.fillStyle = 'rgba(11,16,32,.85)'; cx.fillRect(x, y, w, 46);
     cx.strokeStyle = '#16558f'; cx.lineWidth = 2; cx.strokeRect(x, y, w, 46);
-    cx.fillStyle = '#fff'; fitText(name, x + 10, y + 18, w - 20, 15, true);
+    if (monster) drawHighlightedText(name, monsterHanViet(monster), x + 10, y + 18, w - 20, 15, { bold: true });
+    else { cx.fillStyle = '#fff'; fitText(name, x + 10, y + 18, w - 20, 15, true); }
     const bw = w - 64, bx = x + 10, by = y + 27; cx.fillStyle = '#333'; cx.fillRect(bx, by, bw, 9);
     const r = Math.max(0, hp / max); cx.fillStyle = r > .5 ? col : r > .2 ? '#e6c34a' : '#e04a4a'; cx.fillRect(bx, by, bw * r, 9);
     cx.fillStyle = '#cde'; cx.font = '12px "KanjiGo UI",sans-serif'; cx.fillText(`${hp}/${max}`, x + w - 52, y + 37);
@@ -3939,7 +4023,8 @@
       if (img) { const ih = iw * img.height / img.width; cx.drawImage(img, x + 14, y + 14, iw, ih); }
       const kanjiSize = Math.max(28, Math.min(50, layout.cardH * 0.32));
       cx.fillStyle = unlocked ? '#ffd54a' : '#55586c'; cx.font = `bold ${kanjiSize}px ${JPFONT}`; cx.fillText(unlocked ? kinfo.char : '？', x + layout.cardW - kanjiSize - 18, y + kanjiSize + 8);
-      cx.fillStyle = unlocked ? '#fff' : '#77798a'; cx.font = `${Math.max(12, Math.min(18, layout.cardH * 0.12))}px ${JPFONT}`; cx.fillText(unlocked ? m.name : '？？？', x + 14, y + layout.cardH - 80);
+      if (unlocked) drawMonsterName(m, x + 14, y + layout.cardH - 80, layout.cardW - 28, Math.max(12, Math.min(18, layout.cardH * 0.12)));
+      else { cx.fillStyle = '#77798a'; cx.font = `${Math.max(12, Math.min(18, layout.cardH * 0.12))}px ${JPFONT}`; cx.fillText('？？？', x + 14, y + layout.cardH - 80); }
       if (unlocked) {
         cx.fillStyle = '#9fd8f5'; cx.font = '12px "KanjiGo UI",sans-serif';
         cx.fillText(`Lv.${s.level}/${C.KLEVEL.maxLevel} (${levelLabel(s.level)})`, x + 14, y + layout.cardH - 60);
@@ -4024,7 +4109,8 @@
         const image = unlocked ? monsterImg(id) : getSilhouette(id), iw = Math.max(30, Math.min(68, layout.cardW * .34, layout.cardH * .4));
         if (image) { const ih = iw * image.height / image.width; cx.drawImage(image, x + 11, y + 9, iw, ih); }
         const kanjiSize = Math.max(29, Math.min(44, layout.cardH * .3)); cx.fillStyle = unlocked ? '#ffd54a' : '#55586c'; cx.font = `bold ${kanjiSize}px ${JPFONT}`; cx.textAlign = 'right'; cx.fillText(unlocked ? info.char : '？', x + layout.cardW - 11, y + kanjiSize + 8); cx.textAlign = 'left';
-        cx.fillStyle = unlocked ? '#fff' : '#77798a'; fitText(unlocked ? monster.name : '？？？', x + 11, y + layout.cardH - 54, layout.cardW - 22, 14, true);
+        if (unlocked) drawMonsterName(monster, x + 11, y + layout.cardH - 54, layout.cardW - 22, 14);
+        else { cx.fillStyle = '#77798a'; fitText('？？？', x + 11, y + layout.cardH - 54, layout.cardW - 22, 14, true); }
         if (unlocked) {
           cx.fillStyle = '#9fd8f5'; fitText(`Lv.${stat.level}/${C.KLEVEL.maxLevel} ${levelLabel(stat.level)}`, x + 11, y + layout.cardH - 36, layout.cardW - 22, 11);
           cx.fillStyle = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777'; cx.font = '11px "KanjiGo UI",sans-serif'; cx.fillText(`Recall ${stat.recall}%`, x + 11, y + layout.cardH - 19);
@@ -4046,9 +4132,10 @@
     if (selected && selectedUnlocked) {
       const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
       cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
-      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ') || '—'}`, 20, panelY + 57, narrow ? W - 40 : 280, 15);
-      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, narrow ? 20 : 320, narrow ? panelY + 78 : panelY + 57, narrow ? W - 40 : W - 340, 15);
-      cx.fillStyle = recallColor; cx.font = '13px "KanjiGo UI",sans-serif'; fitText(`Recall ${stat.recall}% · 🔥 ${stat.winStreak} (best ${stat.bestWinStreak})`, 20, narrow ? panelY + 100 : panelY + 82, W - 40, 13);
+      drawMonsterName(C.MONSTERS[selected.monId], 20, panelY + 52, W - 40, 13, { label: true });
+      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ') || '—'}`, 20, panelY + 76, narrow ? W - 40 : 280, 14);
+      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, narrow ? 20 : 320, narrow ? panelY + 97 : panelY + 76, narrow ? W - 40 : W - 340, 14);
+      cx.fillStyle = recallColor; cx.font = '12px "KanjiGo UI",sans-serif'; fitText(`Recall ${stat.recall}% · 🔥 ${stat.winStreak} (best ${stat.bestWinStreak})`, 20, narrow ? panelY + 119 : panelY + 100, W - 40, 12);
     } else {
       cx.fillStyle = '#9ab'; cx.font = `18px ${JPFONT}`; cx.fillText('？？？', 20, panelY + 34); cx.font = '14px "KanjiGo UI",sans-serif'; cx.fillText('Tới 🏛️ Giảng đường để thu phục chữ này.', 20, panelY + 65);
     }
@@ -4082,6 +4169,40 @@
       output += '…';
     }
     cx.fillText(output, x, y);
+  }
+  function monsterHanViet(monster) {
+    if (!monster) return '';
+    const explicit = typeof monster.hanViet === 'string' ? monster.hanViet.trim() : '';
+    if (explicit) return explicit;
+    return String(monster.name || '').trim().split(/\s+/)[0] || '';
+  }
+  function drawHighlightedText(text, highlight, x, y, maxW, maxSize, options = {}) {
+    const value = String(text || ''), token = String(highlight || '').trim();
+    const index = token ? value.toLocaleLowerCase('vi').indexOf(token.toLocaleLowerCase('vi')) : -1;
+    if (index < 0) { cx.fillStyle = options.color || '#fff'; fitText(value, x, y, maxW, maxSize, options.bold !== false); return; }
+    const prefix = value.slice(0, index), marked = value.slice(index, index + token.length), rawSuffix = value.slice(index + token.length);
+    let size = maxSize, suffix = rawSuffix;
+    const setFont = () => { cx.font = `${options.bold === false ? '' : 'bold '}${size}px ${JPFONT}`; };
+    setFont();
+    while (size > 10 && cx.measureText(value).width > maxW) { size--; setFont(); }
+    if (cx.measureText(value).width > maxW) {
+      while (suffix.length > 1 && cx.measureText(`${prefix}${marked}${suffix}…`).width > maxW) suffix = suffix.slice(0, -1);
+      if (suffix !== rawSuffix) suffix += '…';
+    }
+    const totalW = cx.measureText(`${prefix}${marked}${suffix}`).width;
+    let cursor = options.align === 'center' ? x - totalW / 2 : options.align === 'right' ? x - totalW : x;
+    cx.save(); cx.textAlign = 'left';
+    if (prefix) { cx.fillStyle = options.color || '#dce8ff'; cx.fillText(prefix, cursor, y); cursor += cx.measureText(prefix).width; }
+    const markedW = cx.measureText(marked).width;
+    cx.fillStyle = options.highlightColor || '#ffd54a'; cx.fillText(marked, cursor, y);
+    cursor += markedW;
+    if (suffix) { cx.fillStyle = options.color || '#fff'; cx.fillText(suffix, cursor, y); }
+    cx.restore();
+  }
+  function drawMonsterName(monster, x, y, maxW, maxSize, options = {}) {
+    if (!monster) return;
+    const name = `${options.label ? 'HÁN VIỆT · ' : ''}${monster.name || ''}`;
+    drawHighlightedText(name, monsterHanViet(monster), x, y, maxW, maxSize, options);
   }
 
   // ---------- KHỞI ĐỘNG ----------

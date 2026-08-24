@@ -23,7 +23,7 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     measureText: (text) => ({ width: String(text).length * 8 }),
     drawImage: (image) => { if (!image) throw new TypeError('drawImage received an unloaded image'); },
     fillRect: () => { paintCalls++; },
-    fillText(text, x, y) { textCalls.push({ text: String(text), x, y, font: this.font || '' }); },
+    fillText(text, x, y) { textCalls.push({ text: String(text), x, y, font: this.font || '', fillStyle: this.fillStyle || '' }); },
     createLinearGradient: () => ({ addColorStop: noop }),
     createRadialGradient: () => ({ addColorStop: noop }),
   }, {
@@ -39,9 +39,22 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     },
     getBoundingClientRect: () => canvasRect || ({ left: 0, top: 0, width: viewportWidth, height: viewportHeight }),
   };
+  const touchBackClasses = new Set(['touch-hidden']);
+  const touchBackAttributes = new Map([['aria-label', 'Quay lại']]);
   const touchBack = {
-    dataset: { action: 'back' }, textContent: '←',
-    classList: { add: noop, remove: noop, toggle: noop },
+    dataset: { action: 'back' }, textContent: 'QUAY LẠI', title: 'Quay lại',
+    classList: {
+      add: (...names) => names.forEach((name) => touchBackClasses.add(name)),
+      remove: (...names) => names.forEach((name) => touchBackClasses.delete(name)),
+      toggle: (name, force) => {
+        const enabled = force === undefined ? !touchBackClasses.has(name) : Boolean(force);
+        if (enabled) touchBackClasses.add(name); else touchBackClasses.delete(name);
+        return enabled;
+      },
+      contains: (name) => touchBackClasses.has(name),
+    },
+    setAttribute: (name, value) => touchBackAttributes.set(name, String(value)),
+    getAttribute: (name) => touchBackAttributes.get(name) || null,
     addEventListener: (type, listener) => {
       if (!touchBackListeners.has(type)) touchBackListeners.set(type, []);
       touchBackListeners.get(type).push(listener);
@@ -85,13 +98,15 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     for (const listener of windowListeners.get(type) || []) listener(event);
   };
   const dispatchTouchBack = () => {
-    for (const listener of touchBackListeners.get('pointerdown') || []) listener({ preventDefault: noop });
+    for (const listener of touchBackListeners.get('click') || []) listener({ preventDefault: noop });
   };
   const dispatchCanvasEvent = (type, event) => {
     for (const listener of canvasListeners.get(type) || []) listener({ preventDefault: noop, pointerId: 1, ...event });
   };
   return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent, dispatchTouchBack,
-    dispatchCanvasEvent, textCalls, getPaintCalls: () => paintCalls };
+    dispatchCanvasEvent, textCalls, getPaintCalls: () => paintCalls,
+    getTouchBack: () => ({ text: touchBack.textContent, title: touchBack.title,
+      ariaLabel: touchBack.getAttribute('aria-label'), classes: [...touchBackClasses] }) };
 }
 
 test('game boots and exposes a usable QA API', () => {
@@ -266,6 +281,93 @@ test('Academy action keys ignore browser repeat and mobile Back remains usable',
   assert.equal(debug.getLecture().phase, 'lobby');
   dispatchTouchBack();
   assert.equal(debug.state(), 'overworld');
+});
+
+test('Academy and KanjiDex highlight the Hán Việt part of mascot names', () => {
+  const academy = createGame();
+  assert.equal(academy.debug.startAcademyLesson('日'), true);
+  academy.debug.renderOnce();
+  assert.ok(academy.textCalls.some((call) => call.text.includes('HÁN VIỆT')));
+  assert.ok(academy.textCalls.some((call) => call.text === 'Nhật' && call.fillStyle === '#ffd54a'));
+
+  const dex = createGame();
+  dex.debug.openDex(); dex.debug.renderOnce();
+  assert.ok(dex.textCalls.some((call) => call.text === 'Quốc' && call.fillStyle === '#ffd54a'));
+  assert.ok(dex.textCalls.some((call) => call.text.includes('Vương') && call.fillStyle === '#fff'));
+});
+
+test('every vocabulary row supports sentence reading, kana-to-Kanji, and furigana meaning questions', () => {
+  const { context, debug } = createGame();
+  for (const sourceQuestion of context.KANJI_DB.QUESTIONS) {
+    for (const mode of ['m8', 'm9', 'm10']) {
+      const generated = debug.makeQuestion(sourceQuestion.target, '', mode, true, [sourceQuestion]);
+      assert.equal(generated.mode, mode, `${sourceQuestion.id} must support ${mode}`);
+      assert.equal(generated.options.length, 4, `${sourceQuestion.id}/${mode} must have four options`);
+      assert.ok(generated.correctIndex >= 0, `${sourceQuestion.id}/${mode} lost its correct answer`);
+    }
+  }
+  const source = context.KANJI_DB.QUESTIONS.find((q) => q.word === '水' && q.target === '水' && q.answer === 'みず');
+  assert.ok(source);
+
+  const reading = debug.makeQuestion('水', '', 'm8', true, [source]);
+  assert.equal(reading.mode, 'm8');
+  assert.equal(reading.sentence, 'まいにち 水を のみます。');
+  assert.equal(reading.answer, 'みず');
+  assert.equal(reading.options.length, 4);
+
+  const kanji = debug.makeQuestion('水', '', 'm9', true, [source]);
+  assert.equal(kanji.mode, 'm9');
+  assert.equal(kanji.sentenceReading, 'まいにち みずを のみます。');
+  assert.equal(kanji.targetReading, 'みず');
+  assert.equal(kanji.answer, '水');
+  assert.ok(kanji.options.includes('水'));
+
+  const meaning = debug.makeQuestion('水', '', 'm10', true, [source]);
+  assert.equal(meaning.mode, 'm10');
+  assert.equal(meaning.wordReading, 'みず');
+  assert.equal(meaning.answer, 'nước');
+  assert.ok(meaning.options.includes('nước'));
+});
+
+test('mobile Back presents the correct action and exits completed battle states', () => {
+  const { debug, dispatchTouchBack, getTouchBack } = createGame();
+  debug.openDex(); debug.renderOnce();
+  assert.equal(getTouchBack().text, 'ĐÓNG');
+  dispatchTouchBack();
+  assert.equal(debug.state(), 'overworld');
+
+  assert.equal(debug.startBattle('grass'), true);
+  debug.renderOnce();
+  assert.match(getTouchBack().text, /^CHẠY \d+%$/);
+  assert.match(getTouchBack().ariaLabel, /tỉ lệ/i);
+
+  debug.getBattle().phase = 'end';
+  debug.renderOnce();
+  assert.equal(getTouchBack().text, 'TIẾP');
+  assert.ok(getTouchBack().classes.includes('continue-action'));
+  dispatchTouchBack();
+  assert.equal(debug.state(), 'overworld', 'Back must continue from a completed battle instead of trying to run again');
+});
+
+test('mobile Back continues from Capture and PvE result screens', () => {
+  const captureGame = createGame();
+  captureGame.debug.mastery()['日'].lectured = true;
+  assert.equal(captureGame.debug.startCapture('日'), true);
+  captureGame.debug.getCapture().phase = 'end';
+  captureGame.debug.getCapture().passed = false;
+  captureGame.debug.renderOnce();
+  assert.equal(captureGame.getTouchBack().text, 'TIẾP');
+  captureGame.dispatchTouchBack();
+  assert.equal(captureGame.debug.state(), 'lecture');
+
+  const pveGame = createGame();
+  pveGame.debug.mastery()['日'].captured = true;
+  assert.equal(pveGame.debug.startPve({ pool: ['日'], questions: 1 }), true);
+  pveGame.debug.getPve().phase = 'end';
+  pveGame.debug.renderOnce();
+  assert.equal(pveGame.getTouchBack().text, 'TIẾP');
+  pveGame.dispatchTouchBack();
+  assert.equal(pveGame.debug.state(), 'overworld');
 });
 
 test('legacy Academy checks resume at Learning Cards so unseen vocabulary cannot be tested', () => {
@@ -894,8 +996,10 @@ test('Meaning Lens never reveals a meaning-answer question', () => {
   assert.equal(debug.purchaseSkill('meaning_lens').ok, true);
   assert.equal(debug.startBattle('grass'), true);
   const battle = debug.getBattle();
-  battle.q.mode = 'm3';
-  const result = debug.useMeaningLens();
-  assert.equal(result.reason, 'would_reveal_answer');
-  assert.equal(battle.meaningLensRemaining, 1);
+  for (const mode of ['m3', 'm7', 'm10']) {
+    battle.q.mode = mode;
+    const result = debug.useMeaningLens();
+    assert.equal(result.reason, 'would_reveal_answer');
+    assert.equal(battle.meaningLensRemaining, 1);
+  }
 });

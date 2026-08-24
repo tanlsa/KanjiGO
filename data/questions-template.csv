@@ -1,525 +1,525 @@
-word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts
-音楽,âm nhạc,音,おん,on,on,おんがく,ongaku,音~おん~on~âm thanh~target|楽~がく~gaku~nhạc~support
-足音,tiếng bước chân,音,おと,oto,kun,あしおと,ashioto,足~あし~ashi~chân~support|音~おと~oto~âm thanh~target
-毎日,mỗi ngày,日,にち,nichi,on,まいにち,mainichi,毎~まい~mai~mỗi~support|日~にち~nichi~ngày~target
-日曜日,Chủ Nhật,日,にち,nichi,on,にちようび,nichiyoubi,日~にち~nichi~ngày~target|曜~よう~you~thứ~support|日~び~bi~ngày~support
-日,ngày / mặt trời,日,ひ,hi,kun,ひ,hi,日~ひ~hi~ngày / mặt trời~target
-一月,tháng Một,一,いち,ichi,on,いちがつ,ichigatsu,一~いち~ichi~một~target|月~がつ~gatsu~tháng~support
-一年,một năm,一,いち,ichi,on,いちねん,ichinen,一~いち~ichi~một~target|年~ねん~nen~năm~support
-一つ,một cái,一,ひと,hito,kun,ひとつ,hitotsu,一~ひと~hito~một~target|つ~つ~tsu~trợ từ đếm~kana
-国語,quốc ngữ (môn Văn),国,こく,koku,on,こくご,kokugo,国~こく~koku~quốc gia~target|語~ご~go~ngôn ngữ~support
-外国,nước ngoài,国,こく,koku,on,がいこく,gaikoku,外~がい~gai~ngoài~support|国~こく~koku~quốc gia~target
-国,đất nước,国,くに,kuni,kun,くに,kuni,国~くに~kuni~đất nước~target
-去年,năm ngoái,年,ねん,nen,on,きょねん,kyonen,去~きょ~kyo~đã qua~support|年~ねん~nen~năm~target
-毎年,mỗi năm,年,ねん,nen,on,まいねん,mainen,毎~まい~mai~mỗi~support|年~ねん~nen~năm~target
-年,tuổi / năm,年,とし,toshi,kun,とし,toshi,年~とし~toshi~tuổi / năm~target
-大学,đại học,大,だい,dai,on,だいがく,daigaku,大~だい~dai~lớn~target|学~がく~gaku~học~support
-大切,quan trọng,大,たい,tai,on,たいせつ,taisetsu,大~たい~tai~lớn~target|切~せつ~setsu~thiết yếu~support
-大きい,to / lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana
-金魚,cá vàng,魚,ぎょ,gyo,on,きんぎょ,kingyo,金~きん~kin~vàng~support|魚~ぎょ~gyo~cá~target
-魚,cá,魚,さかな,sakana,kun,さかな,sakana,魚~さかな~sakana~cá~target
-魚市場,chợ cá,魚,うお,uo,kun,うおいちば,uoichiba,魚~うお~uo~cá~target|市場~いちば~ichiba~chợ~support
-日本人,người Nhật Bản,人,じん,jin,on,にほんじん,nihonjin,日本~にほん~nihon~Nhật Bản~support|人~じん~jin~người~target
-三人,ba người,人,にん,nin,on,さんにん,sannin,三~さん~san~ba~support|人~にん~nin~người~target
-人,người,人,ひと,hito,kun,ひと,hito,人~ひと~hito~người~target
-十月,tháng Mười,十,じゅう,juu,on,じゅうがつ,juugatsu,十~じゅう~juu~mười~target|月~がつ~gatsu~tháng~support
-十円,mười yên,十,じゅう,juu,on,じゅうえん,juuen,十~じゅう~juu~mười~target|円~えん~en~yên~support
-十日,ngày mùng mười / mười ngày,十,とお,too,kun,とおか,tooka,十~とお~too~mười~target|日~か~ka~ngày~support
-二月,tháng Hai,二,に,ni,on,にがつ,nigatsu,二~に~ni~hai~target|月~がつ~gatsu~tháng~support
-二年,hai năm,二,に,ni,on,にねん,ninen,二~に~ni~hai~target|年~ねん~nen~năm~support
-二つ,hai cái,二,ふた,futa,kun,ふたつ,futatsu,二~ふた~futa~hai~target|つ~つ~tsu~trợ từ đếm~kana
-日本,Nhật Bản,本,ほん,hon,on,にほん,nihon,日~に~ni~Nhật / mặt trời~support|本~ほん~hon~gốc~target
-本当,thật sự / sự thật,本,ほん,hon,on,ほんとう,hontou,本~ほん~hon~gốc / chính~target|当~とう~tou~đúng~support
-本,gốc / căn nguyên,本,もと,moto,kun,もと,moto,本~もと~moto~gốc / căn nguyên~target
-中国,Trung Quốc,中,ちゅう,chuu,on,ちゅうごく,chuugoku,中~ちゅう~chuu~giữa~target|国~ごく~goku~quốc gia~support
-中学校,trường trung học cơ sở,中,ちゅう,chuu,on,ちゅうがっこう,chuugakkou,中~ちゅう~chuu~trung~target|学校~がっこう~gakkou~trường học~support
-中,bên trong / ở giữa,中,なか,naka,kun,なか,naka,中~なか~naka~bên trong / ở giữa~target
-社長,giám đốc công ty,長,ちょう,chou,on,しゃちょう,shachou,社~しゃ~sha~công ty~support|長~ちょう~chou~trưởng~target
-校長,hiệu trưởng,長,ちょう,chou,on,こうちょう,kouchou,校~こう~kou~trường~support|長~ちょう~chou~trưởng~target
-長い,dài,長,なが,naga,kun,ながい,nagai,長~なが~naga~dài~target|い~い~i~~kana
-出口,lối ra,出,で,de,kun,でぐち,deguchi,出~で~de~ra~target|口~ぐち~guchi~miệng / lối~support
-出る,đi ra / xuất hiện,出,で,de,kun,でる,deru,出~で~de~ra~target|る~る~ru~~kana
-出発,khởi hành,出,しゅっ,shu,on,しゅっぱつ,shuppatsu,出~しゅっ~shu~xuất / ra~target|発~ぱつ~patsu~phát / khởi hành~support
-三月,tháng Ba,三,さん,san,on,さんがつ,sangatsu,三~さん~san~ba~target|月~がつ~gatsu~tháng~support
-三人,ba người,三,さん,san,on,さんにん,sannin,三~さん~san~ba~target|人~にん~nin~người~support
-三つ,ba cái,三,みっ,mi,kun,みっつ,mittsu,三~みっ~mi~ba~target|つ~つ~tsu~trợ từ đếm~kana
-時間,thời gian,時,じ,ji,on,じかん,jikan,時~じ~ji~thời gian~target|間~かん~kan~khoảng~support
-六時,sáu giờ,時,じ,ji,on,ろくじ,rokuji,六~ろく~roku~sáu~support|時~じ~ji~giờ~target
-時,lúc / thời điểm,時,とき,toki,kun,とき,toki,時~とき~toki~lúc / thời điểm~target
-銀行,ngân hàng,行,こう,kou,on,ぎんこう,ginkou,銀~ぎん~gin~bạc~support|行~こう~kou~hàng / cơ quan~target
-旅行,du lịch,行,こう,kou,on,りょこう,ryokou,旅~りょ~ryo~chuyến đi~support|行~こう~kou~đi~target
-行く,đi,行,い,i,kun,いく,iku,行~い~i~đi~target|く~く~ku~~kana
-意見,ý kiến,見,けん,ken,on,いけん,iken,意~い~i~ý~support|見~けん~ken~cách nhìn~target
-見学,tham quan học tập,見,けん,ken,on,けんがく,kengaku,見~けん~ken~xem~target|学~がく~gaku~học~support
-見る,nhìn / xem,見,み,mi,kun,みる,miru,見~み~mi~nhìn~target|る~る~ru~~kana
-今月,tháng này,今,こん,kon,on,こんげつ,kongetsu,今~こん~kon~này / hiện tại~target|月~げつ~getsu~tháng~support
-今週,tuần này,今,こん,kon,on,こんしゅう,konshuu,今~こん~kon~này / hiện tại~target|週~しゅう~shuu~tuần~support
-今,bây giờ,今,いま,ima,kun,いま,ima,今~いま~ima~bây giờ~target
-月曜日,thứ Hai,月,げつ,getsu,on,げつようび,getsuyoubi,月~げつ~getsu~mặt trăng / thứ Hai~target|曜日~ようび~youbi~ngày trong tuần~support
-一月,tháng Một,月,がつ,gatsu,on,いちがつ,ichigatsu,一~いち~ichi~một~support|月~がつ~gatsu~tháng~target
-月,mặt trăng,月,つき,tsuki,kun,つき,tsuki,月~つき~tsuki~mặt trăng~target
-半分,một nửa,分,ぶん,bun,on,はんぶん,hanbun,半~はん~han~nửa~support|分~ぶん~bun~phần~target
-十分,mười phút,分,ぷん,pun,on,じゅっぷん,juppun,十~じゅっ~ju~mười~support|分~ぷん~pun~phút~target
-分かる,hiểu,分,わ,wa,kun,わかる,wakaru,分~わ~wa~hiểu / phân biệt~target|かる~かる~karu~~kana
-午後,buổi chiều,後,ご,go,on,ごご,gogo,午~ご~go~trưa~support|後~ご~go~sau~target
-後ろ,phía sau,後,うし,ushi,kun,うしろ,ushiro,後~うし~ushi~phía sau~target|ろ~ろ~ro~~kana
-後で,lát nữa / sau đó,後,あと,ato,kun,あとで,atode,後~あと~ato~sau~target|で~で~de~~kana
-午前,buổi sáng,前,ぜん,zen,on,ごぜん,gozen,午~ご~go~trưa~support|前~ぜん~zen~trước~target
-名前,tên,前,まえ,mae,kun,なまえ,namae,名~な~na~tên~support|前~まえ~mae~phần sau của từ tên~target
-前,phía trước / trước đây,前,まえ,mae,kun,まえ,mae,前~まえ~mae~phía trước~target
-学生,học sinh,生,せい,sei,on,がくせい,gakusei,学~がく~gaku~học~support|生~せい~sei~người / sinh~target
-先生,giáo viên,生,せい,sei,on,せんせい,sensei,先~せん~sen~trước~support|生~せい~sei~sinh~target
-生まれる,được sinh ra,生,う,u,kun,うまれる,umareru,生~う~u~sinh~target|まれる~まれる~mareru~~kana
-五月,tháng Năm,五,ご,go,on,ごがつ,gogatsu,五~ご~go~năm~target|月~がつ~gatsu~tháng~support
-五人,năm người,五,ご,go,on,ごにん,gonin,五~ご~go~năm~target|人~にん~nin~người~support
-五つ,năm cái,五,いつ,itsu,kun,いつつ,itsutsu,五~いつ~itsu~năm~target|つ~つ~tsu~trợ từ đếm~kana
-時間,thời gian,間,かん,kan,on,じかん,jikan,時~じ~ji~thời~support|間~かん~kan~khoảng~target
-人間,con người,間,げん,gen,on,にんげん,ningen,人~にん~nin~người~support|間~げん~gen~cõi / giới~target
-間,khoảng giữa,間,あいだ,aida,kun,あいだ,aida,間~あいだ~aida~khoảng giữa~target
-上手,giỏi / khéo,上,じょう,jou,on,じょうず,jouzu,上~じょう~jou~trên / giỏi~target|手~ず~zu~tay / kỹ năng~support
-上げる,nâng lên,上,あ,a,kun,あげる,ageru,上~あ~a~lên~target|げる~げる~geru~~kana
-上,phía trên,上,うえ,ue,kun,うえ,ue,上~うえ~ue~phía trên~target
-東京,Tokyo,東,とう,tou,on,とうきょう,toukyou,東~とう~tou~phía Đông~target|京~きょう~kyou~kinh đô~support
-東口,cửa phía Đông,東,ひがし,higashi,kun,ひがしぐち,higashiguchi,東~ひがし~higashi~phía Đông~target|口~ぐち~guchi~cửa / lối~support
-東,phía Đông,東,ひがし,higashi,kun,ひがし,higashi,東~ひがし~higashi~phía Đông~target
-四月,tháng Tư,四,し,shi,on,しがつ,shigatsu,四~し~shi~bốn~target|月~がつ~gatsu~tháng~support
-四人,bốn người,四,よ,yo,kun,よにん,yonin,四~よ~yo~bốn~target|人~にん~nin~người~support
-四つ,bốn cái,四,よっ,yo,kun,よっつ,yottsu,四~よっ~yo~bốn~target|つ~つ~tsu~trợ từ đếm~kana
-金曜日,thứ Sáu,金,きん,kin,on,きんようび,kinyoubi,金~きん~kin~vàng / thứ Sáu~target|曜日~ようび~youbi~ngày trong tuần~support
-金色,màu vàng kim,金,きん,kin,on,きんいろ,kiniro,金~きん~kin~vàng~target|色~いろ~iro~màu~support
-お金,tiền,金,かね,kane,kun,おかね,okane,お~お~o~tiền tố lịch sự~kana|金~かね~kane~tiền / vàng~target
-九月,tháng Chín,九,く,ku,on,くがつ,kugatsu,九~く~ku~chín~target|月~がつ~gatsu~tháng~support
-九人,chín người,九,きゅう,kyuu,on,きゅうにん,kyuunin,九~きゅう~kyuu~chín~target|人~にん~nin~người~support
-九つ,chín cái,九,ここの,kokono,kun,ここのつ,kokonotsu,九~ここの~kokono~chín~target|つ~つ~tsu~trợ từ đếm~kana
-入学,nhập học,入,にゅう,nyuu,on,にゅうがく,nyuugaku,入~にゅう~nyuu~nhập / vào~target|学~がく~gaku~học~support
-入る,đi vào,入,はい,hai,kun,はいる,hairu,入~はい~hai~vào~target|る~る~ru~~kana
-入口,lối vào,入,いり,iri,kun,いりぐち,iriguchi,入~いり~iri~vào~target|口~ぐち~guchi~cửa / lối~support
-学生,học sinh / sinh viên,学,がく,gaku,on,がくせい,gakusei,学~がく~gaku~học~target|生~せい~sei~sinh / người học~support
-学校,trường học,学,がっ,ga,on,がっこう,gakkou,学~がっ~ga~học~target|校~こう~kou~trường~support
-学ぶ,học hỏi,学,まな,mana,kun,まなぶ,manabu,学~まな~mana~học~target|ぶ~ぶ~bu~~kana
-高校,trường trung học phổ thông,高,こう,kou,on,こうこう,koukou,高~こう~kou~cao~target|校~こう~kou~trường~support
-高い,cao / đắt,高,たか,taka,kun,たかい,takai,高~たか~taka~cao / đắt~target|い~い~i~~kana
-高さ,độ cao,高,たか,taka,kun,たかさ,takasa,高~たか~taka~cao~target|さ~さ~sa~hậu tố chỉ mức độ~kana
-百円,một trăm yên,円,えん,en,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~support|円~えん~en~yên~target
-一円,một yên,円,えん,en,on,いちえん,ichien,一~いち~ichi~một~support|円~えん~en~yên~target
-円形,hình tròn,円,えん,en,on,えんけい,enkei,円~えん~en~tròn~target|形~けい~kei~hình dạng~support
-子供,trẻ em,子,こ,ko,kun,こども,kodomo,子~こ~ko~trẻ em~target|供~ども~domo~nhóm / cùng~support
-女子,nữ / nữ sinh,子,し,shi,on,じょし,joshi,女~じょ~jo~nữ~support|子~し~shi~người con~target
-子犬,chó con,子,こ,ko,kun,こいぬ,koinu,子~こ~ko~con / nhỏ~target|犬~いぬ~inu~chó~support
-外国,nước ngoài,外,がい,gai,on,がいこく,gaikoku,外~がい~gai~ngoài~target|国~こく~koku~quốc gia~support
-外出,đi ra ngoài,外,がい,gai,on,がいしゅつ,gaishutsu,外~がい~gai~ngoài~target|出~しゅつ~shutsu~ra~support
-外,bên ngoài,外,そと,soto,kun,そと,soto,外~そと~soto~bên ngoài~target
-八月,tháng Tám,八,はち,hachi,on,はちがつ,hachigatsu,八~はち~hachi~tám~target|月~がつ~gatsu~tháng~support
-八人,tám người,八,はち,hachi,on,はちにん,hachinin,八~はち~hachi~tám~target|人~にん~nin~người~support
-八つ,tám cái,八,やっ,ya,kun,やっつ,yattsu,八~やっ~ya~tám~target|つ~つ~tsu~trợ từ đếm~kana
-六月,tháng Sáu,六,ろく,roku,on,ろくがつ,rokugatsu,六~ろく~roku~sáu~target|月~がつ~gatsu~tháng~support
-六人,sáu người,六,ろく,roku,on,ろくにん,rokunin,六~ろく~roku~sáu~target|人~にん~nin~người~support
-六つ,sáu cái,六,むっ,mu,kun,むっつ,muttsu,六~むっ~mu~sáu~target|つ~つ~tsu~trợ từ đếm~kana
-地下,dưới lòng đất / tầng hầm,下,か,ka,on,ちか,chika,地~ち~chi~đất~support|下~か~ka~dưới~target
-下手,không giỏi / vụng,下,へ,he,kun,へた,heta,下~へ~he~dưới / kém~target|手~た~ta~tay / kỹ năng~support
-下,phía dưới,下,した,shita,kun,した,shita,下~した~shita~phía dưới~target
-来年,năm sau,来,らい,rai,on,らいねん,rainen,来~らい~rai~sắp tới~target|年~ねん~nen~năm~support
-来月,tháng sau,来,らい,rai,on,らいげつ,raigetsu,来~らい~rai~sắp tới~target|月~げつ~getsu~tháng~support
-来る,đến,来,く,ku,kun,くる,kuru,来~く~ku~đến~target|る~る~ru~~kana
-天気,thời tiết,気,き,ki,on,てんき,tenki,天~てん~ten~trời~support|気~き~ki~khí~target
-元気,khỏe mạnh / tràn đầy sức sống,気,き,ki,on,げんき,genki,元~げん~gen~nguồn / gốc~support|気~き~ki~tinh thần~target
-人気,được yêu thích / nổi tiếng,気,き,ki,on,にんき,ninki,人~にん~nin~người~support|気~き~ki~sự chú ý~target
-小学校,trường tiểu học,小,しょう,shou,on,しょうがっこう,shougakkou,小~しょう~shou~nhỏ / tiểu~target|学校~がっこう~gakkou~trường học~support
-小さい,nhỏ / bé,小,ちい,chii,kun,ちいさい,chiisai,小~ちい~chii~nhỏ~target|さい~さい~sai~~kana
-小川,con suối nhỏ,小,お,o,kun,おがわ,ogawa,小~お~o~nhỏ~target|川~がわ~gawa~sông / suối~support
-七月,tháng Bảy,七,しち,shichi,on,しちがつ,shichigatsu,七~しち~shichi~bảy~target|月~がつ~gatsu~tháng~support
-七時,bảy giờ,七,しち,shichi,on,しちじ,shichiji,七~しち~shichi~bảy~target|時~じ~ji~giờ~support
-七つ,bảy cái,七,なな,nana,kun,ななつ,nanatsu,七~なな~nana~bảy~target|つ~つ~tsu~trợ từ đếm~kana
-火山,núi lửa,山,ざん,zan,on,かざん,kazan,火~か~ka~lửa~support|山~ざん~zan~núi~target
-登山,leo núi,山,ざん,zan,on,とざん,tozan,登~と~to~leo~support|山~ざん~zan~núi~target
-山,núi,山,やま,yama,kun,やま,yama,山~やま~yama~núi~target
-会話,hội thoại,話,わ,wa,on,かいわ,kaiwa,会~かい~kai~gặp gỡ~support|話~わ~wa~lời nói~target
-電話,điện thoại,話,わ,wa,on,でんわ,denwa,電~でん~den~điện~support|話~わ~wa~nói chuyện~target
-話す,nói chuyện,話,はな,hana,kun,はなす,hanasu,話~はな~hana~nói~target|す~す~su~~kana
-女子,nữ / nữ sinh,女,じょ,jo,on,じょし,joshi,女~じょ~jo~nữ~target|子~し~shi~người con~support
-女性,phụ nữ / giới nữ,女,じょ,jo,on,じょせい,josei,女~じょ~jo~nữ~target|性~せい~sei~giới tính~support
-女,người phụ nữ,女,おんな,onna,kun,おんな,onna,女~おんな~onna~người phụ nữ~target
-東北,vùng Đông Bắc,北,ほく,hoku,on,とうほく,touhoku,東~とう~tou~đông~support|北~ほく~hoku~bắc~target
-北口,cửa phía Bắc,北,きた,kita,kun,きたぐち,kitaguchi,北~きた~kita~phía Bắc~target|口~ぐち~guchi~cửa / lối~support
-北,phía Bắc,北,きた,kita,kun,きた,kita,北~きた~kita~phía Bắc~target
-午前,buổi sáng / trước trưa,午,ご,go,on,ごぜん,gozen,午~ご~go~trưa~target|前~ぜん~zen~trước~support
-午後,buổi chiều / sau trưa,午,ご,go,on,ごご,gogo,午~ご~go~trưa~target|後~ご~go~sau~support
-正午,đúng giữa trưa,午,ご,go,on,しょうご,shougo,正~しょう~shou~đúng / chính~support|午~ご~go~trưa~target
-百円,một trăm yên,百,ひゃく,hyaku,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~target|円~えん~en~yên~support
-三百,ba trăm,百,びゃく,byaku,on,さんびゃく,sanbyaku,三~さん~san~ba~support|百~びゃく~byaku~trăm~target
-六百,sáu trăm,百,ぴゃく,pyaku,on,ろっぴゃく,roppyaku,六~ろっ~ro~sáu~support|百~ぴゃく~pyaku~trăm~target
-辞書,từ điển,書,しょ,sho,on,じしょ,jisho,辞~じ~ji~từ ngữ~support|書~しょ~sho~sách~target
-図書館,thư viện,書,しょ,sho,on,としょかん,toshokan,図~と~to~bản đồ / hình~support|書~しょ~sho~sách~target|館~かん~kan~tòa nhà~support
-書く,viết,書,か,ka,kun,かく,kaku,書~か~ka~viết~target|く~く~ku~~kana
-先生,giáo viên,先,せん,sen,on,せんせい,sensei,先~せん~sen~trước~target|生~せい~sei~sinh / người~support
-先月,tháng trước,先,せん,sen,on,せんげつ,sengetsu,先~せん~sen~trước~target|月~げつ~getsu~tháng~support
-先,phía trước / nơi đến trước,先,さき,saki,kun,さき,saki,先~さき~saki~phía trước~target
-名前,tên,名,な,na,kun,なまえ,namae,名~な~na~tên~target|前~まえ~mae~phần sau của từ tên~support
-有名,nổi tiếng,名,めい,mei,on,ゆうめい,yuumei,有~ゆう~yuu~có~support|名~めい~mei~danh tiếng~target
-名字,họ,名,みょう,myou,on,みょうじ,myouji,名~みょう~myou~tên~target|字~じ~ji~chữ~support
-小川,con suối nhỏ,川,がわ,gawa,kun,おがわ,ogawa,小~お~o~nhỏ~support|川~がわ~gawa~sông / suối~target
-川上,thượng nguồn,川,かわ,kawa,kun,かわかみ,kawakami,川~かわ~kawa~sông~target|上~かみ~kami~phía trên~support
-川,sông,川,かわ,kawa,kun,かわ,kawa,川~かわ~kawa~sông~target
-千円,một nghìn yên,千,せん,sen,on,せんえん,senen,千~せん~sen~một nghìn~target|円~えん~en~yên~support
-三千,ba nghìn,千,ぜん,zen,on,さんぜん,sanzen,三~さん~san~ba~support|千~ぜん~zen~nghìn~target
-千葉,Chiba,千,ち,chi,kun,ちば,chiba,千~ち~chi~nghìn~target|葉~ば~ba~lá~support
-水曜日,thứ Tư,水,すい,sui,on,すいようび,suiyoubi,水~すい~sui~nước / thứ Tư~target|曜日~ようび~youbi~ngày trong tuần~support
-水道,nước máy / đường ống nước,水,すい,sui,on,すいどう,suidou,水~すい~sui~nước~target|道~どう~dou~đường / hệ thống~support
-水,nước,水,みず,mizu,kun,みず,mizu,水~みず~mizu~nước~target
-半分,một nửa,半,はん,han,on,はんぶん,hanbun,半~はん~han~một nửa~target|分~ぶん~bun~phần~support
-半年,nửa năm,半,はん,han,on,はんとし,hantoshi,半~はん~han~một nửa~target|年~とし~toshi~năm~support
-半ば,giữa chừng / một nửa,半,なか,naka,kun,なかば,nakaba,半~なか~naka~nửa / giữa~target|ば~ば~ba~~kana
-男性,nam giới,男,だん,dan,on,だんせい,dansei,男~だん~dan~nam~target|性~せい~sei~giới tính~support
-長男,con trai trưởng,男,なん,nan,on,ちょうなん,chounan,長~ちょう~chou~trưởng~support|男~なん~nan~con trai~target
-男,người đàn ông,男,おとこ,otoko,kun,おとこ,otoko,男~おとこ~otoko~người đàn ông~target
-西洋,phương Tây,西,せい,sei,on,せいよう,seiyou,西~せい~sei~Tây~target|洋~よう~you~đại dương / phương Tây~support
-関西,vùng Kansai,西,さい,sai,on,かんさい,kansai,関~かん~kan~cửa ải / vùng~support|西~さい~sai~Tây~target
-西,phía Tây,西,にし,nishi,kun,にし,nishi,西~にし~nishi~phía Tây~target
-電話,điện thoại,電,でん,den,on,でんわ,denwa,電~でん~den~điện~target|話~わ~wa~nói chuyện~support
-電車,tàu điện,電,でん,den,on,でんしゃ,densha,電~でん~den~điện~target|車~しゃ~sha~xe~support
-電気,điện / điện năng,電,でん,den,on,でんき,denki,電~でん~den~điện~target|気~き~ki~khí / năng lượng~support
-日本語,tiếng Nhật,語,ご,go,on,にほんご,nihongo,日本~にほん~nihon~Nhật Bản~support|語~ご~go~ngôn ngữ~target
-国語,quốc ngữ / môn Văn,語,ご,go,on,こくご,kokugo,国~こく~koku~quốc gia~support|語~ご~go~ngôn ngữ~target
-語る,kể / thuật lại,語,かた,kata,kun,かたる,kataru,語~かた~kata~kể / nói~target|る~る~ru~~kana
-土曜日,thứ Bảy,土,ど,do,on,どようび,doyoubi,土~ど~do~đất / thứ Bảy~target|曜日~ようび~youbi~ngày trong tuần~support
-土地,đất đai,土,と,to,on,とち,tochi,土~と~to~đất~target|地~ち~chi~mặt đất~support
-土,đất,土,つち,tsuchi,kun,つち,tsuchi,土~つち~tsuchi~đất~target
-木曜日,thứ Năm,木,もく,moku,on,もくようび,mokuyoubi,木~もく~moku~cây / thứ Năm~target|曜日~ようび~youbi~ngày trong tuần~support
-大木,cây lớn,木,ぼく,boku,on,たいぼく,taiboku,大~たい~tai~lớn~support|木~ぼく~boku~cây~target
-木,cây / gỗ,木,き,ki,kun,き,ki,木~き~ki~cây / gỗ~target
-食事,bữa ăn,食,しょく,shoku,on,しょくじ,shokuji,食~しょく~shoku~ăn~target|事~じ~ji~việc~support
-食堂,nhà ăn,食,しょく,shoku,on,しょくどう,shokudou,食~しょく~shoku~ăn~target|堂~どう~dou~sảnh / nhà~support
-食べる,ăn,食,た,ta,kun,たべる,taberu,食~た~ta~ăn~target|べる~べる~beru~~kana
-電車,tàu điện,車,しゃ,sha,on,でんしゃ,densha,電~でん~den~điện~support|車~しゃ~sha~xe~target
-自転車,xe đạp,車,しゃ,sha,on,じてんしゃ,jitensha,自転~じてん~jiten~tự quay~support|車~しゃ~sha~xe~target
-車,xe,車,くるま,kuruma,kun,くるま,kuruma,車~くるま~kuruma~xe~target
-南米,Nam Mỹ,南,なん,nan,on,なんべい,nanbei,南~なん~nan~phía Nam~target|米~べい~bei~Mỹ~support
-南口,cửa phía Nam,南,みなみ,minami,kun,みなみぐち,minamiguchi,南~みなみ~minami~phía Nam~target|口~ぐち~guchi~cửa / lối~support
-南,phía Nam,南,みなみ,minami,kun,みなみ,minami,南~みなみ~minami~phía Nam~target
-何人,bao nhiêu người,何,なん,nan,kun,なんにん,nannin,何~なん~nan~bao nhiêu~target|人~にん~nin~người~support
-何時,mấy giờ,何,なん,nan,kun,なんじ,nanji,何~なん~nan~mấy~target|時~じ~ji~giờ~support
-何,cái gì,何,なに,nani,kun,なに,nani,何~なに~nani~cái gì~target
-一万円,mười nghìn yên,万,まん,man,on,いちまんえん,ichimanen,一~いち~ichi~một~support|万~まん~man~mười nghìn~target|円~えん~en~yên~support
-万人,vạn người / mọi người,万,ばん,ban,on,ばんにん,bannin,万~ばん~ban~vạn~target|人~にん~nin~người~support
-万,mười nghìn,万,まん,man,on,まん,man,万~まん~man~mười nghìn~target
-学校,trường học,校,こう,kou,on,がっこう,gakkou,学~がっ~ga~học~support|校~こう~kou~trường~target
-高校,trường trung học phổ thông,校,こう,kou,on,こうこう,koukou,高~こう~kou~cao~support|校~こう~kou~trường~target
-校長,hiệu trưởng,校,こう,kou,on,こうちょう,kouchou,校~こう~kou~trường~target|長~ちょう~chou~trưởng~support
-毎日,mỗi ngày,毎,まい,mai,on,まいにち,mainichi,毎~まい~mai~mỗi~target|日~にち~nichi~ngày~support
-毎年,mỗi năm,毎,まい,mai,on,まいねん,mainen,毎~まい~mai~mỗi~target|年~ねん~nen~năm~support
-毎朝,mỗi sáng,毎,まい,mai,on,まいあさ,maiasa,毎~まい~mai~mỗi~target|朝~あさ~asa~buổi sáng~support
-白紙,giấy trắng,白,はく,haku,on,はくし,hakushi,白~はく~haku~trắng~target|紙~し~shi~giấy~support
-白人,người da trắng,白,はく,haku,on,はくじん,hakujin,白~はく~haku~trắng~target|人~じん~jin~người~support
-白い,màu trắng,白,しろ,shiro,kun,しろい,shiroi,白~しろ~shiro~trắng~target|い~い~i~~kana
-天気,thời tiết,天,てん,ten,on,てんき,tenki,天~てん~ten~trời~target|気~き~ki~khí~support
-天国,thiên đường,天,てん,ten,on,てんごく,tengoku,天~てん~ten~trời~target|国~ごく~goku~cõi / quốc gia~support
-天の川,dải Ngân Hà,天,あま,ama,kun,あまのがわ,amanogawa,天~あま~ama~trời~target|の~の~no~của~kana|川~がわ~gawa~sông~support
-母国,quê hương / mẫu quốc,母,ぼ,bo,on,ぼこく,bokoku,母~ぼ~bo~mẹ / gốc~target|国~こく~koku~quốc gia~support
-母親,người mẹ,母,はは,haha,kun,ははおや,hahaoya,母~はは~haha~mẹ~target|親~おや~oya~cha mẹ~support
-お母さん,mẹ (cách gọi lịch sự),母,かあ,kaa,kun,おかあさん,okaasan,お~お~o~tiền tố lịch sự~kana|母~かあ~kaa~mẹ~target|さん~さん~san~kính ngữ~kana
-火曜日,thứ Ba,火,か,ka,on,かようび,kayoubi,火~か~ka~lửa / thứ Ba~target|曜日~ようび~youbi~ngày trong tuần~support
-火山,núi lửa,火,か,ka,on,かざん,kazan,火~か~ka~lửa~target|山~ざん~zan~núi~support
-火,lửa,火,ひ,hi,kun,ひ,hi,火~ひ~hi~lửa~target
-右折,rẽ phải,右,う,u,on,うせつ,usetsu,右~う~u~phải~target|折~せつ~setsu~rẽ / gập~support
-左右,trái phải / hai bên,右,ゆう,yuu,on,さゆう,sayuu,左~さ~sa~trái~support|右~ゆう~yuu~phải~target
-右,bên phải,右,みぎ,migi,kun,みぎ,migi,右~みぎ~migi~bên phải~target
-読書,đọc sách,読,どく,doku,on,どくしょ,dokusho,読~どく~doku~đọc~target|書~しょ~sho~sách~support
-音読,đọc thành tiếng,読,どく,doku,on,おんどく,ondoku,音~おん~on~âm thanh~support|読~どく~doku~đọc~target
-読む,đọc,読,よ,yo,kun,よむ,yomu,読~よ~yo~đọc~target|む~む~mu~~kana
-友人,bạn bè / người bạn,友,ゆう,yuu,on,ゆうじん,yuujin,友~ゆう~yuu~bạn~target|人~じん~jin~người~support
-親友,bạn thân,友,ゆう,yuu,on,しんゆう,shinyuu,親~しん~shin~thân thiết~support|友~ゆう~yuu~bạn~target
-友達,bạn bè,友,とも,tomo,kun,ともだち,tomodachi,友~とも~tomo~bạn~target|達~だち~dachi~nhóm người~support
-左右,trái phải / hai bên,左,さ,sa,on,さゆう,sayuu,左~さ~sa~trái~target|右~ゆう~yuu~phải~support
-左折,rẽ trái,左,さ,sa,on,させつ,sasetsu,左~さ~sa~trái~target|折~せつ~setsu~rẽ / gập~support
-左,bên trái,左,ひだり,hidari,kun,ひだり,hidari,左~ひだり~hidari~bên trái~target
-休日,ngày nghỉ,休,きゅう,kyuu,on,きゅうじつ,kyuujitsu,休~きゅう~kyuu~nghỉ~target|日~じつ~jitsu~ngày~support
-休校,trường nghỉ học,休,きゅう,kyuu,on,きゅうこう,kyuukou,休~きゅう~kyuu~nghỉ~target|校~こう~kou~trường~support
-休む,nghỉ ngơi,休,やす,yasu,kun,やすむ,yasumu,休~やす~yasu~nghỉ~target|む~む~mu~~kana
-父母,cha mẹ,父,ふ,fu,on,ふぼ,fubo,父~ふ~fu~cha~target|母~ぼ~bo~mẹ~support
-父,cha / bố của mình,父,ちち,chichi,kun,ちち,chichi,父~ちち~chichi~cha / bố~target
-お父さん,bố (cách gọi lịch sự),父,とう,tou,kun,おとうさん,otousan,お~お~o~tiền tố lịch sự~kana|父~とう~tou~bố~target|さん~さん~san~kính ngữ~kana
-雨天,trời mưa / thời tiết mưa,雨,う,u,on,うてん,uten,雨~う~u~mưa~target|天~てん~ten~trời~support
-大雨,mưa lớn,雨,あめ,ame,kun,おおあめ,ooame,大~おお~oo~lớn~support|雨~あめ~ame~mưa~target
-雨具,đồ đi mưa,雨,あま,ama,kun,あまぐ,amagu,雨~あま~ama~mưa~target|具~ぐ~gu~dụng cụ~support
-悪意,ác ý,悪,あく,aku,on,あくい,akui,悪~あく~aku~xấu / ác~target|意~い~i~ý định~support
-最悪,tệ nhất,悪,あく,aku,on,さいあく,saiaku,最~さい~sai~nhất~support|悪~あく~aku~xấu / tệ~target
-悪い,xấu / tệ,悪,わる,waru,kun,わるい,warui,悪~わる~waru~xấu~target|い~い~i~~kana
-暗記,học thuộc lòng,暗,あん,an,on,あんき,anki,暗~あん~an~ghi nhớ thầm~target|記~き~ki~ghi nhớ~support
-暗室,phòng tối,暗,あん,an,on,あんしつ,anshitsu,暗~あん~an~tối~target|室~しつ~shitsu~phòng~support
-暗い,tối,暗,くら,kura,kun,くらい,kurai,暗~くら~kura~tối~target|い~い~i~~kana
-医者,bác sĩ,医,い,i,on,いしゃ,isha,医~い~i~y học~target|者~しゃ~sha~người~support
-医学,y học,医,い,i,on,いがく,igaku,医~い~i~y khoa~target|学~がく~gaku~học~support
-医院,phòng khám,医,い,i,on,いいん,iin,医~い~i~y tế~target|院~いん~in~viện~support
-意味,ý nghĩa,意,い,i,on,いみ,imi,意~い~i~ý~target|味~み~mi~vị / nghĩa~support
-意見,ý kiến,意,い,i,on,いけん,iken,意~い~i~ý~target|見~けん~ken~cách nhìn~support
-意外,ngoài dự đoán / bất ngờ,意,い,i,on,いがい,igai,意~い~i~ý nghĩ~target|外~がい~gai~ngoài~support
-以上,trở lên / hơn nữa,以,い,i,on,いじょう,ijou,以~い~i~từ / trở lên~target|上~じょう~jou~trên~support
-以前,trước đây / trước khi,以,い,i,on,いぜん,izen,以~い~i~từ / mốc~target|前~ぜん~zen~trước~support
-引用,trích dẫn,引,いん,in,on,いんよう,inyou,引~いん~in~dẫn~target|用~よう~you~dùng~support
-引く,kéo / rút,引,ひ,hi,kun,ひく,hiku,引~ひ~hi~kéo~target|く~く~ku~~kana
-病院,bệnh viện,院,いん,in,on,びょういん,byouin,病~びょう~byou~bệnh~support|院~いん~in~viện~target
-入院,nhập viện,院,いん,in,on,にゅういん,nyuuin,入~にゅう~nyuu~vào~support|院~いん~in~viện~target
-店員,nhân viên cửa hàng,員,いん,in,on,てんいん,tenin,店~てん~ten~cửa hàng~support|員~いん~in~nhân viên~target
-会社員,nhân viên công ty,員,いん,in,on,かいしゃいん,kaishain,会社~かいしゃ~kaisha~công ty~support|員~いん~in~nhân viên~target
-運動,vận động / tập thể dục,運,うん,un,on,うんどう,undou,運~うん~un~vận động~target|動~どう~dou~chuyển động~support
-運ぶ,vận chuyển / mang,運,はこ,hako,kun,はこぶ,hakobu,運~はこ~hako~vận chuyển~target|ぶ~ぶ~bu~~kana
-英語,tiếng Anh,英,えい,ei,on,えいご,eigo,英~えい~ei~Anh~target|語~ご~go~ngôn ngữ~support
-英国,nước Anh,英,えい,ei,on,えいこく,eikoku,英~えい~ei~Anh~target|国~こく~koku~quốc gia~support
-映画,phim điện ảnh,映,えい,ei,on,えいが,eiga,映~えい~ei~chiếu~target|画~が~ga~hình ảnh~support
-映る,được chiếu / phản chiếu,映,うつ,utsu,kun,うつる,utsuru,映~うつ~utsu~phản chiếu~target|る~る~ru~~kana
-遠足,chuyến dã ngoại,遠,えん,en,on,えんそく,ensoku,遠~えん~en~xa~target|足~そく~soku~chân / chuyến đi~support
-遠い,xa,遠,とお,too,kun,とおい,tooi,遠~とお~too~xa~target|い~い~i~~kana
-屋上,sân thượng / mái nhà,屋,おく,oku,on,おくじょう,okujou,屋~おく~oku~mái / nhà~target|上~じょう~jou~trên~support
-本屋,hiệu sách,屋,や,ya,kun,ほんや,honya,本~ほん~hon~sách~support|屋~や~ya~cửa hàng~target
-歌手,ca sĩ,歌,か,ka,on,かしゅ,kashu,歌~か~ka~bài hát~target|手~しゅ~shu~người làm~support
-歌う,hát,歌,うた,uta,kun,うたう,utau,歌~うた~uta~hát~target|う~う~u~~kana
-夏季,mùa hè / mùa hạ,夏,か,ka,on,かき,kaki,夏~か~ka~mùa hè~target|季~き~ki~mùa~support
-夏休み,kỳ nghỉ hè,夏,なつ,natsu,kun,なつやすみ,natsuyasumi,夏~なつ~natsu~mùa hè~target|休~やす~yasu~nghỉ~support|み~み~mi~~kana
-家族,gia đình,家,か,ka,on,かぞく,kazoku,家~か~ka~gia đình~target|族~ぞく~zoku~nhóm / tộc~support
-家,ngôi nhà,家,いえ,ie,kun,いえ,ie,家~いえ~ie~nhà~target
-映画,phim điện ảnh,画,が,ga,on,えいが,eiga,映~えい~ei~chiếu~support|画~が~ga~hình ảnh~target
-計画,kế hoạch,画,かく,kaku,on,けいかく,keikaku,計~けい~kei~tính toán~support|画~かく~kaku~kế hoạch / nét~target
-海外,hải ngoại / nước ngoài,海,かい,kai,on,かいがい,kaigai,海~かい~kai~biển~target|外~がい~gai~ngoài~support
-海,biển,海,うみ,umi,kun,うみ,umi,海~うみ~umi~biển~target
-今回,lần này,回,かい,kai,on,こんかい,konkai,今~こん~kon~lần này / hiện tại~support|回~かい~kai~lần~target
-回る,xoay / đi vòng,回,まわ,mawa,kun,まわる,mawaru,回~まわ~mawa~xoay vòng~target|る~る~ru~~kana
-開会,khai mạc / mở cuộc họp,開,かい,kai,on,かいかい,kaikai,開~かい~kai~mở~target|会~かい~kai~cuộc họp~support
-開く,mở ra,開,ひら,hira,kun,ひらく,hiraku,開~ひら~hira~mở~target|く~く~ku~~kana
-世界,thế giới,界,かい,kai,on,せかい,sekai,世~せ~se~đời / thế~support|界~かい~kai~thế giới~target
-業界,ngành nghề / giới kinh doanh,界,かい,kai,on,ぎょうかい,gyoukai,業~ぎょう~gyou~ngành nghề~support|界~かい~kai~giới~target
-音楽,âm nhạc,楽,がく,gaku,on,おんがく,ongaku,音~おん~on~âm thanh~support|楽~がく~gaku~nhạc~target
-楽しい,vui vẻ,楽,たの,tano,kun,たのしい,tanoshii,楽~たの~tano~vui~target|しい~しい~shii~~kana
-図書館,thư viện,館,かん,kan,on,としょかん,toshokan,図書~としょ~tosho~sách~support|館~かん~kan~tòa nhà~target
-映画館,rạp chiếu phim,館,かん,kan,on,えいがかん,eigakan,映画~えいが~eiga~phim~support|館~かん~kan~tòa nhà / rạp~target
-漢字,chữ Kanji / Hán tự,漢,かん,kan,on,かんじ,kanji,漢~かん~kan~Hán~target|字~じ~ji~chữ~support
-漢語,từ Hán Nhật,漢,かん,kan,on,かんご,kango,漢~かん~kan~Hán~target|語~ご~go~từ ngữ~support
-寒気,khí lạnh / cảm giác ớn lạnh,寒,かん,kan,on,かんき,kanki,寒~かん~kan~lạnh~target|気~き~ki~khí~support
-寒い,lạnh,寒,さむ,samu,kun,さむい,samui,寒~さむ~samu~lạnh~target|い~い~i~~kana
-顔面,khuôn mặt / vùng mặt,顔,がん,gan,on,がんめん,ganmen,顔~がん~gan~mặt~target|面~めん~men~bề mặt~support
-顔,khuôn mặt,顔,かお,kao,kun,かお,kao,顔~かお~kao~khuôn mặt~target
-帰国,về nước,帰,き,ki,on,きこく,kikoku,帰~き~ki~trở về~target|国~こく~koku~đất nước~support
-帰る,trở về,帰,かえ,kae,kun,かえる,kaeru,帰~かえ~kae~trở về~target|る~る~ru~~kana
-起立,đứng dậy,起,き,ki,on,きりつ,kiritsu,起~き~ki~đứng lên~target|立~りつ~ritsu~đứng~support
-起きる,thức dậy,起,お,o,kun,おきる,okiru,起~お~o~dậy~target|きる~きる~kiru~~kana
-研究,nghiên cứu,究,きゅう,kyuu,on,けんきゅう,kenkyuu,研~けん~ken~mài giũa / nghiên cứu~support|究~きゅう~kyuu~nghiên cứu đến cùng~target
-究明,điều tra làm rõ,究,きゅう,kyuu,on,きゅうめい,kyuumei,究~きゅう~kyuu~truy cứu~target|明~めい~mei~làm rõ~support
-急行,tàu tốc hành,急,きゅう,kyuu,on,きゅうこう,kyuukou,急~きゅう~kyuu~nhanh / gấp~target|行~こう~kou~chạy / đi~support
-急ぐ,vội / nhanh lên,急,いそ,iso,kun,いそぐ,isogu,急~いそ~iso~vội~target|ぐ~ぐ~gu~~kana
-牛肉,thịt bò,牛,ぎゅう,gyuu,on,ぎゅうにく,gyuuniku,牛~ぎゅう~gyuu~bò~target|肉~にく~niku~thịt~support
-牛,con bò,牛,うし,ushi,kun,うし,ushi,牛~うし~ushi~bò~target
-去年,năm ngoái,去,きょ,kyo,on,きょねん,kyonen,去~きょ~kyo~đã qua~target|年~ねん~nen~năm~support
-去る,rời đi,去,さ,sa,kun,さる,saru,去~さ~sa~rời đi~target|る~る~ru~~kana
-強力,mạnh mẽ / cường lực,強,きょう,kyou,on,きょうりょく,kyouryoku,強~きょう~kyou~mạnh~target|力~りょく~ryoku~sức lực~support
-強い,mạnh,強,つよ,tsuyo,kun,つよい,tsuyoi,強~つよ~tsuyo~mạnh~target|い~い~i~~kana
-教室,lớp học,教,きょう,kyou,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy / giáo~target|室~しつ~shitsu~phòng~support
-教える,dạy / chỉ bảo,教,おし,oshi,kun,おしえる,oshieru,教~おし~oshi~dạy~target|える~える~eru~~kana
-東京,Tokyo / Đông Kinh,京,きょう,kyou,on,とうきょう,toukyou,東~とう~tou~phía đông~support|京~きょう~kyou~kinh đô~target
-京都,Kyoto / kinh đô Kyoto,京,きょう,kyou,on,きょうと,kyouto,京~きょう~kyou~kinh đô~target|都~と~to~đô thị~support
-授業,buổi học / tiết học,業,ぎょう,gyou,on,じゅぎょう,jugyou,授~じゅ~ju~truyền dạy~support|業~ぎょう~gyou~việc học~target
-産業,công nghiệp,業,ぎょう,gyou,on,さんぎょう,sangyou,産~さん~san~sản xuất~support|業~ぎょう~gyou~ngành nghề~target
-近所,hàng xóm / khu vực gần nhà,近,きん,kin,on,きんじょ,kinjo,近~きん~kin~gần~target|所~じょ~jo~nơi~support
-近い,gần,近,ちか,chika,kun,ちかい,chikai,近~ちか~chika~gần~target|い~い~i~~kana
-銀行,ngân hàng,銀,ぎん,gin,on,ぎんこう,ginkou,銀~ぎん~gin~bạc / ngân~target|行~こう~kou~cơ sở~support
-銀色,màu bạc,銀,ぎん,gin,on,ぎんいろ,giniro,銀~ぎん~gin~bạc~target|色~いろ~iro~màu sắc~support
-区役所,văn phòng hành chính quận,区,く,ku,on,くやくしょ,kuyakusho,区~く~ku~quận / khu~target|役所~やくしょ~yakusho~cơ quan hành chính~support
-地区,khu vực,区,く,ku,on,ちく,chiku,地~ち~chi~đất / vùng~support|区~く~ku~khu vực~target
-計画,kế hoạch,計,けい,kei,on,けいかく,keikaku,計~けい~kei~tính toán~target|画~かく~kaku~kế hoạch~support
-計る,đo / tính,計,はか,haka,kun,はかる,hakaru,計~はか~haka~đo~target|る~る~ru~~kana
-兄弟,anh em,兄,きょう,kyou,on,きょうだい,kyoudai,兄~きょう~kyou~anh trai~target|弟~だい~dai~em trai~support
-兄,anh trai,兄,あに,ani,kun,あに,ani,兄~あに~ani~anh trai~target
-軽食,bữa ăn nhẹ,軽,けい,kei,on,けいしょく,keishoku,軽~けい~kei~nhẹ~target|食~しょく~shoku~thức ăn~support
-軽い,nhẹ,軽,かる,karu,kun,かるい,karui,軽~かる~karu~nhẹ~target|い~い~i~~kana
-番犬,chó canh,犬,けん,ken,on,ばんけん,banken,番~ばん~ban~canh gác~support|犬~けん~ken~chó~target
-犬,con chó,犬,いぬ,inu,kun,いぬ,inu,犬~いぬ~inu~chó~target
-研究,nghiên cứu,研,けん,ken,on,けんきゅう,kenkyuu,研~けん~ken~nghiên cứu~target|究~きゅう~kyuu~đến cùng~support
-研ぐ,mài / đánh bóng,研,と,to,kun,とぐ,togu,研~と~to~mài~target|ぐ~ぐ~gu~~kana
-県立,do tỉnh quản lý,県,けん,ken,on,けんりつ,kenritsu,県~けん~ken~tỉnh~target|立~りつ~ritsu~lập~support
-県庁,trụ sở hành chính tỉnh,県,けん,ken,on,けんちょう,kenchou,県~けん~ken~tỉnh~target|庁~ちょう~chou~cơ quan~support
-建設,xây dựng,建,けん,ken,on,けんせつ,kensetsu,建~けん~ken~xây~target|設~せつ~setsu~thiết lập~support
-建てる,xây lên,建,た,ta,kun,たてる,tateru,建~た~ta~xây~target|てる~てる~teru~~kana
-試験,kỳ thi / kiểm tra,験,けん,ken,on,しけん,shiken,試~し~shi~thử~support|験~けん~ken~kiểm nghiệm~target
-経験,kinh nghiệm,験,けん,ken,on,けいけん,keiken,経~けい~kei~trải qua~support|験~けん~ken~kinh nghiệm~target
-元気,khỏe mạnh / tràn đầy năng lượng,元,げん,gen,on,げんき,genki,元~げん~gen~nguồn / gốc~target|気~き~ki~khí lực~support
-元,gốc / nguồn,元,もと,moto,kun,もと,moto,元~もと~moto~gốc~target
-工場,nhà máy,工,こう,kou,on,こうじょう,koujou,工~こう~kou~công nghiệp~target|場~じょう~jou~nơi~support
-工事,công trình / thi công,工,こう,kou,on,こうじ,kouji,工~こう~kou~thi công~target|事~じ~ji~việc~support
-広告,quảng cáo,広,こう,kou,on,こうこく,koukoku,広~こう~kou~rộng / quảng~target|告~こく~koku~báo~support
-広い,rộng,広,ひろ,hiro,kun,ひろい,hiroi,広~ひろ~hiro~rộng~target|い~い~i~~kana
-考察,suy xét / khảo sát,考,こう,kou,on,こうさつ,kousatsu,考~こう~kou~suy nghĩ~target|察~さつ~satsu~xem xét~support
-考える,suy nghĩ,考,かんが,kanga,kun,かんがえる,kangaeru,考~かんが~kanga~suy nghĩ~target|える~える~eru~~kana
-観光,tham quan / du lịch,光,こう,kou,on,かんこう,kankou,観~かん~kan~ngắm~support|光~こう~kou~ánh sáng / cảnh sắc~target
-光,ánh sáng,光,ひかり,hikari,kun,ひかり,hikari,光~ひかり~hikari~ánh sáng~target
-好物,món yêu thích,好,こう,kou,on,こうぶつ,koubutsu,好~こう~kou~yêu thích~target|物~ぶつ~butsu~vật / món~support
-好き,thích,好,す,su,kun,すき,suki,好~す~su~thích~target|き~き~ki~~kana
-合計,tổng cộng,合,ごう,gou,on,ごうけい,goukei,合~ごう~gou~gộp~target|計~けい~kei~tính~support
-合う,hợp / khớp,合,あ,a,kun,あう,au,合~あ~a~hợp~target|う~う~u~~kana
-黒板,bảng đen,黒,こく,koku,on,こくばん,kokuban,黒~こく~koku~đen~target|板~ばん~ban~tấm bảng~support
-黒い,màu đen,黒,くろ,kuro,kun,くろい,kuroi,黒~くろ~kuro~đen~target|い~い~i~~kana
-野菜,rau củ,菜,さい,sai,on,やさい,yasai,野~や~ya~đồng / hoang~support|菜~さい~sai~rau~target
-菜の花,hoa cải,菜,な,na,kun,なのはな,nanohana,菜~な~na~rau cải~target|の~の~no~~kana|花~はな~hana~hoa~support
-作文,bài văn,作,さく,saku,on,さくぶん,sakubun,作~さく~saku~làm / sáng tác~target|文~ぶん~bun~văn~support
-作る,làm / tạo ra,作,つく,tsuku,kun,つくる,tsukuru,作~つく~tsuku~làm~target|る~る~ru~~kana
-生産,sản xuất,産,さん,san,on,せいさん,seisan,生~せい~sei~sinh ra~support|産~さん~san~sản xuất~target
-産む,sinh / đẻ,産,う,u,kun,うむ,umu,産~う~u~sinh~target|む~む~mu~~kana
-用紙,giấy dùng cho một mục đích,紙,し,shi,on,ようし,youshi,用~よう~you~sử dụng~support|紙~し~shi~giấy~target
-紙,giấy,紙,かみ,kami,kun,かみ,kami,紙~かみ~kami~giấy~target
-思考,suy nghĩ / tư duy,思,し,shi,on,しこう,shikou,思~し~shi~suy nghĩ~target|考~こう~kou~xem xét~support
-思う,nghĩ / cảm thấy,思,おも,omo,kun,おもう,omou,思~おも~omo~nghĩ~target|う~う~u~~kana
-姉妹,chị em gái,姉,し,shi,on,しまい,shimai,姉~し~shi~chị gái~target|妹~まい~mai~em gái~support
-姉,chị gái,姉,あね,ane,kun,あね,ane,姉~あね~ane~chị gái~target
-停止,dừng lại / đình chỉ,止,し,shi,on,ていし,teishi,停~てい~tei~dừng~support|止~し~shi~dừng~target
-止まる,dừng lại,止,と,to,kun,とまる,tomaru,止~と~to~dừng~target|まる~まる~maru~~kana
-市場,chợ / thị trường,市,し,shi,on,しじょう,shijou,市~し~shi~chợ~target|場~じょう~jou~nơi~support
-市,chợ phiên,市,いち,ichi,kun,いち,ichi,市~いち~ichi~chợ~target
-仕事,công việc,仕,し,shi,on,しごと,shigoto,仕~し~shi~làm việc~target|事~ごと~goto~việc~support
-仕える,phụng sự / phục vụ,仕,つか,tsuka,kun,つかえる,tsukaeru,仕~つか~tsuka~phụng sự~target|える~える~eru~~kana
-死亡,tử vong,死,し,shi,on,しぼう,shibou,死~し~shi~chết~target|亡~ぼう~bou~mất~support
-死ぬ,chết,死,し,shi,kun,しぬ,shinu,死~し~shi~chết~target|ぬ~ぬ~nu~~kana
-使用,sử dụng,使,し,shi,on,しよう,shiyou,使~し~shi~dùng~target|用~よう~you~sử dụng~support
-使う,dùng / sử dụng,使,つか,tsuka,kun,つかう,tsukau,使~つか~tsuka~dùng~target|う~う~u~~kana
-開始,bắt đầu / khai mạc,始,し,shi,on,かいし,kaishi,開~かい~kai~mở~support|始~し~shi~bắt đầu~target
-始める,bắt đầu,始,はじ,haji,kun,はじめる,hajimeru,始~はじ~haji~bắt đầu~target|める~める~meru~~kana
-試験,kỳ thi / kiểm tra,試,し,shi,on,しけん,shiken,試~し~shi~thử~target|験~けん~ken~kiểm nghiệm~support
-試す,thử,試,ため,tame,kun,ためす,tamesu,試~ため~tame~thử~target|す~す~su~~kana
-私立,tư lập,私,し,shi,on,しりつ,shiritsu,私~し~shi~tư nhân~target|立~りつ~ritsu~lập~support
-私,tôi,私,わたし,watashi,kun,わたし,watashi,私~わたし~watashi~tôi~target
-文字,chữ viết / ký tự,字,じ,ji,on,もじ,moji,文~も~mo~văn~support|字~じ~ji~chữ~target
-漢字,chữ Kanji,字,じ,ji,on,かんじ,kanji,漢~かん~kan~Hán~support|字~じ~ji~chữ~target
-自分,bản thân,自,じ,ji,on,じぶん,jibun,自~じ~ji~tự mình~target|分~ぶん~bun~phần~support
-自ら,tự mình,自,みずか,mizuka,kun,みずから,mizukara,自~みずか~mizuka~tự mình~target|ら~ら~ra~~kana
-事故,sự cố / tai nạn,事,じ,ji,on,じこ,jiko,事~じ~ji~sự việc~target|故~こ~ko~sự cố~support
-仕事,công việc,事,ごと,goto,kun,しごと,shigoto,仕~し~shi~làm~support|事~ごと~goto~việc~target
-持参,mang theo,持,じ,ji,on,じさん,jisan,持~じ~ji~mang~target|参~さん~san~đến / tham gia~support
-持つ,cầm / giữ,持,も,mo,kun,もつ,motsu,持~も~mo~cầm~target|つ~つ~tsu~~kana
-教室,lớp học,室,しつ,shitsu,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy~support|室~しつ~shitsu~phòng~target
-室内,trong phòng,室,しつ,shitsu,on,しつない,shitsunai,室~しつ~shitsu~phòng~target|内~ない~nai~bên trong~support
-品質,chất lượng,質,しつ,shitsu,on,ひんしつ,hinshitsu,品~ひん~hin~sản phẩm~support|質~しつ~shitsu~chất lượng~target
-質問,câu hỏi,質,しつ,shitsu,on,しつもん,shitsumon,質~しつ~shitsu~hỏi / chất vấn~target|問~もん~mon~hỏi~support
-写真,ảnh chụp,写,しゃ,sha,on,しゃしん,shashin,写~しゃ~sha~chụp / sao~target|真~しん~shin~thật~support
-写す,chụp / sao chép,写,うつ,utsu,kun,うつす,utsusu,写~うつ~utsu~chụp / sao~target|す~す~su~~kana
-記者,phóng viên,者,しゃ,sha,on,きしゃ,kisha,記~き~ki~ghi chép~support|者~しゃ~sha~người~target
-若者,người trẻ,者,もの,mono,kun,わかもの,wakamono,若~わか~waka~trẻ~support|者~もの~mono~người~target
-借金,khoản nợ / tiền vay,借,しゃっ,sha,on,しゃっきん,shakkin,借~しゃっ~sha~vay~target|金~きん~kin~tiền~support
-借りる,mượn / vay,借,か,ka,kun,かりる,kariru,借~か~ka~mượn~target|りる~りる~riru~~kana
-弱点,điểm yếu,弱,じゃく,jaku,on,じゃくてん,jakuten,弱~じゃく~jaku~yếu~target|点~てん~ten~điểm~support
-弱い,yếu,弱,よわ,yowa,kun,よわい,yowai,弱~よわ~yowa~yếu~target|い~い~i~~kana
-首都,thủ đô,首,しゅ,shu,on,しゅと,shuto,首~しゅ~shu~đầu / chính~target|都~と~to~đô thị~support
-首,cổ,首,くび,kubi,kun,くび,kubi,首~くび~kubi~cổ~target
-主人,chủ nhà / chồng,主,しゅ,shu,on,しゅじん,shujin,主~しゅ~shu~chủ~target|人~じん~jin~người~support
-主な,chính / chủ yếu,主,おも,omo,kun,おもな,omona,主~おも~omo~chính~target|な~な~na~~kana
-秋分,thu phân,秋,しゅう,shuu,on,しゅうぶん,shuubun,秋~しゅう~shuu~mùa thu~target|分~ぶん~bun~phân chia~support
-秋,mùa thu,秋,あき,aki,kun,あき,aki,秋~あき~aki~mùa thu~target
-集合,tập hợp,集,しゅう,shuu,on,しゅうごう,shuugou,集~しゅう~shuu~tụ họp~target|合~ごう~gou~hợp lại~support
-集める,thu thập / tập hợp,集,あつ,atsu,kun,あつめる,atsumeru,集~あつ~atsu~tập hợp~target|める~める~meru~~kana
-学習,học tập,習,しゅう,shuu,on,がくしゅう,gakushuu,学~がく~gaku~học~support|習~しゅう~shuu~luyện tập~target
-習う,học / luyện,習,なら,nara,kun,ならう,narau,習~なら~nara~học~target|う~う~u~~kana
-終了,kết thúc / hoàn tất,終,しゅう,shuu,on,しゅうりょう,shuuryou,終~しゅう~shuu~kết thúc~target|了~りょう~ryou~hoàn tất~support
-終わる,kết thúc,終,お,o,kun,おわる,owaru,終~お~o~kết thúc~target|わる~わる~waru~~kana
-住所,địa chỉ,住,じゅう,juu,on,じゅうしょ,juusho,住~じゅう~juu~cư trú~target|所~しょ~sho~nơi~support
-住む,sống / cư trú,住,す,su,kun,すむ,sumu,住~す~su~sống~target|む~む~mu~~kana
-重要,quan trọng,重,じゅう,juu,on,じゅうよう,juuyou,重~じゅう~juu~quan trọng~target|要~よう~you~thiết yếu~support
-重い,nặng,重,おも,omo,kun,おもい,omoi,重~おも~omo~nặng~target|い~い~i~~kana
-青春,tuổi thanh xuân,春,しゅん,shun,on,せいしゅん,seishun,青~せい~sei~xanh / trẻ~support|春~しゅん~shun~mùa xuân~target
-春,mùa xuân,春,はる,haru,kun,はる,haru,春~はる~haru~mùa xuân~target
-場所,địa điểm / nơi chốn,所,しょ,sho,on,ばしょ,basho,場~ば~ba~nơi~support|所~しょ~sho~chỗ~target
-所,nơi / chỗ,所,ところ,tokoro,kun,ところ,tokoro,所~ところ~tokoro~nơi~target
-残暑,cái nóng cuối hè,暑,しょ,sho,on,ざんしょ,zansho,残~ざん~zan~còn lại~support|暑~しょ~sho~nóng~target
-暑い,nóng (thời tiết),暑,あつ,atsu,kun,あつい,atsui,暑~あつ~atsu~nóng~target|い~い~i~~kana
-会場,hội trường / địa điểm tổ chức,場,じょう,jou,on,かいじょう,kaijou,会~かい~kai~cuộc họp~support|場~じょう~jou~địa điểm~target
-場所,địa điểm / nơi chốn,場,ば,ba,kun,ばしょ,basho,場~ば~ba~nơi~target|所~しょ~sho~chỗ~support
-乗車,lên xe,乗,じょう,jou,on,じょうしゃ,jousha,乗~じょう~jou~lên~target|車~しゃ~sha~xe~support
-乗る,lên / đi bằng phương tiện,乗,の,no,kun,のる,noru,乗~の~no~lên xe~target|る~る~ru~~kana
-色彩,màu sắc / sắc thái,色,しき,shiki,on,しきさい,shikisai,色~しき~shiki~màu sắc~target|彩~さい~sai~sắc màu~support
-色,màu sắc,色,いろ,iro,kun,いろ,iro,色~いろ~iro~màu sắc~target
-森林,rừng cây,森,しん,shin,on,しんりん,shinrin,森~しん~shin~rừng~target|林~りん~rin~lùm cây~support
-森,rừng,森,もり,mori,kun,もり,mori,森~もり~mori~rừng~target
-心配,lo lắng,心,しん,shin,on,しんぱい,shinpai,心~しん~shin~tâm trí~target|配~ぱい~pai~quan tâm~support
-心,trái tim / tâm hồn,心,こころ,kokoro,kun,こころ,kokoro,心~こころ~kokoro~trái tim~target
-親切,tử tế / tốt bụng,親,しん,shin,on,しんせつ,shinsetsu,親~しん~shin~thân thiết~target|切~せつ~setsu~tận tình~support
-親,cha mẹ,親,おや,oya,kun,おや,oya,親~おや~oya~cha mẹ~target
-写真,ảnh chụp,真,しん,shin,on,しゃしん,shashin,写~しゃ~sha~chụp~support|真~しん~shin~thật~target
-真っ白,trắng tinh,真,ま,ma,kun,まっしろ,masshiro,真~ま~ma~hoàn toàn~target|っ~っ~~~kana|白~しろ~shiro~trắng~support
-進学,học lên,進,しん,shin,on,しんがく,shingaku,進~しん~shin~tiến lên~target|学~がく~gaku~học~support
-進む,tiến lên,進,すす,susu,kun,すすむ,susumu,進~すす~susu~tiến~target|む~む~mu~~kana
-地図,bản đồ,図,ず,zu,on,ちず,chizu,地~ち~chi~đất~support|図~ず~zu~bản đồ~target
-図書館,thư viện,図,と,to,on,としょかん,toshokan,図~と~to~sách / sơ đồ~target|書館~しょかん~shokan~thư quán~support
-青年,thanh niên,青,せい,sei,on,せいねん,seinen,青~せい~sei~xanh / trẻ~target|年~ねん~nen~năm / tuổi~support
-青い,màu xanh,青,あお,ao,kun,あおい,aoi,青~あお~ao~xanh~target|い~い~i~~kana
-正解,đáp án đúng,正,せい,sei,on,せいかい,seikai,正~せい~sei~đúng~target|解~かい~kai~giải~support
-正しい,đúng đắn,正,ただ,tada,kun,ただしい,tadashii,正~ただ~tada~đúng~target|しい~しい~shii~~kana
-音声,âm thanh / giọng nói,声,せい,sei,on,おんせい,onsei,音~おん~on~âm thanh~support|声~せい~sei~giọng~target
-声,giọng nói,声,こえ,koe,kun,こえ,koe,声~こえ~koe~giọng nói~target
-世界,thế giới,世,せ,se,on,せかい,sekai,世~せ~se~thế giới~target|界~かい~kai~cõi / giới~support
-世の中,xã hội / thế gian,世,よ,yo,kun,よのなか,yononaka,世~よ~yo~thế gian~target|の~の~no~~kana|中~なか~naka~bên trong~support
-赤道,xích đạo,赤,せき,seki,on,せきどう,sekidou,赤~せき~seki~đỏ / xích~target|道~どう~dou~đường~support
-赤い,màu đỏ,赤,あか,aka,kun,あかい,akai,赤~あか~aka~đỏ~target|い~い~i~~kana
-夕食,bữa tối,夕,ゆう,yuu,kun,ゆうしょく,yuushoku,夕~ゆう~yuu~buổi tối~target|食~しょく~shoku~bữa ăn~support
-夕方,chiều tối,夕,ゆう,yuu,kun,ゆうがた,yuugata,夕~ゆう~yuu~buổi tối~target|方~がた~gata~phía / khoảng~support
-大切,quan trọng / quý giá,切,せつ,setsu,on,たいせつ,taisetsu,大~たい~tai~lớn~support|切~せつ~setsu~quan trọng~target
-切る,cắt,切,き,ki,kun,きる,kiru,切~き~ki~cắt~target|る~る~ru~~kana
-説明,giải thích,説,せつ,setsu,on,せつめい,setsumei,説~せつ~setsu~giải thích~target|明~めい~mei~rõ~support
-説く,giảng giải / thuyết phục,説,と,to,kun,とく,toku,説~と~to~giảng giải~target|く~く~ku~~kana
-洗面所,phòng rửa mặt,洗,せん,sen,on,せんめんじょ,senmenjo,洗~せん~sen~rửa~target|面所~めんじょ~menjo~nơi rửa mặt~support
-洗う,rửa,洗,あら,ara,kun,あらう,arau,洗~あら~ara~rửa~target|う~う~u~~kana
-早朝,sáng sớm,早,そう,sou,on,そうちょう,souchou,早~そう~sou~sớm~target|朝~ちょう~chou~buổi sáng~support
-早い,sớm / nhanh,早,はや,haya,kun,はやい,hayai,早~はや~haya~sớm / nhanh~target|い~い~i~~kana
-競走,cuộc chạy đua,走,そう,sou,on,きょうそう,kyousou,競~きょう~kyou~thi đấu~support|走~そう~sou~chạy~target
-走る,chạy,走,はし,hashi,kun,はしる,hashiru,走~はし~hashi~chạy~target|る~る~ru~~kana
-送信,gửi đi / truyền tin,送,そう,sou,on,そうしん,soushin,送~そう~sou~gửi~target|信~しん~shin~tin~support
-送る,gửi / tiễn,送,おく,oku,kun,おくる,okuru,送~おく~oku~gửi~target|る~る~ru~~kana
-家族,gia đình,族,ぞく,zoku,on,かぞく,kazoku,家~か~ka~nhà~support|族~ぞく~zoku~gia tộc~target
-民族,dân tộc,族,ぞく,zoku,on,みんぞく,minzoku,民~みん~min~người dân~support|族~ぞく~zoku~nhóm / tộc~target
-村民,dân làng,村,そん,son,on,そんみん,sonmin,村~そん~son~làng~target|民~みん~min~người dân~support
-村,ngôi làng,村,むら,mura,kun,むら,mura,村~むら~mura~làng~target
-体育,thể dục,体,たい,tai,on,たいいく,taiiku,体~たい~tai~cơ thể~target|育~いく~iku~rèn luyện~support
-体,cơ thể,体,からだ,karada,kun,からだ,karada,体~からだ~karada~cơ thể~target
-太陽,mặt trời,太,たい,tai,on,たいよう,taiyou,太~たい~tai~lớn / thái~target|陽~よう~you~mặt trời~support
-太い,to / dày,太,ふと,futo,kun,ふとい,futoi,太~ふと~futo~to / dày~target|い~い~i~~kana
-待機,chờ sẵn / đợi lệnh,待,たい,tai,on,たいき,taiki,待~たい~tai~chờ~target|機~き~ki~thời cơ / máy~support
-待つ,chờ đợi,待,ま,ma,kun,まつ,matsu,待~ま~ma~chờ~target|つ~つ~tsu~~kana
-賃貸,cho thuê / thuê nhà,貸,たい,tai,on,ちんたい,chintai,賃~ちん~chin~tiền thuê~support|貸~たい~tai~cho thuê~target
-貸す,cho mượn,貸,か,ka,kun,かす,kasu,貸~か~ka~cho mượn~target|す~す~su~~kana
-台風,bão,台,たい,tai,on,たいふう,taifuu,台~たい~tai~đài / bệ~target|風~ふう~fuu~gió~support
-台所,nhà bếp,台,だい,dai,on,だいどころ,daidokoro,台~だい~dai~bệ / khu~target|所~どころ~dokoro~nơi~support
-時代,thời đại,代,だい,dai,on,じだい,jidai,時~じ~ji~thời gian~support|代~だい~dai~đời / thời đại~target
-代わる,thay thế,代,か,ka,kun,かわる,kawaru,代~か~ka~thay thế~target|わる~わる~waru~~kana
-問題,vấn đề / câu hỏi,題,だい,dai,on,もんだい,mondai,問~もん~mon~hỏi~support|題~だい~dai~đề bài~target
-宿題,bài tập về nhà,題,だい,dai,on,しゅくだい,shukudai,宿~しゅく~shuku~ở trọ / bài về nhà~support|題~だい~dai~đề bài~target
-短所,khuyết điểm,短,たん,tan,on,たんしょ,tansho,短~たん~tan~ngắn / điểm yếu~target|所~しょ~sho~chỗ~support
-短い,ngắn,短,みじか,mijika,kun,みじかい,mijikai,短~みじか~mijika~ngắn~target|い~い~i~~kana
-知識,kiến thức,知,ち,chi,on,ちしき,chishiki,知~ち~chi~biết~target|識~しき~shiki~nhận thức~support
-知る,biết,知,し,shi,kun,しる,shiru,知~し~shi~biết~target|る~る~ru~~kana
-地下,dưới lòng đất,地,ち,chi,on,ちか,chika,地~ち~chi~đất~target|下~か~ka~bên dưới~support
-地面,mặt đất,地,じ,ji,on,じめん,jimen,地~じ~ji~đất~target|面~めん~men~bề mặt~support
-電池,pin điện,池,ち,chi,on,でんち,denchi,電~でん~den~điện~support|池~ち~chi~bể chứa~target
-池,ao / hồ nhỏ,池,いけ,ike,kun,いけ,ike,池~いけ~ike~ao~target
-お茶,trà,茶,ちゃ,cha,on,おちゃ,ocha,お~お~o~tiền tố lịch sự~kana|茶~ちゃ~cha~trà~target
-茶道,trà đạo,茶,さ,sa,on,さどう,sadou,茶~さ~sa~trà~target|道~どう~dou~đạo / con đường~support
-到着,đến nơi,着,ちゃく,chaku,on,とうちゃく,touchaku,到~とう~tou~đến~support|着~ちゃく~chaku~tới nơi~target
-着る,mặc,着,き,ki,kun,きる,kiru,着~き~ki~mặc~target|る~る~ru~~kana
-昼食,bữa trưa,昼,ちゅう,chuu,on,ちゅうしょく,chuushoku,昼~ちゅう~chuu~buổi trưa~target|食~しょく~shoku~bữa ăn~support
-昼,ban trưa,昼,ひる,hiru,kun,ひる,hiru,昼~ひる~hiru~ban trưa~target
-注意,chú ý,注,ちゅう,chuu,on,ちゅうい,chuui,注~ちゅう~chuu~chú ý~target|意~い~i~ý~support
-注ぐ,rót / đổ vào,注,そそ,soso,kun,そそぐ,sosogu,注~そそ~soso~rót~target|ぐ~ぐ~gu~~kana
-町長,thị trưởng,町,ちょう,chou,on,ちょうちょう,chouchou,町~ちょう~chou~thị trấn~target|長~ちょう~chou~người đứng đầu~support
-町,phố / thị trấn,町,まち,machi,kun,まち,machi,町~まち~machi~phố~target
-野鳥,chim hoang dã,鳥,ちょう,chou,on,やちょう,yachou,野~や~ya~hoang dã~support|鳥~ちょう~chou~chim~target
-鳥,con chim,鳥,とり,tori,kun,とり,tori,鳥~とり~tori~chim~target
-朝食,bữa sáng,朝,ちょう,chou,on,ちょうしょく,choushoku,朝~ちょう~chou~buổi sáng~target|食~しょく~shoku~bữa ăn~support
-朝,buổi sáng,朝,あさ,asa,kun,あさ,asa,朝~あさ~asa~buổi sáng~target
-通学,đi học,通,つう,tsuu,on,つうがく,tsuugaku,通~つう~tsuu~đi lại~target|学~がく~gaku~học~support
-通る,đi qua,通,とお,too,kun,とおる,tooru,通~とお~too~đi qua~target|る~る~ru~~kana
-兄弟,anh em,弟,だい,dai,on,きょうだい,kyoudai,兄~きょう~kyou~anh~support|弟~だい~dai~em~target
-弟,em trai,弟,おとうと,otouto,kun,おとうと,otouto,弟~おとうと~otouto~em trai~target
-低温,nhiệt độ thấp,低,てい,tei,on,ていおん,teion,低~てい~tei~thấp~target|温~おん~on~nhiệt độ~support
-低い,thấp,低,ひく,hiku,kun,ひくい,hikui,低~ひく~hiku~thấp~target|い~い~i~~kana
-運転,lái xe / vận hành,転,てん,ten,on,うんてん,unten,運~うん~un~vận hành~support|転~てん~ten~chuyển động~target
-転ぶ,ngã,転,ころ,koro,kun,ころぶ,korobu,転~ころ~koro~ngã~target|ぶ~ぶ~bu~~kana
-水田,ruộng lúa nước,田,でん,den,on,すいでん,suiden,水~すい~sui~nước~support|田~でん~den~ruộng~target
-田んぼ,ruộng lúa,田,た,ta,kun,たんぼ,tanbo,田~た~ta~ruộng~target|んぼ~んぼ~nbo~~kana
-都会,thành thị,都,と,to,on,とかい,tokai,都~と~to~đô thị~target|会~かい~kai~tụ họp~support
-都,kinh đô,都,みやこ,miyako,kun,みやこ,miyako,都~みやこ~miyako~kinh đô~target
-温度,nhiệt độ,度,ど,do,on,おんど,ondo,温~おん~on~ấm / nhiệt~support|度~ど~do~mức độ~target
-度々,nhiều lần / thường xuyên,度,たび,tabi,kun,たびたび,tabitabi,度~たび~tabi~lần~target|々~たび~tabi~lặp lại~support
-回答,câu trả lời,答,とう,tou,on,かいとう,kaitou,回~かい~kai~phản hồi~support|答~とう~tou~đáp án~target
-答える,trả lời,答,こた,kota,kun,こたえる,kotaeru,答~こた~kota~trả lời~target|える~える~eru~~kana
+word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts,sentence,sentenceReading,sentenceMeaning,id
+音楽,âm nhạc,音,おん,on,on,おんがく,ongaku,音~おん~on~âm thanh~target|楽~がく~gaku~nhạc~support,ことば「音楽」を よみます。,ことば「おんがく」を よみます。,Tôi đọc từ “âm nhạc”.,v1:%E9%9F%B3:%E9%9F%B3%E6%A5%BD:on:%E3%81%8A%E3%82%93
+足音,tiếng bước chân,音,おと,oto,kun,あしおと,ashioto,足~あし~ashi~chân~support|音~おと~oto~âm thanh~target,ことば「足音」を よみます。,ことば「あしおと」を よみます。,Tôi đọc từ “tiếng bước chân”.,v1:%E9%9F%B3:%E8%B6%B3%E9%9F%B3:kun:%E3%81%8A%E3%81%A8
+毎日,mỗi ngày,日,にち,nichi,on,まいにち,mainichi,毎~まい~mai~mỗi~support|日~にち~nichi~ngày~target,ことば「毎日」を よみます。,ことば「まいにち」を よみます。,Tôi đọc từ “mỗi ngày”.,v1:%E6%97%A5:%E6%AF%8E%E6%97%A5:on:%E3%81%AB%E3%81%A1
+日曜日,Chủ Nhật,日,にち,nichi,on,にちようび,nichiyoubi,日~にち~nichi~ngày~target|曜~よう~you~thứ~support|日~び~bi~ngày~support,ことば「日曜日」を よみます。,ことば「にちようび」を よみます。,Tôi đọc từ “Chủ Nhật”.,v1:%E6%97%A5:%E6%97%A5%E6%9B%9C%E6%97%A5:on:%E3%81%AB%E3%81%A1
+日,ngày / mặt trời,日,ひ,hi,kun,ひ,hi,日~ひ~hi~ngày / mặt trời~target,ことば「日」を よみます。,ことば「ひ」を よみます。,Tôi đọc từ “ngày / mặt trời”.,v1:%E6%97%A5:%E6%97%A5:kun:%E3%81%B2
+一月,tháng Một,一,いち,ichi,on,いちがつ,ichigatsu,一~いち~ichi~một~target|月~がつ~gatsu~tháng~support,ことば「一月」を よみます。,ことば「いちがつ」を よみます。,Tôi đọc từ “tháng Một”.,v1:%E4%B8%80:%E4%B8%80%E6%9C%88:on:%E3%81%84%E3%81%A1
+一年,một năm,一,いち,ichi,on,いちねん,ichinen,一~いち~ichi~một~target|年~ねん~nen~năm~support,ことば「一年」を よみます。,ことば「いちねん」を よみます。,Tôi đọc từ “một năm”.,v1:%E4%B8%80:%E4%B8%80%E5%B9%B4:on:%E3%81%84%E3%81%A1
+一つ,một cái,一,ひと,hito,kun,ひとつ,hitotsu,一~ひと~hito~một~target|つ~つ~tsu~trợ từ đếm~kana,ことば「一つ」を よみます。,ことば「ひとつ」を よみます。,Tôi đọc từ “một cái”.,v1:%E4%B8%80:%E4%B8%80%E3%81%A4:kun:%E3%81%B2%E3%81%A8
+国語,quốc ngữ (môn Văn),国,こく,koku,on,こくご,kokugo,国~こく~koku~quốc gia~target|語~ご~go~ngôn ngữ~support,ことば「国語」を よみます。,ことば「こくご」を よみます。,Tôi đọc từ “quốc ngữ (môn Văn)”.,v1:%E5%9B%BD:%E5%9B%BD%E8%AA%9E:on:%E3%81%93%E3%81%8F
+外国,nước ngoài,国,こく,koku,on,がいこく,gaikoku,外~がい~gai~ngoài~support|国~こく~koku~quốc gia~target,ことば「外国」を よみます。,ことば「がいこく」を よみます。,Tôi đọc từ “nước ngoài”.,v1:%E5%9B%BD:%E5%A4%96%E5%9B%BD:on:%E3%81%93%E3%81%8F
+国,đất nước,国,くに,kuni,kun,くに,kuni,国~くに~kuni~đất nước~target,ことば「国」を よみます。,ことば「くに」を よみます。,Tôi đọc từ “đất nước”.,v1:%E5%9B%BD:%E5%9B%BD:kun:%E3%81%8F%E3%81%AB
+去年,năm ngoái,年,ねん,nen,on,きょねん,kyonen,去~きょ~kyo~đã qua~support|年~ねん~nen~năm~target,ことば「去年」を よみます。,ことば「きょねん」を よみます。,Tôi đọc từ “năm ngoái”.,v1:%E5%B9%B4:%E5%8E%BB%E5%B9%B4:on:%E3%81%AD%E3%82%93
+毎年,mỗi năm,年,ねん,nen,on,まいねん,mainen,毎~まい~mai~mỗi~support|年~ねん~nen~năm~target,ことば「毎年」を よみます。,ことば「まいねん」を よみます。,Tôi đọc từ “mỗi năm”.,v1:%E5%B9%B4:%E6%AF%8E%E5%B9%B4:on:%E3%81%AD%E3%82%93
+年,tuổi / năm,年,とし,toshi,kun,とし,toshi,年~とし~toshi~tuổi / năm~target,ことば「年」を よみます。,ことば「とし」を よみます。,Tôi đọc từ “tuổi / năm”.,v1:%E5%B9%B4:%E5%B9%B4:kun:%E3%81%A8%E3%81%97
+大学,đại học,大,だい,dai,on,だいがく,daigaku,大~だい~dai~lớn~target|学~がく~gaku~học~support,ことば「大学」を よみます。,ことば「だいがく」を よみます。,Tôi đọc từ “đại học”.,v1:%E5%A4%A7:%E5%A4%A7%E5%AD%A6:on:%E3%81%A0%E3%81%84
+大切,quan trọng,大,たい,tai,on,たいせつ,taisetsu,大~たい~tai~lớn~target|切~せつ~setsu~thiết yếu~support,ことば「大切」を よみます。,ことば「たいせつ」を よみます。,Tôi đọc từ “quan trọng”.,v1:%E5%A4%A7:%E5%A4%A7%E5%88%87:on:%E3%81%9F%E3%81%84
+大きい,to / lớn,大,おお,oo,kun,おおきい,ookii,大~おお~oo~lớn~target|きい~きい~kii~~kana,ことば「大きい」を よみます。,ことば「おおきい」を よみます。,Tôi đọc từ “to / lớn”.,v1:%E5%A4%A7:%E5%A4%A7%E3%81%8D%E3%81%84:kun:%E3%81%8A%E3%81%8A
+金魚,cá vàng,魚,ぎょ,gyo,on,きんぎょ,kingyo,金~きん~kin~vàng~support|魚~ぎょ~gyo~cá~target,ことば「金魚」を よみます。,ことば「きんぎょ」を よみます。,Tôi đọc từ “cá vàng”.,v1:%E9%AD%9A:%E9%87%91%E9%AD%9A:on:%E3%81%8E%E3%82%87
+魚,cá,魚,さかな,sakana,kun,さかな,sakana,魚~さかな~sakana~cá~target,ことば「魚」を よみます。,ことば「さかな」を よみます。,Tôi đọc từ “cá”.,v1:%E9%AD%9A:%E9%AD%9A:kun:%E3%81%95%E3%81%8B%E3%81%AA
+魚市場,chợ cá,魚,うお,uo,kun,うおいちば,uoichiba,魚~うお~uo~cá~target|市場~いちば~ichiba~chợ~support,ことば「魚市場」を よみます。,ことば「うおいちば」を よみます。,Tôi đọc từ “chợ cá”.,v1:%E9%AD%9A:%E9%AD%9A%E5%B8%82%E5%A0%B4:kun:%E3%81%86%E3%81%8A
+日本人,người Nhật Bản,人,じん,jin,on,にほんじん,nihonjin,日本~にほん~nihon~Nhật Bản~support|人~じん~jin~người~target,ことば「日本人」を よみます。,ことば「にほんじん」を よみます。,Tôi đọc từ “người Nhật Bản”.,v1:%E4%BA%BA:%E6%97%A5%E6%9C%AC%E4%BA%BA:on:%E3%81%98%E3%82%93
+三人,ba người,人,にん,nin,on,さんにん,sannin,三~さん~san~ba~support|人~にん~nin~người~target,ことば「三人」を よみます。,ことば「さんにん」を よみます。,Tôi đọc từ “ba người”.,v1:%E4%BA%BA:%E4%B8%89%E4%BA%BA:on:%E3%81%AB%E3%82%93
+人,người,人,ひと,hito,kun,ひと,hito,人~ひと~hito~người~target,ことば「人」を よみます。,ことば「ひと」を よみます。,Tôi đọc từ “người”.,v1:%E4%BA%BA:%E4%BA%BA:kun:%E3%81%B2%E3%81%A8
+十月,tháng Mười,十,じゅう,juu,on,じゅうがつ,juugatsu,十~じゅう~juu~mười~target|月~がつ~gatsu~tháng~support,ことば「十月」を よみます。,ことば「じゅうがつ」を よみます。,Tôi đọc từ “tháng Mười”.,v1:%E5%8D%81:%E5%8D%81%E6%9C%88:on:%E3%81%98%E3%82%85%E3%81%86
+十円,mười yên,十,じゅう,juu,on,じゅうえん,juuen,十~じゅう~juu~mười~target|円~えん~en~yên~support,ことば「十円」を よみます。,ことば「じゅうえん」を よみます。,Tôi đọc từ “mười yên”.,v1:%E5%8D%81:%E5%8D%81%E5%86%86:on:%E3%81%98%E3%82%85%E3%81%86
+十日,ngày mùng mười / mười ngày,十,とお,too,kun,とおか,tooka,十~とお~too~mười~target|日~か~ka~ngày~support,ことば「十日」を よみます。,ことば「とおか」を よみます。,Tôi đọc từ “ngày mùng mười / mười ngày”.,v1:%E5%8D%81:%E5%8D%81%E6%97%A5:kun:%E3%81%A8%E3%81%8A
+二月,tháng Hai,二,に,ni,on,にがつ,nigatsu,二~に~ni~hai~target|月~がつ~gatsu~tháng~support,ことば「二月」を よみます。,ことば「にがつ」を よみます。,Tôi đọc từ “tháng Hai”.,v1:%E4%BA%8C:%E4%BA%8C%E6%9C%88:on:%E3%81%AB
+二年,hai năm,二,に,ni,on,にねん,ninen,二~に~ni~hai~target|年~ねん~nen~năm~support,ことば「二年」を よみます。,ことば「にねん」を よみます。,Tôi đọc từ “hai năm”.,v1:%E4%BA%8C:%E4%BA%8C%E5%B9%B4:on:%E3%81%AB
+二つ,hai cái,二,ふた,futa,kun,ふたつ,futatsu,二~ふた~futa~hai~target|つ~つ~tsu~trợ từ đếm~kana,ことば「二つ」を よみます。,ことば「ふたつ」を よみます。,Tôi đọc từ “hai cái”.,v1:%E4%BA%8C:%E4%BA%8C%E3%81%A4:kun:%E3%81%B5%E3%81%9F
+日本,Nhật Bản,本,ほん,hon,on,にほん,nihon,日~に~ni~Nhật / mặt trời~support|本~ほん~hon~gốc~target,ことば「日本」を よみます。,ことば「にほん」を よみます。,Tôi đọc từ “Nhật Bản”.,v1:%E6%9C%AC:%E6%97%A5%E6%9C%AC:on:%E3%81%BB%E3%82%93
+本当,thật sự / sự thật,本,ほん,hon,on,ほんとう,hontou,本~ほん~hon~gốc / chính~target|当~とう~tou~đúng~support,ことば「本当」を よみます。,ことば「ほんとう」を よみます。,Tôi đọc từ “thật sự / sự thật”.,v1:%E6%9C%AC:%E6%9C%AC%E5%BD%93:on:%E3%81%BB%E3%82%93
+本,gốc / căn nguyên,本,もと,moto,kun,もと,moto,本~もと~moto~gốc / căn nguyên~target,ことば「本」を よみます。,ことば「もと」を よみます。,Tôi đọc từ “gốc / căn nguyên”.,v1:%E6%9C%AC:%E6%9C%AC:kun:%E3%82%82%E3%81%A8
+中国,Trung Quốc,中,ちゅう,chuu,on,ちゅうごく,chuugoku,中~ちゅう~chuu~giữa~target|国~ごく~goku~quốc gia~support,ことば「中国」を よみます。,ことば「ちゅうごく」を よみます。,Tôi đọc từ “Trung Quốc”.,v1:%E4%B8%AD:%E4%B8%AD%E5%9B%BD:on:%E3%81%A1%E3%82%85%E3%81%86
+中学校,trường trung học cơ sở,中,ちゅう,chuu,on,ちゅうがっこう,chuugakkou,中~ちゅう~chuu~trung~target|学校~がっこう~gakkou~trường học~support,ことば「中学校」を よみます。,ことば「ちゅうがっこう」を よみます。,Tôi đọc từ “trường trung học cơ sở”.,v1:%E4%B8%AD:%E4%B8%AD%E5%AD%A6%E6%A0%A1:on:%E3%81%A1%E3%82%85%E3%81%86
+中,bên trong / ở giữa,中,なか,naka,kun,なか,naka,中~なか~naka~bên trong / ở giữa~target,ことば「中」を よみます。,ことば「なか」を よみます。,Tôi đọc từ “bên trong / ở giữa”.,v1:%E4%B8%AD:%E4%B8%AD:kun:%E3%81%AA%E3%81%8B
+社長,giám đốc công ty,長,ちょう,chou,on,しゃちょう,shachou,社~しゃ~sha~công ty~support|長~ちょう~chou~trưởng~target,ことば「社長」を よみます。,ことば「しゃちょう」を よみます。,Tôi đọc từ “giám đốc công ty”.,v1:%E9%95%B7:%E7%A4%BE%E9%95%B7:on:%E3%81%A1%E3%82%87%E3%81%86
+校長,hiệu trưởng,長,ちょう,chou,on,こうちょう,kouchou,校~こう~kou~trường~support|長~ちょう~chou~trưởng~target,ことば「校長」を よみます。,ことば「こうちょう」を よみます。,Tôi đọc từ “hiệu trưởng”.,v1:%E9%95%B7:%E6%A0%A1%E9%95%B7:on:%E3%81%A1%E3%82%87%E3%81%86
+長い,dài,長,なが,naga,kun,ながい,nagai,長~なが~naga~dài~target|い~い~i~~kana,ことば「長い」を よみます。,ことば「ながい」を よみます。,Tôi đọc từ “dài”.,v1:%E9%95%B7:%E9%95%B7%E3%81%84:kun:%E3%81%AA%E3%81%8C
+出口,lối ra,出,で,de,kun,でぐち,deguchi,出~で~de~ra~target|口~ぐち~guchi~miệng / lối~support,ことば「出口」を よみます。,ことば「でぐち」を よみます。,Tôi đọc từ “lối ra”.,v1:%E5%87%BA:%E5%87%BA%E5%8F%A3:kun:%E3%81%A7
+出る,đi ra / xuất hiện,出,で,de,kun,でる,deru,出~で~de~ra~target|る~る~ru~~kana,ことば「出る」を よみます。,ことば「でる」を よみます。,Tôi đọc từ “đi ra / xuất hiện”.,v1:%E5%87%BA:%E5%87%BA%E3%82%8B:kun:%E3%81%A7
+出発,khởi hành,出,しゅっ,shu,on,しゅっぱつ,shuppatsu,出~しゅっ~shu~xuất / ra~target|発~ぱつ~patsu~phát / khởi hành~support,ことば「出発」を よみます。,ことば「しゅっぱつ」を よみます。,Tôi đọc từ “khởi hành”.,v1:%E5%87%BA:%E5%87%BA%E7%99%BA:on:%E3%81%97%E3%82%85%E3%81%A3
+三月,tháng Ba,三,さん,san,on,さんがつ,sangatsu,三~さん~san~ba~target|月~がつ~gatsu~tháng~support,ことば「三月」を よみます。,ことば「さんがつ」を よみます。,Tôi đọc từ “tháng Ba”.,v1:%E4%B8%89:%E4%B8%89%E6%9C%88:on:%E3%81%95%E3%82%93
+三人,ba người,三,さん,san,on,さんにん,sannin,三~さん~san~ba~target|人~にん~nin~người~support,ことば「三人」を よみます。,ことば「さんにん」を よみます。,Tôi đọc từ “ba người”.,v1:%E4%B8%89:%E4%B8%89%E4%BA%BA:on:%E3%81%95%E3%82%93
+三つ,ba cái,三,みっ,mi,kun,みっつ,mittsu,三~みっ~mi~ba~target|つ~つ~tsu~trợ từ đếm~kana,ことば「三つ」を よみます。,ことば「みっつ」を よみます。,Tôi đọc từ “ba cái”.,v1:%E4%B8%89:%E4%B8%89%E3%81%A4:kun:%E3%81%BF%E3%81%A3
+時間,thời gian,時,じ,ji,on,じかん,jikan,時~じ~ji~thời gian~target|間~かん~kan~khoảng~support,ことば「時間」を よみます。,ことば「じかん」を よみます。,Tôi đọc từ “thời gian”.,v1:%E6%99%82:%E6%99%82%E9%96%93:on:%E3%81%98
+六時,sáu giờ,時,じ,ji,on,ろくじ,rokuji,六~ろく~roku~sáu~support|時~じ~ji~giờ~target,ことば「六時」を よみます。,ことば「ろくじ」を よみます。,Tôi đọc từ “sáu giờ”.,v1:%E6%99%82:%E5%85%AD%E6%99%82:on:%E3%81%98
+時,lúc / thời điểm,時,とき,toki,kun,とき,toki,時~とき~toki~lúc / thời điểm~target,ことば「時」を よみます。,ことば「とき」を よみます。,Tôi đọc từ “lúc / thời điểm”.,v1:%E6%99%82:%E6%99%82:kun:%E3%81%A8%E3%81%8D
+銀行,ngân hàng,行,こう,kou,on,ぎんこう,ginkou,銀~ぎん~gin~bạc~support|行~こう~kou~hàng / cơ quan~target,ことば「銀行」を よみます。,ことば「ぎんこう」を よみます。,Tôi đọc từ “ngân hàng”.,v1:%E8%A1%8C:%E9%8A%80%E8%A1%8C:on:%E3%81%93%E3%81%86
+旅行,du lịch,行,こう,kou,on,りょこう,ryokou,旅~りょ~ryo~chuyến đi~support|行~こう~kou~đi~target,ことば「旅行」を よみます。,ことば「りょこう」を よみます。,Tôi đọc từ “du lịch”.,v1:%E8%A1%8C:%E6%97%85%E8%A1%8C:on:%E3%81%93%E3%81%86
+行く,đi,行,い,i,kun,いく,iku,行~い~i~đi~target|く~く~ku~~kana,ことば「行く」を よみます。,ことば「いく」を よみます。,Tôi đọc từ “đi”.,v1:%E8%A1%8C:%E8%A1%8C%E3%81%8F:kun:%E3%81%84
+意見,ý kiến,見,けん,ken,on,いけん,iken,意~い~i~ý~support|見~けん~ken~cách nhìn~target,ことば「意見」を よみます。,ことば「いけん」を よみます。,Tôi đọc từ “ý kiến”.,v1:%E8%A6%8B:%E6%84%8F%E8%A6%8B:on:%E3%81%91%E3%82%93
+見学,tham quan học tập,見,けん,ken,on,けんがく,kengaku,見~けん~ken~xem~target|学~がく~gaku~học~support,ことば「見学」を よみます。,ことば「けんがく」を よみます。,Tôi đọc từ “tham quan học tập”.,v1:%E8%A6%8B:%E8%A6%8B%E5%AD%A6:on:%E3%81%91%E3%82%93
+見る,nhìn / xem,見,み,mi,kun,みる,miru,見~み~mi~nhìn~target|る~る~ru~~kana,ことば「見る」を よみます。,ことば「みる」を よみます。,Tôi đọc từ “nhìn / xem”.,v1:%E8%A6%8B:%E8%A6%8B%E3%82%8B:kun:%E3%81%BF
+今月,tháng này,今,こん,kon,on,こんげつ,kongetsu,今~こん~kon~này / hiện tại~target|月~げつ~getsu~tháng~support,ことば「今月」を よみます。,ことば「こんげつ」を よみます。,Tôi đọc từ “tháng này”.,v1:%E4%BB%8A:%E4%BB%8A%E6%9C%88:on:%E3%81%93%E3%82%93
+今週,tuần này,今,こん,kon,on,こんしゅう,konshuu,今~こん~kon~này / hiện tại~target|週~しゅう~shuu~tuần~support,ことば「今週」を よみます。,ことば「こんしゅう」を よみます。,Tôi đọc từ “tuần này”.,v1:%E4%BB%8A:%E4%BB%8A%E9%80%B1:on:%E3%81%93%E3%82%93
+今,bây giờ,今,いま,ima,kun,いま,ima,今~いま~ima~bây giờ~target,ことば「今」を よみます。,ことば「いま」を よみます。,Tôi đọc từ “bây giờ”.,v1:%E4%BB%8A:%E4%BB%8A:kun:%E3%81%84%E3%81%BE
+月曜日,thứ Hai,月,げつ,getsu,on,げつようび,getsuyoubi,月~げつ~getsu~mặt trăng / thứ Hai~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「月曜日」を よみます。,ことば「げつようび」を よみます。,Tôi đọc từ “thứ Hai”.,v1:%E6%9C%88:%E6%9C%88%E6%9B%9C%E6%97%A5:on:%E3%81%92%E3%81%A4
+一月,tháng Một,月,がつ,gatsu,on,いちがつ,ichigatsu,一~いち~ichi~một~support|月~がつ~gatsu~tháng~target,ことば「一月」を よみます。,ことば「いちがつ」を よみます。,Tôi đọc từ “tháng Một”.,v1:%E6%9C%88:%E4%B8%80%E6%9C%88:on:%E3%81%8C%E3%81%A4
+月,mặt trăng,月,つき,tsuki,kun,つき,tsuki,月~つき~tsuki~mặt trăng~target,ことば「月」を よみます。,ことば「つき」を よみます。,Tôi đọc từ “mặt trăng”.,v1:%E6%9C%88:%E6%9C%88:kun:%E3%81%A4%E3%81%8D
+半分,một nửa,分,ぶん,bun,on,はんぶん,hanbun,半~はん~han~nửa~support|分~ぶん~bun~phần~target,ことば「半分」を よみます。,ことば「はんぶん」を よみます。,Tôi đọc từ “một nửa”.,v1:%E5%88%86:%E5%8D%8A%E5%88%86:on:%E3%81%B6%E3%82%93
+十分,mười phút,分,ぷん,pun,on,じゅっぷん,juppun,十~じゅっ~ju~mười~support|分~ぷん~pun~phút~target,ことば「十分」を よみます。,ことば「じゅっぷん」を よみます。,Tôi đọc từ “mười phút”.,v1:%E5%88%86:%E5%8D%81%E5%88%86:on:%E3%81%B7%E3%82%93
+分かる,hiểu,分,わ,wa,kun,わかる,wakaru,分~わ~wa~hiểu / phân biệt~target|かる~かる~karu~~kana,ことば「分かる」を よみます。,ことば「わかる」を よみます。,Tôi đọc từ “hiểu”.,v1:%E5%88%86:%E5%88%86%E3%81%8B%E3%82%8B:kun:%E3%82%8F
+午後,buổi chiều,後,ご,go,on,ごご,gogo,午~ご~go~trưa~support|後~ご~go~sau~target,ことば「午後」を よみます。,ことば「ごご」を よみます。,Tôi đọc từ “buổi chiều”.,v1:%E5%BE%8C:%E5%8D%88%E5%BE%8C:on:%E3%81%94
+後ろ,phía sau,後,うし,ushi,kun,うしろ,ushiro,後~うし~ushi~phía sau~target|ろ~ろ~ro~~kana,ことば「後ろ」を よみます。,ことば「うしろ」を よみます。,Tôi đọc từ “phía sau”.,v1:%E5%BE%8C:%E5%BE%8C%E3%82%8D:kun:%E3%81%86%E3%81%97
+後で,lát nữa / sau đó,後,あと,ato,kun,あとで,atode,後~あと~ato~sau~target|で~で~de~~kana,ことば「後で」を よみます。,ことば「あとで」を よみます。,Tôi đọc từ “lát nữa / sau đó”.,v1:%E5%BE%8C:%E5%BE%8C%E3%81%A7:kun:%E3%81%82%E3%81%A8
+午前,buổi sáng,前,ぜん,zen,on,ごぜん,gozen,午~ご~go~trưa~support|前~ぜん~zen~trước~target,ことば「午前」を よみます。,ことば「ごぜん」を よみます。,Tôi đọc từ “buổi sáng”.,v1:%E5%89%8D:%E5%8D%88%E5%89%8D:on:%E3%81%9C%E3%82%93
+名前,tên,前,まえ,mae,kun,なまえ,namae,名~な~na~tên~support|前~まえ~mae~phần sau của từ tên~target,ことば「名前」を よみます。,ことば「なまえ」を よみます。,Tôi đọc từ “tên”.,v1:%E5%89%8D:%E5%90%8D%E5%89%8D:kun:%E3%81%BE%E3%81%88
+前,phía trước / trước đây,前,まえ,mae,kun,まえ,mae,前~まえ~mae~phía trước~target,ことば「前」を よみます。,ことば「まえ」を よみます。,Tôi đọc từ “phía trước / trước đây”.,v1:%E5%89%8D:%E5%89%8D:kun:%E3%81%BE%E3%81%88
+学生,học sinh,生,せい,sei,on,がくせい,gakusei,学~がく~gaku~học~support|生~せい~sei~người / sinh~target,ことば「学生」を よみます。,ことば「がくせい」を よみます。,Tôi đọc từ “học sinh”.,v1:%E7%94%9F:%E5%AD%A6%E7%94%9F:on:%E3%81%9B%E3%81%84
+先生,giáo viên,生,せい,sei,on,せんせい,sensei,先~せん~sen~trước~support|生~せい~sei~sinh~target,ことば「先生」を よみます。,ことば「せんせい」を よみます。,Tôi đọc từ “giáo viên”.,v1:%E7%94%9F:%E5%85%88%E7%94%9F:on:%E3%81%9B%E3%81%84
+生まれる,được sinh ra,生,う,u,kun,うまれる,umareru,生~う~u~sinh~target|まれる~まれる~mareru~~kana,ことば「生まれる」を よみます。,ことば「うまれる」を よみます。,Tôi đọc từ “được sinh ra”.,v1:%E7%94%9F:%E7%94%9F%E3%81%BE%E3%82%8C%E3%82%8B:kun:%E3%81%86
+五月,tháng Năm,五,ご,go,on,ごがつ,gogatsu,五~ご~go~năm~target|月~がつ~gatsu~tháng~support,ことば「五月」を よみます。,ことば「ごがつ」を よみます。,Tôi đọc từ “tháng Năm”.,v1:%E4%BA%94:%E4%BA%94%E6%9C%88:on:%E3%81%94
+五人,năm người,五,ご,go,on,ごにん,gonin,五~ご~go~năm~target|人~にん~nin~người~support,ことば「五人」を よみます。,ことば「ごにん」を よみます。,Tôi đọc từ “năm người”.,v1:%E4%BA%94:%E4%BA%94%E4%BA%BA:on:%E3%81%94
+五つ,năm cái,五,いつ,itsu,kun,いつつ,itsutsu,五~いつ~itsu~năm~target|つ~つ~tsu~trợ từ đếm~kana,ことば「五つ」を よみます。,ことば「いつつ」を よみます。,Tôi đọc từ “năm cái”.,v1:%E4%BA%94:%E4%BA%94%E3%81%A4:kun:%E3%81%84%E3%81%A4
+時間,thời gian,間,かん,kan,on,じかん,jikan,時~じ~ji~thời~support|間~かん~kan~khoảng~target,ことば「時間」を よみます。,ことば「じかん」を よみます。,Tôi đọc từ “thời gian”.,v1:%E9%96%93:%E6%99%82%E9%96%93:on:%E3%81%8B%E3%82%93
+人間,con người,間,げん,gen,on,にんげん,ningen,人~にん~nin~người~support|間~げん~gen~cõi / giới~target,ことば「人間」を よみます。,ことば「にんげん」を よみます。,Tôi đọc từ “con người”.,v1:%E9%96%93:%E4%BA%BA%E9%96%93:on:%E3%81%92%E3%82%93
+間,khoảng giữa,間,あいだ,aida,kun,あいだ,aida,間~あいだ~aida~khoảng giữa~target,ことば「間」を よみます。,ことば「あいだ」を よみます。,Tôi đọc từ “khoảng giữa”.,v1:%E9%96%93:%E9%96%93:kun:%E3%81%82%E3%81%84%E3%81%A0
+上手,giỏi / khéo,上,じょう,jou,on,じょうず,jouzu,上~じょう~jou~trên / giỏi~target|手~ず~zu~tay / kỹ năng~support,ことば「上手」を よみます。,ことば「じょうず」を よみます。,Tôi đọc từ “giỏi / khéo”.,v1:%E4%B8%8A:%E4%B8%8A%E6%89%8B:on:%E3%81%98%E3%82%87%E3%81%86
+上げる,nâng lên,上,あ,a,kun,あげる,ageru,上~あ~a~lên~target|げる~げる~geru~~kana,ことば「上げる」を よみます。,ことば「あげる」を よみます。,Tôi đọc từ “nâng lên”.,v1:%E4%B8%8A:%E4%B8%8A%E3%81%92%E3%82%8B:kun:%E3%81%82
+上,phía trên,上,うえ,ue,kun,うえ,ue,上~うえ~ue~phía trên~target,ことば「上」を よみます。,ことば「うえ」を よみます。,Tôi đọc từ “phía trên”.,v1:%E4%B8%8A:%E4%B8%8A:kun:%E3%81%86%E3%81%88
+東京,Tokyo,東,とう,tou,on,とうきょう,toukyou,東~とう~tou~phía Đông~target|京~きょう~kyou~kinh đô~support,ことば「東京」を よみます。,ことば「とうきょう」を よみます。,Tôi đọc từ “Tokyo”.,v1:%E6%9D%B1:%E6%9D%B1%E4%BA%AC:on:%E3%81%A8%E3%81%86
+東口,cửa phía Đông,東,ひがし,higashi,kun,ひがしぐち,higashiguchi,東~ひがし~higashi~phía Đông~target|口~ぐち~guchi~cửa / lối~support,ことば「東口」を よみます。,ことば「ひがしぐち」を よみます。,Tôi đọc từ “cửa phía Đông”.,v1:%E6%9D%B1:%E6%9D%B1%E5%8F%A3:kun:%E3%81%B2%E3%81%8C%E3%81%97
+東,phía Đông,東,ひがし,higashi,kun,ひがし,higashi,東~ひがし~higashi~phía Đông~target,ことば「東」を よみます。,ことば「ひがし」を よみます。,Tôi đọc từ “phía Đông”.,v1:%E6%9D%B1:%E6%9D%B1:kun:%E3%81%B2%E3%81%8C%E3%81%97
+四月,tháng Tư,四,し,shi,on,しがつ,shigatsu,四~し~shi~bốn~target|月~がつ~gatsu~tháng~support,ことば「四月」を よみます。,ことば「しがつ」を よみます。,Tôi đọc từ “tháng Tư”.,v1:%E5%9B%9B:%E5%9B%9B%E6%9C%88:on:%E3%81%97
+四人,bốn người,四,よ,yo,kun,よにん,yonin,四~よ~yo~bốn~target|人~にん~nin~người~support,ことば「四人」を よみます。,ことば「よにん」を よみます。,Tôi đọc từ “bốn người”.,v1:%E5%9B%9B:%E5%9B%9B%E4%BA%BA:kun:%E3%82%88
+四つ,bốn cái,四,よっ,yo,kun,よっつ,yottsu,四~よっ~yo~bốn~target|つ~つ~tsu~trợ từ đếm~kana,ことば「四つ」を よみます。,ことば「よっつ」を よみます。,Tôi đọc từ “bốn cái”.,v1:%E5%9B%9B:%E5%9B%9B%E3%81%A4:kun:%E3%82%88%E3%81%A3
+金曜日,thứ Sáu,金,きん,kin,on,きんようび,kinyoubi,金~きん~kin~vàng / thứ Sáu~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「金曜日」を よみます。,ことば「きんようび」を よみます。,Tôi đọc từ “thứ Sáu”.,v1:%E9%87%91:%E9%87%91%E6%9B%9C%E6%97%A5:on:%E3%81%8D%E3%82%93
+金色,màu vàng kim,金,きん,kin,on,きんいろ,kiniro,金~きん~kin~vàng~target|色~いろ~iro~màu~support,ことば「金色」を よみます。,ことば「きんいろ」を よみます。,Tôi đọc từ “màu vàng kim”.,v1:%E9%87%91:%E9%87%91%E8%89%B2:on:%E3%81%8D%E3%82%93
+お金,tiền,金,かね,kane,kun,おかね,okane,お~お~o~tiền tố lịch sự~kana|金~かね~kane~tiền / vàng~target,ことば「お金」を よみます。,ことば「おかね」を よみます。,Tôi đọc từ “tiền”.,v1:%E9%87%91:%E3%81%8A%E9%87%91:kun:%E3%81%8B%E3%81%AD
+九月,tháng Chín,九,く,ku,on,くがつ,kugatsu,九~く~ku~chín~target|月~がつ~gatsu~tháng~support,ことば「九月」を よみます。,ことば「くがつ」を よみます。,Tôi đọc từ “tháng Chín”.,v1:%E4%B9%9D:%E4%B9%9D%E6%9C%88:on:%E3%81%8F
+九人,chín người,九,きゅう,kyuu,on,きゅうにん,kyuunin,九~きゅう~kyuu~chín~target|人~にん~nin~người~support,ことば「九人」を よみます。,ことば「きゅうにん」を よみます。,Tôi đọc từ “chín người”.,v1:%E4%B9%9D:%E4%B9%9D%E4%BA%BA:on:%E3%81%8D%E3%82%85%E3%81%86
+九つ,chín cái,九,ここの,kokono,kun,ここのつ,kokonotsu,九~ここの~kokono~chín~target|つ~つ~tsu~trợ từ đếm~kana,ことば「九つ」を よみます。,ことば「ここのつ」を よみます。,Tôi đọc từ “chín cái”.,v1:%E4%B9%9D:%E4%B9%9D%E3%81%A4:kun:%E3%81%93%E3%81%93%E3%81%AE
+入学,nhập học,入,にゅう,nyuu,on,にゅうがく,nyuugaku,入~にゅう~nyuu~nhập / vào~target|学~がく~gaku~học~support,ことば「入学」を よみます。,ことば「にゅうがく」を よみます。,Tôi đọc từ “nhập học”.,v1:%E5%85%A5:%E5%85%A5%E5%AD%A6:on:%E3%81%AB%E3%82%85%E3%81%86
+入る,đi vào,入,はい,hai,kun,はいる,hairu,入~はい~hai~vào~target|る~る~ru~~kana,ことば「入る」を よみます。,ことば「はいる」を よみます。,Tôi đọc từ “đi vào”.,v1:%E5%85%A5:%E5%85%A5%E3%82%8B:kun:%E3%81%AF%E3%81%84
+入口,lối vào,入,いり,iri,kun,いりぐち,iriguchi,入~いり~iri~vào~target|口~ぐち~guchi~cửa / lối~support,ことば「入口」を よみます。,ことば「いりぐち」を よみます。,Tôi đọc từ “lối vào”.,v1:%E5%85%A5:%E5%85%A5%E5%8F%A3:kun:%E3%81%84%E3%82%8A
+学生,học sinh / sinh viên,学,がく,gaku,on,がくせい,gakusei,学~がく~gaku~học~target|生~せい~sei~sinh / người học~support,ことば「学生」を よみます。,ことば「がくせい」を よみます。,Tôi đọc từ “học sinh / sinh viên”.,v1:%E5%AD%A6:%E5%AD%A6%E7%94%9F:on:%E3%81%8C%E3%81%8F
+学校,trường học,学,がっ,ga,on,がっこう,gakkou,学~がっ~ga~học~target|校~こう~kou~trường~support,ことば「学校」を よみます。,ことば「がっこう」を よみます。,Tôi đọc từ “trường học”.,v1:%E5%AD%A6:%E5%AD%A6%E6%A0%A1:on:%E3%81%8C%E3%81%A3
+学ぶ,học hỏi,学,まな,mana,kun,まなぶ,manabu,学~まな~mana~học~target|ぶ~ぶ~bu~~kana,ことば「学ぶ」を よみます。,ことば「まなぶ」を よみます。,Tôi đọc từ “học hỏi”.,v1:%E5%AD%A6:%E5%AD%A6%E3%81%B6:kun:%E3%81%BE%E3%81%AA
+高校,trường trung học phổ thông,高,こう,kou,on,こうこう,koukou,高~こう~kou~cao~target|校~こう~kou~trường~support,ことば「高校」を よみます。,ことば「こうこう」を よみます。,Tôi đọc từ “trường trung học phổ thông”.,v1:%E9%AB%98:%E9%AB%98%E6%A0%A1:on:%E3%81%93%E3%81%86
+高い,cao / đắt,高,たか,taka,kun,たかい,takai,高~たか~taka~cao / đắt~target|い~い~i~~kana,ことば「高い」を よみます。,ことば「たかい」を よみます。,Tôi đọc từ “cao / đắt”.,v1:%E9%AB%98:%E9%AB%98%E3%81%84:kun:%E3%81%9F%E3%81%8B
+高さ,độ cao,高,たか,taka,kun,たかさ,takasa,高~たか~taka~cao~target|さ~さ~sa~hậu tố chỉ mức độ~kana,ことば「高さ」を よみます。,ことば「たかさ」を よみます。,Tôi đọc từ “độ cao”.,v1:%E9%AB%98:%E9%AB%98%E3%81%95:kun:%E3%81%9F%E3%81%8B
+百円,một trăm yên,円,えん,en,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~support|円~えん~en~yên~target,ことば「百円」を よみます。,ことば「ひゃくえん」を よみます。,Tôi đọc từ “một trăm yên”.,v1:%E5%86%86:%E7%99%BE%E5%86%86:on:%E3%81%88%E3%82%93
+一円,một yên,円,えん,en,on,いちえん,ichien,一~いち~ichi~một~support|円~えん~en~yên~target,ことば「一円」を よみます。,ことば「いちえん」を よみます。,Tôi đọc từ “một yên”.,v1:%E5%86%86:%E4%B8%80%E5%86%86:on:%E3%81%88%E3%82%93
+円形,hình tròn,円,えん,en,on,えんけい,enkei,円~えん~en~tròn~target|形~けい~kei~hình dạng~support,ことば「円形」を よみます。,ことば「えんけい」を よみます。,Tôi đọc từ “hình tròn”.,v1:%E5%86%86:%E5%86%86%E5%BD%A2:on:%E3%81%88%E3%82%93
+子供,trẻ em,子,こ,ko,kun,こども,kodomo,子~こ~ko~trẻ em~target|供~ども~domo~nhóm / cùng~support,ことば「子供」を よみます。,ことば「こども」を よみます。,Tôi đọc từ “trẻ em”.,v1:%E5%AD%90:%E5%AD%90%E4%BE%9B:kun:%E3%81%93
+女子,nữ / nữ sinh,子,し,shi,on,じょし,joshi,女~じょ~jo~nữ~support|子~し~shi~người con~target,ことば「女子」を よみます。,ことば「じょし」を よみます。,Tôi đọc từ “nữ / nữ sinh”.,v1:%E5%AD%90:%E5%A5%B3%E5%AD%90:on:%E3%81%97
+子犬,chó con,子,こ,ko,kun,こいぬ,koinu,子~こ~ko~con / nhỏ~target|犬~いぬ~inu~chó~support,ことば「子犬」を よみます。,ことば「こいぬ」を よみます。,Tôi đọc từ “chó con”.,v1:%E5%AD%90:%E5%AD%90%E7%8A%AC:kun:%E3%81%93
+外国,nước ngoài,外,がい,gai,on,がいこく,gaikoku,外~がい~gai~ngoài~target|国~こく~koku~quốc gia~support,ことば「外国」を よみます。,ことば「がいこく」を よみます。,Tôi đọc từ “nước ngoài”.,v1:%E5%A4%96:%E5%A4%96%E5%9B%BD:on:%E3%81%8C%E3%81%84
+外出,đi ra ngoài,外,がい,gai,on,がいしゅつ,gaishutsu,外~がい~gai~ngoài~target|出~しゅつ~shutsu~ra~support,ことば「外出」を よみます。,ことば「がいしゅつ」を よみます。,Tôi đọc từ “đi ra ngoài”.,v1:%E5%A4%96:%E5%A4%96%E5%87%BA:on:%E3%81%8C%E3%81%84
+外,bên ngoài,外,そと,soto,kun,そと,soto,外~そと~soto~bên ngoài~target,ことば「外」を よみます。,ことば「そと」を よみます。,Tôi đọc từ “bên ngoài”.,v1:%E5%A4%96:%E5%A4%96:kun:%E3%81%9D%E3%81%A8
+八月,tháng Tám,八,はち,hachi,on,はちがつ,hachigatsu,八~はち~hachi~tám~target|月~がつ~gatsu~tháng~support,ことば「八月」を よみます。,ことば「はちがつ」を よみます。,Tôi đọc từ “tháng Tám”.,v1:%E5%85%AB:%E5%85%AB%E6%9C%88:on:%E3%81%AF%E3%81%A1
+八人,tám người,八,はち,hachi,on,はちにん,hachinin,八~はち~hachi~tám~target|人~にん~nin~người~support,ことば「八人」を よみます。,ことば「はちにん」を よみます。,Tôi đọc từ “tám người”.,v1:%E5%85%AB:%E5%85%AB%E4%BA%BA:on:%E3%81%AF%E3%81%A1
+八つ,tám cái,八,やっ,ya,kun,やっつ,yattsu,八~やっ~ya~tám~target|つ~つ~tsu~trợ từ đếm~kana,ことば「八つ」を よみます。,ことば「やっつ」を よみます。,Tôi đọc từ “tám cái”.,v1:%E5%85%AB:%E5%85%AB%E3%81%A4:kun:%E3%82%84%E3%81%A3
+六月,tháng Sáu,六,ろく,roku,on,ろくがつ,rokugatsu,六~ろく~roku~sáu~target|月~がつ~gatsu~tháng~support,ことば「六月」を よみます。,ことば「ろくがつ」を よみます。,Tôi đọc từ “tháng Sáu”.,v1:%E5%85%AD:%E5%85%AD%E6%9C%88:on:%E3%82%8D%E3%81%8F
+六人,sáu người,六,ろく,roku,on,ろくにん,rokunin,六~ろく~roku~sáu~target|人~にん~nin~người~support,ことば「六人」を よみます。,ことば「ろくにん」を よみます。,Tôi đọc từ “sáu người”.,v1:%E5%85%AD:%E5%85%AD%E4%BA%BA:on:%E3%82%8D%E3%81%8F
+六つ,sáu cái,六,むっ,mu,kun,むっつ,muttsu,六~むっ~mu~sáu~target|つ~つ~tsu~trợ từ đếm~kana,ことば「六つ」を よみます。,ことば「むっつ」を よみます。,Tôi đọc từ “sáu cái”.,v1:%E5%85%AD:%E5%85%AD%E3%81%A4:kun:%E3%82%80%E3%81%A3
+地下,dưới lòng đất / tầng hầm,下,か,ka,on,ちか,chika,地~ち~chi~đất~support|下~か~ka~dưới~target,ことば「地下」を よみます。,ことば「ちか」を よみます。,Tôi đọc từ “dưới lòng đất / tầng hầm”.,v1:%E4%B8%8B:%E5%9C%B0%E4%B8%8B:on:%E3%81%8B
+下手,không giỏi / vụng,下,へ,he,kun,へた,heta,下~へ~he~dưới / kém~target|手~た~ta~tay / kỹ năng~support,ことば「下手」を よみます。,ことば「へた」を よみます。,Tôi đọc từ “không giỏi / vụng”.,v1:%E4%B8%8B:%E4%B8%8B%E6%89%8B:kun:%E3%81%B8
+下,phía dưới,下,した,shita,kun,した,shita,下~した~shita~phía dưới~target,ことば「下」を よみます。,ことば「した」を よみます。,Tôi đọc từ “phía dưới”.,v1:%E4%B8%8B:%E4%B8%8B:kun:%E3%81%97%E3%81%9F
+来年,năm sau,来,らい,rai,on,らいねん,rainen,来~らい~rai~sắp tới~target|年~ねん~nen~năm~support,ことば「来年」を よみます。,ことば「らいねん」を よみます。,Tôi đọc từ “năm sau”.,v1:%E6%9D%A5:%E6%9D%A5%E5%B9%B4:on:%E3%82%89%E3%81%84
+来月,tháng sau,来,らい,rai,on,らいげつ,raigetsu,来~らい~rai~sắp tới~target|月~げつ~getsu~tháng~support,ことば「来月」を よみます。,ことば「らいげつ」を よみます。,Tôi đọc từ “tháng sau”.,v1:%E6%9D%A5:%E6%9D%A5%E6%9C%88:on:%E3%82%89%E3%81%84
+来る,đến,来,く,ku,kun,くる,kuru,来~く~ku~đến~target|る~る~ru~~kana,ことば「来る」を よみます。,ことば「くる」を よみます。,Tôi đọc từ “đến”.,v1:%E6%9D%A5:%E6%9D%A5%E3%82%8B:kun:%E3%81%8F
+天気,thời tiết,気,き,ki,on,てんき,tenki,天~てん~ten~trời~support|気~き~ki~khí~target,ことば「天気」を よみます。,ことば「てんき」を よみます。,Tôi đọc từ “thời tiết”.,v1:%E6%B0%97:%E5%A4%A9%E6%B0%97:on:%E3%81%8D
+元気,khỏe mạnh / tràn đầy sức sống,気,き,ki,on,げんき,genki,元~げん~gen~nguồn / gốc~support|気~き~ki~tinh thần~target,ことば「元気」を よみます。,ことば「げんき」を よみます。,Tôi đọc từ “khỏe mạnh / tràn đầy sức sống”.,v1:%E6%B0%97:%E5%85%83%E6%B0%97:on:%E3%81%8D
+人気,được yêu thích / nổi tiếng,気,き,ki,on,にんき,ninki,人~にん~nin~người~support|気~き~ki~sự chú ý~target,ことば「人気」を よみます。,ことば「にんき」を よみます。,Tôi đọc từ “được yêu thích / nổi tiếng”.,v1:%E6%B0%97:%E4%BA%BA%E6%B0%97:on:%E3%81%8D
+小学校,trường tiểu học,小,しょう,shou,on,しょうがっこう,shougakkou,小~しょう~shou~nhỏ / tiểu~target|学校~がっこう~gakkou~trường học~support,ことば「小学校」を よみます。,ことば「しょうがっこう」を よみます。,Tôi đọc từ “trường tiểu học”.,v1:%E5%B0%8F:%E5%B0%8F%E5%AD%A6%E6%A0%A1:on:%E3%81%97%E3%82%87%E3%81%86
+小さい,nhỏ / bé,小,ちい,chii,kun,ちいさい,chiisai,小~ちい~chii~nhỏ~target|さい~さい~sai~~kana,ことば「小さい」を よみます。,ことば「ちいさい」を よみます。,Tôi đọc từ “nhỏ / bé”.,v1:%E5%B0%8F:%E5%B0%8F%E3%81%95%E3%81%84:kun:%E3%81%A1%E3%81%84
+小川,con suối nhỏ,小,お,o,kun,おがわ,ogawa,小~お~o~nhỏ~target|川~がわ~gawa~sông / suối~support,ことば「小川」を よみます。,ことば「おがわ」を よみます。,Tôi đọc từ “con suối nhỏ”.,v1:%E5%B0%8F:%E5%B0%8F%E5%B7%9D:kun:%E3%81%8A
+七月,tháng Bảy,七,しち,shichi,on,しちがつ,shichigatsu,七~しち~shichi~bảy~target|月~がつ~gatsu~tháng~support,ことば「七月」を よみます。,ことば「しちがつ」を よみます。,Tôi đọc từ “tháng Bảy”.,v1:%E4%B8%83:%E4%B8%83%E6%9C%88:on:%E3%81%97%E3%81%A1
+七時,bảy giờ,七,しち,shichi,on,しちじ,shichiji,七~しち~shichi~bảy~target|時~じ~ji~giờ~support,ことば「七時」を よみます。,ことば「しちじ」を よみます。,Tôi đọc từ “bảy giờ”.,v1:%E4%B8%83:%E4%B8%83%E6%99%82:on:%E3%81%97%E3%81%A1
+七つ,bảy cái,七,なな,nana,kun,ななつ,nanatsu,七~なな~nana~bảy~target|つ~つ~tsu~trợ từ đếm~kana,ことば「七つ」を よみます。,ことば「ななつ」を よみます。,Tôi đọc từ “bảy cái”.,v1:%E4%B8%83:%E4%B8%83%E3%81%A4:kun:%E3%81%AA%E3%81%AA
+火山,núi lửa,山,ざん,zan,on,かざん,kazan,火~か~ka~lửa~support|山~ざん~zan~núi~target,ことば「火山」を よみます。,ことば「かざん」を よみます。,Tôi đọc từ “núi lửa”.,v1:%E5%B1%B1:%E7%81%AB%E5%B1%B1:on:%E3%81%96%E3%82%93
+登山,leo núi,山,ざん,zan,on,とざん,tozan,登~と~to~leo~support|山~ざん~zan~núi~target,ことば「登山」を よみます。,ことば「とざん」を よみます。,Tôi đọc từ “leo núi”.,v1:%E5%B1%B1:%E7%99%BB%E5%B1%B1:on:%E3%81%96%E3%82%93
+山,núi,山,やま,yama,kun,やま,yama,山~やま~yama~núi~target,ことば「山」を よみます。,ことば「やま」を よみます。,Tôi đọc từ “núi”.,v1:%E5%B1%B1:%E5%B1%B1:kun:%E3%82%84%E3%81%BE
+会話,hội thoại,話,わ,wa,on,かいわ,kaiwa,会~かい~kai~gặp gỡ~support|話~わ~wa~lời nói~target,ことば「会話」を よみます。,ことば「かいわ」を よみます。,Tôi đọc từ “hội thoại”.,v1:%E8%A9%B1:%E4%BC%9A%E8%A9%B1:on:%E3%82%8F
+電話,điện thoại,話,わ,wa,on,でんわ,denwa,電~でん~den~điện~support|話~わ~wa~nói chuyện~target,ことば「電話」を よみます。,ことば「でんわ」を よみます。,Tôi đọc từ “điện thoại”.,v1:%E8%A9%B1:%E9%9B%BB%E8%A9%B1:on:%E3%82%8F
+話す,nói chuyện,話,はな,hana,kun,はなす,hanasu,話~はな~hana~nói~target|す~す~su~~kana,ことば「話す」を よみます。,ことば「はなす」を よみます。,Tôi đọc từ “nói chuyện”.,v1:%E8%A9%B1:%E8%A9%B1%E3%81%99:kun:%E3%81%AF%E3%81%AA
+女子,nữ / nữ sinh,女,じょ,jo,on,じょし,joshi,女~じょ~jo~nữ~target|子~し~shi~người con~support,ことば「女子」を よみます。,ことば「じょし」を よみます。,Tôi đọc từ “nữ / nữ sinh”.,v1:%E5%A5%B3:%E5%A5%B3%E5%AD%90:on:%E3%81%98%E3%82%87
+女性,phụ nữ / giới nữ,女,じょ,jo,on,じょせい,josei,女~じょ~jo~nữ~target|性~せい~sei~giới tính~support,ことば「女性」を よみます。,ことば「じょせい」を よみます。,Tôi đọc từ “phụ nữ / giới nữ”.,v1:%E5%A5%B3:%E5%A5%B3%E6%80%A7:on:%E3%81%98%E3%82%87
+女,người phụ nữ,女,おんな,onna,kun,おんな,onna,女~おんな~onna~người phụ nữ~target,ことば「女」を よみます。,ことば「おんな」を よみます。,Tôi đọc từ “người phụ nữ”.,v1:%E5%A5%B3:%E5%A5%B3:kun:%E3%81%8A%E3%82%93%E3%81%AA
+東北,vùng Đông Bắc,北,ほく,hoku,on,とうほく,touhoku,東~とう~tou~đông~support|北~ほく~hoku~bắc~target,ことば「東北」を よみます。,ことば「とうほく」を よみます。,Tôi đọc từ “vùng Đông Bắc”.,v1:%E5%8C%97:%E6%9D%B1%E5%8C%97:on:%E3%81%BB%E3%81%8F
+北口,cửa phía Bắc,北,きた,kita,kun,きたぐち,kitaguchi,北~きた~kita~phía Bắc~target|口~ぐち~guchi~cửa / lối~support,ことば「北口」を よみます。,ことば「きたぐち」を よみます。,Tôi đọc từ “cửa phía Bắc”.,v1:%E5%8C%97:%E5%8C%97%E5%8F%A3:kun:%E3%81%8D%E3%81%9F
+北,phía Bắc,北,きた,kita,kun,きた,kita,北~きた~kita~phía Bắc~target,ことば「北」を よみます。,ことば「きた」を よみます。,Tôi đọc từ “phía Bắc”.,v1:%E5%8C%97:%E5%8C%97:kun:%E3%81%8D%E3%81%9F
+午前,buổi sáng / trước trưa,午,ご,go,on,ごぜん,gozen,午~ご~go~trưa~target|前~ぜん~zen~trước~support,ことば「午前」を よみます。,ことば「ごぜん」を よみます。,Tôi đọc từ “buổi sáng / trước trưa”.,v1:%E5%8D%88:%E5%8D%88%E5%89%8D:on:%E3%81%94
+午後,buổi chiều / sau trưa,午,ご,go,on,ごご,gogo,午~ご~go~trưa~target|後~ご~go~sau~support,ことば「午後」を よみます。,ことば「ごご」を よみます。,Tôi đọc từ “buổi chiều / sau trưa”.,v1:%E5%8D%88:%E5%8D%88%E5%BE%8C:on:%E3%81%94
+正午,đúng giữa trưa,午,ご,go,on,しょうご,shougo,正~しょう~shou~đúng / chính~support|午~ご~go~trưa~target,ことば「正午」を よみます。,ことば「しょうご」を よみます。,Tôi đọc từ “đúng giữa trưa”.,v1:%E5%8D%88:%E6%AD%A3%E5%8D%88:on:%E3%81%94
+百円,một trăm yên,百,ひゃく,hyaku,on,ひゃくえん,hyakuen,百~ひゃく~hyaku~một trăm~target|円~えん~en~yên~support,ことば「百円」を よみます。,ことば「ひゃくえん」を よみます。,Tôi đọc từ “một trăm yên”.,v1:%E7%99%BE:%E7%99%BE%E5%86%86:on:%E3%81%B2%E3%82%83%E3%81%8F
+三百,ba trăm,百,びゃく,byaku,on,さんびゃく,sanbyaku,三~さん~san~ba~support|百~びゃく~byaku~trăm~target,ことば「三百」を よみます。,ことば「さんびゃく」を よみます。,Tôi đọc từ “ba trăm”.,v1:%E7%99%BE:%E4%B8%89%E7%99%BE:on:%E3%81%B3%E3%82%83%E3%81%8F
+六百,sáu trăm,百,ぴゃく,pyaku,on,ろっぴゃく,roppyaku,六~ろっ~ro~sáu~support|百~ぴゃく~pyaku~trăm~target,ことば「六百」を よみます。,ことば「ろっぴゃく」を よみます。,Tôi đọc từ “sáu trăm”.,v1:%E7%99%BE:%E5%85%AD%E7%99%BE:on:%E3%81%B4%E3%82%83%E3%81%8F
+辞書,từ điển,書,しょ,sho,on,じしょ,jisho,辞~じ~ji~từ ngữ~support|書~しょ~sho~sách~target,ことば「辞書」を よみます。,ことば「じしょ」を よみます。,Tôi đọc từ “từ điển”.,v1:%E6%9B%B8:%E8%BE%9E%E6%9B%B8:on:%E3%81%97%E3%82%87
+図書館,thư viện,書,しょ,sho,on,としょかん,toshokan,図~と~to~bản đồ / hình~support|書~しょ~sho~sách~target|館~かん~kan~tòa nhà~support,ことば「図書館」を よみます。,ことば「としょかん」を よみます。,Tôi đọc từ “thư viện”.,v1:%E6%9B%B8:%E5%9B%B3%E6%9B%B8%E9%A4%A8:on:%E3%81%97%E3%82%87
+書く,viết,書,か,ka,kun,かく,kaku,書~か~ka~viết~target|く~く~ku~~kana,ことば「書く」を よみます。,ことば「かく」を よみます。,Tôi đọc từ “viết”.,v1:%E6%9B%B8:%E6%9B%B8%E3%81%8F:kun:%E3%81%8B
+先生,giáo viên,先,せん,sen,on,せんせい,sensei,先~せん~sen~trước~target|生~せい~sei~sinh / người~support,ことば「先生」を よみます。,ことば「せんせい」を よみます。,Tôi đọc từ “giáo viên”.,v1:%E5%85%88:%E5%85%88%E7%94%9F:on:%E3%81%9B%E3%82%93
+先月,tháng trước,先,せん,sen,on,せんげつ,sengetsu,先~せん~sen~trước~target|月~げつ~getsu~tháng~support,ことば「先月」を よみます。,ことば「せんげつ」を よみます。,Tôi đọc từ “tháng trước”.,v1:%E5%85%88:%E5%85%88%E6%9C%88:on:%E3%81%9B%E3%82%93
+先,phía trước / nơi đến trước,先,さき,saki,kun,さき,saki,先~さき~saki~phía trước~target,ことば「先」を よみます。,ことば「さき」を よみます。,Tôi đọc từ “phía trước / nơi đến trước”.,v1:%E5%85%88:%E5%85%88:kun:%E3%81%95%E3%81%8D
+名前,tên,名,な,na,kun,なまえ,namae,名~な~na~tên~target|前~まえ~mae~phần sau của từ tên~support,ことば「名前」を よみます。,ことば「なまえ」を よみます。,Tôi đọc từ “tên”.,v1:%E5%90%8D:%E5%90%8D%E5%89%8D:kun:%E3%81%AA
+有名,nổi tiếng,名,めい,mei,on,ゆうめい,yuumei,有~ゆう~yuu~có~support|名~めい~mei~danh tiếng~target,ことば「有名」を よみます。,ことば「ゆうめい」を よみます。,Tôi đọc từ “nổi tiếng”.,v1:%E5%90%8D:%E6%9C%89%E5%90%8D:on:%E3%82%81%E3%81%84
+名字,họ,名,みょう,myou,on,みょうじ,myouji,名~みょう~myou~tên~target|字~じ~ji~chữ~support,ことば「名字」を よみます。,ことば「みょうじ」を よみます。,Tôi đọc từ “họ”.,v1:%E5%90%8D:%E5%90%8D%E5%AD%97:on:%E3%81%BF%E3%82%87%E3%81%86
+小川,con suối nhỏ,川,がわ,gawa,kun,おがわ,ogawa,小~お~o~nhỏ~support|川~がわ~gawa~sông / suối~target,ことば「小川」を よみます。,ことば「おがわ」を よみます。,Tôi đọc từ “con suối nhỏ”.,v1:%E5%B7%9D:%E5%B0%8F%E5%B7%9D:kun:%E3%81%8C%E3%82%8F
+川上,thượng nguồn,川,かわ,kawa,kun,かわかみ,kawakami,川~かわ~kawa~sông~target|上~かみ~kami~phía trên~support,ことば「川上」を よみます。,ことば「かわかみ」を よみます。,Tôi đọc từ “thượng nguồn”.,v1:%E5%B7%9D:%E5%B7%9D%E4%B8%8A:kun:%E3%81%8B%E3%82%8F
+川,sông,川,かわ,kawa,kun,かわ,kawa,川~かわ~kawa~sông~target,ことば「川」を よみます。,ことば「かわ」を よみます。,Tôi đọc từ “sông”.,v1:%E5%B7%9D:%E5%B7%9D:kun:%E3%81%8B%E3%82%8F
+千円,một nghìn yên,千,せん,sen,on,せんえん,senen,千~せん~sen~một nghìn~target|円~えん~en~yên~support,ことば「千円」を よみます。,ことば「せんえん」を よみます。,Tôi đọc từ “một nghìn yên”.,v1:%E5%8D%83:%E5%8D%83%E5%86%86:on:%E3%81%9B%E3%82%93
+三千,ba nghìn,千,ぜん,zen,on,さんぜん,sanzen,三~さん~san~ba~support|千~ぜん~zen~nghìn~target,ことば「三千」を よみます。,ことば「さんぜん」を よみます。,Tôi đọc từ “ba nghìn”.,v1:%E5%8D%83:%E4%B8%89%E5%8D%83:on:%E3%81%9C%E3%82%93
+千葉,Chiba,千,ち,chi,kun,ちば,chiba,千~ち~chi~nghìn~target|葉~ば~ba~lá~support,ことば「千葉」を よみます。,ことば「ちば」を よみます。,Tôi đọc từ “Chiba”.,v1:%E5%8D%83:%E5%8D%83%E8%91%89:kun:%E3%81%A1
+水曜日,thứ Tư,水,すい,sui,on,すいようび,suiyoubi,水~すい~sui~nước / thứ Tư~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「水曜日」を よみます。,ことば「すいようび」を よみます。,Tôi đọc từ “thứ Tư”.,v1:%E6%B0%B4:%E6%B0%B4%E6%9B%9C%E6%97%A5:on:%E3%81%99%E3%81%84
+水道,nước máy / đường ống nước,水,すい,sui,on,すいどう,suidou,水~すい~sui~nước~target|道~どう~dou~đường / hệ thống~support,ことば「水道」を よみます。,ことば「すいどう」を よみます。,Tôi đọc từ “nước máy / đường ống nước”.,v1:%E6%B0%B4:%E6%B0%B4%E9%81%93:on:%E3%81%99%E3%81%84
+水,nước,水,みず,mizu,kun,みず,mizu,水~みず~mizu~nước~target,まいにち 水を のみます。,まいにち みずを のみます。,Hằng ngày tôi uống nước.,v1:%E6%B0%B4:%E6%B0%B4:kun:%E3%81%BF%E3%81%9A
+半分,một nửa,半,はん,han,on,はんぶん,hanbun,半~はん~han~một nửa~target|分~ぶん~bun~phần~support,ことば「半分」を よみます。,ことば「はんぶん」を よみます。,Tôi đọc từ “một nửa”.,v1:%E5%8D%8A:%E5%8D%8A%E5%88%86:on:%E3%81%AF%E3%82%93
+半年,nửa năm,半,はん,han,on,はんとし,hantoshi,半~はん~han~một nửa~target|年~とし~toshi~năm~support,ことば「半年」を よみます。,ことば「はんとし」を よみます。,Tôi đọc từ “nửa năm”.,v1:%E5%8D%8A:%E5%8D%8A%E5%B9%B4:on:%E3%81%AF%E3%82%93
+半ば,giữa chừng / một nửa,半,なか,naka,kun,なかば,nakaba,半~なか~naka~nửa / giữa~target|ば~ば~ba~~kana,ことば「半ば」を よみます。,ことば「なかば」を よみます。,Tôi đọc từ “giữa chừng / một nửa”.,v1:%E5%8D%8A:%E5%8D%8A%E3%81%B0:kun:%E3%81%AA%E3%81%8B
+男性,nam giới,男,だん,dan,on,だんせい,dansei,男~だん~dan~nam~target|性~せい~sei~giới tính~support,ことば「男性」を よみます。,ことば「だんせい」を よみます。,Tôi đọc từ “nam giới”.,v1:%E7%94%B7:%E7%94%B7%E6%80%A7:on:%E3%81%A0%E3%82%93
+長男,con trai trưởng,男,なん,nan,on,ちょうなん,chounan,長~ちょう~chou~trưởng~support|男~なん~nan~con trai~target,ことば「長男」を よみます。,ことば「ちょうなん」を よみます。,Tôi đọc từ “con trai trưởng”.,v1:%E7%94%B7:%E9%95%B7%E7%94%B7:on:%E3%81%AA%E3%82%93
+男,người đàn ông,男,おとこ,otoko,kun,おとこ,otoko,男~おとこ~otoko~người đàn ông~target,ことば「男」を よみます。,ことば「おとこ」を よみます。,Tôi đọc từ “người đàn ông”.,v1:%E7%94%B7:%E7%94%B7:kun:%E3%81%8A%E3%81%A8%E3%81%93
+西洋,phương Tây,西,せい,sei,on,せいよう,seiyou,西~せい~sei~Tây~target|洋~よう~you~đại dương / phương Tây~support,ことば「西洋」を よみます。,ことば「せいよう」を よみます。,Tôi đọc từ “phương Tây”.,v1:%E8%A5%BF:%E8%A5%BF%E6%B4%8B:on:%E3%81%9B%E3%81%84
+関西,vùng Kansai,西,さい,sai,on,かんさい,kansai,関~かん~kan~cửa ải / vùng~support|西~さい~sai~Tây~target,ことば「関西」を よみます。,ことば「かんさい」を よみます。,Tôi đọc từ “vùng Kansai”.,v1:%E8%A5%BF:%E9%96%A2%E8%A5%BF:on:%E3%81%95%E3%81%84
+西,phía Tây,西,にし,nishi,kun,にし,nishi,西~にし~nishi~phía Tây~target,ことば「西」を よみます。,ことば「にし」を よみます。,Tôi đọc từ “phía Tây”.,v1:%E8%A5%BF:%E8%A5%BF:kun:%E3%81%AB%E3%81%97
+電話,điện thoại,電,でん,den,on,でんわ,denwa,電~でん~den~điện~target|話~わ~wa~nói chuyện~support,ことば「電話」を よみます。,ことば「でんわ」を よみます。,Tôi đọc từ “điện thoại”.,v1:%E9%9B%BB:%E9%9B%BB%E8%A9%B1:on:%E3%81%A7%E3%82%93
+電車,tàu điện,電,でん,den,on,でんしゃ,densha,電~でん~den~điện~target|車~しゃ~sha~xe~support,ことば「電車」を よみます。,ことば「でんしゃ」を よみます。,Tôi đọc từ “tàu điện”.,v1:%E9%9B%BB:%E9%9B%BB%E8%BB%8A:on:%E3%81%A7%E3%82%93
+電気,điện / điện năng,電,でん,den,on,でんき,denki,電~でん~den~điện~target|気~き~ki~khí / năng lượng~support,ことば「電気」を よみます。,ことば「でんき」を よみます。,Tôi đọc từ “điện / điện năng”.,v1:%E9%9B%BB:%E9%9B%BB%E6%B0%97:on:%E3%81%A7%E3%82%93
+日本語,tiếng Nhật,語,ご,go,on,にほんご,nihongo,日本~にほん~nihon~Nhật Bản~support|語~ご~go~ngôn ngữ~target,ことば「日本語」を よみます。,ことば「にほんご」を よみます。,Tôi đọc từ “tiếng Nhật”.,v1:%E8%AA%9E:%E6%97%A5%E6%9C%AC%E8%AA%9E:on:%E3%81%94
+国語,quốc ngữ / môn Văn,語,ご,go,on,こくご,kokugo,国~こく~koku~quốc gia~support|語~ご~go~ngôn ngữ~target,ことば「国語」を よみます。,ことば「こくご」を よみます。,Tôi đọc từ “quốc ngữ / môn Văn”.,v1:%E8%AA%9E:%E5%9B%BD%E8%AA%9E:on:%E3%81%94
+語る,kể / thuật lại,語,かた,kata,kun,かたる,kataru,語~かた~kata~kể / nói~target|る~る~ru~~kana,ことば「語る」を よみます。,ことば「かたる」を よみます。,Tôi đọc từ “kể / thuật lại”.,v1:%E8%AA%9E:%E8%AA%9E%E3%82%8B:kun:%E3%81%8B%E3%81%9F
+土曜日,thứ Bảy,土,ど,do,on,どようび,doyoubi,土~ど~do~đất / thứ Bảy~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「土曜日」を よみます。,ことば「どようび」を よみます。,Tôi đọc từ “thứ Bảy”.,v1:%E5%9C%9F:%E5%9C%9F%E6%9B%9C%E6%97%A5:on:%E3%81%A9
+土地,đất đai,土,と,to,on,とち,tochi,土~と~to~đất~target|地~ち~chi~mặt đất~support,ことば「土地」を よみます。,ことば「とち」を よみます。,Tôi đọc từ “đất đai”.,v1:%E5%9C%9F:%E5%9C%9F%E5%9C%B0:on:%E3%81%A8
+土,đất,土,つち,tsuchi,kun,つち,tsuchi,土~つち~tsuchi~đất~target,ことば「土」を よみます。,ことば「つち」を よみます。,Tôi đọc từ “đất”.,v1:%E5%9C%9F:%E5%9C%9F:kun:%E3%81%A4%E3%81%A1
+木曜日,thứ Năm,木,もく,moku,on,もくようび,mokuyoubi,木~もく~moku~cây / thứ Năm~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「木曜日」を よみます。,ことば「もくようび」を よみます。,Tôi đọc từ “thứ Năm”.,v1:%E6%9C%A8:%E6%9C%A8%E6%9B%9C%E6%97%A5:on:%E3%82%82%E3%81%8F
+大木,cây lớn,木,ぼく,boku,on,たいぼく,taiboku,大~たい~tai~lớn~support|木~ぼく~boku~cây~target,ことば「大木」を よみます。,ことば「たいぼく」を よみます。,Tôi đọc từ “cây lớn”.,v1:%E6%9C%A8:%E5%A4%A7%E6%9C%A8:on:%E3%81%BC%E3%81%8F
+木,cây / gỗ,木,き,ki,kun,き,ki,木~き~ki~cây / gỗ~target,ことば「木」を よみます。,ことば「き」を よみます。,Tôi đọc từ “cây / gỗ”.,v1:%E6%9C%A8:%E6%9C%A8:kun:%E3%81%8D
+食事,bữa ăn,食,しょく,shoku,on,しょくじ,shokuji,食~しょく~shoku~ăn~target|事~じ~ji~việc~support,ことば「食事」を よみます。,ことば「しょくじ」を よみます。,Tôi đọc từ “bữa ăn”.,v1:%E9%A3%9F:%E9%A3%9F%E4%BA%8B:on:%E3%81%97%E3%82%87%E3%81%8F
+食堂,nhà ăn,食,しょく,shoku,on,しょくどう,shokudou,食~しょく~shoku~ăn~target|堂~どう~dou~sảnh / nhà~support,ことば「食堂」を よみます。,ことば「しょくどう」を よみます。,Tôi đọc từ “nhà ăn”.,v1:%E9%A3%9F:%E9%A3%9F%E5%A0%82:on:%E3%81%97%E3%82%87%E3%81%8F
+食べる,ăn,食,た,ta,kun,たべる,taberu,食~た~ta~ăn~target|べる~べる~beru~~kana,ことば「食べる」を よみます。,ことば「たべる」を よみます。,Tôi đọc từ “ăn”.,v1:%E9%A3%9F:%E9%A3%9F%E3%81%B9%E3%82%8B:kun:%E3%81%9F
+電車,tàu điện,車,しゃ,sha,on,でんしゃ,densha,電~でん~den~điện~support|車~しゃ~sha~xe~target,ことば「電車」を よみます。,ことば「でんしゃ」を よみます。,Tôi đọc từ “tàu điện”.,v1:%E8%BB%8A:%E9%9B%BB%E8%BB%8A:on:%E3%81%97%E3%82%83
+自転車,xe đạp,車,しゃ,sha,on,じてんしゃ,jitensha,自転~じてん~jiten~tự quay~support|車~しゃ~sha~xe~target,ことば「自転車」を よみます。,ことば「じてんしゃ」を よみます。,Tôi đọc từ “xe đạp”.,v1:%E8%BB%8A:%E8%87%AA%E8%BB%A2%E8%BB%8A:on:%E3%81%97%E3%82%83
+車,xe,車,くるま,kuruma,kun,くるま,kuruma,車~くるま~kuruma~xe~target,ことば「車」を よみます。,ことば「くるま」を よみます。,Tôi đọc từ “xe”.,v1:%E8%BB%8A:%E8%BB%8A:kun:%E3%81%8F%E3%82%8B%E3%81%BE
+南米,Nam Mỹ,南,なん,nan,on,なんべい,nanbei,南~なん~nan~phía Nam~target|米~べい~bei~Mỹ~support,ことば「南米」を よみます。,ことば「なんべい」を よみます。,Tôi đọc từ “Nam Mỹ”.,v1:%E5%8D%97:%E5%8D%97%E7%B1%B3:on:%E3%81%AA%E3%82%93
+南口,cửa phía Nam,南,みなみ,minami,kun,みなみぐち,minamiguchi,南~みなみ~minami~phía Nam~target|口~ぐち~guchi~cửa / lối~support,ことば「南口」を よみます。,ことば「みなみぐち」を よみます。,Tôi đọc từ “cửa phía Nam”.,v1:%E5%8D%97:%E5%8D%97%E5%8F%A3:kun:%E3%81%BF%E3%81%AA%E3%81%BF
+南,phía Nam,南,みなみ,minami,kun,みなみ,minami,南~みなみ~minami~phía Nam~target,ことば「南」を よみます。,ことば「みなみ」を よみます。,Tôi đọc từ “phía Nam”.,v1:%E5%8D%97:%E5%8D%97:kun:%E3%81%BF%E3%81%AA%E3%81%BF
+何人,bao nhiêu người,何,なん,nan,kun,なんにん,nannin,何~なん~nan~bao nhiêu~target|人~にん~nin~người~support,ことば「何人」を よみます。,ことば「なんにん」を よみます。,Tôi đọc từ “bao nhiêu người”.,v1:%E4%BD%95:%E4%BD%95%E4%BA%BA:kun:%E3%81%AA%E3%82%93
+何時,mấy giờ,何,なん,nan,kun,なんじ,nanji,何~なん~nan~mấy~target|時~じ~ji~giờ~support,ことば「何時」を よみます。,ことば「なんじ」を よみます。,Tôi đọc từ “mấy giờ”.,v1:%E4%BD%95:%E4%BD%95%E6%99%82:kun:%E3%81%AA%E3%82%93
+何,cái gì,何,なに,nani,kun,なに,nani,何~なに~nani~cái gì~target,ことば「何」を よみます。,ことば「なに」を よみます。,Tôi đọc từ “cái gì”.,v1:%E4%BD%95:%E4%BD%95:kun:%E3%81%AA%E3%81%AB
+一万円,mười nghìn yên,万,まん,man,on,いちまんえん,ichimanen,一~いち~ichi~một~support|万~まん~man~mười nghìn~target|円~えん~en~yên~support,ことば「一万円」を よみます。,ことば「いちまんえん」を よみます。,Tôi đọc từ “mười nghìn yên”.,v1:%E4%B8%87:%E4%B8%80%E4%B8%87%E5%86%86:on:%E3%81%BE%E3%82%93
+万人,vạn người / mọi người,万,ばん,ban,on,ばんにん,bannin,万~ばん~ban~vạn~target|人~にん~nin~người~support,ことば「万人」を よみます。,ことば「ばんにん」を よみます。,Tôi đọc từ “vạn người / mọi người”.,v1:%E4%B8%87:%E4%B8%87%E4%BA%BA:on:%E3%81%B0%E3%82%93
+万,mười nghìn,万,まん,man,on,まん,man,万~まん~man~mười nghìn~target,ことば「万」を よみます。,ことば「まん」を よみます。,Tôi đọc từ “mười nghìn”.,v1:%E4%B8%87:%E4%B8%87:on:%E3%81%BE%E3%82%93
+学校,trường học,校,こう,kou,on,がっこう,gakkou,学~がっ~ga~học~support|校~こう~kou~trường~target,ことば「学校」を よみます。,ことば「がっこう」を よみます。,Tôi đọc từ “trường học”.,v1:%E6%A0%A1:%E5%AD%A6%E6%A0%A1:on:%E3%81%93%E3%81%86
+高校,trường trung học phổ thông,校,こう,kou,on,こうこう,koukou,高~こう~kou~cao~support|校~こう~kou~trường~target,ことば「高校」を よみます。,ことば「こうこう」を よみます。,Tôi đọc từ “trường trung học phổ thông”.,v1:%E6%A0%A1:%E9%AB%98%E6%A0%A1:on:%E3%81%93%E3%81%86
+校長,hiệu trưởng,校,こう,kou,on,こうちょう,kouchou,校~こう~kou~trường~target|長~ちょう~chou~trưởng~support,ことば「校長」を よみます。,ことば「こうちょう」を よみます。,Tôi đọc từ “hiệu trưởng”.,v1:%E6%A0%A1:%E6%A0%A1%E9%95%B7:on:%E3%81%93%E3%81%86
+毎日,mỗi ngày,毎,まい,mai,on,まいにち,mainichi,毎~まい~mai~mỗi~target|日~にち~nichi~ngày~support,ことば「毎日」を よみます。,ことば「まいにち」を よみます。,Tôi đọc từ “mỗi ngày”.,v1:%E6%AF%8E:%E6%AF%8E%E6%97%A5:on:%E3%81%BE%E3%81%84
+毎年,mỗi năm,毎,まい,mai,on,まいねん,mainen,毎~まい~mai~mỗi~target|年~ねん~nen~năm~support,ことば「毎年」を よみます。,ことば「まいねん」を よみます。,Tôi đọc từ “mỗi năm”.,v1:%E6%AF%8E:%E6%AF%8E%E5%B9%B4:on:%E3%81%BE%E3%81%84
+毎朝,mỗi sáng,毎,まい,mai,on,まいあさ,maiasa,毎~まい~mai~mỗi~target|朝~あさ~asa~buổi sáng~support,ことば「毎朝」を よみます。,ことば「まいあさ」を よみます。,Tôi đọc từ “mỗi sáng”.,v1:%E6%AF%8E:%E6%AF%8E%E6%9C%9D:on:%E3%81%BE%E3%81%84
+白紙,giấy trắng,白,はく,haku,on,はくし,hakushi,白~はく~haku~trắng~target|紙~し~shi~giấy~support,ことば「白紙」を よみます。,ことば「はくし」を よみます。,Tôi đọc từ “giấy trắng”.,v1:%E7%99%BD:%E7%99%BD%E7%B4%99:on:%E3%81%AF%E3%81%8F
+白人,người da trắng,白,はく,haku,on,はくじん,hakujin,白~はく~haku~trắng~target|人~じん~jin~người~support,ことば「白人」を よみます。,ことば「はくじん」を よみます。,Tôi đọc từ “người da trắng”.,v1:%E7%99%BD:%E7%99%BD%E4%BA%BA:on:%E3%81%AF%E3%81%8F
+白い,màu trắng,白,しろ,shiro,kun,しろい,shiroi,白~しろ~shiro~trắng~target|い~い~i~~kana,ことば「白い」を よみます。,ことば「しろい」を よみます。,Tôi đọc từ “màu trắng”.,v1:%E7%99%BD:%E7%99%BD%E3%81%84:kun:%E3%81%97%E3%82%8D
+天気,thời tiết,天,てん,ten,on,てんき,tenki,天~てん~ten~trời~target|気~き~ki~khí~support,ことば「天気」を よみます。,ことば「てんき」を よみます。,Tôi đọc từ “thời tiết”.,v1:%E5%A4%A9:%E5%A4%A9%E6%B0%97:on:%E3%81%A6%E3%82%93
+天国,thiên đường,天,てん,ten,on,てんごく,tengoku,天~てん~ten~trời~target|国~ごく~goku~cõi / quốc gia~support,ことば「天国」を よみます。,ことば「てんごく」を よみます。,Tôi đọc từ “thiên đường”.,v1:%E5%A4%A9:%E5%A4%A9%E5%9B%BD:on:%E3%81%A6%E3%82%93
+天の川,dải Ngân Hà,天,あま,ama,kun,あまのがわ,amanogawa,天~あま~ama~trời~target|の~の~no~của~kana|川~がわ~gawa~sông~support,ことば「天の川」を よみます。,ことば「あまのがわ」を よみます。,Tôi đọc từ “dải Ngân Hà”.,v1:%E5%A4%A9:%E5%A4%A9%E3%81%AE%E5%B7%9D:kun:%E3%81%82%E3%81%BE
+母国,quê hương / mẫu quốc,母,ぼ,bo,on,ぼこく,bokoku,母~ぼ~bo~mẹ / gốc~target|国~こく~koku~quốc gia~support,ことば「母国」を よみます。,ことば「ぼこく」を よみます。,Tôi đọc từ “quê hương / mẫu quốc”.,v1:%E6%AF%8D:%E6%AF%8D%E5%9B%BD:on:%E3%81%BC
+母親,người mẹ,母,はは,haha,kun,ははおや,hahaoya,母~はは~haha~mẹ~target|親~おや~oya~cha mẹ~support,ことば「母親」を よみます。,ことば「ははおや」を よみます。,Tôi đọc từ “người mẹ”.,v1:%E6%AF%8D:%E6%AF%8D%E8%A6%AA:kun:%E3%81%AF%E3%81%AF
+お母さん,mẹ (cách gọi lịch sự),母,かあ,kaa,kun,おかあさん,okaasan,お~お~o~tiền tố lịch sự~kana|母~かあ~kaa~mẹ~target|さん~さん~san~kính ngữ~kana,ことば「お母さん」を よみます。,ことば「おかあさん」を よみます。,Tôi đọc từ “mẹ (cách gọi lịch sự)”.,v1:%E6%AF%8D:%E3%81%8A%E6%AF%8D%E3%81%95%E3%82%93:kun:%E3%81%8B%E3%81%82
+火曜日,thứ Ba,火,か,ka,on,かようび,kayoubi,火~か~ka~lửa / thứ Ba~target|曜日~ようび~youbi~ngày trong tuần~support,ことば「火曜日」を よみます。,ことば「かようび」を よみます。,Tôi đọc từ “thứ Ba”.,v1:%E7%81%AB:%E7%81%AB%E6%9B%9C%E6%97%A5:on:%E3%81%8B
+火山,núi lửa,火,か,ka,on,かざん,kazan,火~か~ka~lửa~target|山~ざん~zan~núi~support,ことば「火山」を よみます。,ことば「かざん」を よみます。,Tôi đọc từ “núi lửa”.,v1:%E7%81%AB:%E7%81%AB%E5%B1%B1:on:%E3%81%8B
+火,lửa,火,ひ,hi,kun,ひ,hi,火~ひ~hi~lửa~target,ことば「火」を よみます。,ことば「ひ」を よみます。,Tôi đọc từ “lửa”.,v1:%E7%81%AB:%E7%81%AB:kun:%E3%81%B2
+右折,rẽ phải,右,う,u,on,うせつ,usetsu,右~う~u~phải~target|折~せつ~setsu~rẽ / gập~support,ことば「右折」を よみます。,ことば「うせつ」を よみます。,Tôi đọc từ “rẽ phải”.,v1:%E5%8F%B3:%E5%8F%B3%E6%8A%98:on:%E3%81%86
+左右,trái phải / hai bên,右,ゆう,yuu,on,さゆう,sayuu,左~さ~sa~trái~support|右~ゆう~yuu~phải~target,ことば「左右」を よみます。,ことば「さゆう」を よみます。,Tôi đọc từ “trái phải / hai bên”.,v1:%E5%8F%B3:%E5%B7%A6%E5%8F%B3:on:%E3%82%86%E3%81%86
+右,bên phải,右,みぎ,migi,kun,みぎ,migi,右~みぎ~migi~bên phải~target,ことば「右」を よみます。,ことば「みぎ」を よみます。,Tôi đọc từ “bên phải”.,v1:%E5%8F%B3:%E5%8F%B3:kun:%E3%81%BF%E3%81%8E
+読書,đọc sách,読,どく,doku,on,どくしょ,dokusho,読~どく~doku~đọc~target|書~しょ~sho~sách~support,ことば「読書」を よみます。,ことば「どくしょ」を よみます。,Tôi đọc từ “đọc sách”.,v1:%E8%AA%AD:%E8%AA%AD%E6%9B%B8:on:%E3%81%A9%E3%81%8F
+音読,đọc thành tiếng,読,どく,doku,on,おんどく,ondoku,音~おん~on~âm thanh~support|読~どく~doku~đọc~target,ことば「音読」を よみます。,ことば「おんどく」を よみます。,Tôi đọc từ “đọc thành tiếng”.,v1:%E8%AA%AD:%E9%9F%B3%E8%AA%AD:on:%E3%81%A9%E3%81%8F
+読む,đọc,読,よ,yo,kun,よむ,yomu,読~よ~yo~đọc~target|む~む~mu~~kana,ことば「読む」を よみます。,ことば「よむ」を よみます。,Tôi đọc từ “đọc”.,v1:%E8%AA%AD:%E8%AA%AD%E3%82%80:kun:%E3%82%88
+友人,bạn bè / người bạn,友,ゆう,yuu,on,ゆうじん,yuujin,友~ゆう~yuu~bạn~target|人~じん~jin~người~support,ことば「友人」を よみます。,ことば「ゆうじん」を よみます。,Tôi đọc từ “bạn bè / người bạn”.,v1:%E5%8F%8B:%E5%8F%8B%E4%BA%BA:on:%E3%82%86%E3%81%86
+親友,bạn thân,友,ゆう,yuu,on,しんゆう,shinyuu,親~しん~shin~thân thiết~support|友~ゆう~yuu~bạn~target,ことば「親友」を よみます。,ことば「しんゆう」を よみます。,Tôi đọc từ “bạn thân”.,v1:%E5%8F%8B:%E8%A6%AA%E5%8F%8B:on:%E3%82%86%E3%81%86
+友達,bạn bè,友,とも,tomo,kun,ともだち,tomodachi,友~とも~tomo~bạn~target|達~だち~dachi~nhóm người~support,ことば「友達」を よみます。,ことば「ともだち」を よみます。,Tôi đọc từ “bạn bè”.,v1:%E5%8F%8B:%E5%8F%8B%E9%81%94:kun:%E3%81%A8%E3%82%82
+左右,trái phải / hai bên,左,さ,sa,on,さゆう,sayuu,左~さ~sa~trái~target|右~ゆう~yuu~phải~support,ことば「左右」を よみます。,ことば「さゆう」を よみます。,Tôi đọc từ “trái phải / hai bên”.,v1:%E5%B7%A6:%E5%B7%A6%E5%8F%B3:on:%E3%81%95
+左折,rẽ trái,左,さ,sa,on,させつ,sasetsu,左~さ~sa~trái~target|折~せつ~setsu~rẽ / gập~support,ことば「左折」を よみます。,ことば「させつ」を よみます。,Tôi đọc từ “rẽ trái”.,v1:%E5%B7%A6:%E5%B7%A6%E6%8A%98:on:%E3%81%95
+左,bên trái,左,ひだり,hidari,kun,ひだり,hidari,左~ひだり~hidari~bên trái~target,ことば「左」を よみます。,ことば「ひだり」を よみます。,Tôi đọc từ “bên trái”.,v1:%E5%B7%A6:%E5%B7%A6:kun:%E3%81%B2%E3%81%A0%E3%82%8A
+休日,ngày nghỉ,休,きゅう,kyuu,on,きゅうじつ,kyuujitsu,休~きゅう~kyuu~nghỉ~target|日~じつ~jitsu~ngày~support,ことば「休日」を よみます。,ことば「きゅうじつ」を よみます。,Tôi đọc từ “ngày nghỉ”.,v1:%E4%BC%91:%E4%BC%91%E6%97%A5:on:%E3%81%8D%E3%82%85%E3%81%86
+休校,trường nghỉ học,休,きゅう,kyuu,on,きゅうこう,kyuukou,休~きゅう~kyuu~nghỉ~target|校~こう~kou~trường~support,ことば「休校」を よみます。,ことば「きゅうこう」を よみます。,Tôi đọc từ “trường nghỉ học”.,v1:%E4%BC%91:%E4%BC%91%E6%A0%A1:on:%E3%81%8D%E3%82%85%E3%81%86
+休む,nghỉ ngơi,休,やす,yasu,kun,やすむ,yasumu,休~やす~yasu~nghỉ~target|む~む~mu~~kana,ことば「休む」を よみます。,ことば「やすむ」を よみます。,Tôi đọc từ “nghỉ ngơi”.,v1:%E4%BC%91:%E4%BC%91%E3%82%80:kun:%E3%82%84%E3%81%99
+父母,cha mẹ,父,ふ,fu,on,ふぼ,fubo,父~ふ~fu~cha~target|母~ぼ~bo~mẹ~support,ことば「父母」を よみます。,ことば「ふぼ」を よみます。,Tôi đọc từ “cha mẹ”.,v1:%E7%88%B6:%E7%88%B6%E6%AF%8D:on:%E3%81%B5
+父,cha / bố của mình,父,ちち,chichi,kun,ちち,chichi,父~ちち~chichi~cha / bố~target,ことば「父」を よみます。,ことば「ちち」を よみます。,Tôi đọc từ “cha / bố của mình”.,v1:%E7%88%B6:%E7%88%B6:kun:%E3%81%A1%E3%81%A1
+お父さん,bố (cách gọi lịch sự),父,とう,tou,kun,おとうさん,otousan,お~お~o~tiền tố lịch sự~kana|父~とう~tou~bố~target|さん~さん~san~kính ngữ~kana,ことば「お父さん」を よみます。,ことば「おとうさん」を よみます。,Tôi đọc từ “bố (cách gọi lịch sự)”.,v1:%E7%88%B6:%E3%81%8A%E7%88%B6%E3%81%95%E3%82%93:kun:%E3%81%A8%E3%81%86
+雨天,trời mưa / thời tiết mưa,雨,う,u,on,うてん,uten,雨~う~u~mưa~target|天~てん~ten~trời~support,ことば「雨天」を よみます。,ことば「うてん」を よみます。,Tôi đọc từ “trời mưa / thời tiết mưa”.,v1:%E9%9B%A8:%E9%9B%A8%E5%A4%A9:on:%E3%81%86
+大雨,mưa lớn,雨,あめ,ame,kun,おおあめ,ooame,大~おお~oo~lớn~support|雨~あめ~ame~mưa~target,ことば「大雨」を よみます。,ことば「おおあめ」を よみます。,Tôi đọc từ “mưa lớn”.,v1:%E9%9B%A8:%E5%A4%A7%E9%9B%A8:kun:%E3%81%82%E3%82%81
+雨具,đồ đi mưa,雨,あま,ama,kun,あまぐ,amagu,雨~あま~ama~mưa~target|具~ぐ~gu~dụng cụ~support,ことば「雨具」を よみます。,ことば「あまぐ」を よみます。,Tôi đọc từ “đồ đi mưa”.,v1:%E9%9B%A8:%E9%9B%A8%E5%85%B7:kun:%E3%81%82%E3%81%BE
+悪意,ác ý,悪,あく,aku,on,あくい,akui,悪~あく~aku~xấu / ác~target|意~い~i~ý định~support,ことば「悪意」を よみます。,ことば「あくい」を よみます。,Tôi đọc từ “ác ý”.,v1:%E6%82%AA:%E6%82%AA%E6%84%8F:on:%E3%81%82%E3%81%8F
+最悪,tệ nhất,悪,あく,aku,on,さいあく,saiaku,最~さい~sai~nhất~support|悪~あく~aku~xấu / tệ~target,ことば「最悪」を よみます。,ことば「さいあく」を よみます。,Tôi đọc từ “tệ nhất”.,v1:%E6%82%AA:%E6%9C%80%E6%82%AA:on:%E3%81%82%E3%81%8F
+悪い,xấu / tệ,悪,わる,waru,kun,わるい,warui,悪~わる~waru~xấu~target|い~い~i~~kana,ことば「悪い」を よみます。,ことば「わるい」を よみます。,Tôi đọc từ “xấu / tệ”.,v1:%E6%82%AA:%E6%82%AA%E3%81%84:kun:%E3%82%8F%E3%82%8B
+暗記,học thuộc lòng,暗,あん,an,on,あんき,anki,暗~あん~an~ghi nhớ thầm~target|記~き~ki~ghi nhớ~support,ことば「暗記」を よみます。,ことば「あんき」を よみます。,Tôi đọc từ “học thuộc lòng”.,v1:%E6%9A%97:%E6%9A%97%E8%A8%98:on:%E3%81%82%E3%82%93
+暗室,phòng tối,暗,あん,an,on,あんしつ,anshitsu,暗~あん~an~tối~target|室~しつ~shitsu~phòng~support,ことば「暗室」を よみます。,ことば「あんしつ」を よみます。,Tôi đọc từ “phòng tối”.,v1:%E6%9A%97:%E6%9A%97%E5%AE%A4:on:%E3%81%82%E3%82%93
+暗い,tối,暗,くら,kura,kun,くらい,kurai,暗~くら~kura~tối~target|い~い~i~~kana,ことば「暗い」を よみます。,ことば「くらい」を よみます。,Tôi đọc từ “tối”.,v1:%E6%9A%97:%E6%9A%97%E3%81%84:kun:%E3%81%8F%E3%82%89
+医者,bác sĩ,医,い,i,on,いしゃ,isha,医~い~i~y học~target|者~しゃ~sha~người~support,ことば「医者」を よみます。,ことば「いしゃ」を よみます。,Tôi đọc từ “bác sĩ”.,v1:%E5%8C%BB:%E5%8C%BB%E8%80%85:on:%E3%81%84
+医学,y học,医,い,i,on,いがく,igaku,医~い~i~y khoa~target|学~がく~gaku~học~support,ことば「医学」を よみます。,ことば「いがく」を よみます。,Tôi đọc từ “y học”.,v1:%E5%8C%BB:%E5%8C%BB%E5%AD%A6:on:%E3%81%84
+医院,phòng khám,医,い,i,on,いいん,iin,医~い~i~y tế~target|院~いん~in~viện~support,ことば「医院」を よみます。,ことば「いいん」を よみます。,Tôi đọc từ “phòng khám”.,v1:%E5%8C%BB:%E5%8C%BB%E9%99%A2:on:%E3%81%84
+意味,ý nghĩa,意,い,i,on,いみ,imi,意~い~i~ý~target|味~み~mi~vị / nghĩa~support,ことば「意味」を よみます。,ことば「いみ」を よみます。,Tôi đọc từ “ý nghĩa”.,v1:%E6%84%8F:%E6%84%8F%E5%91%B3:on:%E3%81%84
+意見,ý kiến,意,い,i,on,いけん,iken,意~い~i~ý~target|見~けん~ken~cách nhìn~support,ことば「意見」を よみます。,ことば「いけん」を よみます。,Tôi đọc từ “ý kiến”.,v1:%E6%84%8F:%E6%84%8F%E8%A6%8B:on:%E3%81%84
+意外,ngoài dự đoán / bất ngờ,意,い,i,on,いがい,igai,意~い~i~ý nghĩ~target|外~がい~gai~ngoài~support,ことば「意外」を よみます。,ことば「いがい」を よみます。,Tôi đọc từ “ngoài dự đoán / bất ngờ”.,v1:%E6%84%8F:%E6%84%8F%E5%A4%96:on:%E3%81%84
+以上,trở lên / hơn nữa,以,い,i,on,いじょう,ijou,以~い~i~từ / trở lên~target|上~じょう~jou~trên~support,ことば「以上」を よみます。,ことば「いじょう」を よみます。,Tôi đọc từ “trở lên / hơn nữa”.,v1:%E4%BB%A5:%E4%BB%A5%E4%B8%8A:on:%E3%81%84
+以前,trước đây / trước khi,以,い,i,on,いぜん,izen,以~い~i~từ / mốc~target|前~ぜん~zen~trước~support,ことば「以前」を よみます。,ことば「いぜん」を よみます。,Tôi đọc từ “trước đây / trước khi”.,v1:%E4%BB%A5:%E4%BB%A5%E5%89%8D:on:%E3%81%84
+引用,trích dẫn,引,いん,in,on,いんよう,inyou,引~いん~in~dẫn~target|用~よう~you~dùng~support,ことば「引用」を よみます。,ことば「いんよう」を よみます。,Tôi đọc từ “trích dẫn”.,v1:%E5%BC%95:%E5%BC%95%E7%94%A8:on:%E3%81%84%E3%82%93
+引く,kéo / rút,引,ひ,hi,kun,ひく,hiku,引~ひ~hi~kéo~target|く~く~ku~~kana,ことば「引く」を よみます。,ことば「ひく」を よみます。,Tôi đọc từ “kéo / rút”.,v1:%E5%BC%95:%E5%BC%95%E3%81%8F:kun:%E3%81%B2
+病院,bệnh viện,院,いん,in,on,びょういん,byouin,病~びょう~byou~bệnh~support|院~いん~in~viện~target,ことば「病院」を よみます。,ことば「びょういん」を よみます。,Tôi đọc từ “bệnh viện”.,v1:%E9%99%A2:%E7%97%85%E9%99%A2:on:%E3%81%84%E3%82%93
+入院,nhập viện,院,いん,in,on,にゅういん,nyuuin,入~にゅう~nyuu~vào~support|院~いん~in~viện~target,ことば「入院」を よみます。,ことば「にゅういん」を よみます。,Tôi đọc từ “nhập viện”.,v1:%E9%99%A2:%E5%85%A5%E9%99%A2:on:%E3%81%84%E3%82%93
+店員,nhân viên cửa hàng,員,いん,in,on,てんいん,tenin,店~てん~ten~cửa hàng~support|員~いん~in~nhân viên~target,ことば「店員」を よみます。,ことば「てんいん」を よみます。,Tôi đọc từ “nhân viên cửa hàng”.,v1:%E5%93%A1:%E5%BA%97%E5%93%A1:on:%E3%81%84%E3%82%93
+会社員,nhân viên công ty,員,いん,in,on,かいしゃいん,kaishain,会社~かいしゃ~kaisha~công ty~support|員~いん~in~nhân viên~target,ことば「会社員」を よみます。,ことば「かいしゃいん」を よみます。,Tôi đọc từ “nhân viên công ty”.,v1:%E5%93%A1:%E4%BC%9A%E7%A4%BE%E5%93%A1:on:%E3%81%84%E3%82%93
+運動,vận động / tập thể dục,運,うん,un,on,うんどう,undou,運~うん~un~vận động~target|動~どう~dou~chuyển động~support,ことば「運動」を よみます。,ことば「うんどう」を よみます。,Tôi đọc từ “vận động / tập thể dục”.,v1:%E9%81%8B:%E9%81%8B%E5%8B%95:on:%E3%81%86%E3%82%93
+運ぶ,vận chuyển / mang,運,はこ,hako,kun,はこぶ,hakobu,運~はこ~hako~vận chuyển~target|ぶ~ぶ~bu~~kana,ことば「運ぶ」を よみます。,ことば「はこぶ」を よみます。,Tôi đọc từ “vận chuyển / mang”.,v1:%E9%81%8B:%E9%81%8B%E3%81%B6:kun:%E3%81%AF%E3%81%93
+英語,tiếng Anh,英,えい,ei,on,えいご,eigo,英~えい~ei~Anh~target|語~ご~go~ngôn ngữ~support,ことば「英語」を よみます。,ことば「えいご」を よみます。,Tôi đọc từ “tiếng Anh”.,v1:%E8%8B%B1:%E8%8B%B1%E8%AA%9E:on:%E3%81%88%E3%81%84
+英国,nước Anh,英,えい,ei,on,えいこく,eikoku,英~えい~ei~Anh~target|国~こく~koku~quốc gia~support,ことば「英国」を よみます。,ことば「えいこく」を よみます。,Tôi đọc từ “nước Anh”.,v1:%E8%8B%B1:%E8%8B%B1%E5%9B%BD:on:%E3%81%88%E3%81%84
+映画,phim điện ảnh,映,えい,ei,on,えいが,eiga,映~えい~ei~chiếu~target|画~が~ga~hình ảnh~support,ことば「映画」を よみます。,ことば「えいが」を よみます。,Tôi đọc từ “phim điện ảnh”.,v1:%E6%98%A0:%E6%98%A0%E7%94%BB:on:%E3%81%88%E3%81%84
+映る,được chiếu / phản chiếu,映,うつ,utsu,kun,うつる,utsuru,映~うつ~utsu~phản chiếu~target|る~る~ru~~kana,ことば「映る」を よみます。,ことば「うつる」を よみます。,Tôi đọc từ “được chiếu / phản chiếu”.,v1:%E6%98%A0:%E6%98%A0%E3%82%8B:kun:%E3%81%86%E3%81%A4
+遠足,chuyến dã ngoại,遠,えん,en,on,えんそく,ensoku,遠~えん~en~xa~target|足~そく~soku~chân / chuyến đi~support,ことば「遠足」を よみます。,ことば「えんそく」を よみます。,Tôi đọc từ “chuyến dã ngoại”.,v1:%E9%81%A0:%E9%81%A0%E8%B6%B3:on:%E3%81%88%E3%82%93
+遠い,xa,遠,とお,too,kun,とおい,tooi,遠~とお~too~xa~target|い~い~i~~kana,ことば「遠い」を よみます。,ことば「とおい」を よみます。,Tôi đọc từ “xa”.,v1:%E9%81%A0:%E9%81%A0%E3%81%84:kun:%E3%81%A8%E3%81%8A
+屋上,sân thượng / mái nhà,屋,おく,oku,on,おくじょう,okujou,屋~おく~oku~mái / nhà~target|上~じょう~jou~trên~support,ことば「屋上」を よみます。,ことば「おくじょう」を よみます。,Tôi đọc từ “sân thượng / mái nhà”.,v1:%E5%B1%8B:%E5%B1%8B%E4%B8%8A:on:%E3%81%8A%E3%81%8F
+本屋,hiệu sách,屋,や,ya,kun,ほんや,honya,本~ほん~hon~sách~support|屋~や~ya~cửa hàng~target,ことば「本屋」を よみます。,ことば「ほんや」を よみます。,Tôi đọc từ “hiệu sách”.,v1:%E5%B1%8B:%E6%9C%AC%E5%B1%8B:kun:%E3%82%84
+歌手,ca sĩ,歌,か,ka,on,かしゅ,kashu,歌~か~ka~bài hát~target|手~しゅ~shu~người làm~support,ことば「歌手」を よみます。,ことば「かしゅ」を よみます。,Tôi đọc từ “ca sĩ”.,v1:%E6%AD%8C:%E6%AD%8C%E6%89%8B:on:%E3%81%8B
+歌う,hát,歌,うた,uta,kun,うたう,utau,歌~うた~uta~hát~target|う~う~u~~kana,ことば「歌う」を よみます。,ことば「うたう」を よみます。,Tôi đọc từ “hát”.,v1:%E6%AD%8C:%E6%AD%8C%E3%81%86:kun:%E3%81%86%E3%81%9F
+夏季,mùa hè / mùa hạ,夏,か,ka,on,かき,kaki,夏~か~ka~mùa hè~target|季~き~ki~mùa~support,ことば「夏季」を よみます。,ことば「かき」を よみます。,Tôi đọc từ “mùa hè / mùa hạ”.,v1:%E5%A4%8F:%E5%A4%8F%E5%AD%A3:on:%E3%81%8B
+夏休み,kỳ nghỉ hè,夏,なつ,natsu,kun,なつやすみ,natsuyasumi,夏~なつ~natsu~mùa hè~target|休~やす~yasu~nghỉ~support|み~み~mi~~kana,ことば「夏休み」を よみます。,ことば「なつやすみ」を よみます。,Tôi đọc từ “kỳ nghỉ hè”.,v1:%E5%A4%8F:%E5%A4%8F%E4%BC%91%E3%81%BF:kun:%E3%81%AA%E3%81%A4
+家族,gia đình,家,か,ka,on,かぞく,kazoku,家~か~ka~gia đình~target|族~ぞく~zoku~nhóm / tộc~support,ことば「家族」を よみます。,ことば「かぞく」を よみます。,Tôi đọc từ “gia đình”.,v1:%E5%AE%B6:%E5%AE%B6%E6%97%8F:on:%E3%81%8B
+家,ngôi nhà,家,いえ,ie,kun,いえ,ie,家~いえ~ie~nhà~target,ことば「家」を よみます。,ことば「いえ」を よみます。,Tôi đọc từ “ngôi nhà”.,v1:%E5%AE%B6:%E5%AE%B6:kun:%E3%81%84%E3%81%88
+映画,phim điện ảnh,画,が,ga,on,えいが,eiga,映~えい~ei~chiếu~support|画~が~ga~hình ảnh~target,ことば「映画」を よみます。,ことば「えいが」を よみます。,Tôi đọc từ “phim điện ảnh”.,v1:%E7%94%BB:%E6%98%A0%E7%94%BB:on:%E3%81%8C
+計画,kế hoạch,画,かく,kaku,on,けいかく,keikaku,計~けい~kei~tính toán~support|画~かく~kaku~kế hoạch / nét~target,ことば「計画」を よみます。,ことば「けいかく」を よみます。,Tôi đọc từ “kế hoạch”.,v1:%E7%94%BB:%E8%A8%88%E7%94%BB:on:%E3%81%8B%E3%81%8F
+海外,hải ngoại / nước ngoài,海,かい,kai,on,かいがい,kaigai,海~かい~kai~biển~target|外~がい~gai~ngoài~support,ことば「海外」を よみます。,ことば「かいがい」を よみます。,Tôi đọc từ “hải ngoại / nước ngoài”.,v1:%E6%B5%B7:%E6%B5%B7%E5%A4%96:on:%E3%81%8B%E3%81%84
+海,biển,海,うみ,umi,kun,うみ,umi,海~うみ~umi~biển~target,ことば「海」を よみます。,ことば「うみ」を よみます。,Tôi đọc từ “biển”.,v1:%E6%B5%B7:%E6%B5%B7:kun:%E3%81%86%E3%81%BF
+今回,lần này,回,かい,kai,on,こんかい,konkai,今~こん~kon~lần này / hiện tại~support|回~かい~kai~lần~target,ことば「今回」を よみます。,ことば「こんかい」を よみます。,Tôi đọc từ “lần này”.,v1:%E5%9B%9E:%E4%BB%8A%E5%9B%9E:on:%E3%81%8B%E3%81%84
+回る,xoay / đi vòng,回,まわ,mawa,kun,まわる,mawaru,回~まわ~mawa~xoay vòng~target|る~る~ru~~kana,ことば「回る」を よみます。,ことば「まわる」を よみます。,Tôi đọc từ “xoay / đi vòng”.,v1:%E5%9B%9E:%E5%9B%9E%E3%82%8B:kun:%E3%81%BE%E3%82%8F
+開会,khai mạc / mở cuộc họp,開,かい,kai,on,かいかい,kaikai,開~かい~kai~mở~target|会~かい~kai~cuộc họp~support,ことば「開会」を よみます。,ことば「かいかい」を よみます。,Tôi đọc từ “khai mạc / mở cuộc họp”.,v1:%E9%96%8B:%E9%96%8B%E4%BC%9A:on:%E3%81%8B%E3%81%84
+開く,mở ra,開,ひら,hira,kun,ひらく,hiraku,開~ひら~hira~mở~target|く~く~ku~~kana,ことば「開く」を よみます。,ことば「ひらく」を よみます。,Tôi đọc từ “mở ra”.,v1:%E9%96%8B:%E9%96%8B%E3%81%8F:kun:%E3%81%B2%E3%82%89
+世界,thế giới,界,かい,kai,on,せかい,sekai,世~せ~se~đời / thế~support|界~かい~kai~thế giới~target,ことば「世界」を よみます。,ことば「せかい」を よみます。,Tôi đọc từ “thế giới”.,v1:%E7%95%8C:%E4%B8%96%E7%95%8C:on:%E3%81%8B%E3%81%84
+業界,ngành nghề / giới kinh doanh,界,かい,kai,on,ぎょうかい,gyoukai,業~ぎょう~gyou~ngành nghề~support|界~かい~kai~giới~target,ことば「業界」を よみます。,ことば「ぎょうかい」を よみます。,Tôi đọc từ “ngành nghề / giới kinh doanh”.,v1:%E7%95%8C:%E6%A5%AD%E7%95%8C:on:%E3%81%8B%E3%81%84
+音楽,âm nhạc,楽,がく,gaku,on,おんがく,ongaku,音~おん~on~âm thanh~support|楽~がく~gaku~nhạc~target,ことば「音楽」を よみます。,ことば「おんがく」を よみます。,Tôi đọc từ “âm nhạc”.,v1:%E6%A5%BD:%E9%9F%B3%E6%A5%BD:on:%E3%81%8C%E3%81%8F
+楽しい,vui vẻ,楽,たの,tano,kun,たのしい,tanoshii,楽~たの~tano~vui~target|しい~しい~shii~~kana,ことば「楽しい」を よみます。,ことば「たのしい」を よみます。,Tôi đọc từ “vui vẻ”.,v1:%E6%A5%BD:%E6%A5%BD%E3%81%97%E3%81%84:kun:%E3%81%9F%E3%81%AE
+図書館,thư viện,館,かん,kan,on,としょかん,toshokan,図書~としょ~tosho~sách~support|館~かん~kan~tòa nhà~target,ことば「図書館」を よみます。,ことば「としょかん」を よみます。,Tôi đọc từ “thư viện”.,v1:%E9%A4%A8:%E5%9B%B3%E6%9B%B8%E9%A4%A8:on:%E3%81%8B%E3%82%93
+映画館,rạp chiếu phim,館,かん,kan,on,えいがかん,eigakan,映画~えいが~eiga~phim~support|館~かん~kan~tòa nhà / rạp~target,ことば「映画館」を よみます。,ことば「えいがかん」を よみます。,Tôi đọc từ “rạp chiếu phim”.,v1:%E9%A4%A8:%E6%98%A0%E7%94%BB%E9%A4%A8:on:%E3%81%8B%E3%82%93
+漢字,chữ Kanji / Hán tự,漢,かん,kan,on,かんじ,kanji,漢~かん~kan~Hán~target|字~じ~ji~chữ~support,ことば「漢字」を よみます。,ことば「かんじ」を よみます。,Tôi đọc từ “chữ Kanji / Hán tự”.,v1:%E6%BC%A2:%E6%BC%A2%E5%AD%97:on:%E3%81%8B%E3%82%93
+漢語,từ Hán Nhật,漢,かん,kan,on,かんご,kango,漢~かん~kan~Hán~target|語~ご~go~từ ngữ~support,ことば「漢語」を よみます。,ことば「かんご」を よみます。,Tôi đọc từ “từ Hán Nhật”.,v1:%E6%BC%A2:%E6%BC%A2%E8%AA%9E:on:%E3%81%8B%E3%82%93
+寒気,khí lạnh / cảm giác ớn lạnh,寒,かん,kan,on,かんき,kanki,寒~かん~kan~lạnh~target|気~き~ki~khí~support,ことば「寒気」を よみます。,ことば「かんき」を よみます。,Tôi đọc từ “khí lạnh / cảm giác ớn lạnh”.,v1:%E5%AF%92:%E5%AF%92%E6%B0%97:on:%E3%81%8B%E3%82%93
+寒い,lạnh,寒,さむ,samu,kun,さむい,samui,寒~さむ~samu~lạnh~target|い~い~i~~kana,ことば「寒い」を よみます。,ことば「さむい」を よみます。,Tôi đọc từ “lạnh”.,v1:%E5%AF%92:%E5%AF%92%E3%81%84:kun:%E3%81%95%E3%82%80
+顔面,khuôn mặt / vùng mặt,顔,がん,gan,on,がんめん,ganmen,顔~がん~gan~mặt~target|面~めん~men~bề mặt~support,ことば「顔面」を よみます。,ことば「がんめん」を よみます。,Tôi đọc từ “khuôn mặt / vùng mặt”.,v1:%E9%A1%94:%E9%A1%94%E9%9D%A2:on:%E3%81%8C%E3%82%93
+顔,khuôn mặt,顔,かお,kao,kun,かお,kao,顔~かお~kao~khuôn mặt~target,ことば「顔」を よみます。,ことば「かお」を よみます。,Tôi đọc từ “khuôn mặt”.,v1:%E9%A1%94:%E9%A1%94:kun:%E3%81%8B%E3%81%8A
+帰国,về nước,帰,き,ki,on,きこく,kikoku,帰~き~ki~trở về~target|国~こく~koku~đất nước~support,ことば「帰国」を よみます。,ことば「きこく」を よみます。,Tôi đọc từ “về nước”.,v1:%E5%B8%B0:%E5%B8%B0%E5%9B%BD:on:%E3%81%8D
+帰る,trở về,帰,かえ,kae,kun,かえる,kaeru,帰~かえ~kae~trở về~target|る~る~ru~~kana,ことば「帰る」を よみます。,ことば「かえる」を よみます。,Tôi đọc từ “trở về”.,v1:%E5%B8%B0:%E5%B8%B0%E3%82%8B:kun:%E3%81%8B%E3%81%88
+起立,đứng dậy,起,き,ki,on,きりつ,kiritsu,起~き~ki~đứng lên~target|立~りつ~ritsu~đứng~support,ことば「起立」を よみます。,ことば「きりつ」を よみます。,Tôi đọc từ “đứng dậy”.,v1:%E8%B5%B7:%E8%B5%B7%E7%AB%8B:on:%E3%81%8D
+起きる,thức dậy,起,お,o,kun,おきる,okiru,起~お~o~dậy~target|きる~きる~kiru~~kana,ことば「起きる」を よみます。,ことば「おきる」を よみます。,Tôi đọc từ “thức dậy”.,v1:%E8%B5%B7:%E8%B5%B7%E3%81%8D%E3%82%8B:kun:%E3%81%8A
+研究,nghiên cứu,究,きゅう,kyuu,on,けんきゅう,kenkyuu,研~けん~ken~mài giũa / nghiên cứu~support|究~きゅう~kyuu~nghiên cứu đến cùng~target,ことば「研究」を よみます。,ことば「けんきゅう」を よみます。,Tôi đọc từ “nghiên cứu”.,v1:%E7%A9%B6:%E7%A0%94%E7%A9%B6:on:%E3%81%8D%E3%82%85%E3%81%86
+究明,điều tra làm rõ,究,きゅう,kyuu,on,きゅうめい,kyuumei,究~きゅう~kyuu~truy cứu~target|明~めい~mei~làm rõ~support,ことば「究明」を よみます。,ことば「きゅうめい」を よみます。,Tôi đọc từ “điều tra làm rõ”.,v1:%E7%A9%B6:%E7%A9%B6%E6%98%8E:on:%E3%81%8D%E3%82%85%E3%81%86
+急行,tàu tốc hành,急,きゅう,kyuu,on,きゅうこう,kyuukou,急~きゅう~kyuu~nhanh / gấp~target|行~こう~kou~chạy / đi~support,ことば「急行」を よみます。,ことば「きゅうこう」を よみます。,Tôi đọc từ “tàu tốc hành”.,v1:%E6%80%A5:%E6%80%A5%E8%A1%8C:on:%E3%81%8D%E3%82%85%E3%81%86
+急ぐ,vội / nhanh lên,急,いそ,iso,kun,いそぐ,isogu,急~いそ~iso~vội~target|ぐ~ぐ~gu~~kana,ことば「急ぐ」を よみます。,ことば「いそぐ」を よみます。,Tôi đọc từ “vội / nhanh lên”.,v1:%E6%80%A5:%E6%80%A5%E3%81%90:kun:%E3%81%84%E3%81%9D
+牛肉,thịt bò,牛,ぎゅう,gyuu,on,ぎゅうにく,gyuuniku,牛~ぎゅう~gyuu~bò~target|肉~にく~niku~thịt~support,ことば「牛肉」を よみます。,ことば「ぎゅうにく」を よみます。,Tôi đọc từ “thịt bò”.,v1:%E7%89%9B:%E7%89%9B%E8%82%89:on:%E3%81%8E%E3%82%85%E3%81%86
+牛,con bò,牛,うし,ushi,kun,うし,ushi,牛~うし~ushi~bò~target,ことば「牛」を よみます。,ことば「うし」を よみます。,Tôi đọc từ “con bò”.,v1:%E7%89%9B:%E7%89%9B:kun:%E3%81%86%E3%81%97
+去年,năm ngoái,去,きょ,kyo,on,きょねん,kyonen,去~きょ~kyo~đã qua~target|年~ねん~nen~năm~support,ことば「去年」を よみます。,ことば「きょねん」を よみます。,Tôi đọc từ “năm ngoái”.,v1:%E5%8E%BB:%E5%8E%BB%E5%B9%B4:on:%E3%81%8D%E3%82%87
+去る,rời đi,去,さ,sa,kun,さる,saru,去~さ~sa~rời đi~target|る~る~ru~~kana,ことば「去る」を よみます。,ことば「さる」を よみます。,Tôi đọc từ “rời đi”.,v1:%E5%8E%BB:%E5%8E%BB%E3%82%8B:kun:%E3%81%95
+強力,mạnh mẽ / cường lực,強,きょう,kyou,on,きょうりょく,kyouryoku,強~きょう~kyou~mạnh~target|力~りょく~ryoku~sức lực~support,ことば「強力」を よみます。,ことば「きょうりょく」を よみます。,Tôi đọc từ “mạnh mẽ / cường lực”.,v1:%E5%BC%B7:%E5%BC%B7%E5%8A%9B:on:%E3%81%8D%E3%82%87%E3%81%86
+強い,mạnh,強,つよ,tsuyo,kun,つよい,tsuyoi,強~つよ~tsuyo~mạnh~target|い~い~i~~kana,ことば「強い」を よみます。,ことば「つよい」を よみます。,Tôi đọc từ “mạnh”.,v1:%E5%BC%B7:%E5%BC%B7%E3%81%84:kun:%E3%81%A4%E3%82%88
+教室,lớp học,教,きょう,kyou,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy / giáo~target|室~しつ~shitsu~phòng~support,ことば「教室」を よみます。,ことば「きょうしつ」を よみます。,Tôi đọc từ “lớp học”.,v1:%E6%95%99:%E6%95%99%E5%AE%A4:on:%E3%81%8D%E3%82%87%E3%81%86
+教える,dạy / chỉ bảo,教,おし,oshi,kun,おしえる,oshieru,教~おし~oshi~dạy~target|える~える~eru~~kana,ことば「教える」を よみます。,ことば「おしえる」を よみます。,Tôi đọc từ “dạy / chỉ bảo”.,v1:%E6%95%99:%E6%95%99%E3%81%88%E3%82%8B:kun:%E3%81%8A%E3%81%97
+東京,Tokyo / Đông Kinh,京,きょう,kyou,on,とうきょう,toukyou,東~とう~tou~phía đông~support|京~きょう~kyou~kinh đô~target,ことば「東京」を よみます。,ことば「とうきょう」を よみます。,Tôi đọc từ “Tokyo / Đông Kinh”.,v1:%E4%BA%AC:%E6%9D%B1%E4%BA%AC:on:%E3%81%8D%E3%82%87%E3%81%86
+京都,Kyoto / kinh đô Kyoto,京,きょう,kyou,on,きょうと,kyouto,京~きょう~kyou~kinh đô~target|都~と~to~đô thị~support,ことば「京都」を よみます。,ことば「きょうと」を よみます。,Tôi đọc từ “Kyoto / kinh đô Kyoto”.,v1:%E4%BA%AC:%E4%BA%AC%E9%83%BD:on:%E3%81%8D%E3%82%87%E3%81%86
+授業,buổi học / tiết học,業,ぎょう,gyou,on,じゅぎょう,jugyou,授~じゅ~ju~truyền dạy~support|業~ぎょう~gyou~việc học~target,ことば「授業」を よみます。,ことば「じゅぎょう」を よみます。,Tôi đọc từ “buổi học / tiết học”.,v1:%E6%A5%AD:%E6%8E%88%E6%A5%AD:on:%E3%81%8E%E3%82%87%E3%81%86
+産業,công nghiệp,業,ぎょう,gyou,on,さんぎょう,sangyou,産~さん~san~sản xuất~support|業~ぎょう~gyou~ngành nghề~target,ことば「産業」を よみます。,ことば「さんぎょう」を よみます。,Tôi đọc từ “công nghiệp”.,v1:%E6%A5%AD:%E7%94%A3%E6%A5%AD:on:%E3%81%8E%E3%82%87%E3%81%86
+近所,hàng xóm / khu vực gần nhà,近,きん,kin,on,きんじょ,kinjo,近~きん~kin~gần~target|所~じょ~jo~nơi~support,ことば「近所」を よみます。,ことば「きんじょ」を よみます。,Tôi đọc từ “hàng xóm / khu vực gần nhà”.,v1:%E8%BF%91:%E8%BF%91%E6%89%80:on:%E3%81%8D%E3%82%93
+近い,gần,近,ちか,chika,kun,ちかい,chikai,近~ちか~chika~gần~target|い~い~i~~kana,ことば「近い」を よみます。,ことば「ちかい」を よみます。,Tôi đọc từ “gần”.,v1:%E8%BF%91:%E8%BF%91%E3%81%84:kun:%E3%81%A1%E3%81%8B
+銀行,ngân hàng,銀,ぎん,gin,on,ぎんこう,ginkou,銀~ぎん~gin~bạc / ngân~target|行~こう~kou~cơ sở~support,ことば「銀行」を よみます。,ことば「ぎんこう」を よみます。,Tôi đọc từ “ngân hàng”.,v1:%E9%8A%80:%E9%8A%80%E8%A1%8C:on:%E3%81%8E%E3%82%93
+銀色,màu bạc,銀,ぎん,gin,on,ぎんいろ,giniro,銀~ぎん~gin~bạc~target|色~いろ~iro~màu sắc~support,ことば「銀色」を よみます。,ことば「ぎんいろ」を よみます。,Tôi đọc từ “màu bạc”.,v1:%E9%8A%80:%E9%8A%80%E8%89%B2:on:%E3%81%8E%E3%82%93
+区役所,văn phòng hành chính quận,区,く,ku,on,くやくしょ,kuyakusho,区~く~ku~quận / khu~target|役所~やくしょ~yakusho~cơ quan hành chính~support,ことば「区役所」を よみます。,ことば「くやくしょ」を よみます。,Tôi đọc từ “văn phòng hành chính quận”.,v1:%E5%8C%BA:%E5%8C%BA%E5%BD%B9%E6%89%80:on:%E3%81%8F
+地区,khu vực,区,く,ku,on,ちく,chiku,地~ち~chi~đất / vùng~support|区~く~ku~khu vực~target,ことば「地区」を よみます。,ことば「ちく」を よみます。,Tôi đọc từ “khu vực”.,v1:%E5%8C%BA:%E5%9C%B0%E5%8C%BA:on:%E3%81%8F
+計画,kế hoạch,計,けい,kei,on,けいかく,keikaku,計~けい~kei~tính toán~target|画~かく~kaku~kế hoạch~support,ことば「計画」を よみます。,ことば「けいかく」を よみます。,Tôi đọc từ “kế hoạch”.,v1:%E8%A8%88:%E8%A8%88%E7%94%BB:on:%E3%81%91%E3%81%84
+計る,đo / tính,計,はか,haka,kun,はかる,hakaru,計~はか~haka~đo~target|る~る~ru~~kana,ことば「計る」を よみます。,ことば「はかる」を よみます。,Tôi đọc từ “đo / tính”.,v1:%E8%A8%88:%E8%A8%88%E3%82%8B:kun:%E3%81%AF%E3%81%8B
+兄弟,anh em,兄,きょう,kyou,on,きょうだい,kyoudai,兄~きょう~kyou~anh trai~target|弟~だい~dai~em trai~support,ことば「兄弟」を よみます。,ことば「きょうだい」を よみます。,Tôi đọc từ “anh em”.,v1:%E5%85%84:%E5%85%84%E5%BC%9F:on:%E3%81%8D%E3%82%87%E3%81%86
+兄,anh trai,兄,あに,ani,kun,あに,ani,兄~あに~ani~anh trai~target,ことば「兄」を よみます。,ことば「あに」を よみます。,Tôi đọc từ “anh trai”.,v1:%E5%85%84:%E5%85%84:kun:%E3%81%82%E3%81%AB
+軽食,bữa ăn nhẹ,軽,けい,kei,on,けいしょく,keishoku,軽~けい~kei~nhẹ~target|食~しょく~shoku~thức ăn~support,ことば「軽食」を よみます。,ことば「けいしょく」を よみます。,Tôi đọc từ “bữa ăn nhẹ”.,v1:%E8%BB%BD:%E8%BB%BD%E9%A3%9F:on:%E3%81%91%E3%81%84
+軽い,nhẹ,軽,かる,karu,kun,かるい,karui,軽~かる~karu~nhẹ~target|い~い~i~~kana,ことば「軽い」を よみます。,ことば「かるい」を よみます。,Tôi đọc từ “nhẹ”.,v1:%E8%BB%BD:%E8%BB%BD%E3%81%84:kun:%E3%81%8B%E3%82%8B
+番犬,chó canh,犬,けん,ken,on,ばんけん,banken,番~ばん~ban~canh gác~support|犬~けん~ken~chó~target,ことば「番犬」を よみます。,ことば「ばんけん」を よみます。,Tôi đọc từ “chó canh”.,v1:%E7%8A%AC:%E7%95%AA%E7%8A%AC:on:%E3%81%91%E3%82%93
+犬,con chó,犬,いぬ,inu,kun,いぬ,inu,犬~いぬ~inu~chó~target,ことば「犬」を よみます。,ことば「いぬ」を よみます。,Tôi đọc từ “con chó”.,v1:%E7%8A%AC:%E7%8A%AC:kun:%E3%81%84%E3%81%AC
+研究,nghiên cứu,研,けん,ken,on,けんきゅう,kenkyuu,研~けん~ken~nghiên cứu~target|究~きゅう~kyuu~đến cùng~support,ことば「研究」を よみます。,ことば「けんきゅう」を よみます。,Tôi đọc từ “nghiên cứu”.,v1:%E7%A0%94:%E7%A0%94%E7%A9%B6:on:%E3%81%91%E3%82%93
+研ぐ,mài / đánh bóng,研,と,to,kun,とぐ,togu,研~と~to~mài~target|ぐ~ぐ~gu~~kana,ことば「研ぐ」を よみます。,ことば「とぐ」を よみます。,Tôi đọc từ “mài / đánh bóng”.,v1:%E7%A0%94:%E7%A0%94%E3%81%90:kun:%E3%81%A8
+県立,do tỉnh quản lý,県,けん,ken,on,けんりつ,kenritsu,県~けん~ken~tỉnh~target|立~りつ~ritsu~lập~support,ことば「県立」を よみます。,ことば「けんりつ」を よみます。,Tôi đọc từ “do tỉnh quản lý”.,v1:%E7%9C%8C:%E7%9C%8C%E7%AB%8B:on:%E3%81%91%E3%82%93
+県庁,trụ sở hành chính tỉnh,県,けん,ken,on,けんちょう,kenchou,県~けん~ken~tỉnh~target|庁~ちょう~chou~cơ quan~support,ことば「県庁」を よみます。,ことば「けんちょう」を よみます。,Tôi đọc từ “trụ sở hành chính tỉnh”.,v1:%E7%9C%8C:%E7%9C%8C%E5%BA%81:on:%E3%81%91%E3%82%93
+建設,xây dựng,建,けん,ken,on,けんせつ,kensetsu,建~けん~ken~xây~target|設~せつ~setsu~thiết lập~support,ことば「建設」を よみます。,ことば「けんせつ」を よみます。,Tôi đọc từ “xây dựng”.,v1:%E5%BB%BA:%E5%BB%BA%E8%A8%AD:on:%E3%81%91%E3%82%93
+建てる,xây lên,建,た,ta,kun,たてる,tateru,建~た~ta~xây~target|てる~てる~teru~~kana,ことば「建てる」を よみます。,ことば「たてる」を よみます。,Tôi đọc từ “xây lên”.,v1:%E5%BB%BA:%E5%BB%BA%E3%81%A6%E3%82%8B:kun:%E3%81%9F
+試験,kỳ thi / kiểm tra,験,けん,ken,on,しけん,shiken,試~し~shi~thử~support|験~けん~ken~kiểm nghiệm~target,ことば「試験」を よみます。,ことば「しけん」を よみます。,Tôi đọc từ “kỳ thi / kiểm tra”.,v1:%E9%A8%93:%E8%A9%A6%E9%A8%93:on:%E3%81%91%E3%82%93
+経験,kinh nghiệm,験,けん,ken,on,けいけん,keiken,経~けい~kei~trải qua~support|験~けん~ken~kinh nghiệm~target,ことば「経験」を よみます。,ことば「けいけん」を よみます。,Tôi đọc từ “kinh nghiệm”.,v1:%E9%A8%93:%E7%B5%8C%E9%A8%93:on:%E3%81%91%E3%82%93
+元気,khỏe mạnh / tràn đầy năng lượng,元,げん,gen,on,げんき,genki,元~げん~gen~nguồn / gốc~target|気~き~ki~khí lực~support,ことば「元気」を よみます。,ことば「げんき」を よみます。,Tôi đọc từ “khỏe mạnh / tràn đầy năng lượng”.,v1:%E5%85%83:%E5%85%83%E6%B0%97:on:%E3%81%92%E3%82%93
+元,gốc / nguồn,元,もと,moto,kun,もと,moto,元~もと~moto~gốc~target,ことば「元」を よみます。,ことば「もと」を よみます。,Tôi đọc từ “gốc / nguồn”.,v1:%E5%85%83:%E5%85%83:kun:%E3%82%82%E3%81%A8
+工場,nhà máy,工,こう,kou,on,こうじょう,koujou,工~こう~kou~công nghiệp~target|場~じょう~jou~nơi~support,ことば「工場」を よみます。,ことば「こうじょう」を よみます。,Tôi đọc từ “nhà máy”.,v1:%E5%B7%A5:%E5%B7%A5%E5%A0%B4:on:%E3%81%93%E3%81%86
+工事,công trình / thi công,工,こう,kou,on,こうじ,kouji,工~こう~kou~thi công~target|事~じ~ji~việc~support,ことば「工事」を よみます。,ことば「こうじ」を よみます。,Tôi đọc từ “công trình / thi công”.,v1:%E5%B7%A5:%E5%B7%A5%E4%BA%8B:on:%E3%81%93%E3%81%86
+広告,quảng cáo,広,こう,kou,on,こうこく,koukoku,広~こう~kou~rộng / quảng~target|告~こく~koku~báo~support,ことば「広告」を よみます。,ことば「こうこく」を よみます。,Tôi đọc từ “quảng cáo”.,v1:%E5%BA%83:%E5%BA%83%E5%91%8A:on:%E3%81%93%E3%81%86
+広い,rộng,広,ひろ,hiro,kun,ひろい,hiroi,広~ひろ~hiro~rộng~target|い~い~i~~kana,ことば「広い」を よみます。,ことば「ひろい」を よみます。,Tôi đọc từ “rộng”.,v1:%E5%BA%83:%E5%BA%83%E3%81%84:kun:%E3%81%B2%E3%82%8D
+考察,suy xét / khảo sát,考,こう,kou,on,こうさつ,kousatsu,考~こう~kou~suy nghĩ~target|察~さつ~satsu~xem xét~support,ことば「考察」を よみます。,ことば「こうさつ」を よみます。,Tôi đọc từ “suy xét / khảo sát”.,v1:%E8%80%83:%E8%80%83%E5%AF%9F:on:%E3%81%93%E3%81%86
+考える,suy nghĩ,考,かんが,kanga,kun,かんがえる,kangaeru,考~かんが~kanga~suy nghĩ~target|える~える~eru~~kana,ことば「考える」を よみます。,ことば「かんがえる」を よみます。,Tôi đọc từ “suy nghĩ”.,v1:%E8%80%83:%E8%80%83%E3%81%88%E3%82%8B:kun:%E3%81%8B%E3%82%93%E3%81%8C
+観光,tham quan / du lịch,光,こう,kou,on,かんこう,kankou,観~かん~kan~ngắm~support|光~こう~kou~ánh sáng / cảnh sắc~target,ことば「観光」を よみます。,ことば「かんこう」を よみます。,Tôi đọc từ “tham quan / du lịch”.,v1:%E5%85%89:%E8%A6%B3%E5%85%89:on:%E3%81%93%E3%81%86
+光,ánh sáng,光,ひかり,hikari,kun,ひかり,hikari,光~ひかり~hikari~ánh sáng~target,ことば「光」を よみます。,ことば「ひかり」を よみます。,Tôi đọc từ “ánh sáng”.,v1:%E5%85%89:%E5%85%89:kun:%E3%81%B2%E3%81%8B%E3%82%8A
+好物,món yêu thích,好,こう,kou,on,こうぶつ,koubutsu,好~こう~kou~yêu thích~target|物~ぶつ~butsu~vật / món~support,ことば「好物」を よみます。,ことば「こうぶつ」を よみます。,Tôi đọc từ “món yêu thích”.,v1:%E5%A5%BD:%E5%A5%BD%E7%89%A9:on:%E3%81%93%E3%81%86
+好き,thích,好,す,su,kun,すき,suki,好~す~su~thích~target|き~き~ki~~kana,ことば「好き」を よみます。,ことば「すき」を よみます。,Tôi đọc từ “thích”.,v1:%E5%A5%BD:%E5%A5%BD%E3%81%8D:kun:%E3%81%99
+合計,tổng cộng,合,ごう,gou,on,ごうけい,goukei,合~ごう~gou~gộp~target|計~けい~kei~tính~support,ことば「合計」を よみます。,ことば「ごうけい」を よみます。,Tôi đọc từ “tổng cộng”.,v1:%E5%90%88:%E5%90%88%E8%A8%88:on:%E3%81%94%E3%81%86
+合う,hợp / khớp,合,あ,a,kun,あう,au,合~あ~a~hợp~target|う~う~u~~kana,ことば「合う」を よみます。,ことば「あう」を よみます。,Tôi đọc từ “hợp / khớp”.,v1:%E5%90%88:%E5%90%88%E3%81%86:kun:%E3%81%82
+黒板,bảng đen,黒,こく,koku,on,こくばん,kokuban,黒~こく~koku~đen~target|板~ばん~ban~tấm bảng~support,ことば「黒板」を よみます。,ことば「こくばん」を よみます。,Tôi đọc từ “bảng đen”.,v1:%E9%BB%92:%E9%BB%92%E6%9D%BF:on:%E3%81%93%E3%81%8F
+黒い,màu đen,黒,くろ,kuro,kun,くろい,kuroi,黒~くろ~kuro~đen~target|い~い~i~~kana,ことば「黒い」を よみます。,ことば「くろい」を よみます。,Tôi đọc từ “màu đen”.,v1:%E9%BB%92:%E9%BB%92%E3%81%84:kun:%E3%81%8F%E3%82%8D
+野菜,rau củ,菜,さい,sai,on,やさい,yasai,野~や~ya~đồng / hoang~support|菜~さい~sai~rau~target,ことば「野菜」を よみます。,ことば「やさい」を よみます。,Tôi đọc từ “rau củ”.,v1:%E8%8F%9C:%E9%87%8E%E8%8F%9C:on:%E3%81%95%E3%81%84
+菜の花,hoa cải,菜,な,na,kun,なのはな,nanohana,菜~な~na~rau cải~target|の~の~no~~kana|花~はな~hana~hoa~support,ことば「菜の花」を よみます。,ことば「なのはな」を よみます。,Tôi đọc từ “hoa cải”.,v1:%E8%8F%9C:%E8%8F%9C%E3%81%AE%E8%8A%B1:kun:%E3%81%AA
+作文,bài văn,作,さく,saku,on,さくぶん,sakubun,作~さく~saku~làm / sáng tác~target|文~ぶん~bun~văn~support,ことば「作文」を よみます。,ことば「さくぶん」を よみます。,Tôi đọc từ “bài văn”.,v1:%E4%BD%9C:%E4%BD%9C%E6%96%87:on:%E3%81%95%E3%81%8F
+作る,làm / tạo ra,作,つく,tsuku,kun,つくる,tsukuru,作~つく~tsuku~làm~target|る~る~ru~~kana,ことば「作る」を よみます。,ことば「つくる」を よみます。,Tôi đọc từ “làm / tạo ra”.,v1:%E4%BD%9C:%E4%BD%9C%E3%82%8B:kun:%E3%81%A4%E3%81%8F
+生産,sản xuất,産,さん,san,on,せいさん,seisan,生~せい~sei~sinh ra~support|産~さん~san~sản xuất~target,ことば「生産」を よみます。,ことば「せいさん」を よみます。,Tôi đọc từ “sản xuất”.,v1:%E7%94%A3:%E7%94%9F%E7%94%A3:on:%E3%81%95%E3%82%93
+産む,sinh / đẻ,産,う,u,kun,うむ,umu,産~う~u~sinh~target|む~む~mu~~kana,ことば「産む」を よみます。,ことば「うむ」を よみます。,Tôi đọc từ “sinh / đẻ”.,v1:%E7%94%A3:%E7%94%A3%E3%82%80:kun:%E3%81%86
+用紙,giấy dùng cho một mục đích,紙,し,shi,on,ようし,youshi,用~よう~you~sử dụng~support|紙~し~shi~giấy~target,ことば「用紙」を よみます。,ことば「ようし」を よみます。,Tôi đọc từ “giấy dùng cho một mục đích”.,v1:%E7%B4%99:%E7%94%A8%E7%B4%99:on:%E3%81%97
+紙,giấy,紙,かみ,kami,kun,かみ,kami,紙~かみ~kami~giấy~target,ことば「紙」を よみます。,ことば「かみ」を よみます。,Tôi đọc từ “giấy”.,v1:%E7%B4%99:%E7%B4%99:kun:%E3%81%8B%E3%81%BF
+思考,suy nghĩ / tư duy,思,し,shi,on,しこう,shikou,思~し~shi~suy nghĩ~target|考~こう~kou~xem xét~support,ことば「思考」を よみます。,ことば「しこう」を よみます。,Tôi đọc từ “suy nghĩ / tư duy”.,v1:%E6%80%9D:%E6%80%9D%E8%80%83:on:%E3%81%97
+思う,nghĩ / cảm thấy,思,おも,omo,kun,おもう,omou,思~おも~omo~nghĩ~target|う~う~u~~kana,ことば「思う」を よみます。,ことば「おもう」を よみます。,Tôi đọc từ “nghĩ / cảm thấy”.,v1:%E6%80%9D:%E6%80%9D%E3%81%86:kun:%E3%81%8A%E3%82%82
+姉妹,chị em gái,姉,し,shi,on,しまい,shimai,姉~し~shi~chị gái~target|妹~まい~mai~em gái~support,ことば「姉妹」を よみます。,ことば「しまい」を よみます。,Tôi đọc từ “chị em gái”.,v1:%E5%A7%89:%E5%A7%89%E5%A6%B9:on:%E3%81%97
+姉,chị gái,姉,あね,ane,kun,あね,ane,姉~あね~ane~chị gái~target,ことば「姉」を よみます。,ことば「あね」を よみます。,Tôi đọc từ “chị gái”.,v1:%E5%A7%89:%E5%A7%89:kun:%E3%81%82%E3%81%AD
+停止,dừng lại / đình chỉ,止,し,shi,on,ていし,teishi,停~てい~tei~dừng~support|止~し~shi~dừng~target,ことば「停止」を よみます。,ことば「ていし」を よみます。,Tôi đọc từ “dừng lại / đình chỉ”.,v1:%E6%AD%A2:%E5%81%9C%E6%AD%A2:on:%E3%81%97
+止まる,dừng lại,止,と,to,kun,とまる,tomaru,止~と~to~dừng~target|まる~まる~maru~~kana,ことば「止まる」を よみます。,ことば「とまる」を よみます。,Tôi đọc từ “dừng lại”.,v1:%E6%AD%A2:%E6%AD%A2%E3%81%BE%E3%82%8B:kun:%E3%81%A8
+市場,chợ / thị trường,市,し,shi,on,しじょう,shijou,市~し~shi~chợ~target|場~じょう~jou~nơi~support,ことば「市場」を よみます。,ことば「しじょう」を よみます。,Tôi đọc từ “chợ / thị trường”.,v1:%E5%B8%82:%E5%B8%82%E5%A0%B4:on:%E3%81%97
+市,chợ phiên,市,いち,ichi,kun,いち,ichi,市~いち~ichi~chợ~target,ことば「市」を よみます。,ことば「いち」を よみます。,Tôi đọc từ “chợ phiên”.,v1:%E5%B8%82:%E5%B8%82:kun:%E3%81%84%E3%81%A1
+仕事,công việc,仕,し,shi,on,しごと,shigoto,仕~し~shi~làm việc~target|事~ごと~goto~việc~support,ことば「仕事」を よみます。,ことば「しごと」を よみます。,Tôi đọc từ “công việc”.,v1:%E4%BB%95:%E4%BB%95%E4%BA%8B:on:%E3%81%97
+仕える,phụng sự / phục vụ,仕,つか,tsuka,kun,つかえる,tsukaeru,仕~つか~tsuka~phụng sự~target|える~える~eru~~kana,ことば「仕える」を よみます。,ことば「つかえる」を よみます。,Tôi đọc từ “phụng sự / phục vụ”.,v1:%E4%BB%95:%E4%BB%95%E3%81%88%E3%82%8B:kun:%E3%81%A4%E3%81%8B
+死亡,tử vong,死,し,shi,on,しぼう,shibou,死~し~shi~chết~target|亡~ぼう~bou~mất~support,ことば「死亡」を よみます。,ことば「しぼう」を よみます。,Tôi đọc từ “tử vong”.,v1:%E6%AD%BB:%E6%AD%BB%E4%BA%A1:on:%E3%81%97
+死ぬ,chết,死,し,shi,kun,しぬ,shinu,死~し~shi~chết~target|ぬ~ぬ~nu~~kana,ことば「死ぬ」を よみます。,ことば「しぬ」を よみます。,Tôi đọc từ “chết”.,v1:%E6%AD%BB:%E6%AD%BB%E3%81%AC:kun:%E3%81%97
+使用,sử dụng,使,し,shi,on,しよう,shiyou,使~し~shi~dùng~target|用~よう~you~sử dụng~support,ことば「使用」を よみます。,ことば「しよう」を よみます。,Tôi đọc từ “sử dụng”.,v1:%E4%BD%BF:%E4%BD%BF%E7%94%A8:on:%E3%81%97
+使う,dùng / sử dụng,使,つか,tsuka,kun,つかう,tsukau,使~つか~tsuka~dùng~target|う~う~u~~kana,ことば「使う」を よみます。,ことば「つかう」を よみます。,Tôi đọc từ “dùng / sử dụng”.,v1:%E4%BD%BF:%E4%BD%BF%E3%81%86:kun:%E3%81%A4%E3%81%8B
+開始,bắt đầu / khai mạc,始,し,shi,on,かいし,kaishi,開~かい~kai~mở~support|始~し~shi~bắt đầu~target,ことば「開始」を よみます。,ことば「かいし」を よみます。,Tôi đọc từ “bắt đầu / khai mạc”.,v1:%E5%A7%8B:%E9%96%8B%E5%A7%8B:on:%E3%81%97
+始める,bắt đầu,始,はじ,haji,kun,はじめる,hajimeru,始~はじ~haji~bắt đầu~target|める~める~meru~~kana,ことば「始める」を よみます。,ことば「はじめる」を よみます。,Tôi đọc từ “bắt đầu”.,v1:%E5%A7%8B:%E5%A7%8B%E3%82%81%E3%82%8B:kun:%E3%81%AF%E3%81%98
+試験,kỳ thi / kiểm tra,試,し,shi,on,しけん,shiken,試~し~shi~thử~target|験~けん~ken~kiểm nghiệm~support,ことば「試験」を よみます。,ことば「しけん」を よみます。,Tôi đọc từ “kỳ thi / kiểm tra”.,v1:%E8%A9%A6:%E8%A9%A6%E9%A8%93:on:%E3%81%97
+試す,thử,試,ため,tame,kun,ためす,tamesu,試~ため~tame~thử~target|す~す~su~~kana,ことば「試す」を よみます。,ことば「ためす」を よみます。,Tôi đọc từ “thử”.,v1:%E8%A9%A6:%E8%A9%A6%E3%81%99:kun:%E3%81%9F%E3%82%81
+私立,tư lập,私,し,shi,on,しりつ,shiritsu,私~し~shi~tư nhân~target|立~りつ~ritsu~lập~support,ことば「私立」を よみます。,ことば「しりつ」を よみます。,Tôi đọc từ “tư lập”.,v1:%E7%A7%81:%E7%A7%81%E7%AB%8B:on:%E3%81%97
+私,tôi,私,わたし,watashi,kun,わたし,watashi,私~わたし~watashi~tôi~target,ことば「私」を よみます。,ことば「わたし」を よみます。,Tôi đọc từ “tôi”.,v1:%E7%A7%81:%E7%A7%81:kun:%E3%82%8F%E3%81%9F%E3%81%97
+文字,chữ viết / ký tự,字,じ,ji,on,もじ,moji,文~も~mo~văn~support|字~じ~ji~chữ~target,ことば「文字」を よみます。,ことば「もじ」を よみます。,Tôi đọc từ “chữ viết / ký tự”.,v1:%E5%AD%97:%E6%96%87%E5%AD%97:on:%E3%81%98
+漢字,chữ Kanji,字,じ,ji,on,かんじ,kanji,漢~かん~kan~Hán~support|字~じ~ji~chữ~target,ことば「漢字」を よみます。,ことば「かんじ」を よみます。,Tôi đọc từ “chữ Kanji”.,v1:%E5%AD%97:%E6%BC%A2%E5%AD%97:on:%E3%81%98
+自分,bản thân,自,じ,ji,on,じぶん,jibun,自~じ~ji~tự mình~target|分~ぶん~bun~phần~support,ことば「自分」を よみます。,ことば「じぶん」を よみます。,Tôi đọc từ “bản thân”.,v1:%E8%87%AA:%E8%87%AA%E5%88%86:on:%E3%81%98
+自ら,tự mình,自,みずか,mizuka,kun,みずから,mizukara,自~みずか~mizuka~tự mình~target|ら~ら~ra~~kana,ことば「自ら」を よみます。,ことば「みずから」を よみます。,Tôi đọc từ “tự mình”.,v1:%E8%87%AA:%E8%87%AA%E3%82%89:kun:%E3%81%BF%E3%81%9A%E3%81%8B
+事故,sự cố / tai nạn,事,じ,ji,on,じこ,jiko,事~じ~ji~sự việc~target|故~こ~ko~sự cố~support,ことば「事故」を よみます。,ことば「じこ」を よみます。,Tôi đọc từ “sự cố / tai nạn”.,v1:%E4%BA%8B:%E4%BA%8B%E6%95%85:on:%E3%81%98
+仕事,công việc,事,ごと,goto,kun,しごと,shigoto,仕~し~shi~làm~support|事~ごと~goto~việc~target,ことば「仕事」を よみます。,ことば「しごと」を よみます。,Tôi đọc từ “công việc”.,v1:%E4%BA%8B:%E4%BB%95%E4%BA%8B:kun:%E3%81%94%E3%81%A8
+持参,mang theo,持,じ,ji,on,じさん,jisan,持~じ~ji~mang~target|参~さん~san~đến / tham gia~support,ことば「持参」を よみます。,ことば「じさん」を よみます。,Tôi đọc từ “mang theo”.,v1:%E6%8C%81:%E6%8C%81%E5%8F%82:on:%E3%81%98
+持つ,cầm / giữ,持,も,mo,kun,もつ,motsu,持~も~mo~cầm~target|つ~つ~tsu~~kana,ことば「持つ」を よみます。,ことば「もつ」を よみます。,Tôi đọc từ “cầm / giữ”.,v1:%E6%8C%81:%E6%8C%81%E3%81%A4:kun:%E3%82%82
+教室,lớp học,室,しつ,shitsu,on,きょうしつ,kyoushitsu,教~きょう~kyou~dạy~support|室~しつ~shitsu~phòng~target,ことば「教室」を よみます。,ことば「きょうしつ」を よみます。,Tôi đọc từ “lớp học”.,v1:%E5%AE%A4:%E6%95%99%E5%AE%A4:on:%E3%81%97%E3%81%A4
+室内,trong phòng,室,しつ,shitsu,on,しつない,shitsunai,室~しつ~shitsu~phòng~target|内~ない~nai~bên trong~support,ことば「室内」を よみます。,ことば「しつない」を よみます。,Tôi đọc từ “trong phòng”.,v1:%E5%AE%A4:%E5%AE%A4%E5%86%85:on:%E3%81%97%E3%81%A4
+品質,chất lượng,質,しつ,shitsu,on,ひんしつ,hinshitsu,品~ひん~hin~sản phẩm~support|質~しつ~shitsu~chất lượng~target,ことば「品質」を よみます。,ことば「ひんしつ」を よみます。,Tôi đọc từ “chất lượng”.,v1:%E8%B3%AA:%E5%93%81%E8%B3%AA:on:%E3%81%97%E3%81%A4
+質問,câu hỏi,質,しつ,shitsu,on,しつもん,shitsumon,質~しつ~shitsu~hỏi / chất vấn~target|問~もん~mon~hỏi~support,ことば「質問」を よみます。,ことば「しつもん」を よみます。,Tôi đọc từ “câu hỏi”.,v1:%E8%B3%AA:%E8%B3%AA%E5%95%8F:on:%E3%81%97%E3%81%A4
+写真,ảnh chụp,写,しゃ,sha,on,しゃしん,shashin,写~しゃ~sha~chụp / sao~target|真~しん~shin~thật~support,ことば「写真」を よみます。,ことば「しゃしん」を よみます。,Tôi đọc từ “ảnh chụp”.,v1:%E5%86%99:%E5%86%99%E7%9C%9F:on:%E3%81%97%E3%82%83
+写す,chụp / sao chép,写,うつ,utsu,kun,うつす,utsusu,写~うつ~utsu~chụp / sao~target|す~す~su~~kana,ことば「写す」を よみます。,ことば「うつす」を よみます。,Tôi đọc từ “chụp / sao chép”.,v1:%E5%86%99:%E5%86%99%E3%81%99:kun:%E3%81%86%E3%81%A4
+記者,phóng viên,者,しゃ,sha,on,きしゃ,kisha,記~き~ki~ghi chép~support|者~しゃ~sha~người~target,ことば「記者」を よみます。,ことば「きしゃ」を よみます。,Tôi đọc từ “phóng viên”.,v1:%E8%80%85:%E8%A8%98%E8%80%85:on:%E3%81%97%E3%82%83
+若者,người trẻ,者,もの,mono,kun,わかもの,wakamono,若~わか~waka~trẻ~support|者~もの~mono~người~target,ことば「若者」を よみます。,ことば「わかもの」を よみます。,Tôi đọc từ “người trẻ”.,v1:%E8%80%85:%E8%8B%A5%E8%80%85:kun:%E3%82%82%E3%81%AE
+借金,khoản nợ / tiền vay,借,しゃっ,sha,on,しゃっきん,shakkin,借~しゃっ~sha~vay~target|金~きん~kin~tiền~support,ことば「借金」を よみます。,ことば「しゃっきん」を よみます。,Tôi đọc từ “khoản nợ / tiền vay”.,v1:%E5%80%9F:%E5%80%9F%E9%87%91:on:%E3%81%97%E3%82%83%E3%81%A3
+借りる,mượn / vay,借,か,ka,kun,かりる,kariru,借~か~ka~mượn~target|りる~りる~riru~~kana,ことば「借りる」を よみます。,ことば「かりる」を よみます。,Tôi đọc từ “mượn / vay”.,v1:%E5%80%9F:%E5%80%9F%E3%82%8A%E3%82%8B:kun:%E3%81%8B
+弱点,điểm yếu,弱,じゃく,jaku,on,じゃくてん,jakuten,弱~じゃく~jaku~yếu~target|点~てん~ten~điểm~support,ことば「弱点」を よみます。,ことば「じゃくてん」を よみます。,Tôi đọc từ “điểm yếu”.,v1:%E5%BC%B1:%E5%BC%B1%E7%82%B9:on:%E3%81%98%E3%82%83%E3%81%8F
+弱い,yếu,弱,よわ,yowa,kun,よわい,yowai,弱~よわ~yowa~yếu~target|い~い~i~~kana,ことば「弱い」を よみます。,ことば「よわい」を よみます。,Tôi đọc từ “yếu”.,v1:%E5%BC%B1:%E5%BC%B1%E3%81%84:kun:%E3%82%88%E3%82%8F
+首都,thủ đô,首,しゅ,shu,on,しゅと,shuto,首~しゅ~shu~đầu / chính~target|都~と~to~đô thị~support,ことば「首都」を よみます。,ことば「しゅと」を よみます。,Tôi đọc từ “thủ đô”.,v1:%E9%A6%96:%E9%A6%96%E9%83%BD:on:%E3%81%97%E3%82%85
+首,cổ,首,くび,kubi,kun,くび,kubi,首~くび~kubi~cổ~target,ことば「首」を よみます。,ことば「くび」を よみます。,Tôi đọc từ “cổ”.,v1:%E9%A6%96:%E9%A6%96:kun:%E3%81%8F%E3%81%B3
+主人,chủ nhà / chồng,主,しゅ,shu,on,しゅじん,shujin,主~しゅ~shu~chủ~target|人~じん~jin~người~support,ことば「主人」を よみます。,ことば「しゅじん」を よみます。,Tôi đọc từ “chủ nhà / chồng”.,v1:%E4%B8%BB:%E4%B8%BB%E4%BA%BA:on:%E3%81%97%E3%82%85
+主な,chính / chủ yếu,主,おも,omo,kun,おもな,omona,主~おも~omo~chính~target|な~な~na~~kana,ことば「主な」を よみます。,ことば「おもな」を よみます。,Tôi đọc từ “chính / chủ yếu”.,v1:%E4%B8%BB:%E4%B8%BB%E3%81%AA:kun:%E3%81%8A%E3%82%82
+秋分,thu phân,秋,しゅう,shuu,on,しゅうぶん,shuubun,秋~しゅう~shuu~mùa thu~target|分~ぶん~bun~phân chia~support,ことば「秋分」を よみます。,ことば「しゅうぶん」を よみます。,Tôi đọc từ “thu phân”.,v1:%E7%A7%8B:%E7%A7%8B%E5%88%86:on:%E3%81%97%E3%82%85%E3%81%86
+秋,mùa thu,秋,あき,aki,kun,あき,aki,秋~あき~aki~mùa thu~target,ことば「秋」を よみます。,ことば「あき」を よみます。,Tôi đọc từ “mùa thu”.,v1:%E7%A7%8B:%E7%A7%8B:kun:%E3%81%82%E3%81%8D
+集合,tập hợp,集,しゅう,shuu,on,しゅうごう,shuugou,集~しゅう~shuu~tụ họp~target|合~ごう~gou~hợp lại~support,ことば「集合」を よみます。,ことば「しゅうごう」を よみます。,Tôi đọc từ “tập hợp”.,v1:%E9%9B%86:%E9%9B%86%E5%90%88:on:%E3%81%97%E3%82%85%E3%81%86
+集める,thu thập / tập hợp,集,あつ,atsu,kun,あつめる,atsumeru,集~あつ~atsu~tập hợp~target|める~める~meru~~kana,ことば「集める」を よみます。,ことば「あつめる」を よみます。,Tôi đọc từ “thu thập / tập hợp”.,v1:%E9%9B%86:%E9%9B%86%E3%82%81%E3%82%8B:kun:%E3%81%82%E3%81%A4
+学習,học tập,習,しゅう,shuu,on,がくしゅう,gakushuu,学~がく~gaku~học~support|習~しゅう~shuu~luyện tập~target,ことば「学習」を よみます。,ことば「がくしゅう」を よみます。,Tôi đọc từ “học tập”.,v1:%E7%BF%92:%E5%AD%A6%E7%BF%92:on:%E3%81%97%E3%82%85%E3%81%86
+習う,học / luyện,習,なら,nara,kun,ならう,narau,習~なら~nara~học~target|う~う~u~~kana,ことば「習う」を よみます。,ことば「ならう」を よみます。,Tôi đọc từ “học / luyện”.,v1:%E7%BF%92:%E7%BF%92%E3%81%86:kun:%E3%81%AA%E3%82%89
+終了,kết thúc / hoàn tất,終,しゅう,shuu,on,しゅうりょう,shuuryou,終~しゅう~shuu~kết thúc~target|了~りょう~ryou~hoàn tất~support,ことば「終了」を よみます。,ことば「しゅうりょう」を よみます。,Tôi đọc từ “kết thúc / hoàn tất”.,v1:%E7%B5%82:%E7%B5%82%E4%BA%86:on:%E3%81%97%E3%82%85%E3%81%86
+終わる,kết thúc,終,お,o,kun,おわる,owaru,終~お~o~kết thúc~target|わる~わる~waru~~kana,ことば「終わる」を よみます。,ことば「おわる」を よみます。,Tôi đọc từ “kết thúc”.,v1:%E7%B5%82:%E7%B5%82%E3%82%8F%E3%82%8B:kun:%E3%81%8A
+住所,địa chỉ,住,じゅう,juu,on,じゅうしょ,juusho,住~じゅう~juu~cư trú~target|所~しょ~sho~nơi~support,ことば「住所」を よみます。,ことば「じゅうしょ」を よみます。,Tôi đọc từ “địa chỉ”.,v1:%E4%BD%8F:%E4%BD%8F%E6%89%80:on:%E3%81%98%E3%82%85%E3%81%86
+住む,sống / cư trú,住,す,su,kun,すむ,sumu,住~す~su~sống~target|む~む~mu~~kana,ことば「住む」を よみます。,ことば「すむ」を よみます。,Tôi đọc từ “sống / cư trú”.,v1:%E4%BD%8F:%E4%BD%8F%E3%82%80:kun:%E3%81%99
+重要,quan trọng,重,じゅう,juu,on,じゅうよう,juuyou,重~じゅう~juu~quan trọng~target|要~よう~you~thiết yếu~support,ことば「重要」を よみます。,ことば「じゅうよう」を よみます。,Tôi đọc từ “quan trọng”.,v1:%E9%87%8D:%E9%87%8D%E8%A6%81:on:%E3%81%98%E3%82%85%E3%81%86
+重い,nặng,重,おも,omo,kun,おもい,omoi,重~おも~omo~nặng~target|い~い~i~~kana,ことば「重い」を よみます。,ことば「おもい」を よみます。,Tôi đọc từ “nặng”.,v1:%E9%87%8D:%E9%87%8D%E3%81%84:kun:%E3%81%8A%E3%82%82
+青春,tuổi thanh xuân,春,しゅん,shun,on,せいしゅん,seishun,青~せい~sei~xanh / trẻ~support|春~しゅん~shun~mùa xuân~target,ことば「青春」を よみます。,ことば「せいしゅん」を よみます。,Tôi đọc từ “tuổi thanh xuân”.,v1:%E6%98%A5:%E9%9D%92%E6%98%A5:on:%E3%81%97%E3%82%85%E3%82%93
+春,mùa xuân,春,はる,haru,kun,はる,haru,春~はる~haru~mùa xuân~target,ことば「春」を よみます。,ことば「はる」を よみます。,Tôi đọc từ “mùa xuân”.,v1:%E6%98%A5:%E6%98%A5:kun:%E3%81%AF%E3%82%8B
+場所,địa điểm / nơi chốn,所,しょ,sho,on,ばしょ,basho,場~ば~ba~nơi~support|所~しょ~sho~chỗ~target,ことば「場所」を よみます。,ことば「ばしょ」を よみます。,Tôi đọc từ “địa điểm / nơi chốn”.,v1:%E6%89%80:%E5%A0%B4%E6%89%80:on:%E3%81%97%E3%82%87
+所,nơi / chỗ,所,ところ,tokoro,kun,ところ,tokoro,所~ところ~tokoro~nơi~target,ことば「所」を よみます。,ことば「ところ」を よみます。,Tôi đọc từ “nơi / chỗ”.,v1:%E6%89%80:%E6%89%80:kun:%E3%81%A8%E3%81%93%E3%82%8D
+残暑,cái nóng cuối hè,暑,しょ,sho,on,ざんしょ,zansho,残~ざん~zan~còn lại~support|暑~しょ~sho~nóng~target,ことば「残暑」を よみます。,ことば「ざんしょ」を よみます。,Tôi đọc từ “cái nóng cuối hè”.,v1:%E6%9A%91:%E6%AE%8B%E6%9A%91:on:%E3%81%97%E3%82%87
+暑い,nóng (thời tiết),暑,あつ,atsu,kun,あつい,atsui,暑~あつ~atsu~nóng~target|い~い~i~~kana,ことば「暑い」を よみます。,ことば「あつい」を よみます。,Tôi đọc từ “nóng (thời tiết)”.,v1:%E6%9A%91:%E6%9A%91%E3%81%84:kun:%E3%81%82%E3%81%A4
+会場,hội trường / địa điểm tổ chức,場,じょう,jou,on,かいじょう,kaijou,会~かい~kai~cuộc họp~support|場~じょう~jou~địa điểm~target,ことば「会場」を よみます。,ことば「かいじょう」を よみます。,Tôi đọc từ “hội trường / địa điểm tổ chức”.,v1:%E5%A0%B4:%E4%BC%9A%E5%A0%B4:on:%E3%81%98%E3%82%87%E3%81%86
+場所,địa điểm / nơi chốn,場,ば,ba,kun,ばしょ,basho,場~ば~ba~nơi~target|所~しょ~sho~chỗ~support,ことば「場所」を よみます。,ことば「ばしょ」を よみます。,Tôi đọc từ “địa điểm / nơi chốn”.,v1:%E5%A0%B4:%E5%A0%B4%E6%89%80:kun:%E3%81%B0
+乗車,lên xe,乗,じょう,jou,on,じょうしゃ,jousha,乗~じょう~jou~lên~target|車~しゃ~sha~xe~support,ことば「乗車」を よみます。,ことば「じょうしゃ」を よみます。,Tôi đọc từ “lên xe”.,v1:%E4%B9%97:%E4%B9%97%E8%BB%8A:on:%E3%81%98%E3%82%87%E3%81%86
+乗る,lên / đi bằng phương tiện,乗,の,no,kun,のる,noru,乗~の~no~lên xe~target|る~る~ru~~kana,ことば「乗る」を よみます。,ことば「のる」を よみます。,Tôi đọc từ “lên / đi bằng phương tiện”.,v1:%E4%B9%97:%E4%B9%97%E3%82%8B:kun:%E3%81%AE
+色彩,màu sắc / sắc thái,色,しき,shiki,on,しきさい,shikisai,色~しき~shiki~màu sắc~target|彩~さい~sai~sắc màu~support,ことば「色彩」を よみます。,ことば「しきさい」を よみます。,Tôi đọc từ “màu sắc / sắc thái”.,v1:%E8%89%B2:%E8%89%B2%E5%BD%A9:on:%E3%81%97%E3%81%8D
+色,màu sắc,色,いろ,iro,kun,いろ,iro,色~いろ~iro~màu sắc~target,ことば「色」を よみます。,ことば「いろ」を よみます。,Tôi đọc từ “màu sắc”.,v1:%E8%89%B2:%E8%89%B2:kun:%E3%81%84%E3%82%8D
+森林,rừng cây,森,しん,shin,on,しんりん,shinrin,森~しん~shin~rừng~target|林~りん~rin~lùm cây~support,ことば「森林」を よみます。,ことば「しんりん」を よみます。,Tôi đọc từ “rừng cây”.,v1:%E6%A3%AE:%E6%A3%AE%E6%9E%97:on:%E3%81%97%E3%82%93
+森,rừng,森,もり,mori,kun,もり,mori,森~もり~mori~rừng~target,ことば「森」を よみます。,ことば「もり」を よみます。,Tôi đọc từ “rừng”.,v1:%E6%A3%AE:%E6%A3%AE:kun:%E3%82%82%E3%82%8A
+心配,lo lắng,心,しん,shin,on,しんぱい,shinpai,心~しん~shin~tâm trí~target|配~ぱい~pai~quan tâm~support,ことば「心配」を よみます。,ことば「しんぱい」を よみます。,Tôi đọc từ “lo lắng”.,v1:%E5%BF%83:%E5%BF%83%E9%85%8D:on:%E3%81%97%E3%82%93
+心,trái tim / tâm hồn,心,こころ,kokoro,kun,こころ,kokoro,心~こころ~kokoro~trái tim~target,ことば「心」を よみます。,ことば「こころ」を よみます。,Tôi đọc từ “trái tim / tâm hồn”.,v1:%E5%BF%83:%E5%BF%83:kun:%E3%81%93%E3%81%93%E3%82%8D
+親切,tử tế / tốt bụng,親,しん,shin,on,しんせつ,shinsetsu,親~しん~shin~thân thiết~target|切~せつ~setsu~tận tình~support,ことば「親切」を よみます。,ことば「しんせつ」を よみます。,Tôi đọc từ “tử tế / tốt bụng”.,v1:%E8%A6%AA:%E8%A6%AA%E5%88%87:on:%E3%81%97%E3%82%93
+親,cha mẹ,親,おや,oya,kun,おや,oya,親~おや~oya~cha mẹ~target,ことば「親」を よみます。,ことば「おや」を よみます。,Tôi đọc từ “cha mẹ”.,v1:%E8%A6%AA:%E8%A6%AA:kun:%E3%81%8A%E3%82%84
+写真,ảnh chụp,真,しん,shin,on,しゃしん,shashin,写~しゃ~sha~chụp~support|真~しん~shin~thật~target,ことば「写真」を よみます。,ことば「しゃしん」を よみます。,Tôi đọc từ “ảnh chụp”.,v1:%E7%9C%9F:%E5%86%99%E7%9C%9F:on:%E3%81%97%E3%82%93
+真っ白,trắng tinh,真,ま,ma,kun,まっしろ,masshiro,真~ま~ma~hoàn toàn~target|っ~っ~~~kana|白~しろ~shiro~trắng~support,ことば「真っ白」を よみます。,ことば「まっしろ」を よみます。,Tôi đọc từ “trắng tinh”.,v1:%E7%9C%9F:%E7%9C%9F%E3%81%A3%E7%99%BD:kun:%E3%81%BE
+進学,học lên,進,しん,shin,on,しんがく,shingaku,進~しん~shin~tiến lên~target|学~がく~gaku~học~support,ことば「進学」を よみます。,ことば「しんがく」を よみます。,Tôi đọc từ “học lên”.,v1:%E9%80%B2:%E9%80%B2%E5%AD%A6:on:%E3%81%97%E3%82%93
+進む,tiến lên,進,すす,susu,kun,すすむ,susumu,進~すす~susu~tiến~target|む~む~mu~~kana,ことば「進む」を よみます。,ことば「すすむ」を よみます。,Tôi đọc từ “tiến lên”.,v1:%E9%80%B2:%E9%80%B2%E3%82%80:kun:%E3%81%99%E3%81%99
+地図,bản đồ,図,ず,zu,on,ちず,chizu,地~ち~chi~đất~support|図~ず~zu~bản đồ~target,ことば「地図」を よみます。,ことば「ちず」を よみます。,Tôi đọc từ “bản đồ”.,v1:%E5%9B%B3:%E5%9C%B0%E5%9B%B3:on:%E3%81%9A
+図書館,thư viện,図,と,to,on,としょかん,toshokan,図~と~to~sách / sơ đồ~target|書館~しょかん~shokan~thư quán~support,ことば「図書館」を よみます。,ことば「としょかん」を よみます。,Tôi đọc từ “thư viện”.,v1:%E5%9B%B3:%E5%9B%B3%E6%9B%B8%E9%A4%A8:on:%E3%81%A8
+青年,thanh niên,青,せい,sei,on,せいねん,seinen,青~せい~sei~xanh / trẻ~target|年~ねん~nen~năm / tuổi~support,ことば「青年」を よみます。,ことば「せいねん」を よみます。,Tôi đọc từ “thanh niên”.,v1:%E9%9D%92:%E9%9D%92%E5%B9%B4:on:%E3%81%9B%E3%81%84
+青い,màu xanh,青,あお,ao,kun,あおい,aoi,青~あお~ao~xanh~target|い~い~i~~kana,ことば「青い」を よみます。,ことば「あおい」を よみます。,Tôi đọc từ “màu xanh”.,v1:%E9%9D%92:%E9%9D%92%E3%81%84:kun:%E3%81%82%E3%81%8A
+正解,đáp án đúng,正,せい,sei,on,せいかい,seikai,正~せい~sei~đúng~target|解~かい~kai~giải~support,ことば「正解」を よみます。,ことば「せいかい」を よみます。,Tôi đọc từ “đáp án đúng”.,v1:%E6%AD%A3:%E6%AD%A3%E8%A7%A3:on:%E3%81%9B%E3%81%84
+正しい,đúng đắn,正,ただ,tada,kun,ただしい,tadashii,正~ただ~tada~đúng~target|しい~しい~shii~~kana,ことば「正しい」を よみます。,ことば「ただしい」を よみます。,Tôi đọc từ “đúng đắn”.,v1:%E6%AD%A3:%E6%AD%A3%E3%81%97%E3%81%84:kun:%E3%81%9F%E3%81%A0
+音声,âm thanh / giọng nói,声,せい,sei,on,おんせい,onsei,音~おん~on~âm thanh~support|声~せい~sei~giọng~target,ことば「音声」を よみます。,ことば「おんせい」を よみます。,Tôi đọc từ “âm thanh / giọng nói”.,v1:%E5%A3%B0:%E9%9F%B3%E5%A3%B0:on:%E3%81%9B%E3%81%84
+声,giọng nói,声,こえ,koe,kun,こえ,koe,声~こえ~koe~giọng nói~target,ことば「声」を よみます。,ことば「こえ」を よみます。,Tôi đọc từ “giọng nói”.,v1:%E5%A3%B0:%E5%A3%B0:kun:%E3%81%93%E3%81%88
+世界,thế giới,世,せ,se,on,せかい,sekai,世~せ~se~thế giới~target|界~かい~kai~cõi / giới~support,ことば「世界」を よみます。,ことば「せかい」を よみます。,Tôi đọc từ “thế giới”.,v1:%E4%B8%96:%E4%B8%96%E7%95%8C:on:%E3%81%9B
+世の中,xã hội / thế gian,世,よ,yo,kun,よのなか,yononaka,世~よ~yo~thế gian~target|の~の~no~~kana|中~なか~naka~bên trong~support,ことば「世の中」を よみます。,ことば「よのなか」を よみます。,Tôi đọc từ “xã hội / thế gian”.,v1:%E4%B8%96:%E4%B8%96%E3%81%AE%E4%B8%AD:kun:%E3%82%88
+赤道,xích đạo,赤,せき,seki,on,せきどう,sekidou,赤~せき~seki~đỏ / xích~target|道~どう~dou~đường~support,ことば「赤道」を よみます。,ことば「せきどう」を よみます。,Tôi đọc từ “xích đạo”.,v1:%E8%B5%A4:%E8%B5%A4%E9%81%93:on:%E3%81%9B%E3%81%8D
+赤い,màu đỏ,赤,あか,aka,kun,あかい,akai,赤~あか~aka~đỏ~target|い~い~i~~kana,ことば「赤い」を よみます。,ことば「あかい」を よみます。,Tôi đọc từ “màu đỏ”.,v1:%E8%B5%A4:%E8%B5%A4%E3%81%84:kun:%E3%81%82%E3%81%8B
+夕食,bữa tối,夕,ゆう,yuu,kun,ゆうしょく,yuushoku,夕~ゆう~yuu~buổi tối~target|食~しょく~shoku~bữa ăn~support,ことば「夕食」を よみます。,ことば「ゆうしょく」を よみます。,Tôi đọc từ “bữa tối”.,v1:%E5%A4%95:%E5%A4%95%E9%A3%9F:kun:%E3%82%86%E3%81%86
+夕方,chiều tối,夕,ゆう,yuu,kun,ゆうがた,yuugata,夕~ゆう~yuu~buổi tối~target|方~がた~gata~phía / khoảng~support,ことば「夕方」を よみます。,ことば「ゆうがた」を よみます。,Tôi đọc từ “chiều tối”.,v1:%E5%A4%95:%E5%A4%95%E6%96%B9:kun:%E3%82%86%E3%81%86
+大切,quan trọng / quý giá,切,せつ,setsu,on,たいせつ,taisetsu,大~たい~tai~lớn~support|切~せつ~setsu~quan trọng~target,ことば「大切」を よみます。,ことば「たいせつ」を よみます。,Tôi đọc từ “quan trọng / quý giá”.,v1:%E5%88%87:%E5%A4%A7%E5%88%87:on:%E3%81%9B%E3%81%A4
+切る,cắt,切,き,ki,kun,きる,kiru,切~き~ki~cắt~target|る~る~ru~~kana,ことば「切る」を よみます。,ことば「きる」を よみます。,Tôi đọc từ “cắt”.,v1:%E5%88%87:%E5%88%87%E3%82%8B:kun:%E3%81%8D
+説明,giải thích,説,せつ,setsu,on,せつめい,setsumei,説~せつ~setsu~giải thích~target|明~めい~mei~rõ~support,ことば「説明」を よみます。,ことば「せつめい」を よみます。,Tôi đọc từ “giải thích”.,v1:%E8%AA%AC:%E8%AA%AC%E6%98%8E:on:%E3%81%9B%E3%81%A4
+説く,giảng giải / thuyết phục,説,と,to,kun,とく,toku,説~と~to~giảng giải~target|く~く~ku~~kana,ことば「説く」を よみます。,ことば「とく」を よみます。,Tôi đọc từ “giảng giải / thuyết phục”.,v1:%E8%AA%AC:%E8%AA%AC%E3%81%8F:kun:%E3%81%A8
+洗面所,phòng rửa mặt,洗,せん,sen,on,せんめんじょ,senmenjo,洗~せん~sen~rửa~target|面所~めんじょ~menjo~nơi rửa mặt~support,ことば「洗面所」を よみます。,ことば「せんめんじょ」を よみます。,Tôi đọc từ “phòng rửa mặt”.,v1:%E6%B4%97:%E6%B4%97%E9%9D%A2%E6%89%80:on:%E3%81%9B%E3%82%93
+洗う,rửa,洗,あら,ara,kun,あらう,arau,洗~あら~ara~rửa~target|う~う~u~~kana,ことば「洗う」を よみます。,ことば「あらう」を よみます。,Tôi đọc từ “rửa”.,v1:%E6%B4%97:%E6%B4%97%E3%81%86:kun:%E3%81%82%E3%82%89
+早朝,sáng sớm,早,そう,sou,on,そうちょう,souchou,早~そう~sou~sớm~target|朝~ちょう~chou~buổi sáng~support,ことば「早朝」を よみます。,ことば「そうちょう」を よみます。,Tôi đọc từ “sáng sớm”.,v1:%E6%97%A9:%E6%97%A9%E6%9C%9D:on:%E3%81%9D%E3%81%86
+早い,sớm / nhanh,早,はや,haya,kun,はやい,hayai,早~はや~haya~sớm / nhanh~target|い~い~i~~kana,ことば「早い」を よみます。,ことば「はやい」を よみます。,Tôi đọc từ “sớm / nhanh”.,v1:%E6%97%A9:%E6%97%A9%E3%81%84:kun:%E3%81%AF%E3%82%84
+競走,cuộc chạy đua,走,そう,sou,on,きょうそう,kyousou,競~きょう~kyou~thi đấu~support|走~そう~sou~chạy~target,ことば「競走」を よみます。,ことば「きょうそう」を よみます。,Tôi đọc từ “cuộc chạy đua”.,v1:%E8%B5%B0:%E7%AB%B6%E8%B5%B0:on:%E3%81%9D%E3%81%86
+走る,chạy,走,はし,hashi,kun,はしる,hashiru,走~はし~hashi~chạy~target|る~る~ru~~kana,ことば「走る」を よみます。,ことば「はしる」を よみます。,Tôi đọc từ “chạy”.,v1:%E8%B5%B0:%E8%B5%B0%E3%82%8B:kun:%E3%81%AF%E3%81%97
+送信,gửi đi / truyền tin,送,そう,sou,on,そうしん,soushin,送~そう~sou~gửi~target|信~しん~shin~tin~support,ことば「送信」を よみます。,ことば「そうしん」を よみます。,Tôi đọc từ “gửi đi / truyền tin”.,v1:%E9%80%81:%E9%80%81%E4%BF%A1:on:%E3%81%9D%E3%81%86
+送る,gửi / tiễn,送,おく,oku,kun,おくる,okuru,送~おく~oku~gửi~target|る~る~ru~~kana,ことば「送る」を よみます。,ことば「おくる」を よみます。,Tôi đọc từ “gửi / tiễn”.,v1:%E9%80%81:%E9%80%81%E3%82%8B:kun:%E3%81%8A%E3%81%8F
+家族,gia đình,族,ぞく,zoku,on,かぞく,kazoku,家~か~ka~nhà~support|族~ぞく~zoku~gia tộc~target,ことば「家族」を よみます。,ことば「かぞく」を よみます。,Tôi đọc từ “gia đình”.,v1:%E6%97%8F:%E5%AE%B6%E6%97%8F:on:%E3%81%9E%E3%81%8F
+民族,dân tộc,族,ぞく,zoku,on,みんぞく,minzoku,民~みん~min~người dân~support|族~ぞく~zoku~nhóm / tộc~target,ことば「民族」を よみます。,ことば「みんぞく」を よみます。,Tôi đọc từ “dân tộc”.,v1:%E6%97%8F:%E6%B0%91%E6%97%8F:on:%E3%81%9E%E3%81%8F
+村民,dân làng,村,そん,son,on,そんみん,sonmin,村~そん~son~làng~target|民~みん~min~người dân~support,ことば「村民」を よみます。,ことば「そんみん」を よみます。,Tôi đọc từ “dân làng”.,v1:%E6%9D%91:%E6%9D%91%E6%B0%91:on:%E3%81%9D%E3%82%93
+村,ngôi làng,村,むら,mura,kun,むら,mura,村~むら~mura~làng~target,ことば「村」を よみます。,ことば「むら」を よみます。,Tôi đọc từ “ngôi làng”.,v1:%E6%9D%91:%E6%9D%91:kun:%E3%82%80%E3%82%89
+体育,thể dục,体,たい,tai,on,たいいく,taiiku,体~たい~tai~cơ thể~target|育~いく~iku~rèn luyện~support,ことば「体育」を よみます。,ことば「たいいく」を よみます。,Tôi đọc từ “thể dục”.,v1:%E4%BD%93:%E4%BD%93%E8%82%B2:on:%E3%81%9F%E3%81%84
+体,cơ thể,体,からだ,karada,kun,からだ,karada,体~からだ~karada~cơ thể~target,ことば「体」を よみます。,ことば「からだ」を よみます。,Tôi đọc từ “cơ thể”.,v1:%E4%BD%93:%E4%BD%93:kun:%E3%81%8B%E3%82%89%E3%81%A0
+太陽,mặt trời,太,たい,tai,on,たいよう,taiyou,太~たい~tai~lớn / thái~target|陽~よう~you~mặt trời~support,ことば「太陽」を よみます。,ことば「たいよう」を よみます。,Tôi đọc từ “mặt trời”.,v1:%E5%A4%AA:%E5%A4%AA%E9%99%BD:on:%E3%81%9F%E3%81%84
+太い,to / dày,太,ふと,futo,kun,ふとい,futoi,太~ふと~futo~to / dày~target|い~い~i~~kana,ことば「太い」を よみます。,ことば「ふとい」を よみます。,Tôi đọc từ “to / dày”.,v1:%E5%A4%AA:%E5%A4%AA%E3%81%84:kun:%E3%81%B5%E3%81%A8
+待機,chờ sẵn / đợi lệnh,待,たい,tai,on,たいき,taiki,待~たい~tai~chờ~target|機~き~ki~thời cơ / máy~support,ことば「待機」を よみます。,ことば「たいき」を よみます。,Tôi đọc từ “chờ sẵn / đợi lệnh”.,v1:%E5%BE%85:%E5%BE%85%E6%A9%9F:on:%E3%81%9F%E3%81%84
+待つ,chờ đợi,待,ま,ma,kun,まつ,matsu,待~ま~ma~chờ~target|つ~つ~tsu~~kana,ことば「待つ」を よみます。,ことば「まつ」を よみます。,Tôi đọc từ “chờ đợi”.,v1:%E5%BE%85:%E5%BE%85%E3%81%A4:kun:%E3%81%BE
+賃貸,cho thuê / thuê nhà,貸,たい,tai,on,ちんたい,chintai,賃~ちん~chin~tiền thuê~support|貸~たい~tai~cho thuê~target,ことば「賃貸」を よみます。,ことば「ちんたい」を よみます。,Tôi đọc từ “cho thuê / thuê nhà”.,v1:%E8%B2%B8:%E8%B3%83%E8%B2%B8:on:%E3%81%9F%E3%81%84
+貸す,cho mượn,貸,か,ka,kun,かす,kasu,貸~か~ka~cho mượn~target|す~す~su~~kana,ことば「貸す」を よみます。,ことば「かす」を よみます。,Tôi đọc từ “cho mượn”.,v1:%E8%B2%B8:%E8%B2%B8%E3%81%99:kun:%E3%81%8B
+台風,bão,台,たい,tai,on,たいふう,taifuu,台~たい~tai~đài / bệ~target|風~ふう~fuu~gió~support,ことば「台風」を よみます。,ことば「たいふう」を よみます。,Tôi đọc từ “bão”.,v1:%E5%8F%B0:%E5%8F%B0%E9%A2%A8:on:%E3%81%9F%E3%81%84
+台所,nhà bếp,台,だい,dai,on,だいどころ,daidokoro,台~だい~dai~bệ / khu~target|所~どころ~dokoro~nơi~support,ことば「台所」を よみます。,ことば「だいどころ」を よみます。,Tôi đọc từ “nhà bếp”.,v1:%E5%8F%B0:%E5%8F%B0%E6%89%80:on:%E3%81%A0%E3%81%84
+時代,thời đại,代,だい,dai,on,じだい,jidai,時~じ~ji~thời gian~support|代~だい~dai~đời / thời đại~target,ことば「時代」を よみます。,ことば「じだい」を よみます。,Tôi đọc từ “thời đại”.,v1:%E4%BB%A3:%E6%99%82%E4%BB%A3:on:%E3%81%A0%E3%81%84
+代わる,thay thế,代,か,ka,kun,かわる,kawaru,代~か~ka~thay thế~target|わる~わる~waru~~kana,ことば「代わる」を よみます。,ことば「かわる」を よみます。,Tôi đọc từ “thay thế”.,v1:%E4%BB%A3:%E4%BB%A3%E3%82%8F%E3%82%8B:kun:%E3%81%8B
+問題,vấn đề / câu hỏi,題,だい,dai,on,もんだい,mondai,問~もん~mon~hỏi~support|題~だい~dai~đề bài~target,ことば「問題」を よみます。,ことば「もんだい」を よみます。,Tôi đọc từ “vấn đề / câu hỏi”.,v1:%E9%A1%8C:%E5%95%8F%E9%A1%8C:on:%E3%81%A0%E3%81%84
+宿題,bài tập về nhà,題,だい,dai,on,しゅくだい,shukudai,宿~しゅく~shuku~ở trọ / bài về nhà~support|題~だい~dai~đề bài~target,ことば「宿題」を よみます。,ことば「しゅくだい」を よみます。,Tôi đọc từ “bài tập về nhà”.,v1:%E9%A1%8C:%E5%AE%BF%E9%A1%8C:on:%E3%81%A0%E3%81%84
+短所,khuyết điểm,短,たん,tan,on,たんしょ,tansho,短~たん~tan~ngắn / điểm yếu~target|所~しょ~sho~chỗ~support,ことば「短所」を よみます。,ことば「たんしょ」を よみます。,Tôi đọc từ “khuyết điểm”.,v1:%E7%9F%AD:%E7%9F%AD%E6%89%80:on:%E3%81%9F%E3%82%93
+短い,ngắn,短,みじか,mijika,kun,みじかい,mijikai,短~みじか~mijika~ngắn~target|い~い~i~~kana,ことば「短い」を よみます。,ことば「みじかい」を よみます。,Tôi đọc từ “ngắn”.,v1:%E7%9F%AD:%E7%9F%AD%E3%81%84:kun:%E3%81%BF%E3%81%98%E3%81%8B
+知識,kiến thức,知,ち,chi,on,ちしき,chishiki,知~ち~chi~biết~target|識~しき~shiki~nhận thức~support,ことば「知識」を よみます。,ことば「ちしき」を よみます。,Tôi đọc từ “kiến thức”.,v1:%E7%9F%A5:%E7%9F%A5%E8%AD%98:on:%E3%81%A1
+知る,biết,知,し,shi,kun,しる,shiru,知~し~shi~biết~target|る~る~ru~~kana,ことば「知る」を よみます。,ことば「しる」を よみます。,Tôi đọc từ “biết”.,v1:%E7%9F%A5:%E7%9F%A5%E3%82%8B:kun:%E3%81%97
+地下,dưới lòng đất,地,ち,chi,on,ちか,chika,地~ち~chi~đất~target|下~か~ka~bên dưới~support,ことば「地下」を よみます。,ことば「ちか」を よみます。,Tôi đọc từ “dưới lòng đất”.,v1:%E5%9C%B0:%E5%9C%B0%E4%B8%8B:on:%E3%81%A1
+地面,mặt đất,地,じ,ji,on,じめん,jimen,地~じ~ji~đất~target|面~めん~men~bề mặt~support,ことば「地面」を よみます。,ことば「じめん」を よみます。,Tôi đọc từ “mặt đất”.,v1:%E5%9C%B0:%E5%9C%B0%E9%9D%A2:on:%E3%81%98
+電池,pin điện,池,ち,chi,on,でんち,denchi,電~でん~den~điện~support|池~ち~chi~bể chứa~target,ことば「電池」を よみます。,ことば「でんち」を よみます。,Tôi đọc từ “pin điện”.,v1:%E6%B1%A0:%E9%9B%BB%E6%B1%A0:on:%E3%81%A1
+池,ao / hồ nhỏ,池,いけ,ike,kun,いけ,ike,池~いけ~ike~ao~target,ことば「池」を よみます。,ことば「いけ」を よみます。,Tôi đọc từ “ao / hồ nhỏ”.,v1:%E6%B1%A0:%E6%B1%A0:kun:%E3%81%84%E3%81%91
+お茶,trà,茶,ちゃ,cha,on,おちゃ,ocha,お~お~o~tiền tố lịch sự~kana|茶~ちゃ~cha~trà~target,ことば「お茶」を よみます。,ことば「おちゃ」を よみます。,Tôi đọc từ “trà”.,v1:%E8%8C%B6:%E3%81%8A%E8%8C%B6:on:%E3%81%A1%E3%82%83
+茶道,trà đạo,茶,さ,sa,on,さどう,sadou,茶~さ~sa~trà~target|道~どう~dou~đạo / con đường~support,ことば「茶道」を よみます。,ことば「さどう」を よみます。,Tôi đọc từ “trà đạo”.,v1:%E8%8C%B6:%E8%8C%B6%E9%81%93:on:%E3%81%95
+到着,đến nơi,着,ちゃく,chaku,on,とうちゃく,touchaku,到~とう~tou~đến~support|着~ちゃく~chaku~tới nơi~target,ことば「到着」を よみます。,ことば「とうちゃく」を よみます。,Tôi đọc từ “đến nơi”.,v1:%E7%9D%80:%E5%88%B0%E7%9D%80:on:%E3%81%A1%E3%82%83%E3%81%8F
+着る,mặc,着,き,ki,kun,きる,kiru,着~き~ki~mặc~target|る~る~ru~~kana,ことば「着る」を よみます。,ことば「きる」を よみます。,Tôi đọc từ “mặc”.,v1:%E7%9D%80:%E7%9D%80%E3%82%8B:kun:%E3%81%8D
+昼食,bữa trưa,昼,ちゅう,chuu,on,ちゅうしょく,chuushoku,昼~ちゅう~chuu~buổi trưa~target|食~しょく~shoku~bữa ăn~support,ことば「昼食」を よみます。,ことば「ちゅうしょく」を よみます。,Tôi đọc từ “bữa trưa”.,v1:%E6%98%BC:%E6%98%BC%E9%A3%9F:on:%E3%81%A1%E3%82%85%E3%81%86
+昼,ban trưa,昼,ひる,hiru,kun,ひる,hiru,昼~ひる~hiru~ban trưa~target,ことば「昼」を よみます。,ことば「ひる」を よみます。,Tôi đọc từ “ban trưa”.,v1:%E6%98%BC:%E6%98%BC:kun:%E3%81%B2%E3%82%8B
+注意,chú ý,注,ちゅう,chuu,on,ちゅうい,chuui,注~ちゅう~chuu~chú ý~target|意~い~i~ý~support,ことば「注意」を よみます。,ことば「ちゅうい」を よみます。,Tôi đọc từ “chú ý”.,v1:%E6%B3%A8:%E6%B3%A8%E6%84%8F:on:%E3%81%A1%E3%82%85%E3%81%86
+注ぐ,rót / đổ vào,注,そそ,soso,kun,そそぐ,sosogu,注~そそ~soso~rót~target|ぐ~ぐ~gu~~kana,ことば「注ぐ」を よみます。,ことば「そそぐ」を よみます。,Tôi đọc từ “rót / đổ vào”.,v1:%E6%B3%A8:%E6%B3%A8%E3%81%90:kun:%E3%81%9D%E3%81%9D
+町長,thị trưởng,町,ちょう,chou,on,ちょうちょう,chouchou,町~ちょう~chou~thị trấn~target|長~ちょう~chou~người đứng đầu~support,ことば「町長」を よみます。,ことば「ちょうちょう」を よみます。,Tôi đọc từ “thị trưởng”.,v1:%E7%94%BA:%E7%94%BA%E9%95%B7:on:%E3%81%A1%E3%82%87%E3%81%86
+町,phố / thị trấn,町,まち,machi,kun,まち,machi,町~まち~machi~phố~target,ことば「町」を よみます。,ことば「まち」を よみます。,Tôi đọc từ “phố / thị trấn”.,v1:%E7%94%BA:%E7%94%BA:kun:%E3%81%BE%E3%81%A1
+野鳥,chim hoang dã,鳥,ちょう,chou,on,やちょう,yachou,野~や~ya~hoang dã~support|鳥~ちょう~chou~chim~target,ことば「野鳥」を よみます。,ことば「やちょう」を よみます。,Tôi đọc từ “chim hoang dã”.,v1:%E9%B3%A5:%E9%87%8E%E9%B3%A5:on:%E3%81%A1%E3%82%87%E3%81%86
+鳥,con chim,鳥,とり,tori,kun,とり,tori,鳥~とり~tori~chim~target,ことば「鳥」を よみます。,ことば「とり」を よみます。,Tôi đọc từ “con chim”.,v1:%E9%B3%A5:%E9%B3%A5:kun:%E3%81%A8%E3%82%8A
+朝食,bữa sáng,朝,ちょう,chou,on,ちょうしょく,choushoku,朝~ちょう~chou~buổi sáng~target|食~しょく~shoku~bữa ăn~support,ことば「朝食」を よみます。,ことば「ちょうしょく」を よみます。,Tôi đọc từ “bữa sáng”.,v1:%E6%9C%9D:%E6%9C%9D%E9%A3%9F:on:%E3%81%A1%E3%82%87%E3%81%86
+朝,buổi sáng,朝,あさ,asa,kun,あさ,asa,朝~あさ~asa~buổi sáng~target,ことば「朝」を よみます。,ことば「あさ」を よみます。,Tôi đọc từ “buổi sáng”.,v1:%E6%9C%9D:%E6%9C%9D:kun:%E3%81%82%E3%81%95
+通学,đi học,通,つう,tsuu,on,つうがく,tsuugaku,通~つう~tsuu~đi lại~target|学~がく~gaku~học~support,ことば「通学」を よみます。,ことば「つうがく」を よみます。,Tôi đọc từ “đi học”.,v1:%E9%80%9A:%E9%80%9A%E5%AD%A6:on:%E3%81%A4%E3%81%86
+通る,đi qua,通,とお,too,kun,とおる,tooru,通~とお~too~đi qua~target|る~る~ru~~kana,ことば「通る」を よみます。,ことば「とおる」を よみます。,Tôi đọc từ “đi qua”.,v1:%E9%80%9A:%E9%80%9A%E3%82%8B:kun:%E3%81%A8%E3%81%8A
+兄弟,anh em,弟,だい,dai,on,きょうだい,kyoudai,兄~きょう~kyou~anh~support|弟~だい~dai~em~target,ことば「兄弟」を よみます。,ことば「きょうだい」を よみます。,Tôi đọc từ “anh em”.,v1:%E5%BC%9F:%E5%85%84%E5%BC%9F:on:%E3%81%A0%E3%81%84
+弟,em trai,弟,おとうと,otouto,kun,おとうと,otouto,弟~おとうと~otouto~em trai~target,ことば「弟」を よみます。,ことば「おとうと」を よみます。,Tôi đọc từ “em trai”.,v1:%E5%BC%9F:%E5%BC%9F:kun:%E3%81%8A%E3%81%A8%E3%81%86%E3%81%A8
+低温,nhiệt độ thấp,低,てい,tei,on,ていおん,teion,低~てい~tei~thấp~target|温~おん~on~nhiệt độ~support,ことば「低温」を よみます。,ことば「ていおん」を よみます。,Tôi đọc từ “nhiệt độ thấp”.,v1:%E4%BD%8E:%E4%BD%8E%E6%B8%A9:on:%E3%81%A6%E3%81%84
+低い,thấp,低,ひく,hiku,kun,ひくい,hikui,低~ひく~hiku~thấp~target|い~い~i~~kana,ことば「低い」を よみます。,ことば「ひくい」を よみます。,Tôi đọc từ “thấp”.,v1:%E4%BD%8E:%E4%BD%8E%E3%81%84:kun:%E3%81%B2%E3%81%8F
+運転,lái xe / vận hành,転,てん,ten,on,うんてん,unten,運~うん~un~vận hành~support|転~てん~ten~chuyển động~target,ことば「運転」を よみます。,ことば「うんてん」を よみます。,Tôi đọc từ “lái xe / vận hành”.,v1:%E8%BB%A2:%E9%81%8B%E8%BB%A2:on:%E3%81%A6%E3%82%93
+転ぶ,ngã,転,ころ,koro,kun,ころぶ,korobu,転~ころ~koro~ngã~target|ぶ~ぶ~bu~~kana,ことば「転ぶ」を よみます。,ことば「ころぶ」を よみます。,Tôi đọc từ “ngã”.,v1:%E8%BB%A2:%E8%BB%A2%E3%81%B6:kun:%E3%81%93%E3%82%8D
+水田,ruộng lúa nước,田,でん,den,on,すいでん,suiden,水~すい~sui~nước~support|田~でん~den~ruộng~target,ことば「水田」を よみます。,ことば「すいでん」を よみます。,Tôi đọc từ “ruộng lúa nước”.,v1:%E7%94%B0:%E6%B0%B4%E7%94%B0:on:%E3%81%A7%E3%82%93
+田んぼ,ruộng lúa,田,た,ta,kun,たんぼ,tanbo,田~た~ta~ruộng~target|んぼ~んぼ~nbo~~kana,ことば「田んぼ」を よみます。,ことば「たんぼ」を よみます。,Tôi đọc từ “ruộng lúa”.,v1:%E7%94%B0:%E7%94%B0%E3%82%93%E3%81%BC:kun:%E3%81%9F
+都会,thành thị,都,と,to,on,とかい,tokai,都~と~to~đô thị~target|会~かい~kai~tụ họp~support,ことば「都会」を よみます。,ことば「とかい」を よみます。,Tôi đọc từ “thành thị”.,v1:%E9%83%BD:%E9%83%BD%E4%BC%9A:on:%E3%81%A8
+都,kinh đô,都,みやこ,miyako,kun,みやこ,miyako,都~みやこ~miyako~kinh đô~target,ことば「都」を よみます。,ことば「みやこ」を よみます。,Tôi đọc từ “kinh đô”.,v1:%E9%83%BD:%E9%83%BD:kun:%E3%81%BF%E3%82%84%E3%81%93
+温度,nhiệt độ,度,ど,do,on,おんど,ondo,温~おん~on~ấm / nhiệt~support|度~ど~do~mức độ~target,ことば「温度」を よみます。,ことば「おんど」を よみます。,Tôi đọc từ “nhiệt độ”.,v1:%E5%BA%A6:%E6%B8%A9%E5%BA%A6:on:%E3%81%A9
+度々,nhiều lần / thường xuyên,度,たび,tabi,kun,たびたび,tabitabi,度~たび~tabi~lần~target|々~たび~tabi~lặp lại~support,ことば「度々」を よみます。,ことば「たびたび」を よみます。,Tôi đọc từ “nhiều lần / thường xuyên”.,v1:%E5%BA%A6:%E5%BA%A6%E3%80%85:kun:%E3%81%9F%E3%81%B3
+回答,câu trả lời,答,とう,tou,on,かいとう,kaitou,回~かい~kai~phản hồi~support|答~とう~tou~đáp án~target,ことば「回答」を よみます。,ことば「かいとう」を よみます。,Tôi đọc từ “câu trả lời”.,v1:%E7%AD%94:%E5%9B%9E%E7%AD%94:on:%E3%81%A8%E3%81%86
+答える,trả lời,答,こた,kota,kun,こたえる,kotaeru,答~こた~kota~trả lời~target|える~える~eru~~kana,ことば「答える」を よみます。,ことば「こたえる」を よみます。,Tôi đọc từ “trả lời”.,v1:%E7%AD%94:%E7%AD%94%E3%81%88%E3%82%8B:kun:%E3%81%93%E3%81%9F

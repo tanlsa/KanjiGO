@@ -17,16 +17,29 @@ const cell = (value) => {
 };
 const encodeParts = (parts) => (parts || []).map((part) =>
   [part.text, part.reading, part.romaji, part.meaning, part.role || 'support'].map(cell).join('~')).join('|');
+const vocabularyId = (question) => question.id || `v1:${[question.target, question.word, question.type, question.answer]
+  .map((value) => encodeURIComponent(String(value || '').trim())).join(':')}`;
+const withContextDefaults = (question) => ({
+  ...question,
+  sentence: question.sentence || `ことば「${question.word || ''}」を よみます。`,
+  sentenceReading: question.sentenceReading || `ことば「${question.wordReading || question.answer || ''}」を よみます。`,
+  sentenceMeaning: question.sentenceMeaning || `Tôi đọc từ “${question.mean || ''}”.`,
+  id: vocabularyId(question),
+});
 
 const db = context.KANJI_DB;
 const kanjiRows = Object.entries(db.KANJI).map(([key, info]) => [
   key, info.char, info.meaning, (info.on || []).join('; '), (info.kun || []).join('; '), info.monId, info.jlpt || 'BONUS',
 ].map(cell).join(','));
-const questionRows = db.QUESTIONS.map((question) => [
-  question.word, question.mean, question.target, question.answer, question.romaji, question.type,
-  question.wordReading || '', question.wordRomaji || '', encodeParts(question.parts),
-].map(cell).join(','));
+const questionRows = db.QUESTIONS.map((raw) => {
+  const question = withContextDefaults(raw);
+  return [
+    question.word, question.mean, question.target, question.answer, question.romaji, question.type,
+    question.wordReading || '', question.wordRomaji || '', encodeParts(question.parts),
+    question.sentence, question.sentenceReading, question.sentenceMeaning, question.id,
+  ].map(cell).join(',');
+});
 
 fs.writeFileSync(path.join(root, 'data/kanji-template.csv'), `key,char,meaning,on,kun,monId,jlpt\n${kanjiRows.join('\n')}\n`);
-fs.writeFileSync(path.join(root, 'data/questions-template.csv'), `word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts\n${questionRows.join('\n')}\n`);
+fs.writeFileSync(path.join(root, 'data/questions-template.csv'), `word,mean,target,answer,romaji,type,wordReading,wordRomaji,parts,sentence,sentenceReading,sentenceMeaning,id\n${questionRows.join('\n')}\n`);
 console.log(`Synced ${kanjiRows.length} Kanji and ${questionRows.length} questions.`);

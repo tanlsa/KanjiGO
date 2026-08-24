@@ -10,9 +10,11 @@
 //
 //  SCHEMA (khớp cột trong admin.html / data/*.csv):
 //   KANJI[key] = { char, meaning, on:[...], kun:[...], monId, jlpt }
-//   QUESTIONS  = { id?, word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts[] }
+//   QUESTIONS  = { id?, word, mean, target, answer, romaji, type, wordReading, wordRomaji,
+//                  parts[], sentence?, sentenceReading?, sentenceMeaning? }
 //   id          = stable vocabulary id. Nếu bỏ trống, data-loader tạo id deterministic.
 //   parts[]     = { text, reading, romaji, meaning, role('target'|'support'|'kana') }
+//   sentence*   = ngữ cảnh tự nhiên tùy chọn; engine tự sinh fallback nếu bỏ trống.
 //   monId phải khớp 1 id trong CONFIG.MONSTERS.
 // ============================================================
 window.KANJI_DB = {
@@ -634,7 +636,8 @@ window.KANJI_DB = {
       { text: '水', reading: 'すい', romaji: 'sui', meaning: 'nước / thứ Tư', role: 'target' }, { text: '曜日', reading: 'ようび', romaji: 'youbi', meaning: 'ngày trong tuần', role: 'support' }] },
     { word: '水道', mean: 'nước máy / đường ống nước', target: '水', answer: 'すい', romaji: 'sui', type: 'on', wordReading: 'すいどう', wordRomaji: 'suidou', parts: [
       { text: '水', reading: 'すい', romaji: 'sui', meaning: 'nước', role: 'target' }, { text: '道', reading: 'どう', romaji: 'dou', meaning: 'đường / hệ thống', role: 'support' }] },
-    { word: '水', mean: 'nước', target: '水', answer: 'みず', romaji: 'mizu', type: 'kun', wordReading: 'みず', wordRomaji: 'mizu', parts: [
+    { word: '水', mean: 'nước', target: '水', answer: 'みず', romaji: 'mizu', type: 'kun', wordReading: 'みず', wordRomaji: 'mizu',
+      sentence: 'まいにち 水を のみます。', sentenceReading: 'まいにち みずを のみます。', sentenceMeaning: 'Hằng ngày tôi uống nước.', parts: [
       { text: '水', reading: 'みず', romaji: 'mizu', meaning: 'nước', role: 'target' }] },
     // 半
     { word: '半分', mean: 'một nửa', target: '半', answer: 'はん', romaji: 'han', type: 'on', wordReading: 'はんぶん', wordRomaji: 'hanbun', parts: [

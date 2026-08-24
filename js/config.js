@@ -139,7 +139,11 @@ window.CONFIG = {
     staminaRegenPerGrassWin: 1,
     relaxFromAttempt: 3,
   },
-  QUESTION_MODES: { weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2 } },
+  QUESTION_MODES: {
+    // m8: đọc Kanji trong câu · m9: chọn Kanji từ câu kana
+    // m10: chọn nghĩa của từ/cụm có kèm furigana.
+    weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2, m8: 2, m9: 2, m10: 2 },
+  },
   PVE: {
     questions: 10,
     baseExpPerKanji: 6,
@@ -339,6 +343,8 @@ window.CONFIG = {
   },
 
   // --- 📖 THƯ VIỆN MONSTER (id khớp KANJI_DB.KANJI[*].monId) ---
+  // Quy ước tên mascot: từ đầu tiên là âm Hán Việt của Kanji tương ứng.
+  // Có thể khai báo `hanViet` để override nếu một mascot dùng tên đặc biệt.
   MONSTERS: {
     yin:  { name: 'Âm Thư Yêu', kanji: '音', img: 'assets/monsters/yin/sprite.png',  maxHp: 24, atk: [3, 6], exp: 15, drawW: 200, drawH: 205, effect: 'sound-wave' },
     ri:   { name: 'Nhật Quang',  kanji: '日', img: 'assets/monsters/ri/sprite.png',   maxHp: 22, atk: [3, 6], exp: 16, drawW: 205, drawH: 190, effect: 'sun-glow' },
