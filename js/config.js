@@ -23,9 +23,18 @@ window.CONFIG = {
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
-  // Canvas vẫn phủ kín cửa sổ bằng CSS, nhưng giới hạn backing buffer để
-  // màn hình 2K/4K không phải render hàng triệu pixel mỗi frame.
-  RENDER: { maxWidth: 1280, maxHeight: 720, activeFps: 60, idleFps: 30, uiFps: 30 },
+  // Giữ khung thiết kế 16:9 để HUD không teo trên màn hình lớn. Backing
+  // buffer vẫn nhân theo presentation scale + DPR nên chữ không bị kéo giãn.
+  // 8.3 MP là trần 4K; Retina chỉ lấy thêm mẫu khi còn trong ngân sách này.
+  RENDER: {
+    maxLogicalWidth: 1280,
+    maxLogicalHeight: 720,
+    maxDevicePixelRatio: 2,
+    maxRenderPixels: 8294400,
+    activeFps: 60,
+    idleFps: 30,
+    uiFps: 30,
+  },
   MOVE_MS: 180, RUN_MOVE_MS: 105,
   ANIM_MS: 120, RUN_ANIM_MS: 72, FRAMES: 4,
   DIR_ROW: { down: 0, left: 1, right: 2, up: 3 },
@@ -118,7 +127,10 @@ window.CONFIG = {
 
   // --- 🧠 SRS Leitner + vòng lặp học ---
   SRS: {
-    boxIntervals: [0, 60e3, 5 * 60e3, 30 * 60e3, 3 * 3600e3, 24 * 3600e3],
+    // Một activity chỉ được chấm Leitner một lần. Khoảng cách đủ dài để
+    // "mastered" phản ánh trí nhớ qua nhiều ngày, không phải grind một lượt.
+    boxIntervals: [0, 10 * 60e3, 24 * 3600e3, 3 * 24 * 3600e3, 7 * 24 * 3600e3, 21 * 24 * 3600e3],
+    sessionPassRatio: 0.8,
     rustBonusMax: 2.5,
     newlyCapturedDueMs: 0,
   },

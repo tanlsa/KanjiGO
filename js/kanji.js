@@ -10,7 +10,8 @@
 //
 //  SCHEMA (khớp cột trong admin.html / data/*.csv):
 //   KANJI[key] = { char, meaning, on:[...], kun:[...], monId, jlpt }
-//   QUESTIONS  = { word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts[] }
+//   QUESTIONS  = { id?, word, mean, target, answer, romaji, type, wordReading, wordRomaji, parts[] }
+//   id          = stable vocabulary id. Nếu bỏ trống, data-loader tạo id deterministic.
 //   parts[]     = { text, reading, romaji, meaning, role('target'|'support'|'kana') }
 //   monId phải khớp 1 id trong CONFIG.MONSTERS.
 // ============================================================

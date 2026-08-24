@@ -50,6 +50,20 @@ test('all JavaScript and inline HTML scripts compile', () => {
   }
 });
 
+test('offline Japanese and Vietnamese font assets are complete and used by the UI', () => {
+  const weights = [400, 700], subsets = ['japanese', 'vietnamese', 'latin'];
+  for (const weight of weights) for (const subset of subsets) {
+    const file = `assets/fonts/noto-sans-jp-${subset}-${weight}.woff2`;
+    const data = fs.readFileSync(path.join(ROOT, file));
+    assert.equal(data.subarray(0, 4).toString('ascii'), 'wOF2', `${file} is not a WOFF2 font`);
+    assert.ok(data.length > 4000, `${file} is unexpectedly empty`);
+  }
+  assert.match(read('assets/fonts/OFL.txt'), /SIL OPEN FONT LICENSE/i);
+  assert.match(read('index.html'), /css\/fonts\.css/);
+  assert.match(read('admin.html'), /css\/fonts\.css/);
+  assert.doesNotMatch(read('js/game.js'), /\bmonospace\b/, 'multilingual canvas UI must not use raw platform monospace');
+});
+
 test('canonical curriculum matches the source list and has no duplicates', () => {
   const { KANJI_CATALOG: catalog } = loadDataContext();
   const source = read('KANJI-LIST.md');
@@ -86,13 +100,15 @@ test('every curriculum Kanji has metadata, questions, monster config, and a tran
 test('question data is internally consistent and supports vocabulary highlighting', () => {
   const { KANJI_DB } = loadDataContext();
   const chars = new Set(Object.values(KANJI_DB.KANJI).map((info) => info.char));
-  const keys = new Set();
+  const keys = new Set(), ids = new Set();
   for (const [index, q] of KANJI_DB.QUESTIONS.entries()) {
     const label = `question ${index + 1} (${q.word}/${q.target})`;
     assert.ok(chars.has(q.target), `${label} targets unknown Kanji`);
     assert.ok(q.word.includes(q.target), `${label} word does not contain target`);
     assert.ok(q.answer && q.romaji && q.mean && q.wordReading && q.wordRomaji, `${label} has an empty learning field`);
     assert.ok(['on', 'kun'].includes(q.type), `${label} has invalid reading type`);
+    assert.ok(typeof q.id === 'string' && q.id.trim(), `${label} has no stable vocabulary id`);
+    assert.ok(!ids.has(q.id), `${label} duplicates vocabulary id ${q.id}`); ids.add(q.id);
     assert.ok(Array.isArray(q.parts) && q.parts.length > 0, `${label} has no vocabulary parts`);
     assert.equal(q.parts.map((part) => part.text).join(''), q.word, `${label} parts do not rebuild the word`);
     const targets = q.parts.filter((part) => part.role === 'target');

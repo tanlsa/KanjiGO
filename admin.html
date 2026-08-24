@@ -4,10 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>KanjiGO — Admin: Nhập Kanji & Câu hỏi</title>
+<link rel="stylesheet" href="css/fonts.css" />
 <style>
   :root{--bg:#0e1430;--pnl:#141c3c;--line:#243258;--cy:#6cc0ff;--ok:#6effa1;--warn:#ffd54a;--err:#ff8a8a}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:#e9eef7;font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5}
+  body{margin:0;background:var(--bg);color:#e9eef7;font-family:var(--kanjigo-font);line-height:1.5}
   header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   header h1{font-size:20px;margin:0}.go{color:var(--cy)}
   header .src{margin-left:auto;font-size:13px;background:#0b1330;border:1px solid var(--line);padding:6px 12px;border-radius:20px}
@@ -34,7 +35,7 @@
   #preview{overflow-x:auto}
   th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
   th{background:#0b1330;color:#9fd8f5}
-  .jp{font-family:"Yu Gothic","Noto Sans JP",sans-serif;font-size:15px}
+  .jp{font-family:var(--kanjigo-font);font-size:15px}
   details{margin-top:8px}summary{cursor:pointer;color:var(--cy);font-size:13px}
   pre.out{background:#0b1330;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;overflow:auto;max-height:260px}
   a.back{color:var(--cy)}

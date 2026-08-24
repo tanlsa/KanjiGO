@@ -7,16 +7,23 @@ const vm = require('node:vm');
 const ROOT = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
-function createGame({ learningSave = null, gameSave = null, disableTestUnlocks = false, enableSkillQaSeed = false, viewportWidth = 1280, viewportHeight = 720 } = {}) {
+function createGame({ learningSave = null, gameSave = null, disableTestUnlocks = false, enableSkillQaSeed = false,
+  viewportWidth = 1280, viewportHeight = 720, devicePixelRatio = 1, canvasRect = null, mockFonts = false } = {}) {
   const storage = new Map();
   const windowListeners = new Map();
+  const canvasListeners = new Map();
+  const touchBackListeners = new Map();
+  let paintCalls = 0;
   if (learningSave) storage.set('KANJIGO_LEARNING_V1', JSON.stringify(learningSave));
   if (gameSave) storage.set('KANJIGO_GAME_V1', JSON.stringify(gameSave));
   const noop = () => {};
   const imageRequests = [];
+  const textCalls = [];
   const canvasContext = new Proxy({
     measureText: (text) => ({ width: String(text).length * 8 }),
     drawImage: (image) => { if (!image) throw new TypeError('drawImage received an unloaded image'); },
+    fillRect: () => { paintCalls++; },
+    fillText(text, x, y) { textCalls.push({ text: String(text), x, y, font: this.font || '' }); },
     createLinearGradient: () => ({ addColorStop: noop }),
     createRadialGradient: () => ({ addColorStop: noop }),
   }, {
@@ -26,8 +33,19 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const canvas = {
     width: 640, height: 480, style: {},
     getContext: () => canvasContext,
-    addEventListener: noop,
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 640, height: 480 }),
+    addEventListener: (type, listener) => {
+      if (!canvasListeners.has(type)) canvasListeners.set(type, []);
+      canvasListeners.get(type).push(listener);
+    },
+    getBoundingClientRect: () => canvasRect || ({ left: 0, top: 0, width: viewportWidth, height: viewportHeight }),
+  };
+  const touchBack = {
+    dataset: { action: 'back' }, textContent: '←',
+    classList: { add: noop, remove: noop, toggle: noop },
+    addEventListener: (type, listener) => {
+      if (!touchBackListeners.has(type)) touchBackListeners.set(type, []);
+      touchBackListeners.get(type).push(listener);
+    },
   };
   const createCanvas = () => ({ width: 0, height: 0, getContext: () => canvasContext });
   class MockImage {
@@ -36,16 +54,17 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   }
   const context = {
     console, module: { exports: {} }, Image: MockImage,
-    innerWidth: viewportWidth, innerHeight: viewportHeight,
+    innerWidth: viewportWidth, innerHeight: viewportHeight, devicePixelRatio,
     performance: { now: () => 0 }, requestAnimationFrame: noop,
     addEventListener: (type, listener) => {
       if (!windowListeners.has(type)) windowListeners.set(type, []);
       windowListeners.get(type).push(listener);
     },
     document: {
-      getElementById: (id) => id === 'game' ? canvas : null,
+      getElementById: (id) => id === 'game' ? canvas : id === 'touch-back' ? touchBack : null,
       querySelectorAll: () => [],
       createElement: (tag) => tag === 'canvas' ? createCanvas() : {},
+      ...(mockFonts ? { fonts: { load: () => Promise.resolve([]), check: () => true } } : {}),
     },
     localStorage: {
       getItem: (key) => storage.has(key) ? storage.get(key) : null,
@@ -65,7 +84,14 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const dispatchWindowEvent = (type, event) => {
     for (const listener of windowListeners.get(type) || []) listener(event);
   };
-  return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent };
+  const dispatchTouchBack = () => {
+    for (const listener of touchBackListeners.get('pointerdown') || []) listener({ preventDefault: noop });
+  };
+  const dispatchCanvasEvent = (type, event) => {
+    for (const listener of canvasListeners.get(type) || []) listener({ preventDefault: noop, pointerId: 1, ...event });
+  };
+  return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent, dispatchTouchBack,
+    dispatchCanvasEvent, textCalls, getPaintCalls: () => paintCalls };
 }
 
 test('game boots and exposes a usable QA API', () => {
@@ -77,11 +103,67 @@ test('game boots and exposes a usable QA API', () => {
   assert.ok(debug.availableSpawn('water').includes('fish'));
 });
 
-test('render buffer is capped while preserving the viewport aspect ratio', () => {
-  const { debug } = createGame({ viewportWidth: 3840, viewportHeight: 2160 });
+test('successful bootstrap paints synchronously and resize repaints the cleared canvas', async () => {
+  const game = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.ok(game.getPaintCalls() > 0, 'first frame must not depend only on requestAnimationFrame visibility');
+  const beforeResize = game.getPaintCalls();
+  game.dispatchWindowEvent('resize', {});
+  assert.ok(game.getPaintCalls() > beforeResize, 'resize must repaint after resetting the backing buffer');
+});
+
+test('render buffer stays CSS-sharp and caps only extra HiDPI samples', () => {
+  const { debug } = createGame({ viewportWidth: 3840, viewportHeight: 2160, devicePixelRatio: 2 });
+  const size = debug.getCanvasSize(), metrics = debug.getRenderMetrics();
+  assert.deepEqual({ ...size }, { width: 1280, height: 720 });
+  assert.equal(metrics.logicalWidth, 1280);
+  assert.equal(metrics.logicalHeight, 720);
+  assert.equal(metrics.backingWidth, 3840);
+  assert.equal(metrics.backingHeight, 2160);
+  assert.equal(metrics.presentationScale, 3);
+  assert.equal(metrics.pixelRatio, 3, '8.3 MP budget should keep one backing pixel per 4K CSS pixel');
+});
+
+test('DPR changes backing resolution without changing layout or camera coordinates', () => {
+  const standard = createGame({ viewportWidth: 1440, viewportHeight: 900, devicePixelRatio: 1 }).debug;
+  const retina = createGame({ viewportWidth: 1440, viewportHeight: 900, devicePixelRatio: 2 }).debug;
+  assert.deepEqual({ ...standard.getCanvasSize() }, { ...retina.getCanvasSize() });
+  assert.deepEqual({ ...standard.getCanvasSize() }, { width: 1152, height: 720 });
+  assert.equal(standard.getRenderMetrics().backingWidth, 1440);
+  assert.equal(retina.getRenderMetrics().backingWidth, 2880);
+  assert.equal(retina.getRenderMetrics().backingHeight, 1800);
+  assert.deepEqual({ ...standard.getQuizLayout() }, { ...retina.getQuizLayout() });
+  assert.deepEqual({ ...standard.getOverworldCamera() }, { ...retina.getOverworldCamera() });
+});
+
+test('pointer mapping uses logical coordinates instead of the HiDPI backing buffer', () => {
+  const rect = { left: 73, top: 41, width: 960, height: 540 };
+  const { debug, dispatchCanvasEvent } = createGame({
+    viewportWidth: 1920, viewportHeight: 1080, devicePixelRatio: 2, canvasRect: rect,
+  });
   const size = debug.getCanvasSize();
-  assert.equal(size.width, 1280);
-  assert.equal(size.height, 720);
+  assert.deepEqual({ ...debug.clientToLogical(rect.left + rect.width * .75, rect.top + rect.height * .25, rect) }, { x: 960, y: 180 });
+
+  assert.equal(debug.startBattle('grass'), true);
+  debug.renderOnce();
+  const battle = debug.getBattle(), beforeHp = battle.monHp, layout = debug.getQuizLayout();
+  const index = battle.q.correctIndex, col = index % 2, row = Math.floor(index / 2);
+  const logicalX = layout.pad + col * (layout.answerW + layout.answerGapX) + layout.answerW / 2;
+  const logicalY = layout.answerStartY + row * (layout.answerH + layout.answerGapY) + layout.answerH / 2;
+  dispatchCanvasEvent('pointerdown', {
+    clientX: rect.left + logicalX / size.width * rect.width,
+    clientY: rect.top + logicalY / size.height * rect.height,
+  });
+  assert.ok(battle.monHp < beforeHp, 'the visual answer center must hit the same answer at DPR 2');
+});
+
+test('bundled multilingual font loads without blocking the first frame and triggers a clean repaint', async () => {
+  const game = createGame({ mockFonts: true });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(game.debug.getFontState().ready, true);
+  game.debug.enterLecture(); game.debug.renderOnce();
+  assert.ok(game.textCalls.some((call) => /Giảng|KANJI|Kanji/.test(call.text) && call.font.includes('KanjiGo UI')));
+  assert.equal(game.textCalls.some((call) => /[À-ỹぁ-んァ-ヶ一-龯]/u.test(call.text) && /\bmonospace\b/.test(call.font)), false);
 });
 
 test('mobile overworld zooms out enough to frame the grand academy', () => {
@@ -114,6 +196,157 @@ test('academy interaction works from the approach tile and while standing in the
     dispatchWindowEvent('keydown', { key: position.input === 'enter' ? 'Enter' : ' ', preventDefault() {} });
     assert.equal(debug.state(), 'lecture', `${position.label} should enter the academy`);
   }
+});
+
+function enterAcademyCards(debug, char = '日') {
+  assert.equal(debug.startAcademyLesson(char), true);
+  assert.equal(debug.getLecture().phase, 'intro');
+  debug.onLectureKey('enter');
+  assert.equal(debug.getLecture().phase, 'readings');
+  debug.onLectureKey('enter');
+  assert.equal(debug.getLecture().phase, 'cards');
+}
+
+function revealAllAcademyCards(debug) {
+  const total = debug.getLecture().examples.length;
+  for (let index = 0; index < total; index++) {
+    assert.equal(debug.getLecture().cardIndex, index);
+    debug.onLectureKey('enter'); // reveal
+    assert.equal(debug.getLecture().cardRevealed, true);
+    if (index < total - 1) debug.onLectureKey('enter'); // next card
+  }
+  debug.onLectureKey('enter'); // begin check after the final revealed card
+  assert.equal(debug.getLecture().phase, 'check');
+}
+
+test('Academy Learning Cards cover every vocabulary item before the mini-check', () => {
+  const { debug } = createGame();
+  enterAcademyCards(debug, '日');
+  assert.equal(debug.getLecture().examples.length, 3, '日 should expose its complete vocabulary set');
+  revealAllAcademyCards(debug);
+
+  const taughtIds = new Set(debug.getLecture().examples.map((question) => question.id));
+  assert.deepEqual(new Set(debug.getLecture().seenVocabIds), taughtIds);
+  for (const id of taughtIds) assert.equal(debug.getVocabularyProgress(id).stage, 'seen');
+  for (let index = 0; index < 3; index++) {
+    assert.ok(taughtIds.has(debug.getLecture().q.vocabId), 'mini-check selected vocabulary that was not shown');
+    debug.answerLecture(debug.getLecture().q.correctIndex);
+    debug.onLectureKey('enter');
+  }
+  assert.equal(debug.getLecture().phase, 'ready');
+  assert.equal(debug.getKanjiStat('日').lectured, true);
+});
+
+test('Academy cards require reveal and always open the next vocabulary on its front face', () => {
+  const { debug } = createGame();
+  enterAcademyCards(debug, '日');
+  const first = debug.getLecture().examples[0], second = debug.getLecture().examples[1];
+  assert.equal(debug.getVocabularyProgress(first.id), null, 'merely displaying a card must not mark it seen');
+  debug.renderOnce();
+  assert.equal(debug.getLecture().hitboxes.some((box) => box.action === 'card_next'), false, 'Next must stay hidden before reveal');
+
+  debug.onLectureKey('enter');
+  assert.equal(debug.getVocabularyProgress(first.id).stage, 'seen');
+  debug.renderOnce();
+  assert.equal(debug.getLecture().hitboxes.some((box) => box.action === 'card_reveal'), false);
+  assert.equal(debug.getLecture().hitboxes.some((box) => box.action === 'card_next'), true);
+
+  debug.onLectureKey('arrowright');
+  assert.equal(debug.getLecture().cardIndex, 1);
+  assert.equal(debug.getLecture().cardRevealed, false, 'the next card must begin on its retrieval face');
+  assert.equal(debug.getVocabularyProgress(second.id), null, 'an unrevealed next card must not be counted as seen');
+});
+
+test('Academy action keys ignore browser repeat and mobile Back remains usable', () => {
+  const { debug, dispatchWindowEvent, dispatchTouchBack } = createGame();
+  assert.equal(debug.startAcademyLesson('日'), true);
+  dispatchWindowEvent('keydown', { key: 'Enter', repeat: true, preventDefault() {} });
+  assert.equal(debug.getLecture().phase, 'intro', 'held Enter must not skip Academy phases');
+  dispatchTouchBack();
+  assert.equal(debug.getLecture().phase, 'lobby');
+  dispatchTouchBack();
+  assert.equal(debug.state(), 'overworld');
+});
+
+test('legacy Academy checks resume at Learning Cards so unseen vocabulary cannot be tested', () => {
+  const legacy = { academyDraft: { char: '日', phase: 'check', checkIndex: 2, lessonScore: 0 } };
+  const { debug } = createGame({ learningSave: legacy });
+  assert.equal(debug.startAcademyLesson('日', true), true);
+  assert.equal(debug.getLecture().phase, 'cards');
+  assert.equal(debug.getLecture().seenVocabIds.length, 0);
+  assert.equal(debug.getLecture().cardRevealed, false);
+});
+
+test('Academy uses targeted recap for partial and low first-pass scores', () => {
+  const partial = createGame().debug;
+  enterAcademyCards(partial); revealAllAcademyCards(partial);
+  let missedId = '';
+  for (let index = 0; index < 3; index++) {
+    const q = partial.getLecture().q;
+    const answer = index === 2 ? (q.correctIndex + 1) % q.options.length : q.correctIndex;
+    if (index === 2) missedId = q.vocabId;
+    partial.answerLecture(answer); partial.onLectureKey('enter');
+  }
+  assert.equal(partial.getLecture().phase, 'recap');
+  assert.equal(partial.getLecture().lessonScore, 2);
+  assert.ok(partial.getLecture().recapIds.includes(missedId));
+  assert.equal(partial.getKanjiStat('日').lectured, false, 'recap must happen before lesson completion');
+  partial.onLectureKey('enter');
+  assert.equal(partial.getLecture().phase, 'confirm');
+  partial.answerLecture(partial.getLecture().q.correctIndex); partial.onLectureKey('enter');
+  assert.equal(partial.getLecture().phase, 'ready');
+
+  const low = createGame().debug;
+  enterAcademyCards(low); revealAllAcademyCards(low);
+  for (let index = 0; index < 3; index++) {
+    const q = low.getLecture().q;
+    low.answerLecture((q.correctIndex + 1) % q.options.length); low.onLectureKey('enter');
+  }
+  assert.equal(low.getLecture().phase, 'recap');
+  assert.ok(low.getLecture().recapIds.length >= 2);
+  while (low.getLecture().phase === 'recap') low.onLectureKey('enter');
+  assert.equal(low.getLecture().confirmTotal, 2);
+  while (low.getLecture().phase === 'confirm') {
+    low.answerLecture(low.getLecture().q.correctIndex); low.onLectureKey('enter');
+  }
+  assert.equal(low.getLecture().phase, 'ready');
+  assert.equal(low.getKanjiStat('日').lectured, true);
+});
+
+test('Capture tests taught vocabulary and changes the SRS box at most once per session', () => {
+  const { debug } = createGame();
+  enterAcademyCards(debug); revealAllAcademyCards(debug);
+  for (let index = 0; index < 3; index++) {
+    debug.answerLecture(debug.getLecture().q.correctIndex); debug.onLectureKey('enter');
+  }
+  const taughtIds = new Set(debug.getLecture().seenVocabIds);
+  const stat = debug.mastery()['日']; stat.box = 0; stat.nextReview = 0;
+  assert.equal(debug.startCapture('日'), true);
+  for (let index = 0; index < 5; index++) {
+    const capture = debug.getCapture();
+    assert.ok(taughtIds.has(capture.q.vocabId), 'Capture selected vocabulary outside the lesson cards');
+    debug.answerCapture(capture.q.correctIndex); debug.updateCapture(700);
+  }
+  assert.equal(debug.getCapture().phase, 'end');
+  assert.equal(stat.box, 1, 'five correct answers in one Capture must only promote one box');
+  debug.updateCapture(700);
+  assert.equal(stat.box, 1, 'session finalization must be idempotent');
+});
+
+test('mobile Academy renders the card, recap, and confirmation flow without overflow crashes', () => {
+  const { debug } = createGame({ viewportWidth: 390, viewportHeight: 844 });
+  enterAcademyCards(debug);
+  assert.doesNotThrow(() => debug.renderOnce());
+  revealAllAcademyCards(debug);
+  for (let index = 0; index < 3; index++) {
+    const q = debug.getLecture().q;
+    debug.answerLecture((q.correctIndex + 1) % q.options.length); debug.onLectureKey('enter');
+  }
+  assert.equal(debug.getLecture().phase, 'recap');
+  assert.doesNotThrow(() => debug.renderOnce());
+  while (debug.getLecture().phase === 'recap') debug.onLectureKey('enter');
+  assert.equal(debug.getLecture().phase, 'confirm');
+  assert.doesNotThrow(() => debug.renderOnce());
 });
 
 test('startup only preloads core assets and the active pet', () => {

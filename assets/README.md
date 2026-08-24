@@ -4,6 +4,9 @@ Asset được chia theo chức năng để dễ mở rộng:
 
 ```text
 assets/
+├── fonts/
+│   ├── noto-sans-jp-{japanese,vietnamese,latin}-{400,700}.woff2
+│   └── OFL.txt
 ├── characters/
 │   ├── player.png
 │   ├── player-bicycle.png
@@ -24,6 +27,18 @@ assets/
     └── <monId>/
         └── sprite.png
 ```
+
+## Fonts
+
+UI dùng family offline `KanjiGo UI` được khai báo tại `css/fonts.css`. Sáu
+WOFF2 subset của Noto Sans JP bao phủ Japanese, Vietnamese và Latin ở weight
+400/700, vì vậy chữ Kanji, kana và dấu tiếng Việt giữ cùng metric trên mọi hệ
+điều hành mà không cần tải font từ mạng. License SIL Open Font License 1.1 nằm
+tại `fonts/OFL.txt`.
+
+Canvas chờ font ở chế độ không chặn frame đầu và tự repaint khi font sẵn sàng.
+Không dùng `monospace` trực tiếp cho nội dung học vì glyph fallback khác nhau
+giữa Windows, macOS và mobile.
 
 ## Characters
 
