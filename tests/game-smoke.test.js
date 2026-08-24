@@ -9,6 +9,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 function createGame({ learningSave = null, gameSave = null, disableTestUnlocks = false, enableSkillQaSeed = false, viewportWidth = 1280, viewportHeight = 720 } = {}) {
   const storage = new Map();
+  const windowListeners = new Map();
   if (learningSave) storage.set('KANJIGO_LEARNING_V1', JSON.stringify(learningSave));
   if (gameSave) storage.set('KANJIGO_GAME_V1', JSON.stringify(gameSave));
   const noop = () => {};
@@ -36,7 +37,11 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const context = {
     console, module: { exports: {} }, Image: MockImage,
     innerWidth: viewportWidth, innerHeight: viewportHeight,
-    performance: { now: () => 0 }, requestAnimationFrame: noop, addEventListener: noop,
+    performance: { now: () => 0 }, requestAnimationFrame: noop,
+    addEventListener: (type, listener) => {
+      if (!windowListeners.has(type)) windowListeners.set(type, []);
+      windowListeners.get(type).push(listener);
+    },
     document: {
       getElementById: (id) => id === 'game' ? canvas : null,
       querySelectorAll: () => [],
@@ -57,7 +62,10 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   context.CONFIG.SKILL_TREE.qaSeed.enabled = enableSkillQaSeed;
   if (disableTestUnlocks) context.CONFIG.PROGRESSION.testUnlockedTiers = [];
   vm.runInContext(read('js/game.js'), context, { filename: 'js/game.js' });
-  return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests };
+  const dispatchWindowEvent = (type, event) => {
+    for (const listener of windowListeners.get(type) || []) listener(event);
+  };
+  return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent };
 }
 
 test('game boots and exposes a usable QA API', () => {
@@ -90,6 +98,22 @@ test('campus camera stays centered on the player instead of jumping to frame the
   const camera = debug.getOverworldCamera();
   const viewHeight = debug.getCanvasSize().height / debug.getWorldZoom();
   assert.equal(player.py + 16 - camera.camY, viewHeight / 2);
+});
+
+test('academy interaction works from the approach tile and while standing in the doorway', () => {
+  for (const position of [
+    { gx: 7, gy: 9, facing: 'up', label: 'approach tile', input: 'space' },
+    { gx: 7, gy: 8, facing: 'up', label: 'doorway tile', input: 'enter' },
+  ]) {
+    const { debug, dispatchWindowEvent } = createGame();
+    const player = debug.getPlayer();
+    player.gx = position.gx; player.gy = position.gy;
+    player.px = position.gx * 32; player.py = position.gy * 32;
+    player.facing = position.facing; player.moving = false;
+    assert.equal(debug.academyEntranceInReach(), true, `${position.label} should reach the academy`);
+    dispatchWindowEvent('keydown', { key: position.input === 'enter' ? 'Enter' : ' ', preventDefault() {} });
+    assert.equal(debug.state(), 'lecture', `${position.label} should enter the academy`);
+  }
 });
 
 test('startup only preloads core assets and the active pet', () => {

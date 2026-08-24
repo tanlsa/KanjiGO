@@ -735,10 +735,10 @@
   addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();
     keys[k] = true;
-    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
+    if ([' ', 'enter', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
     if (state === 'lecture' && ['backspace', 'tab'].includes(k)) e.preventDefault();
     if (state === 'overworld') {
-      if (e.key === ' ') onSpace();
+      if (k === ' ' || k === 'enter') onSpace();
       if (k === 'd') openDex();
       if (k === 'k') openSkillTree();
       if (k === 'r') cycleRadarTarget();
@@ -972,6 +972,9 @@
     }
   }
   function frontTile() { const [dx, dy] = delta(player.facing); return { gx: player.gx + dx, gy: player.gy + dy, t: tileAt(player.gx + dx, player.gy + dy) }; }
+  function academyEntranceInReach() {
+    return tileAt(player.gx, player.gy) === K.ACADEMY_DOOR || frontTile().t === K.ACADEMY_DOOR;
+  }
   function npcInFront() { const f = frontTile(); return NPCS.find((n) => n.gx === f.gx && n.gy === f.gy) || null; }
   function onSpace() {
     if (fishing) return;
@@ -985,10 +988,11 @@
     if (npc) { dialog.active = true; dialog.idx = 0; dialog.npc = npc; return; }
     if (player.moving) return;
     const f = frontTile();
-    if (isBicycleActive() && (f.t === K.ACADEMY_DOOR || f.t === K.BOAT || f.t === K.WATER)) {
+    const academyEntrance = !player.onBoat && academyEntranceInReach();
+    if (isBicycleActive() && (academyEntrance || f.t === K.BOAT || f.t === K.WATER)) {
       bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.frame = 0; saveGame();
     }
-    if (!player.onBoat && f.t === K.ACADEMY_DOOR) { enterLecture(); return; }
+    if (academyEntrance) { enterLecture(); return; }
     if (!player.onBoat && f.t === K.BOAT) { board(f); return; }
     if (player.onBoat && f.t >= 0 && f.t !== K.WATER && f.t !== K.BOAT && !BLOCKED.has(f.t)) { disembark(f); return; }
     if (!player.onBoat && f.t === K.WATER) { fish(); return; }
@@ -2555,7 +2559,7 @@
   }
   function drawHudHint() {
     overworldHitboxes = [];
-    const academy = frontTile().t === K.ACADEMY_DOOR;
+    const academy = academyEntranceInReach();
     const compact = cv.width < 620;
     const radar = radarSummary(), total = KANJI_BY_CHAR.size, captured = capturedKanjiCount();
     const statusW = Math.min(cv.width - 16, compact ? 230 : 270);
@@ -2563,7 +2567,7 @@
     const explorationGuide = bicycleAvailable() ? ' · B: Xe đạp' : '';
     const autoRideGuide = autoRideAvailable() ? ' · P: Auto' : '';
     const radarGuide = radar.mode === 'targeting' ? ' · R: Radar' : '';
-    const message = fishing ? '🎣 Đang câu cá...' : academy ? 'Space: Vào Giảng đường' : (compact ? `D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · D: Dex · K: Skill · Space: Tương tác`);
+    const message = fishing ? '🎣 Đang câu cá...' : academy ? 'Space/Enter: Vào Giảng đường' : (compact ? `D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · D: Dex · K: Skill · Space/Enter: Tương tác`);
     const hintW = Math.min(cv.width - 16, compact ? 340 : Math.max(300, Math.min(680, statusX - 16)));
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
@@ -3697,7 +3701,7 @@
     skillStatus, purchaseSkill, resetPerks, hasSkill, capturedKanjiCount, kanjiAtLevelCount, resolveSkillEffects,
     openSkillTree, onSkillKey, getSkillUi: () => ({ ...skillUi, hitboxes: [...skillUi.hitboxes] }),
     useMeaningLens, radarSummary, cycleRadarTarget, radarEncounterMultiplier, getRadarTarget: () => radarTarget,
-    toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk,
+    toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk, onSpace, academyEntranceInReach,
     toggleAutoRide, stopAutoRide, isAutoRideActive: () => autoRideActive, findAutoRidePath, nextAutoRideDirection,
     getPveResult: () => pveResult, getCanvasSize: () => ({ width: cv.width, height: cv.height }), getWorldZoom: () => worldZoom,
     getOverworldCamera: () => ({ ...overworldCamera() }), getQuizLayout: () => ({ ...quizPanelLayout(cv.width, cv.height) }),
