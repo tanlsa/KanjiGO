@@ -2801,10 +2801,15 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
       if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
     }
-    drawTrainerArena(camX, camY);
+    for (const { gx: x, gy: y } of TREE_CELLS) {
+      if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
+      const sx = x * TILE - camX, sy = y * TILE - camY;
+      if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
+      cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17, sy + 27, 13, 5, 0, 0, Math.PI * 2); cx.fill();
+      drawTile(K.TREE, sx, sy);
+    }
     drawAcademy(camX, camY);
     drawTulipGardens(camX, camY, frameNow);
-    drawMapSigns(camX, camY);
     for (const n of NPCS) {
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
       drawCharacterShadow(npcX, npcY);
@@ -2829,14 +2834,9 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       ? Math.max(0, Number(C.BICYCLE.verticalOverlayDrop) || 0) : 0);
     drawSprite(imgs.player, player.facing, player.frame, playerX, riderY);
     if (riding) drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY, TILE * (C.BICYCLE.spriteScale || 1));
+    drawTrainerArena(camX, camY);
     drawFishing(camX, camY);
-    for (const { gx: x, gy: y } of TREE_CELLS) {
-      if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
-      const sx = x * TILE - camX, sy = y * TILE - camY;
-      if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
-      cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17, sy + 27, 13, 5, 0, 0, Math.PI * 2); cx.fill();
-      drawTile(K.TREE, sx, sy);
-    }
+    drawMapSigns(camX, camY);
   }
   function overworldCamera() {
     let camX = player.px + TILE / 2 - VIEW_PX_W / 2;
@@ -3878,24 +3878,35 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
   }
   function drawPetMastery(kanji, x, y, w = 260, card = false) {
     const s = ensureMastery(kanji);
+    const isNarrow = (card ? w - 16 : w) < 220;
+    let titleY = y - 2;
+    let barY = y + 4;
+    let statsY1 = y + 20;
+    let statsY2 = y + 34;
     if (card) {
-      cx.fillStyle = 'rgba(11,16,32,.88)'; cx.fillRect(x, y, w, 42);
-      cx.strokeStyle = '#16558f'; cx.lineWidth = 1; cx.strokeRect(x, y, w, 42);
-      x += 8; y += 8; w -= 16;
+      const cardH = isNarrow ? 60 : 50;
+      cx.fillStyle = 'rgba(11,16,32,.88)'; cx.fillRect(x, y, w, cardH);
+      cx.strokeStyle = '#16558f'; cx.lineWidth = 1; cx.strokeRect(x, y, w, cardH);
+      x += 8; w -= 16;
+
+      titleY = y + 16;
+      barY = y + 20;
+      statsY1 = isNarrow ? y + 39 : y + 41;
+      statsY2 = y + 51;
     }
     cx.fillStyle = '#cde'; cx.font = '12px "KanjiGo UI",sans-serif';
-    fitText(`📚 「${kanji}」  Lv.${s.level}/${C.KLEVEL.maxLevel} ${levelLabel(s.level)}`, x, y - 2, w, 12);
-    const bx = x, by = y + 4;
+    fitText(`📚 「${kanji}」  Lv.${s.level}/${C.KLEVEL.maxLevel} ${levelLabel(s.level)}`, x, titleY, w, 12);
+    const bx = x, by = barY;
     cx.fillStyle = '#333'; cx.fillRect(bx, by, w, 7);
     const need = expToNext(kanji), progress = s.level >= C.KLEVEL.maxLevel ? 1 : expInLevel(kanji) / need;
     const r = Math.max(0, Math.min(1, progress));
     cx.fillStyle = '#6cc0ff'; cx.fillRect(bx, by, w * r, 7);
     const mpText = s.level >= C.KLEVEL.maxLevel ? 'MP MASTERED' : `MP ${expInLevel(kanji)}/${need}`;
     cx.fillStyle = '#9ab'; cx.font = '10px "KanjiGo UI",sans-serif';
-    if (w < 220) fitText(mpText, bx, by + 16, w, 10);
-    else cx.fillText(mpText, bx + Math.max(0, w - 110), by + 16);
+    if (isNarrow) fitText(mpText, bx, statsY1, w, 10);
+    else cx.fillText(mpText, bx + Math.max(0, w - 110), statsY1);
     cx.fillStyle = s.recall > 70 ? '#6effa1' : s.recall >= 30 ? '#ffd54a' : '#ff7777';
-    fitText(`Recall ${s.recall}% · 🔥${s.winStreak}`, bx, by + (w < 220 ? 30 : 16), Math.min(140, w), 10);
+    fitText(`Recall ${s.recall}% · 🔥${s.winStreak}`, bx, isNarrow ? statsY2 : statsY1, Math.min(140, w), 10);
   }
   function quizPresentation(q, compact = false) {
     if (q.mode === 'm8') return {
