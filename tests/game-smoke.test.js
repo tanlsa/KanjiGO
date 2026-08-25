@@ -197,6 +197,22 @@ test('campus camera stays centered on the player instead of jumping to frame the
   assert.equal(player.py + 16 - camera.camY, viewHeight / 2);
 });
 
+test('desktop HUD reserves a dedicated right-side gutter for the Settings control', () => {
+  for (const viewport of [
+    { viewportWidth: 744, viewportHeight: 480, devicePixelRatio: 1 },
+    { viewportWidth: 3840, viewportHeight: 2160, devicePixelRatio: 2 },
+  ]) {
+    const { debug } = createGame(viewport);
+    const layout = debug.getOverworldHudLayout();
+    const metrics = debug.getRenderMetrics();
+    assert.equal(layout.compact, false);
+    assert.ok(layout.settingsGutter * metrics.presentationScale >= 66,
+      'the logical gutter must reserve at least 66 CSS pixels at every presentation scale');
+    assert.ok(layout.statusX + layout.statusW <= debug.getCanvasSize().width - layout.settingsGutter - 8,
+      'status panel must end before the Settings gutter');
+  }
+});
+
 test('academy interaction works from the approach tile and while standing in the doorway', () => {
   for (const position of [
     { gx: 7, gy: 9, facing: 'up', label: 'approach tile', input: 'space' },

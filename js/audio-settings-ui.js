@@ -1,16 +1,16 @@
 // ============================================================
-//  AUDIO-SETTINGS-UI.JS — DOM controls for AudioManager settings.
+//  AUDIO-SETTINGS-UI.JS — Shared Settings shell; audio is its first section.
 // ============================================================
 (function () {
   const manager = window.AudioManager;
   if (!manager) return;
 
   const DEFAULTS = Object.freeze({ master: 100, music: 70, sfx: 80, ui: 80, ambient: 60, muted: false });
-  const overlay = document.getElementById('audio-settings-overlay');
-  const panel = document.getElementById('audio-settings-panel');
-  const openButton = document.getElementById('audio-settings-open');
-  const closeButton = document.getElementById('audio-settings-close');
-  const resetButton = document.getElementById('audio-settings-reset');
+  const overlay = document.getElementById('settings-overlay');
+  const panel = document.getElementById('settings-panel');
+  const openButton = document.getElementById('settings-open');
+  const closeButton = document.getElementById('settings-close');
+  const resetButton = document.getElementById('settings-reset');
   const controls = [...document.querySelectorAll('[data-audio-setting]')];
   let lastFocused = null;
   let open = false;
@@ -52,8 +52,9 @@
   }
 
   function setOpen(nextOpen) {
-    open = nextOpen;
+    open = Boolean(nextOpen);
     overlay.classList.toggle('is-open', open);
+    overlay.setAttribute('aria-hidden', String(!open));
     openButton.setAttribute('aria-expanded', String(open));
     if (open) {
       lastFocused = document.activeElement;
@@ -78,11 +79,16 @@
   });
 
   openButton.setAttribute('aria-expanded', 'false');
-  openButton.addEventListener('click', () => setOpen(true));
+  openButton.addEventListener('click', () => setOpen(!open));
   closeButton.addEventListener('click', () => setOpen(false));
   resetButton.addEventListener('click', setDefaults);
   overlay.addEventListener('click', (event) => { if (event.target === overlay) setOpen(false); });
   document.addEventListener('keydown', (event) => {
+    const key = String(event.key || '').toLowerCase();
+    const typing = /^(input|textarea|select)$/i.test(event.target && event.target.tagName || '');
+    if (key === 'o' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault(); event.stopPropagation(); setOpen(!open); return;
+    }
     if (!open) return;
     event.stopPropagation();
     if (event.key === 'Escape') { event.preventDefault(); setOpen(false); }
@@ -93,4 +99,11 @@
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }
   });
+
+  window.SettingsUI = {
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+    toggle: () => setOpen(!open),
+    isOpen: () => open,
+  };
 })();

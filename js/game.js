@@ -2955,18 +2955,26 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     const weak = entries.filter(({ stat }) => stat.recall < 70).length;
     return { due, weak, total: entries.length, mode: resolveSkillEffects().radarMode, target: radarTarget, targetLabel: radarTargetLabel() };
   }
+  function overworldHudLayout() {
+    const compact = SCREEN_W < 620;
+    const statusW = Math.min(SCREEN_W - 16, compact ? 230 : 270);
+    // Settings là DOM overlay theo CSS pixels, còn HUD dùng logical canvas
+    // pixels. Quy đổi gutter để hai lớp luôn có vùng riêng ở mọi DPI/scale.
+    const settingsGutter = compact ? 0 : Math.ceil(66 / Math.max(.01, presentationScale));
+    const statusX = compact ? 8 : SCREEN_W - statusW - 8 - settingsGutter;
+    const statusY = compact ? 42 : 8;
+    const hintW = Math.min(SCREEN_W - 16, compact ? 340 : Math.max(300, Math.min(680, statusX - 16)));
+    return { compact, statusW, statusX, statusY, hintW, settingsGutter };
+  }
   function drawHudHint() {
     overworldHitboxes = [];
     const academy = academyEntranceInReach();
-    const compact = SCREEN_W < 620;
+    const { compact, statusW, statusX, statusY, hintW } = overworldHudLayout();
     const radar = radarSummary(), total = KANJI_BY_CHAR.size, captured = capturedKanjiCount();
-    const statusW = Math.min(SCREEN_W - 16, compact ? 230 : 270);
-    const statusX = compact ? 8 : SCREEN_W - statusW - 8, statusY = compact ? 42 : 8;
     const explorationGuide = bicycleAvailable() ? ' · B: Xe đạp' : '';
     const autoRideGuide = autoRideAvailable() ? ' · P: Auto' : '';
     const radarGuide = radar.mode === 'targeting' ? ' · R: Radar' : '';
     const message = fishing ? '🎣 Đang câu cá...' : academy ? 'Space/Enter: Vào Giảng đường' : (compact ? `D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · D: Dex · K: Skill · Space/Enter: Tương tác`);
-    const hintW = Math.min(SCREEN_W - 16, compact ? 340 : Math.max(300, Math.min(680, statusX - 16)));
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
     const status = `⭐${availableKP()} KP · ${captured}/${total} · Pet「${C.MONSTERS[currentPetId]?.kanji || '?'}」${isBicycleActive() ? ' · 🚲 ON' : ''}${autoRideActive ? ' · 🧭 AUTO' : ''}`;
@@ -4280,6 +4288,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     skillStatus, purchaseSkill, resetPerks, hasSkill, capturedKanjiCount, kanjiAtLevelCount, resolveSkillEffects,
     openSkillTree, onSkillKey, getSkillUi: () => ({ ...skillUi, hitboxes: [...skillUi.hitboxes] }),
     useMeaningLens, radarSummary, cycleRadarTarget, radarEncounterMultiplier, getRadarTarget: () => radarTarget,
+    getOverworldHudLayout: () => ({ ...overworldHudLayout() }),
     toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk, onSpace, academyEntranceInReach,
     toggleAutoRide, stopAutoRide, isAutoRideActive: () => autoRideActive, findAutoRidePath, nextAutoRideDirection,
     getPveResult: () => pveResult, getCanvasSize: () => ({ width: SCREEN_W, height: SCREEN_H }), getWorldZoom: () => worldZoom,

@@ -339,6 +339,7 @@ test('imported browser data merges safely without hiding packaged content', () =
 test('HTML loads game scripts in dependency order', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(scripts, ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
+  assert.deepEqual(scripts, ['js/content-catalog.js', 'js/config.js', 'js/audio-config.js', 'js/audio-manager.js',
+    'js/audio-settings-ui.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
   assert.match(html, /<canvas\s+id="game"/);
 });
