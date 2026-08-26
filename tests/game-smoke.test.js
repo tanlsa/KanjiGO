@@ -348,6 +348,8 @@ test('mobile profile renders in portrait and closes through the shared Back cont
   assert.equal(game.debug.openProfile(), true);
   assert.doesNotThrow(() => game.debug.renderOnce());
   assert.equal(game.getTouchBack().text, 'ĐÓNG');
+  assert.equal(game.debug.getProfileUi().hitboxes.some((box) => box.action === 'close'), false,
+    'mobile should not draw a second canvas close button beneath the shared Back control');
   game.dispatchTouchBack();
   assert.equal(game.debug.state(), 'overworld');
 });
@@ -774,6 +776,19 @@ test('mobile battle quiz keeps touch answers and footer inside separate safe are
   assert.ok(layout.answerW >= 140, 'answer touch target is too narrow');
   assert.ok(answersBottom + 20 <= footerY, 'footer overlaps the second answer row');
   assert.ok(layout.panelH < layout.H, 'quiz panel covers the whole battlefield');
+});
+
+test('mobile landscape battle uses one compact answer row and preserves the battlefield', () => {
+  const { debug } = createGame({ viewportWidth: 844, viewportHeight: 390 });
+  debug.startBattle('grass');
+  const layout = debug.getQuizLayout();
+  const answersBottom = layout.answerStartY + layout.answerH;
+  const footerY = layout.y + layout.panelH - 14;
+  assert.equal(layout.shortLandscape, true);
+  assert.equal(layout.answerCols, 4);
+  assert.equal(layout.answerH, 44);
+  assert.ok(layout.H - layout.panelH >= 210, 'landscape battlefield is too short');
+  assert.ok(answersBottom + 20 <= footerY, 'landscape footer overlaps the answer row');
 });
 
 test('pet follow distance stays stable regardless of trail sample density', () => {

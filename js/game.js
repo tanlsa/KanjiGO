@@ -140,6 +140,7 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
     document.querySelectorAll('#touch-controls [data-key]').forEach((button) => {
       const key = button.dataset.key;
       const release = () => { keys[key] = false; button.classList.remove('pressed'); };
+      const suppressNativeHold = (e) => e.preventDefault();
       button.addEventListener('pointerdown', (e) => {
         e.preventDefault(); keys[key] = true; button.classList.add('pressed');
         if (button.setPointerCapture) button.setPointerCapture(e.pointerId);
@@ -147,6 +148,11 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
       button.addEventListener('pointerup', release);
       button.addEventListener('pointercancel', release);
       button.addEventListener('lostpointercapture', release);
+      // Mobile browsers may still open selection/copy UI after a long press,
+      // even with touch-action:none. Suppress those native gestures explicitly.
+      ['contextmenu', 'selectstart', 'dragstart'].forEach((eventName) => {
+        button.addEventListener(eventName, suppressNativeHold);
+      });
     });
     const bindAction = (button) => {
       const eventName = button.dataset.action === 'back' ? 'click' : 'pointerdown';
@@ -1000,11 +1006,13 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     if (quiz.phase !== 'fight') return;
     const layout = quizPanelLayout(SCREEN_W, SCREEN_H);
     const { answerH: bh, answerGapY: gap, answerStartY: startY, pad: P, answerW: bw, answerGapX } = layout;
-    if (y < startY || y > startY + 2 * bh + gap) return;
-    const col = x >= P + bw + answerGapX ? 1 : 0;
-    const row = y >= startY + bh + gap ? 1 : 0;
-    const idx = row * 2 + col;
-if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw && idx < quiz.q.options.length) {
+    const cols = layout.answerCols || 2, rows = Math.ceil(quiz.q.options.length / cols);
+    if (y < startY || y > startY + rows * bh + Math.max(0, rows - 1) * gap) return;
+    const col = Math.floor((x - P) / (bw + answerGapX));
+    const row = Math.floor((y - startY) / (bh + gap));
+    const idx = row * cols + col;
+    if (col < 0 || col >= cols || row < 0 || row >= rows) return;
+    if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw && idx < quiz.q.options.length) {
       playSFX('UI_BUTTON_CLICK');
       if (state === 'battle') answer(idx);
       else if (state === 'capture') answerCapture(idx);
@@ -2798,9 +2806,15 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function drawProfileHeader(W, compact) {
     const pad = compact ? 12 : 22, closeW = compact ? 78 : 112, closeH = 32, closeX = W - pad - closeW, closeY = 12;
     cx.fillStyle = '#fff'; fitText('HỒ SƠ NHÂN VẬT', pad, compact ? 34 : 38, Math.max(120, closeX - pad - 12), compact ? 21 : 29, true);
-    cx.fillStyle = '#263a5d'; cx.fillRect(closeX, closeY, closeW, closeH); cx.strokeStyle = '#5f82b2'; cx.strokeRect(closeX, closeY, closeW, closeH);
-    cx.fillStyle = '#dce8ff'; cx.textAlign = 'center'; fitText(compact ? 'ĐÓNG [I]' : 'ĐÓNG · I / ESC', closeX + closeW / 2, closeY + 21, closeW - 10, compact ? 10 : 11, true); cx.textAlign = 'left';
-    profileUi.hitboxes.push({ action: 'close', x: closeX, y: closeY, w: closeW, h: closeH });
+    // Mobile already exposes the shared DOM Back button in this exact corner.
+    // Drawing a second canvas button beneath it makes the action look broken
+    // and creates two competing hit targets, so desktop keeps the canvas close
+    // affordance while touch/narrow layouts rely on the accessible DOM control.
+    if (!usesTouchUi()) {
+      cx.fillStyle = '#263a5d'; cx.fillRect(closeX, closeY, closeW, closeH); cx.strokeStyle = '#5f82b2'; cx.strokeRect(closeX, closeY, closeW, closeH);
+      cx.fillStyle = '#dce8ff'; cx.textAlign = 'center'; fitText(compact ? 'ĐÓNG [I]' : 'ĐÓNG · I / ESC', closeX + closeW / 2, closeY + 21, closeW - 10, compact ? 10 : 11, true); cx.textAlign = 'left';
+      profileUi.hitboxes.push({ action: 'close', x: closeX, y: closeY, w: closeW, h: closeH });
+    }
   }
   function renderProfilePortrait(stats, W, H) {
     const pad = 12, top = 53, gap = 8, heroH = Math.min(118, Math.max(96, H * .17));
@@ -3063,6 +3077,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = '#e84b3c'; cx.fillRect(Math.round(bobX) - 1, Math.round(bobY), 3, 3);
   }
   let touchUiState = '';
+  function usesTouchUi() {
+    if (VIEWPORT_W <= 700) return true;
+    return Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  }
   function touchBackPresentation() {
     if (state === 'battle') {
       if (battle && battle.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau trận đấu', continues: true };
@@ -3390,13 +3408,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const academy = academyEntranceInReach();
     const { compact, statusW, statusX, statusY, hintW } = overworldHudLayout();
     const radar = radarSummary(), total = KANJI_BY_CHAR.size, captured = capturedKanjiCount();
+    const touchUi = usesTouchUi();
     const explorationGuide = bicycleAvailable() ? ' · B: Xe đạp' : '';
     const autoRideGuide = autoRideAvailable() ? ' · P: Auto' : '';
     const radarGuide = radar.mode === 'targeting' ? ' · R: Radar' : '';
     const tour = onboardingTour(), tourNearby = onboardingGuideInReach();
     const message = tour
       ? `🎓 ${tourNearby ? `SPACE: nói chuyện với cô ${tour.name}` : `${tour.stop.objective} • ${onboardingGuideDirection(tour)}`} · ${tour.index + 1}/${tour.total}`
-      : fishing ? '🎣 Đang câu cá...' : academy ? 'Space/Enter: Vào Giảng đường' : (compact ? `I: Hồ sơ · D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · I: Hồ sơ · D: Dex · K: Skill · Space/Enter: Tương tác`);
+      : fishing ? '🎣 Đang câu cá...'
+        : academy ? `${touchUi ? 'SPACE' : 'Space/Enter'}: Vào Giảng đường`
+          : compact && touchUi ? 'Dùng nút bên dưới để di chuyển, tương tác và mở menu'
+            : compact ? `I: Hồ sơ · D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}`
+              : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · I: Hồ sơ · D: Dex · K: Skill · Space/Enter: Tương tác`;
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
     const petStatus = followerUnlocked() ? `Pet「${C.MONSTERS[currentPetId]?.kanji || '?'}」` : 'Chưa có Pet';
@@ -3417,19 +3440,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   const PANEL_H = (C.UI && C.UI.panelH) || 200;
   function quizPanelLayout(W, H) {
     const narrow = W < 520;
+    const shortLandscape = !narrow && H <= 520;
     const preferredH = narrow ? Math.round(H * .4) : Math.round(H * .31);
-    const panelH = narrow
+    const panelH = shortLandscape ? 180 : narrow
       ? Math.max(258, Math.min(292, preferredH))
       : Math.max(PANEL_H, Math.min(224, preferredH));
-    const h = Math.min(panelH, Math.max(184, H - (narrow ? 250 : 170)));
+    const h = shortLandscape ? panelH : Math.min(panelH, Math.max(184, H - (narrow ? 250 : 170)));
     const y = H - h;
-    const pad = narrow ? 12 : 22;
-    const answerGapX = narrow ? 8 : 20;
+    const pad = narrow ? 12 : shortLandscape ? 12 : 22;
+    const answerGapX = narrow ? 8 : shortLandscape ? 7 : 20;
     const answerGapY = narrow ? 9 : Math.max(8, (C.UI && C.UI.answerGapY) || 8);
-    const answerH = narrow ? Math.max(42, Math.min(50, Math.floor((h - 166) / 2))) : Math.max(36, (C.UI && C.UI.answerH) || 36);
-    const answerStartY = y + (narrow ? 116 : 98);
-    const answerW = (W - pad * 2 - answerGapX) / 2;
-    return { W, H, narrow, panelH: h, y, pad, answerGapX, answerGapY, answerH, answerStartY, answerW };
+    const answerH = narrow ? Math.max(42, Math.min(50, Math.floor((h - 166) / 2))) : shortLandscape ? 44 : Math.max(36, (C.UI && C.UI.answerH) || 36);
+    const answerStartY = y + (narrow ? 116 : shortLandscape ? 102 : 98);
+    const answerCols = shortLandscape ? 4 : 2;
+    const answerW = (W - pad * 2 - answerGapX * (answerCols - 1)) / answerCols;
+    return { W, H, narrow, shortLandscape, panelH: h, y, pad, answerCols, answerGapX, answerGapY, answerH, answerStartY, answerW };
   }
   function drawMonsterMeaningEffect(mon, centerX, baseY, width, alpha = 1) {
     if (!mon || !mon.effect || alpha <= 0) return;
@@ -3689,9 +3714,11 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     // thay vì ép sân thành một dải 16:9 khiến đầu nhân vật chui vào thanh thông tin.
     const stageH = W < 520 ? FIELD_H : Math.min(FIELD_H, stageW * 9 / 16);
     const stageX = (W - stageW) / 2, stageY = W < 520 ? 0 : Math.max(0, (FIELD_H - stageH) / 2);
-    const actorScale = Math.max(.48, Math.min(1, stageW / 900, stageH / 430));
+    const shallowLandscape = stageW >= 620 && stageH < 280;
+    const baseActorScale = Math.min(1, stageW / 900, stageH / 430);
+    const actorScale = shallowLandscape ? Math.max(.34, baseActorScale * .72) : Math.max(.48, baseActorScale);
     const plCX = stageX + stageW * .25, monCX = stageX + stageW * .75;
-    const baseY = stageY + stageH * .82;
+    const baseY = stageY + stageH * (shallowLandscape ? .96 : .82);
     const idle = Math.sin(performance.now() / 260) * 3 * actorScale;
     const petP = b.petAttackT > 0 ? 1 - b.petAttackT / (b.petAttackTotal || 460) : 0;
     const enemyP = b.enemyAttackT > 0 ? 1 - b.enemyAttackT / (b.enemyAttackTotal || 520) : 0;
@@ -3745,7 +3772,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     drawHpBar(enemyHudX, hudY, mobileHud ? `${m.name}「${m.kanji}」 Lv.${b.kanjiLevel}` : `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW, m);
     drawEnergyGauge(b, petHudX, hudY + 53, hpW);
     drawAttackGauge(b, enemyHudX, hudY + 53, hpW);
-    if (stageW >= 620) drawPetMastery(petKanji, petHudX, hudY + 87, hpW, true);
+    if (stageW >= 620 && stageH >= 300) drawPetMastery(petKanji, petHudX, hudY + 87, hpW, true);
 
     if (b.combo > 1) {
       cx.fillStyle = '#ffd54a'; cx.font = 'bold 18px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
@@ -4043,6 +4070,58 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
 
     const cardX = area.x + 28, cardY = bodyY + 48, cardW = area.w - 56, cardH = Math.max(190, bodyH - 70);
     drawAcademyCard(cardX, cardY, cardW, cardH, true);
+    const portraitCard = cardW < 250;
+    const navH = (lecture.uiScale || 1) < 1 ? 64 : 44;
+    const navY = cardY + cardH - navH - 8, navW = compact ? 76 : 94;
+    const drawCardNavigation = () => {
+      if (index > 0) {
+        drawAcademyCard(cardX + 8, navY, navW, navH, false); cx.fillStyle = '#9fd8f5'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
+        cx.fillText('◀ TRƯỚC', cardX + 17, navY + navH / 2 + 4); lecture.hitboxes.push({ x: cardX + 8, y: navY, w: navW, h: navH, action: 'card_prev' });
+      }
+      // Không cho bỏ qua retrieval face: thẻ hiện tại phải được lật trước
+      // khi nút Next xuất hiện.
+      if (revealed && index < total - 1) {
+        const x = cardX + cardW - navW - 8; drawAcademyCard(x, navY, navW, navH, false); cx.fillStyle = '#9fd8f5'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
+        cx.fillText('SAU ▶', x + 21, navY + navH / 2 + 4); lecture.hitboxes.push({ x, y: navY, w: navW, h: navH, action: 'card_next' });
+      }
+    };
+
+    // Portrait phones need a vertical flash-card. A desktop-style sidebar
+    // leaves barely 120px for vocabulary and truncates both the meaning and
+    // furigana, despite having plenty of vertical room.
+    if (portraitCard) {
+      const summaryH = 126, contentX = cardX + 14, contentW = cardW - 28, summaryRightX = cardX + 106;
+      cx.fillStyle = '#ffd54a'; cx.font = `bold 62px ${JPFONT}`; cx.textAlign = 'center';
+      cx.fillText(lecture.info.char, cardX + 55, cardY + 82); cx.textAlign = 'left';
+      cx.fillStyle = '#fff'; fitText(lecture.info.meaning, summaryRightX, cardY + 37, cardW - 120, 16, true);
+      if (revealed) {
+        cx.fillStyle = '#9fd8f5'; cx.font = `10px ${JPFONT}`;
+        fitText(`ON  ${(lecture.info.on || []).join(' · ') || '—'}`, summaryRightX, cardY + 68, cardW - 120, 10, true);
+        cx.fillStyle = '#8debb3'; fitText(`KUN ${(lecture.info.kun || []).join(' · ') || '—'}`, summaryRightX, cardY + 92, cardW - 120, 10, true);
+      } else {
+        cx.fillStyle = '#7183a4'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
+        cx.fillText('ON / KUN', summaryRightX, cardY + 69); cx.fillText('LẬT ĐỂ XEM', summaryRightX, cardY + 91);
+      }
+      cx.strokeStyle = '#2a527e'; cx.beginPath(); cx.moveTo(cardX + 12, cardY + summaryH); cx.lineTo(cardX + cardW - 12, cardY + summaryH); cx.stroke();
+
+      if (!revealed) {
+        cx.fillStyle = '#9fd8f5'; fitText('NHÌN CỤM TỪ', contentX, cardY + 153, contentW, 11, true);
+        drawVocabularyWordFace(question, lecture.char, contentX, cardY + 211, contentW, 39);
+        cx.fillStyle = '#fff'; fitText(question.mean, contentX, cardY + 247, contentW, 18, true);
+        cx.fillStyle = '#a9bad8'; cx.font = `12px ${JPFONT}`;
+        wrap('Tự nhớ cách đọc của cả cụm, sau đó lật thẻ để kiểm tra furigana và liên kết từng chữ.', contentX, cardY + 278, contentW, 19);
+        lecture.hitboxes.push({ x: contentX, y: cardY + summaryH, w: contentW, h: navY - cardY - summaryH, action: 'card_reveal' });
+      } else {
+        cx.fillStyle = recap ? '#ffcb70' : '#6effa1'; cx.font = 'bold 11px "KanjiGo UI",sans-serif';
+        fitText(recap ? 'RECAP · THẺ YẾU' : 'FURIGANA + CẢ CỤM', contentX, cardY + 151, contentW, 11, true);
+        drawBridgeVocabulary(question, lecture.char, contentX, cardY + 164, contentW, true);
+        cx.fillStyle = '#a9bad8'; cx.font = `11px ${JPFONT}`;
+        wrap(recap ? 'Đọc thành tiếng một lần, chú ý chữ vàng, rồi xác nhận bằng câu hỏi ngắn.' : 'Đọc từng phần từ trái sang phải, sau đó nối lại thành cả cụm.', contentX, cardY + 271, contentW, 18);
+      }
+      drawCardNavigation();
+      return;
+    }
+
     const leftW = compact ? Math.min(118, cardW * .31) : Math.min(190, cardW * .28);
     cx.fillStyle = '#ffd54a'; cx.font = `bold ${compact ? 64 : 92}px ${JPFONT}`; cx.textAlign = 'center';
     cx.fillText(lecture.info.char, cardX + leftW / 2 + 8, cardY + (compact ? 88 : 118)); cx.textAlign = 'left';
@@ -4082,18 +4161,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       wrap(recap ? 'Đọc thành tiếng một lần, chú ý chữ vàng, rồi xác nhận lại bằng câu hỏi ngắn.' : 'Mẹo: đọc từng phần từ trái sang phải, sau đó nối lại thành cả cụm.', contentX, cardY + Math.min(cardH - 35, 148), contentW, compact ? 17 : 20);
     }
 
-    const navH = (lecture.uiScale || 1) < 1 ? 64 : 44;
-    const navY = cardY + cardH - navH - 8, navW = compact ? 76 : 94;
-    if (index > 0) {
-      drawAcademyCard(cardX + 8, navY, navW, navH, false); cx.fillStyle = '#9fd8f5'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
-      cx.fillText('◀ TRƯỚC', cardX + 17, navY + navH / 2 + 4); lecture.hitboxes.push({ x: cardX + 8, y: navY, w: navW, h: navH, action: 'card_prev' });
-    }
-    // Không cho bỏ qua retrieval face: thẻ hiện tại phải được lật trước khi
-    // nút Next xuất hiện. Điều này cũng loại bỏ overlap với hitbox lật thẻ.
-    if (revealed && index < total - 1) {
-      const x = cardX + cardW - navW - 8; drawAcademyCard(x, navY, navW, navH, false); cx.fillStyle = '#9fd8f5'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
-      cx.fillText('SAU ▶', x + 21, navY + navH / 2 + 4); lecture.hitboxes.push({ x, y: navY, w: navW, h: navH, action: 'card_next' });
-    }
+    drawCardNavigation();
   }
   function vocabularyParts(q, target) {
     if (Array.isArray(q.parts) && q.parts.length) return q.parts;
@@ -4389,14 +4457,16 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = '#ffd54a'; cx.font = `15px ${JPFONT}`;
     fitText(presentation.support, x + P, y + (narrow ? 103 : 82), W - P * 2, narrow ? 13 : 15);
 
-    // ── VÙNG 2: 4 ĐÁP ÁN (2×2) — giãn cách rộng, mờ đi khi bị khoá ──
+    // Portrait/desktop dùng 2×2. Mobile landscape dùng một hàng bốn nút để
+    // trả lại chiều cao cho battlefield mà vẫn giữ target chạm cao 44px.
     const ans = q.options;
     const bh = layout.answerH;
     const gY = layout.answerGapY;
     const bx = x + P, bw = layout.answerW;
     const startY = layout.answerStartY;
+    const cols = layout.answerCols || 2;
     for (let i = 0; i < ans.length; i++) {
-      const col = i % 2, row = (i / 2) | 0;
+      const col = i % cols, row = (i / cols) | 0;
       const ox = bx + col * (bw + layout.answerGapX), oy = startY + row * (bh + gY);
       cx.globalAlpha = disabled ? 0.4 : 1;
       const hinted = b.hint && i !== q.correctIndex && i === 0;

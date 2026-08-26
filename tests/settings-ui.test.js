@@ -131,3 +131,17 @@ test('index exposes a general Settings shell and keeps it above mobile Back', ()
   const overlayZ = Number(html.match(/#settings-overlay\{[^}]*z-index:(\d+)/)?.[1]);
   assert.ok(overlayZ > backZ, 'Settings modal must block mobile Back and every underlying game control');
 });
+
+test('mobile movement controls suppress long-press selection and browser callouts', () => {
+  const html = read('index.html');
+  const game = read('js/game.js');
+  const movementStyle = html.match(/#touch-controls button,#touch-actions button\{([^}]*)\}/)?.[1] || '';
+
+  assert.match(movementStyle, /touch-action:none/);
+  assert.match(movementStyle, /-webkit-user-select:none/);
+  assert.match(movementStyle, /user-select:none/);
+  assert.match(movementStyle, /-webkit-touch-callout:none/);
+  assert.match(movementStyle, /-webkit-tap-highlight-color:transparent/);
+  assert.equal((html.match(/data-key="arrow(?:up|down|left|right)"[^>]*draggable="false"/g) || []).length, 4);
+  assert.match(game, /\['contextmenu', 'selectstart', 'dragstart'\]\.forEach/);
+});
