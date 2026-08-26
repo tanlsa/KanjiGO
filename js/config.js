@@ -20,6 +20,8 @@ window.CONFIG = {
     academy: 'assets/world/academy-grand.png',
     tulipTiles: 'assets/world/tulip-tiles.png',
     arenaWallTiles: 'assets/world/arena-wall-tiles.png',
+    battleForest: 'assets/backgrounds/battle-forest.png',
+    battleStand: 'assets/backgrounds/battle-stand.png',
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,

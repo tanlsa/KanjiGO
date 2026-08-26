@@ -3232,8 +3232,10 @@
     const stageH = W < 520 ? FIELD_H : Math.min(FIELD_H, stageW * 9 / 16);
     const stageX = (W - stageW) / 2, stageY = W < 520 ? 0 : Math.max(0, (FIELD_H - stageH) / 2);
     const actorScale = Math.max(.48, Math.min(1, stageW / 900, stageH / 430));
-    const plCX = stageX + stageW * .25, monCX = stageX + stageW * .75;
-    const baseY = stageY + stageH * .82;
+    // Character anchors are independent from the background artwork.
+    const plCX = stageX + stageW * .18, monCX = stageX + stageW * .82;
+    const plBaseY = Math.min(FIELD_H - 10, stageY + stageH * .9 + 25);
+    const monBaseY = stageY + stageH * .90;
     const idle = Math.sin(performance.now() / 260) * 3 * actorScale;
     const petP = b.petAttackT > 0 ? 1 - b.petAttackT / (b.petAttackTotal || 460) : 0;
     const enemyP = b.enemyAttackT > 0 ? 1 - b.enemyAttackT / (b.enemyAttackTotal || 520) : 0;
@@ -3242,41 +3244,46 @@
     const enemyRecoil = b.enemyHitT > 0 ? Math.sin(b.enemyHitT / 16) * 9 * actorScale : 0;
     const petRecoil = b.playerHitT > 0 ? -Math.abs(Math.sin(b.playerHitT / 20)) * 18 * actorScale : 0;
 
+    if (b.kind !== 'water') {
+      drawBattleStand(plCX, plBaseY, 210 * actorScale, 1);
+      // drawBattleStand(monCX, monBaseY, 170 * actorScale, .82);
+    }
+
     // Mini PvE chỉ hiển thị pet chiến đấu; player không xuất hiện trong sân đấu.
     const petW = 150 * actorScale;
-    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, baseY + 3, 78 * actorScale, 19 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, plBaseY + 3, 78 * actorScale, 19 * actorScale, 0, 0, Math.PI * 2); cx.fill();
     const petImg = monsterImg(currentPetId);
     if (petImg) {
       const ph = petW * petImg.height / petImg.width, petX = plCX + petLunge + petRecoil;
-      cx.drawImage(petImg, petX - petW / 2, baseY - ph + idle, petW, ph);
-      drawMonsterMeaningEffect(C.MONSTERS[currentPetId], petX, baseY + idle, petW);
+      cx.drawImage(petImg, petX - petW / 2, plBaseY - ph + idle, petW, ph);
+      drawMonsterMeaningEffect(C.MONSTERS[currentPetId], petX, plBaseY + idle, petW);
     }
 
-    // Enemy cùng baseline để hai phía thực sự lao vào nhau.
+    // Wild Kanjimon are 1.25x normal size and sit low enough to clear the HUD.
     const m = b.mon, img = monsterImg(b.monId);
-    const enemyW = Math.min(240, m.drawW * 1.12) * actorScale;
+    const enemyW = Math.min(240, m.drawW * 1.12) * actorScale * 1;
     const enemyH = enemyW * (m.drawH / m.drawW);
     const enemyX = monCX - enemyLunge + enemyRecoil;
-    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(monCX, baseY + 3, enemyW * .46, 20 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = 'rgba(0,0,0,.2)'; cx.beginPath(); cx.ellipse(monCX, monBaseY + 3, enemyW * .46, 15 * actorScale, 0, 0, Math.PI * 2); cx.fill();
     if (img) {
       cx.save();
       if (b.enemyHitT > 0) cx.filter = `brightness(${1.5 + 1.5 * Math.abs(Math.sin(b.enemyHitT / 25))}) saturate(.35)`;
       else if (b.botFlash > 0) cx.filter = `brightness(${1.1 + .35 * Math.abs(Math.sin(Date.now() / 50))})`;
-      cx.drawImage(img, enemyX - enemyW / 2, baseY - enemyH - idle, enemyW, enemyH);
+      cx.drawImage(img, enemyX - enemyW / 2, monBaseY - enemyH - idle, enemyW, enemyH);
       cx.restore();
     } else {
       // Enemy sprites are lazy-loaded. Keep the battle frame and quiz usable
       // while decode is pending instead of throwing drawImage(null), which
       // would abort render before the HUD/panel and stop requestAnimationFrame.
       const placeholderSize = Math.max(54, enemyW * .52);
-      cx.fillStyle = 'rgba(11,16,48,.78)'; cx.beginPath(); cx.arc(enemyX, baseY - enemyH * .46, placeholderSize * .58, 0, Math.PI * 2); cx.fill();
+      cx.fillStyle = 'rgba(11,16,48,.78)'; cx.beginPath(); cx.arc(enemyX, monBaseY - enemyH * .46, placeholderSize * .58, 0, Math.PI * 2); cx.fill();
       cx.strokeStyle = '#6cc0ff'; cx.lineWidth = 3; cx.stroke();
       cx.fillStyle = '#ffd54a'; cx.font = `bold ${placeholderSize}px ${JPFONT}`; cx.textAlign = 'center';
-      cx.fillText(m.kanji || '？', enemyX, baseY - enemyH * .46 + placeholderSize * .34); cx.textAlign = 'left';
+      cx.fillText(m.kanji || '？', enemyX, monBaseY - enemyH * .46 + placeholderSize * .34); cx.textAlign = 'left';
     }
-    drawMonsterMeaningEffect(m, enemyX, baseY - idle, enemyW);
+    drawMonsterMeaningEffect(m, enemyX, monBaseY - idle, enemyW);
 
-    drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, baseY });
+    drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, plBaseY, monBaseY, actorScale });
 
     // HUD đối xứng ở hai góc trên của sân đấu.
     const hpW = Math.max(140, Math.min(320, (stageW - 54) / 2));
@@ -3330,9 +3337,10 @@
     }
     cx.globalAlpha = 1;
     for (const n of b.damageNumbers || []) {
-      const life = 1 - n.t / n.total, x = n.side === 'enemy' ? s.monCX : s.plCX;
+      const enemySide = n.side === 'enemy', life = 1 - n.t / n.total, x = enemySide ? s.monCX : s.plCX;
+      const baseY = enemySide ? s.monBaseY : s.plBaseY;
       cx.globalAlpha = Math.min(1, n.t / 180); cx.fillStyle = n.color; cx.textAlign = 'center';
-      cx.font = 'bold 25px "KanjiGo UI",sans-serif'; cx.fillText(n.text, x, s.baseY - 170 - life * 50);
+      cx.font = 'bold 25px "KanjiGo UI",sans-serif'; cx.fillText(n.text, x, baseY - 150 * s.actorScale - life * 50);
     }
     cx.globalAlpha = 1; cx.textAlign = 'left';
     if (b.skillT > 0) {
@@ -3965,6 +3973,20 @@
     }
     cx.fillStyle = '#8aa'; cx.font = `${narrow ? 10 : 12}px "KanjiGo UI",sans-serif`; cx.textAlign = 'right'; cx.fillText(narrow ? '← Chạy' : 'Esc: bỏ chạy', W - P, statusY); cx.textAlign = 'left';
   }
+  function drawBattleStand(x, baseY, width, depth = 1) {
+    const stand = imgs.battle_stand;
+    if (!stand) return;
+    const imageW = stand.naturalWidth || stand.width, imageH = stand.naturalHeight || stand.height;
+    const sourceX = imageW * .07, sourceY = imageH * .3;
+    const sourceW = imageW * .86, sourceH = imageH * .38;
+    const height = width * (sourceH / sourceW) * depth;
+    const drawY = baseY - height * .4;
+    cx.save();
+    cx.beginPath(); cx.ellipse(x, drawY + height * .5, width * .5, height * .5, 0, 0, Math.PI * 2); cx.clip();
+    cx.globalCompositeOperation = 'multiply'; cx.imageSmoothingEnabled = false;
+    cx.drawImage(stand, sourceX, sourceY, sourceW, sourceH, x - width * .5, drawY, width, height);
+    cx.restore();
+  }
   function drawBattleBackground(kind, W, fieldH) {
     if (kind === 'water') {
       const g = cx.createLinearGradient(0, 0, 0, fieldH); g.addColorStop(0, '#1e6f8f'); g.addColorStop(.6, '#0e4763'); g.addColorStop(1, '#07293a');
@@ -3972,11 +3994,20 @@
       cx.strokeStyle = 'rgba(160,220,240,.22)'; cx.lineWidth = 2;
       for (let yy = 46; yy < fieldH; yy += 40) { cx.beginPath(); for (let xx = 0; xx <= W; xx += 16) { const y = yy + Math.sin((xx + yy) / 24) * 4; xx === 0 ? cx.moveTo(xx, y) : cx.lineTo(xx, y); } cx.stroke(); }
     } else {
-      const sky = cx.createLinearGradient(0, 0, 0, fieldH * .62); sky.addColorStop(0, '#a7e08a'); sky.addColorStop(1, '#cdeeae');
-      cx.fillStyle = sky; cx.fillRect(0, 0, W, fieldH * .62);
-      const gr = cx.createLinearGradient(0, fieldH * .62, 0, fieldH); gr.addColorStop(0, '#6ab04c'); gr.addColorStop(1, '#3f7d32');
-      cx.fillStyle = gr; cx.fillRect(0, fieldH * .62, W, fieldH * .38);
-      cx.fillStyle = 'rgba(255,255,255,.15)'; cx.fillRect(0, fieldH * .62 - 2, W, 3);
+      const bg = imgs.battle_forest;
+      if (!bg) { cx.fillStyle = '#55a83e'; cx.fillRect(0, 0, W, fieldH); return; }
+      const imageW = bg.naturalWidth || bg.width, imageH = bg.naturalHeight || bg.height;
+      // Preserve the source ratio, then bias the crop downward so ultrawide
+      // battlefields retain a useful strip of meadow beneath the forest line.
+      const scale = Math.max(W / imageW, fieldH / imageH);
+      const sourceW = W / scale, sourceH = fieldH / scale;
+      const sourceX = (imageW - sourceW) / 2;
+      const sourceY = Math.min(imageH - sourceH, imageH * .15);
+      cx.save();
+      // Keep the same crisp sampling used by Kanjimon sprites and the stand art.
+      cx.imageSmoothingEnabled = false;
+      cx.drawImage(bg, sourceX, sourceY, sourceW, sourceH, 0, 0, W, fieldH);
+      cx.restore();
     }
   }
   function drawHpBar(x, y, name, hp, max, col, w = 260, monster = null) {
@@ -4217,7 +4248,7 @@
   }
 
   // ---------- KHỞI ĐỘNG ----------
-  const toLoad = [loadImg('player', C.ASSETS.player), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles)];
+  const toLoad = [loadImg('player', C.ASSETS.player), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
