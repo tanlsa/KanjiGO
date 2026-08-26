@@ -105,6 +105,37 @@
     ARENA: arena,
     DECORATIONS: decorations,
     SIGNS: [{ gx: 31, gy: 9, label: 'WILDERNESS', color: '#4b9b65' }],
+    // NPC onboarding được engine đặt ở đúng chặng đang học. Các điểm đứng đều
+    // nằm cạnh trục chính để người mới không bị kẹt trong collision map.
+    ONBOARDING_GUIDE: {
+      id: 'aoi', name: 'Aoi',
+      stops: [
+        {
+          id: 'academy', gx: 8, gy: 9, facing: 'left', label: 'Giảng đường Kanji', action: 'academy',
+          objective: 'Theo cô Aoi tới Giảng đường để học chữ đầu tiên',
+          lines: [
+            'Mình là Aoi, hướng dẫn viên của bạn. Đây là Giảng đường Kanji — nơi mở khóa và nạp kiến thức cho chữ mới.',
+            'Mình sẽ mở Learning Card của chữ bạn vừa chọn. Hãy học, vượt mini-check và thu phục chữ đó; sau đó mình mới dẫn bạn đi tiếp nhé!',
+          ],
+        },
+        {
+          id: 'wilderness', gx: 31, gy: 10, facing: 'right', label: 'Wilderness', action: 'continue',
+          objective: 'Theo cô Aoi sang Wilderness để xem khu luyện tập',
+          lines: [
+            'Đây là Wilderness. Bụi cỏ dùng để gặp lại Kanji đã mở khóa; hồ nước dành cho câu cá và những chữ liên quan tới nước.',
+            'Chiến đấu ở đây giúp bạn ôn từ vựng, tăng Recall và nâng level cho mascot — không thay thế việc học chữ mới ở Giảng đường.',
+          ],
+        },
+        {
+          id: 'arena', gx: 20, gy: 16, facing: 'down', label: 'Trainer Arena', action: 'complete',
+          objective: 'Theo cô Aoi tới cổng Trainer Arena',
+          lines: [
+            'Phía dưới là Trainer Arena. Mỗi Trainer kiểm tra một chủ đề; hãy thu phục đủ Kanji trong đội hình của họ để mở trận đấu.',
+            'Khi hoàn thành toàn bộ N5 và vượt bài thi Boss, bạn sẽ nhận huy hiệu N5 để mở lộ trình N4. Tour nhập môn hoàn tất rồi!',
+          ],
+        },
+      ],
+    },
     NPCS: [
       {
         gx: 17, gy: 11,

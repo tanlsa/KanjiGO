@@ -9,6 +9,7 @@
   const TILES = window.MAP_DATA.TILES;
   const NPCS = window.MAP_DATA.NPCS;
   const ARENA = window.MAP_DATA.ARENA || null;
+  const ONBOARDING_GUIDE = window.MAP_DATA.ONBOARDING_GUIDE || null;
   const MAP_SIGNS = window.MAP_DATA.SIGNS || [];
   const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
   const KDB = window.KANJI_DB;
@@ -122,7 +123,7 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   }
 
   // ---------- TRẠNG THÁI ----------
-  let state = 'overworld';   // overworld | battle | dex | skills | lecture | capture | pve
+  let state = 'overworld';   // overworld | battle | dex | skills | profile | lecture | capture | pve
   const player = {
     gx: C.PLAYER.startGx, gy: C.PLAYER.startGy,
     px: C.PLAYER.startGx * TILE, py: C.PLAYER.startGy * TILE,
@@ -156,6 +157,7 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
 if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
         if (button.dataset.action === 'dex') { playSFX('UI_BUTTON_CLICK'); openDex(); }
         if (button.dataset.action === 'skills') { playSFX('UI_BUTTON_CLICK'); openSkillTree(); }
+        if (button.dataset.action === 'profile') { playSFX('UI_BUTTON_CLICK'); openProfile(); }
         if (button.dataset.action === 'bicycle') { playSFX('UI_BUTTON_CLICK'); toggleBicycle(); }
         if (button.dataset.action === 'auto-ride') { playSFX('UI_BUTTON_CLICK'); toggleAutoRide(); }
       });
@@ -169,15 +171,23 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   bindTouchControls();
 
   // ---------- 📚 TIẾN ĐỘ HỌC ----------
-  const LEARNING_KEY = 'KANJIGO_LEARNING_V1';
+  const characterStorageKey = (baseKey) => window.KanjiGOCharacters?.storageKey?.(baseKey) || baseKey;
+  const LEARNING_KEY = characterStorageKey('KANJIGO_LEARNING_V1');
   const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, vocabulary: {}, captureAttempts: {}, academyDraft: null, badges: {}, trainerWins: {}, progression: null };
   const legacyMasteryKeys = new Set();
   const legacyPetProgress = {};
-  const GAME_KEY = 'KANJIGO_GAME_V1';
+  const GAME_KEY = characterStorageKey('KANJIGO_GAME_V1');
   let stamina = C.CAPTURE.stamina;
   let pveResult = null;
   let loadedLearningSave = false;
   let progressionNotice = null;
+
+  function activeCharacterProfile() { return window.KanjiGOCharacters?.active?.() || null; }
+  function isSandboxCharacter() { return activeCharacterProfile()?.sandbox === true; }
+  function shouldSeedLegacyStarter() {
+    const profile = activeCharacterProfile();
+    return !profile || profile.sandbox === true || profile.onboardingComplete === true;
+  }
 
   function kanjiInfo(char) {
     return KANJI_BY_CHAR.get(char) || null;
@@ -202,7 +212,8 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     const id = String(tier || 'BONUS').toUpperCase();
     if (id === 'BONUS') return true;
     const testUnlockedTiers = (C.PROGRESSION && C.PROGRESSION.testUnlockedTiers) || [];
-    if (testUnlockedTiers.map((value) => String(value).toUpperCase()).includes(id)) return true;
+    if ((isSandboxCharacter() || C.PROGRESSION?.allowStandardQa === true)
+      && testUnlockedTiers.map((value) => String(value).toUpperCase()).includes(id)) return true;
     const definition = (CATALOG.tiers || {})[id];
     return !definition || !definition.requiresBadge || hasBadge(definition.requiresBadge);
   }
@@ -324,7 +335,11 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   }
   const SKILL_DEFINITION_ERRORS = validateSkillDefinitions();
   if (SKILL_DEFINITION_ERRORS.length) console.error('[KanjiGO] Skill Tree config không hợp lệ:', SKILL_DEFINITION_ERRORS);
-  function hasSkill(id) { return !!learning.progression.skillPurchases[id]; }
+  function hasSkill(id) {
+    const definition = SKILL_BY_ID.get(id);
+    if (isSandboxCharacter() && definition && definition.released !== false) return true;
+    return !!learning.progression.skillPurchases[id];
+  }
   const SKILL_EFFECT_HANDLERS = {
     attackGaugeMultiplier: (resolved, effect) => {
       resolved.attackGaugeMultiplier = Math.max(.85, resolved.attackGaugeMultiplier * Math.max(.5, Math.min(1, Number(effect.value) || 1)));
@@ -352,7 +367,10 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       reviewWeightMultiplier: 1, reviewWeightCap: 1, radarMode: 'off', bicycleAccess: false,
       bicycleSpeedMultiplier: 1, autoRideAccess: false, compoundEncounterMultiplier: 1,
     };
-    for (const [id] of Object.entries(learning.progression.skillPurchases)) {
+    const activeSkillIds = isSandboxCharacter()
+      ? SKILL_DEFINITIONS.filter((definition) => definition && definition.released !== false).map((definition) => definition.id)
+      : Object.keys(learning.progression.skillPurchases);
+    for (const id of activeSkillIds) {
       const definition = SKILL_BY_ID.get(id);
       if (!definition || definition.released === false || !definition.effect) continue;
       const handler = SKILL_EFFECT_HANDLERS[definition.effect.id];
@@ -432,9 +450,10 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   }
   function newMastery(char) {
     const starter = C.MONSTERS[C.PET.monId] && C.MONSTERS[C.PET.monId].kanji;
+    const starterUnlocked = shouldSeedLegacyStarter() && char === starter;
     return { correct: 0, wrong: 0, box: 0, nextReview: 0,
       mp: 0, level: 1, recall: 100, winStreak: 0, lossStreak: 0, bestWinStreak: 0,
-      captured: char === starter, lectured: char === starter };
+      captured: starterUnlocked, lectured: starterUnlocked };
   }
   function ensureMastery(char) {
     const key = resolveKanji(char), current = learning.mastery[key];
@@ -815,6 +834,10 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   let radarTarget = 'balanced';
   // petData[monId] = {evolveStage}. Có mặt = đã thu thập; level/MP nằm ở mastery[kanji].
   const petData = {};
+  function followerUnlocked() {
+    const profile = activeCharacterProfile();
+    return (!profile || profile.onboardingComplete === true) && !!petData[currentPetId] && !!C.MONSTERS[currentPetId];
+  }
   function saveGame() {
     try { localStorage.setItem(GAME_KEY, JSON.stringify({ petData, currentPetId, stamina, bicycleActive, autoRideActive, radarTarget })); } catch (e) { /* file:// có thể khóa storage */ }
   }
@@ -838,7 +861,13 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       }
     } catch (e) { /* fallback giữ state mặc định */ }
   }
-  petData[currentPetId] = { evolveStage: 0 };
+  window.KanjiGOCharacters?.setBeforeSwitch?.(() => {
+    if (state === 'battle' || state === 'capture' || state === 'pve') return false;
+    saveLearning(); saveGame(); return true;
+  });
+  // Save cũ và SANDBOX giữ mascot mặc định. Một nhân vật mới phải tự học và
+  // thu phục Kanji đầu tiên; tuyệt đối không seed pet trước onboarding.
+  if (shouldSeedLegacyStarter()) petData[currentPetId] = { evolveStage: 0 };
   loadGame();
   if (!bicycleAvailable()) bicycleActive = false;
   if (!autoRideAvailable()) autoRideActive = false;
@@ -858,8 +887,8 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     }
   }
   migrateLegacyPetProgress();
-  // Seed pet từ config cho cả profile mới và save cũ; chỉ nâng tới mức tối thiểu đã cấu hình.
-  for (const seed of C.INITIAL_PETS || []) {
+  // Pet/level thử nghiệm chỉ thuộc profile SANDBOX; hành trình mới bắt đầu sạch.
+  for (const seed of isSandboxCharacter() ? (C.INITIAL_PETS || []) : []) {
     const id = seed && seed.monId, info = C.MONSTERS[id];
     if (!info) continue;
     if (!petData[id]) petData[id] = { evolveStage: 0 };
@@ -874,7 +903,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   // currency giả, nhờ vậy toàn bộ luồng unlock vẫn được test đúng như gameplay.
   function applySkillTreeQaSeed() {
     const seed = C.SKILL_TREE && C.SKILL_TREE.qaSeed;
-    if (!seed || seed.enabled !== true) return 0;
+    if (!seed || seed.enabled !== true || (!isSandboxCharacter() && seed.allowStandardQa !== true)) return 0;
     const targetCount = Math.max(0, Math.floor(Number(seed.capturedKanji) || 0));
     const targetLevel = Math.max(1, Math.min(C.KLEVEL.maxLevel, Math.floor(Number(seed.level) || 1)));
     const ordered = [], seen = new Set();
@@ -897,8 +926,6 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   for (const id of Object.keys(petData)) {
     if (C.MONSTERS[id]) ensureMastery(C.MONSTERS[id].kanji).captured = true;
   }
-  // Starter luôn mở để người chơi có thể vào bụi cỏ và hồi thể lực.
-  ensureMastery(C.MONSTERS[currentPetId].kanji).captured = true;
   evaluateAllKpMilestones({ migrated: loadedLearningSave, toast: loadedLearningSave, save: false });
   saveLearning(); saveGame();
   const petLevel = () => ensureMastery(C.MONSTERS[currentPetId].kanji).level;
@@ -906,6 +933,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
 
   // ---------- INPUT ----------
   addEventListener('keydown', (e) => {
+    if (window.KanjiGOCharacters?.isOnboardingBlocking?.()) return;
     const k = e.key.toLowerCase();
     keys[k] = true;
     if ([' ', 'enter', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
@@ -918,12 +946,14 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
 if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
       if (k === 'd') { playSFX('UI_BUTTON_CLICK'); openDex(); }
       if (k === 'k') openSkillTree();
+      if (k === 'i') { playSFX('UI_BUTTON_CLICK'); openProfile(); }
       if (k === 'r') cycleRadarTarget();
       if (k === 'b') toggleBicycle();
       if (k === 'p') toggleAutoRide();
     } else if (state === 'battle') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onBattleKey(k); }
     else if (state === 'dex') { if (['escape', 'd', 'enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) playSFX('UI_BUTTON_CLICK'); onDexKey(k); }
     else if (state === 'skills') onSkillKey(k);
+    else if (state === 'profile') { if (k === 'escape' || k === 'i') playSFX('UI_BUTTON_CLICK'); onProfileKey(k); }
     else if (state === 'lecture') { if (['escape', 'enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) playSFX('UI_BUTTON_CLICK'); onLectureKey(k); }
     else if (state === 'capture') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onCaptureKey(k); }
     else if (state === 'pve') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onPveKey(k); }
@@ -936,6 +966,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     }
     else if (state === 'dex') onDexKey('escape');
     else if (state === 'skills') onSkillKey('escape');
+    else if (state === 'profile') onProfileKey('escape');
     else if (state === 'lecture') onLectureKey('escape');
     else if (state === 'capture') onCaptureKey(capture && capture.phase === 'end' ? 'enter' : 'escape');
     else if (state === 'pve') onPveKey(pve && pve.phase === 'end' ? 'enter' : 'escape');
@@ -951,6 +982,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     const { x, y } = clientToLogical(e.clientX, e.clientY);
     if (state === 'dex') { e.preventDefault(); onDexPointerDown(x, y, e.pointerId); return; }
     if (state === 'skills') { e.preventDefault(); onSkillPointerDown(x, y, e.pointerId); return; }
+    if (state === 'profile') { e.preventDefault(); onProfilePointerDown(x, y); return; }
     if (state === 'lecture') { onLecturePointerDown(x, y, e.pointerId); return; }
     if (state === 'overworld') {
       const hit = overworldHitboxes.find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
@@ -1070,6 +1102,75 @@ if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw &&
   // di chuyển phải: chỉ mũi tên phải (vì D mở Dex). Thêm hàm riêng cho rõ:
   function pressedRight() { return keys['arrowright']; }
   function showToast(text) { toast = { text, t: 1500 }; }
+  function onboardingTour() {
+    const profile = activeCharacterProfile(), stops = ONBOARDING_GUIDE && ONBOARDING_GUIDE.stops;
+    if (!profile || profile.onboardingComplete || !profile.onboardingIntroComplete || !Array.isArray(stops) || !stops.length) return null;
+    const index = Math.max(0, Math.min(stops.length - 1, Math.floor(Number(profile.onboardingTourStep)) || 0));
+    return { profile, index, stop: stops[index], total: stops.length, name: ONBOARDING_GUIDE.name || 'Aoi' };
+  }
+  function onboardingGuideInReach() {
+    const tour = onboardingTour();
+    if (!tour) return null;
+    const distance = Math.abs(player.gx - tour.stop.gx) + Math.abs(player.gy - tour.stop.gy);
+    return distance <= 1 ? tour : null;
+  }
+  function onboardingGuideDirection(tour = onboardingTour()) {
+    if (!tour) return '';
+    const dx = tour.stop.gx - player.gx, dy = tour.stop.gy - player.gy, parts = [];
+    if (dy < 0) parts.push(`↑${Math.abs(dy)}`); else if (dy > 0) parts.push(`↓${dy}`);
+    if (dx < 0) parts.push(`←${Math.abs(dx)}`); else if (dx > 0) parts.push(`→${dx}`);
+    return parts.join(' ');
+  }
+  function finishOnboardingGuideStop(tour) {
+    const latest = onboardingTour();
+    if (!latest || latest.index !== tour.index) return;
+    const nextIndex = tour.index + 1;
+    if (tour.stop.action === 'complete' || nextIndex >= tour.total) {
+      const starter = resolveKanji(tour.profile.starterKanji || '一'), info = kanjiInfo(starter);
+      if (!info || !ensureMastery(starter).captured) {
+        window.KanjiGOCharacters?.setOnboardingTourStep?.(0);
+        showToast('🔒 Hãy học và thu phục Kanji đầu tiên tại Giảng đường trước.');
+        return;
+      }
+      currentPetId = info.monId;
+      collect(info.monId); resetPetTrail();
+      window.KanjiGOCharacters?.completeOnboarding?.();
+      saveGame();
+      showToast(`🎓 Hoàn tất tour! ${C.MONSTERS[currentPetId].name} chính thức đi cùng bạn.`);
+      return;
+    }
+    if (tour.stop.action === 'academy') {
+      const starter = resolveKanji(tour.profile.starterKanji || '一'), info = kanjiInfo(starter);
+      if (info && ensureMastery(starter).captured) {
+        currentPetId = info.monId; collect(info.monId); resetPetTrail();
+        window.KanjiGOCharacters?.setOnboardingTourStep?.(nextIndex);
+        const next = onboardingTour();
+        if (next) showToast(`Đã thu phục 「${starter}」! Theo cô ${next.name} tới ${next.stop.label} • ${onboardingGuideDirection(next)}`);
+        return;
+      }
+      if (!enterLecture(starter)) enterLecture();
+      return;
+    }
+    window.KanjiGOCharacters?.setOnboardingTourStep?.(nextIndex);
+    const next = onboardingTour();
+    if (next) showToast(`Theo cô ${next.name} tới ${next.stop.label} • ${onboardingGuideDirection(next)}`);
+  }
+  function interactOnboardingGuide() {
+    const tour = onboardingGuideInReach();
+    if (!tour || player.moving) return false;
+    if (isBicycleActive()) {
+      bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.frame = 0; saveGame();
+    }
+    dialog = {
+      active: true, idx: 0,
+      npc: { type: 'onboarding-guide', name: tour.name, lines: tour.stop.lines || [`Đây là ${tour.stop.label}.`] },
+      onClose: () => finishOnboardingGuideStop(tour),
+    };
+    return true;
+  }
+  window.KanjiGOCharacters?.setOnboardingFinished?.((slot) => {
+    showToast(`Cô Aoi đang chờ bạn tại Giảng đường • Kanji đầu tiên: 「${slot.starterKanji || '一'}」`);
+  });
 
   // ---------- OVERWORLD ----------
   const delta = (d) => ({ down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] }[d]);
@@ -1078,6 +1179,8 @@ if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw &&
     const t = tileAt(gx, gy);
     if (t < 0) return false;
     if (NPCS.some((n) => n.gx === gx && n.gy === gy)) return false;
+    const guide = onboardingTour();
+    if (guide && guide.stop.gx === gx && guide.stop.gy === gy) return false;
     if (player.onBoat) return t === K.WATER || t === K.BOAT;
     return !BLOCKED.has(t);
   }
@@ -1159,6 +1262,9 @@ if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw &&
   }
   function onStepComplete() {
     const t = tileAt(player.gx, player.gy);
+    // Onboarding là một tuyến bắt buộc. Trước khi tour kết thúc, người chơi
+    // không thể vô tình rơi vào encounter bên ngoài luồng học starter.
+    if (window.KanjiGOCharacters?.isOnboarding?.()) return;
     if (player.onBoat) {
       if (t === K.WATER) playSFX('WORLD_WATER_WADE');
       if (t === K.WATER) {
@@ -1178,7 +1284,17 @@ if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw &&
   function npcInFront() { const f = frontTile(); return NPCS.find((n) => n.gx === f.gx && n.gy === f.gy) || null; }
   function onSpace() {
     if (fishing) return;
-    if (dialog.active) { dialog.idx++; if (dialog.idx >= dialog.npc.lines.length) { dialog.active = false; dialog.npc = null; } return; }
+    if (dialog.active) {
+      dialog.idx++;
+      if (dialog.idx >= dialog.npc.lines.length) {
+        const onClose = dialog.onClose;
+        dialog = { active: false, idx: 0, npc: null };
+        if (typeof onClose === 'function') onClose();
+      }
+      return;
+    }
+    if (player.moving) return;
+    if (interactOnboardingGuide()) return;
     const npc = npcInFront();
     if (npc && isBicycleActive()) { bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.frame = 0; saveGame(); }
     if (npc && npc.type === 'lecture') { enterLecture(); return; }
@@ -1186,7 +1302,6 @@ if (x >= P + col * (bw + answerGapX) && x <= P + col * (bw + answerGapX) + bw &&
     if (npc && npc.type === 'trainer') { interactTrainer(npc.trainerId, npc); return; }
     if (npc && npc.type === 'gym') { startGym(npc.tier || 'N5'); return; }
     if (npc) { dialog.active = true; dialog.idx = 0; dialog.npc = npc; return; }
-    if (player.moving) return;
     const f = frontTile();
     const academyEntrance = !player.onBoat && academyEntranceInReach();
     if (isBicycleActive() && (academyEntrance || f.t === K.BOAT || f.t === K.WATER)) {
@@ -1932,8 +2047,15 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (passed) {
       s.captured = true;
       const kpResult = evaluateKanjiMilestones(capture.char, { save: false, toast: true });
-      collect(capture.info.monId); saveLearning(); saveGame();
-capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}`;
+      collect(capture.info.monId);
+      const tour = onboardingTour(), starter = tour && resolveKanji(tour.profile.starterKanji || '一');
+      const starterCaptured = tour && tour.stop.action === 'academy' && starter === resolveKanji(capture.char);
+      if (starterCaptured) {
+        currentPetId = capture.info.monId; resetPetTrail();
+        window.KanjiGOCharacters?.setOnboardingTourStep?.(tour.index + 1);
+      }
+      saveLearning(); saveGame();
+      capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}${starterCaptured ? '  •  Hoàn tất tour để mascot đi cùng!' : ''}`;
       playSFX('PROGRESSION_ACHIEVEMENT');
       if (learning.academyDraft && resolveKanji(learning.academyDraft.char) === capture.char) learning.academyDraft = null;
     } else {
@@ -1976,6 +2098,15 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
   let pve = null;
   const TRAINER_DEFINITIONS = ((C.TRAINER_ARENA && C.TRAINER_ARENA.trainers) || []);
   const TRAINER_BY_ID = new Map(TRAINER_DEFINITIONS.map((trainer) => [trainer.id, trainer]));
+  // 4x4 atlas order mirrors the semantic Trainer list. A single atlas keeps
+  // these map markers consistent across platforms and avoids expensive emoji
+  // font fallback during every overworld frame.
+  const TRAINER_THEME_ICON_INDEX = {
+    gardener: 0, parent: 1, student: 2, timekeeper: 3,
+    traveler: 4, chef: 5, conductor: 6, neighbor: 7,
+    explorer: 8, weather_kid: 9, doctor: 10, citizen: 11,
+    merchant: 12, librarian: 13, artist: 14, gym: 15,
+  };
   function trainerTeam(id) {
     const trainer = TRAINER_BY_ID.get(id); if (!trainer) return [];
     const order = new Map(trainer.kanji.map((char, index) => [char, index]));
@@ -2216,6 +2347,67 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       state = 'overworld';
     }
     ensureDexSelectionVisible();
+  }
+
+  // ---------- 👤 HỒ SƠ NHÂN VẬT ----------
+  let profileUi = { hitboxes: [], stats: null };
+  function openProfile() {
+    if (state !== 'overworld' || dialog.active || player.moving || fishing) return false;
+    profileUi.stats = profileStats(); profileUi.hitboxes = [];
+    state = 'profile';
+    return true;
+  }
+  function closeProfile() { state = 'overworld'; profileUi.hitboxes = []; return true; }
+  function onProfileKey(k) { if (k === 'escape' || k === 'i') closeProfile(); }
+  function onProfilePointerDown(x, y) {
+    const hit = profileUi.hitboxes.find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
+    if (hit && hit.action === 'close') { playSFX('UI_BUTTON_CLICK'); closeProfile(); }
+  }
+  function profileStats() {
+    const infos = [...KANJI_BY_CHAR.values()];
+    const captured = infos.map((info) => ({ info, stat: ensureMastery(info.char) })).filter((entry) => entry.stat.captured);
+    const totalLevels = captured.reduce((total, entry) => total + entry.stat.level, 0);
+    const levelsGained = captured.reduce((total, entry) => total + Math.max(0, entry.stat.level - 1), 0);
+    const maxedKanji = captured.filter((entry) => entry.stat.level >= C.KLEVEL.maxLevel).length;
+    const averageRecall = captured.length
+      ? Math.round(captured.reduce((total, entry) => total + entry.stat.recall, 0) / captured.length) : 0;
+    const vocabulary = Object.values(learning.vocabulary || {}).filter((entry) => entry && typeof entry === 'object');
+    const vocabularySeen = vocabulary.filter((entry) => Number(entry.seenAt) > 0).length;
+    const vocabularyMastered = vocabulary.filter((entry) => entry.stage === 'mastered' || Number(entry.masteredAt) > 0).length;
+    const attempts = Math.max(Number(learning.total) || 0, (Number(learning.correct) || 0) + (Number(learning.wrong) || 0));
+    const tiers = ((C.PROGRESSION && C.PROGRESSION.order) || []).map((tier) => {
+      const id = String(tier).toUpperCase(), gym = C.PROGRESSION && C.PROGRESSION.gym && C.PROGRESSION.gym[id];
+      const badgeId = String((gym && gym.badge) || id).toUpperCase();
+      return { ...tierProgress(id), id, badgeId, earned: hasBadge(badgeId), unlocked: isTierUnlocked(id), hasExam: !!gym };
+    });
+    return {
+      captured: captured.length, total: infos.length, totalLevels, levelsGained, maxedKanji, averageRecall,
+      dueReviews: captured.filter((entry) => isDue(entry.info.char)).length,
+      vocabularySeen, vocabularyMastered, vocabularyTotal: new Set(KDB.QUESTIONS.map((question) => vocabularyId(question))).size,
+      accuracy: attempts ? Math.round((Number(learning.correct) || 0) / attempts * 100) : 0,
+      correct: Number(learning.correct) || 0, attempts, bestStreak: Number(learning.best) || 0,
+      trainerWins: trainerWinsCount(), trainerTotal: TRAINER_DEFINITIONS.length,
+      skillsUnlocked: isSandboxCharacter()
+        ? SKILL_DEFINITIONS.filter((definition) => definition && definition.released !== false).length
+        : Object.keys((learning.progression && learning.progression.skillPurchases) || {}).length,
+      earnedKP: learning.progression ? learning.progression.earnedKP : 0, availableKP: availableKP(),
+      currentPet: followerUnlocked() ? C.MONSTERS[currentPetId] : null,
+      currentPetLevel: followerUnlocked() ? petLevel() : 0, tiers,
+    };
+  }
+  function playerDisplayName() { return window.KanjiGOCharacters?.active?.()?.name || C.PLAYER.name || 'Bạn'; }
+  function profileNextGoal(stats) {
+    const n5 = stats.tiers.find((tier) => tier.id === 'N5');
+    if (n5 && !n5.earned) {
+      if (n5.captured < n5.total) return `Mục tiêu tiếp theo: thu phục thêm ${n5.total - n5.captured} Kanji N5 để tiến gần Boss Gym.`;
+      const required = Math.min(stats.trainerTotal, Math.max(0, Number(C.TRAINER_ARENA && C.TRAINER_ARENA.requiredTrainerWins) || 0));
+      if (stats.trainerWins < required) return `Mục tiêu tiếp theo: thắng thêm ${required - stats.trainerWins} Trainer để mở Boss Gym N5.`;
+      return 'Boss Gym N5 đã sẵn sàng — vượt bài kiểm tra để nhận huy hiệu và mở N4!';
+    }
+    const n4 = stats.tiers.find((tier) => tier.id === 'N4');
+    if (n4 && n4.captured < n4.total) return `Huy hiệu N5 đã mở N4 — còn ${n4.total - n4.captured} Kanji trong hành trình hiện tại.`;
+    if (stats.dueReviews > 0) return `Có ${stats.dueReviews} Kanji tới hạn ôn — quay lại luyện để giữ Recall ổn định.`;
+    return 'Tiến độ rất tốt! Hãy tiếp tục nâng Kanji lên Lv.10 và làm chủ thêm từ vựng.';
   }
 
   // ---------- 🌳 SKILL TREE ----------
@@ -2510,6 +2702,157 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     drawSkillDetail(layout);
   }
 
+  function drawProfilePanel(x, y, w, h, accent = '#2f7fc0') {
+    cx.fillStyle = 'rgba(12,25,51,.94)'; cx.fillRect(x, y, w, h);
+    cx.strokeStyle = accent; cx.lineWidth = 2; cx.strokeRect(x, y, w, h);
+    cx.fillStyle = `${accent}33`; cx.fillRect(x + 2, y + 2, w - 4, 4);
+  }
+  function drawProfileMetric(entry, x, y, w, h) {
+    cx.fillStyle = 'rgba(20,43,78,.9)'; cx.fillRect(x, y, w, h);
+    cx.strokeStyle = `${entry.color}88`; cx.lineWidth = 1; cx.strokeRect(x, y, w, h);
+    cx.fillStyle = entry.color; cx.textAlign = 'center';
+    fitText(entry.value, x + w / 2, y + Math.max(24, h * .48), w - 12, Math.max(16, Math.min(25, h * .3)), true);
+    cx.fillStyle = '#b9cae4';
+    fitText(entry.label, x + w / 2, y + h - (entry.sub && h >= 64 ? 24 : 10), w - 10, Math.max(8, Math.min(11, h * .17)), true);
+    if (entry.sub && h >= 64) {
+      cx.fillStyle = '#7188a9'; fitText(entry.sub, x + w / 2, y + h - 8, w - 10, 9);
+    }
+    cx.textAlign = 'left';
+  }
+  function profileMetricEntries(stats) {
+    return [
+      { label: 'KANJI THU PHỤC', value: `${stats.captured}/${stats.total}`, color: '#6effa1' },
+      { label: 'CẤP ĐÃ NÂNG', value: `+${stats.levelsGained}`, sub: `Tổng cấp ${stats.totalLevels}`, color: '#ffd54a' },
+      { label: `KANJI LV.${C.KLEVEL.maxLevel}`, value: String(stats.maxedKanji), color: '#ffae62' },
+      { label: 'RECALL TRUNG BÌNH', value: `${stats.averageRecall}%`, sub: `${stats.dueReviews} tới hạn`, color: '#7ff7ff' },
+      { label: 'TỪ VỰNG ĐÃ GẶP', value: `${stats.vocabularySeen}/${stats.vocabularyTotal}`, color: '#d7b4ff' },
+      { label: 'TỪ VỰNG NHỚ VỮNG', value: String(stats.vocabularyMastered), color: '#ff9fd8' },
+      { label: 'ĐỘ CHÍNH XÁC', value: `${stats.accuracy}%`, sub: `${stats.correct}/${stats.attempts} đúng`, color: '#83ddff' },
+      { label: 'TRAINER ĐÃ THẮNG', value: `${stats.trainerWins}/${stats.trainerTotal}`, color: '#ff8b8b' },
+    ];
+  }
+  function drawProfileMetricGrid(stats, x, y, w, h, columns) {
+    const entries = profileMetricEntries(stats), gap = 7, rows = Math.ceil(entries.length / columns);
+    const cardW = (w - gap * (columns - 1)) / columns, cardH = (h - gap * (rows - 1)) / rows;
+    entries.forEach((entry, index) => {
+      const col = index % columns, row = Math.floor(index / columns);
+      drawProfileMetric(entry, x + col * (cardW + gap), y + row * (cardH + gap), cardW, cardH);
+    });
+  }
+  function drawProfileHero(stats, x, y, w, h, compact = false) {
+    drawProfilePanel(x, y, w, h, '#a65fd5');
+    cx.fillStyle = '#ffb5e8'; cx.textAlign = 'center'; cx.font = `bold ${compact ? 12 : 15}px "KanjiGo UI",sans-serif`;
+    cx.fillText('HỌC GIẢ KANJI', x + w / 2, y + 23);
+    const spriteSize = compact ? Math.min(56, h - 48) : Math.min(82, w * .38, h * .3);
+    const spriteY = compact ? y + 34 : y + 40;
+    if (imgs.player) cx.drawImage(imgs.player, 0, 0, TILE, TILE, x + 13, spriteY, spriteSize, spriteSize);
+    const petImage = followerUnlocked() ? monsterImg(currentPetId) : null;
+    if (petImage) {
+      const sourceW = petImage.naturalWidth || petImage.width || 1, sourceH = petImage.naturalHeight || petImage.height || sourceW;
+      const ratio = sourceH / sourceW, petW = spriteSize, petH = Math.min(spriteSize, spriteSize * ratio);
+      cx.drawImage(petImage, x + w - petW - 13, spriteY + spriteSize - petH, petW, petH);
+    }
+    if (compact) {
+      cx.fillStyle = '#fff'; fitText(playerDisplayName(), x + w / 2, y + 58, Math.max(60, w - spriteSize * 2 - 40), 17, true);
+      cx.fillStyle = '#9fd8f5'; fitText(stats.currentPet ? `Pet「${stats.currentPet.kanji}」Lv.${stats.currentPetLevel}` : 'Chưa có mascot đồng hành', x + w / 2, y + 80, Math.max(64, w - spriteSize * 2 - 26), 10, true);
+      cx.fillStyle = '#ffd54a'; fitText(`⭐ ${stats.availableKP} KP`, x + w / 2, y + 99, Math.max(64, w - spriteSize * 2 - 26), 11, true);
+    } else {
+      const infoY = spriteY + spriteSize + 25;
+      cx.fillStyle = '#fff'; fitText(playerDisplayName(), x + w / 2, infoY, w - 24, 22, true);
+      cx.fillStyle = '#9fd8f5'; fitText(stats.currentPet ? `Đồng hành: ${stats.currentPet.name}「${stats.currentPet.kanji}」` : 'Đồng hành: hoàn tất onboarding để mở', x + w / 2, infoY + 25, w - 24, 11, true);
+      const chipY = infoY + 43;
+      cx.fillStyle = 'rgba(255,213,74,.12)'; cx.fillRect(x + 14, chipY, w - 28, 34);
+      cx.strokeStyle = '#8d7228'; cx.strokeRect(x + 14, chipY, w - 28, 34);
+      cx.fillStyle = '#ffd54a'; fitText(`⭐ ${stats.availableKP} KP còn lại`, x + w / 2, chipY + 22, w - 42, 13, true);
+      cx.fillStyle = '#8094ba'; fitText(`${stats.skillsUnlocked} kỹ năng đã mở · Best combo ${stats.bestStreak}`, x + w / 2, chipY + 55, w - 24, 10);
+    }
+    cx.textAlign = 'left';
+  }
+  function drawProfileTierRows(stats, x, y, w, h) {
+    const tiers = stats.tiers.slice(0, 2), gap = 8, rowH = Math.max(28, (h - gap * Math.max(0, tiers.length - 1)) / Math.max(1, tiers.length));
+    tiers.forEach((tier, index) => {
+      const rowY = y + index * (rowH + gap), ratio = tier.total ? Math.max(0, Math.min(1, tier.captured / tier.total)) : 0;
+      cx.fillStyle = '#dce8ff'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.fillText(`JLPT ${tier.id}`, x, rowY + 12);
+      cx.fillStyle = tier.earned ? '#6effa1' : tier.unlocked ? '#9fd8f5' : '#71809b'; cx.textAlign = 'right';
+      cx.fillText(tier.earned ? 'HUY HIỆU ✓' : `${tier.captured}/${tier.total}`, x + w, rowY + 12); cx.textAlign = 'left';
+      const barY = rowY + 19;
+      cx.fillStyle = '#26344f'; cx.fillRect(x, barY, w, 7);
+      cx.fillStyle = tier.earned ? '#ffd54a' : tier.id === 'N4' ? '#b782eb' : '#4fd595'; cx.fillRect(x, barY, w * ratio, 7);
+    });
+  }
+  function drawProfileBadgeSlots(stats, x, y, w, h) {
+    const badges = stats.tiers.slice(0, 2), gap = 8, slotW = (w - gap * Math.max(0, badges.length - 1)) / Math.max(1, badges.length);
+    badges.forEach((badge, index) => {
+      const bx = x + index * (slotW + gap);
+      cx.fillStyle = badge.earned ? 'rgba(103,79,16,.72)' : 'rgba(22,34,57,.9)'; cx.fillRect(bx, y, slotW, h);
+      cx.strokeStyle = badge.earned ? '#ffd54a' : '#42516a'; cx.lineWidth = badge.earned ? 2 : 1; cx.strokeRect(bx, y, slotW, h);
+      const iconSize = Math.max(28, Math.min(56, h - 47, slotW * .42));
+      drawThemeAtlasIcon('gym', bx + (slotW - iconSize) / 2, y + 8, iconSize, badge.earned ? 1 : .24);
+      cx.fillStyle = badge.earned ? '#fff1a8' : '#7f8da5'; cx.textAlign = 'center';
+      fitText(`HUY HIỆU ${badge.badgeId}`, bx + slotW / 2, y + h - 24, slotW - 10, 11, true);
+      cx.fillStyle = badge.earned ? '#6effa1' : badge.hasExam ? '#9aa8bf' : '#65738c';
+      fitText(badge.earned ? 'ĐÃ NHẬN' : badge.hasExam ? 'CHƯA NHẬN' : 'SẮP RA MẮT', bx + slotW / 2, y + h - 8, slotW - 10, 9, true);
+      cx.textAlign = 'left';
+    });
+  }
+  function drawProfileHeader(W, compact) {
+    const pad = compact ? 12 : 22, closeW = compact ? 78 : 112, closeH = 32, closeX = W - pad - closeW, closeY = 12;
+    cx.fillStyle = '#fff'; fitText('HỒ SƠ NHÂN VẬT', pad, compact ? 34 : 38, Math.max(120, closeX - pad - 12), compact ? 21 : 29, true);
+    cx.fillStyle = '#263a5d'; cx.fillRect(closeX, closeY, closeW, closeH); cx.strokeStyle = '#5f82b2'; cx.strokeRect(closeX, closeY, closeW, closeH);
+    cx.fillStyle = '#dce8ff'; cx.textAlign = 'center'; fitText(compact ? 'ĐÓNG [I]' : 'ĐÓNG · I / ESC', closeX + closeW / 2, closeY + 21, closeW - 10, compact ? 10 : 11, true); cx.textAlign = 'left';
+    profileUi.hitboxes.push({ action: 'close', x: closeX, y: closeY, w: closeW, h: closeH });
+  }
+  function renderProfilePortrait(stats, W, H) {
+    const pad = 12, top = 53, gap = 8, heroH = Math.min(118, Math.max(96, H * .17));
+    drawProfileHero(stats, pad, top, W - pad * 2, heroH, true);
+    const statsY = top + heroH + gap, statsH = Math.min(228, Math.max(184, H * .31));
+    cx.fillStyle = '#9fd8f5'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.fillText('THỐNG KÊ HỌC TẬP', pad, statsY + 12);
+    drawProfileMetricGrid(stats, pad, statsY + 20, W - pad * 2, statsH - 20, 2);
+    const tierY = statsY + statsH + gap, tierH = Math.min(92, Math.max(68, H * .12));
+    drawProfilePanel(pad, tierY, W - pad * 2, tierH, '#4fd595');
+    cx.fillStyle = '#9fd8f5'; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.fillText('TIẾN ĐỘ JLPT', pad + 10, tierY + 16);
+    drawProfileTierRows(stats, pad + 10, tierY + 23, W - pad * 2 - 20, tierH - 29);
+    const badgeY = tierY + tierH + gap, badgeH = Math.max(70, H - badgeY - 12);
+    drawProfilePanel(pad, badgeY, W - pad * 2, badgeH, '#d9ad42');
+    cx.fillStyle = '#ffd970'; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.fillText('BỘ SƯU TẬP HUY HIỆU', pad + 10, badgeY + 17);
+    const goalH = badgeH >= 150 ? 39 : 0;
+    drawProfileBadgeSlots(stats, pad + 10, badgeY + 24, W - pad * 2 - 20, badgeH - 31 - goalH);
+    if (goalH) {
+      cx.fillStyle = '#9fd8f5'; cx.font = '10px "KanjiGo UI",sans-serif';
+      wrap(profileNextGoal(stats), pad + 11, badgeY + badgeH - 24, W - pad * 2 - 22, 13);
+    }
+  }
+  function renderProfileLandscape(stats, W, H) {
+    const pad = 20, top = 58, gap = 12, contentH = H - top - 18, leftW = Math.min(250, Math.max(190, W * .25));
+    drawProfileHero(stats, pad, top, leftW, contentH, false);
+    const rightX = pad + leftW + gap, rightW = W - rightX - pad;
+    const statsH = Math.min(280, Math.max(168, contentH * .46));
+    drawProfilePanel(rightX, top, rightW, statsH, '#4a9ad1');
+    cx.fillStyle = '#9fd8f5'; cx.font = 'bold 12px "KanjiGo UI",sans-serif'; cx.fillText('THỐNG KÊ HỌC TẬP', rightX + 12, top + 21);
+    drawProfileMetricGrid(stats, rightX + 12, top + 31, rightW - 24, statsH - 43, 4);
+    const achievementY = top + statsH + gap, achievementH = H - achievementY - 18;
+    drawProfilePanel(rightX, achievementY, rightW, achievementH, '#d9ad42');
+    const split = Math.max(165, rightW * .43);
+    cx.fillStyle = '#9fd8f5'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.fillText('TIẾN ĐỘ JLPT', rightX + 12, achievementY + 21);
+    drawProfileTierRows(stats, rightX + 12, achievementY + 32, split - 24, Math.min(82, achievementH - 67));
+    cx.fillStyle = '#8fb0cf'; cx.font = '10px "KanjiGo UI",sans-serif';
+    fitText(profileNextGoal(stats), rightX + 12, achievementY + achievementH - 14, split - 24, 10);
+    cx.fillStyle = '#ffd970'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.fillText('HUY HIỆU', rightX + split + 4, achievementY + 21);
+    drawProfileBadgeSlots(stats, rightX + split + 4, achievementY + 31, rightW - split - 16, achievementH - 43);
+  }
+  function renderProfile() {
+    const W = SCREEN_W, H = SCREEN_H, compact = W < 620;
+    profileUi.hitboxes = [];
+    const gradient = cx.createLinearGradient ? cx.createLinearGradient(0, 0, W, H) : null;
+    if (gradient && gradient.addColorStop) { gradient.addColorStop(0, '#07152c'); gradient.addColorStop(1, '#17264a'); }
+    cx.fillStyle = gradient || '#0b1831'; cx.fillRect(0, 0, W, H);
+    cx.fillStyle = 'rgba(94,142,204,.08)';
+    for (let x = 0; x < W; x += 48) for (let y = 0; y < H; y += 48) cx.fillRect(x, y, 1, 1);
+    drawProfileHeader(W, compact);
+    const stats = profileUi.stats || profileStats();
+    if (compact) renderProfilePortrait(stats, W, H); else renderProfileLandscape(stats, W, H);
+  }
+
   // ---------- VÒNG LẶP ----------
   let last = 0;
   function targetFrameMs() {
@@ -2735,6 +3078,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       return { label: 'RỜI', title: 'Rời thử thách và quay lại bản đồ' };
     }
     if (state === 'dex') return { label: 'ĐÓNG', title: 'Đóng KanjiDex' };
+    if (state === 'profile') return { label: 'ĐÓNG', title: 'Đóng Hồ sơ nhân vật' };
     if (state === 'skills') {
       const confirming = skillUi.purchaseConfirmId || skillUi.resetConfirm;
       return confirming ? { label: 'HỦY', title: 'Hủy xác nhận hiện tại' } : { label: 'ĐÓNG', title: 'Đóng Skill Tree' };
@@ -2749,6 +3093,12 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
   function syncTouchUi() {
     const hidden = state !== 'overworld';
     const nextState = hidden ? 'hidden' : 'visible';
+    const settingsButton = document.getElementById('settings-open');
+    if (settingsButton) {
+      settingsButton.classList.toggle('game-ui-hidden', hidden);
+      settingsButton.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+      settingsButton.tabIndex = hidden ? -1 : 0;
+    }
     const backButton = document.getElementById('touch-back');
     backButton?.classList.toggle('combat-back', state === 'battle' || state === 'capture' || state === 'pve');
     if (backButton) {
@@ -2783,6 +3133,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     if (state === 'battle') { renderBattle(); return; }
     if (state === 'dex') { renderDex(); return; }
     if (state === 'skills') { renderSkillTree(); if (toast.t > 0) drawToast(); return; }
+    if (state === 'profile') { renderProfile(); return; }
     if (state === 'lecture') { renderLecture(); return; }
     if (state === 'capture') { renderCapture(); return; }
     if (state === 'pve') { renderPve(); return; }
@@ -2801,6 +3152,9 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
       if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
     }
+    // Arena floor effects belong below actors. Drawing this translucent layer
+    // after NPCs made their theme icons and sprites look washed out.
+    drawTrainerArenaBackground(camX, camY);
     for (const { gx: x, gy: y } of TREE_CELLS) {
       if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
       const sx = x * TILE - camX, sy = y * TILE - camY;
@@ -2812,15 +3166,21 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     drawTulipGardens(camX, camY, frameNow);
     for (const n of NPCS) {
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
+      if (npcX < -TILE * 2 || npcX > VIEW_PX_W + TILE || npcY < -TILE * 2 || npcY > VIEW_PX_H + TILE) continue;
       drawCharacterShadow(npcX, npcY);
       drawSprite(imgs.npc, 'down', 0, npcX, npcY);
-      if (n.icon) { cx.font = '14px sans-serif'; cx.fillText(n.icon, n.gx * TILE - camX + 7, n.gy * TILE - camY - 3); }
+      if (n.icon) drawNpcThemeIcon(n, npcX, npcY);
       if (n.type === 'trainer') {
-        const status = trainerStatus(n.trainerId), marker = status.state === 'defeated' ? '✓' : status.state === 'locked' ? '🔒' : '⚔';
+        const status = trainerStatus(n.trainerId), marker = status.state === 'defeated' ? '✓' : status.state === 'locked' ? '×' : '!';
         cx.fillStyle = status.state === 'defeated' ? '#6effa1' : status.state === 'locked' ? '#ffd54a' : '#ff8b8b';
-        cx.font = 'bold 9px sans-serif'; cx.fillText(marker, n.gx * TILE - camX + 23, n.gy * TILE - camY + 7);
+        cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+        cx.strokeStyle = 'rgba(6,14,28,.95)'; cx.lineWidth = 3;
+        cx.strokeText(marker, Math.round(npcX + 27), Math.round(npcY - 7));
+        cx.fillText(marker, Math.round(npcX + 27), Math.round(npcY - 7));
+        cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
       }
     }
+    drawOnboardingGuide(camX, camY, frameNow);
     drawPet(camX, camY);
     drawRunDust(camX, camY);
     if (player.onBoat) drawTile(K.BOAT, Math.round(player.px - camX), Math.round(player.py - camY));
@@ -2834,7 +3194,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       ? Math.max(0, Number(C.BICYCLE.verticalOverlayDrop) || 0) : 0);
     drawSprite(imgs.player, player.facing, player.frame, playerX, riderY);
     if (riding) drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY, TILE * (C.BICYCLE.spriteScale || 1));
-    drawTrainerArena(camX, camY);
+    drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
     drawMapSigns(camX, camY);
   }
@@ -2844,11 +3204,28 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
     return { camX, camY };
   }
-  function drawTrainerArena(camX, camY) {
-    if (!ARENA) return;
+  function trainerArenaFrame(camX, camY) {
+    if (!ARENA) return null;
     const left = ARENA.x * TILE - camX, top = ARENA.y * TILE - camY;
     const width = ARENA.width * TILE, height = ARENA.height * TILE;
+    if (left + width < -TILE || left > VIEW_PX_W + TILE || top + height < -TILE || top > VIEW_PX_H + TILE) return null;
+    return { left, top, width, height,
+      centerX: ARENA.centerGx * TILE - camX + TILE / 2, centerY: ARENA.centerGy * TILE - camY + TILE / 2 };
+  }
+  function drawTrainerArenaBackground(camX, camY) {
+    const frame = trainerArenaFrame(camX, camY);
+    if (!frame) return;
+    const { left, top, width, height, centerX, centerY } = frame;
     cx.fillStyle = 'rgba(17,25,48,.12)'; cx.fillRect(left + 5, top + 7, width - 10, height - 8);
+    // Vòng đấu nằm dưới Boss, Trainer và badge chủ đề để các chi tiết luôn rõ.
+    cx.fillStyle = 'rgba(16,38,67,.18)'; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 2.2, TILE * 1.4, 0, 0, Math.PI * 2); cx.fill();
+    cx.strokeStyle = '#f0ca58'; cx.lineWidth = 2; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 2, TILE * 1.22, 0, 0, Math.PI * 2); cx.stroke();
+    cx.strokeStyle = 'rgba(255,241,164,.58)'; cx.lineWidth = 1; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 1.25, TILE * .72, 0, 0, Math.PI * 2); cx.stroke();
+  }
+  function drawTrainerArenaForeground(camX, camY) {
+    const frame = trainerArenaFrame(camX, camY);
+    if (!frame) return;
+    const { left, top, width, centerX } = frame;
     // Atlas runtime: ngang, dọc, bo trên-trái, trên-phải, dưới-trái, dưới-phải.
     const wallVariant = (gx, gy) => {
       const leftEdge = gx === ARENA.x, rightEdge = gx === ARENA.x + ARENA.width - 1;
@@ -2867,11 +3244,6 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
         cx.drawImage(imgs.arena_wall_tiles, wallVariant(gx, gy) * TILE, 0, TILE, TILE, x, y, TILE, TILE);
       }
     }
-    // Vòng đấu trung tâm và bệ Boss.
-    const centerX = ARENA.centerGx * TILE - camX + TILE / 2, centerY = ARENA.centerGy * TILE - camY + TILE / 2;
-    cx.fillStyle = 'rgba(16,38,67,.18)'; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 2.2, TILE * 1.4, 0, 0, Math.PI * 2); cx.fill();
-    cx.strokeStyle = '#f0ca58'; cx.lineWidth = 2; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 2, TILE * 1.22, 0, 0, Math.PI * 2); cx.stroke();
-    cx.strokeStyle = 'rgba(255,241,164,.58)'; cx.lineWidth = 1; cx.beginPath(); cx.ellipse(centerX, centerY + 7, TILE * 1.25, TILE * .72, 0, 0, Math.PI * 2); cx.stroke();
     // Cổng phía bắc tạo silhouette kiến trúc rõ ràng khi đi từ Giảng đường xuống.
     const gateX = centerX - TILE * 1.8, gateY = top + 5;
     cx.fillStyle = '#172640'; cx.fillRect(gateX, gateY, TILE * 3.6, 16);
@@ -2883,6 +3255,52 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       cx.fillStyle = color; cx.fillRect(x + 2, y - 12, 10, 7);
       cx.fillStyle = 'rgba(255,255,255,.55)'; cx.fillRect(x + 3, y - 11, 7, 1);
     });
+  }
+  function drawThemeAtlasIcon(key, x, y, iconSize = 24, alpha = 1) {
+    const atlas = imgs.trainer_theme_icons;
+    if (!atlas) return false;
+    const previousAlpha = Number.isFinite(cx.globalAlpha) ? cx.globalAlpha : 1;
+    const iconIndex = TRAINER_THEME_ICON_INDEX[key];
+    if (!Number.isInteger(iconIndex)) return false;
+    const columns = 4;
+    const atlasWidth = atlas.naturalWidth || atlas.width || 256;
+    const atlasHeight = atlas.naturalHeight || atlas.height || 256;
+    const sourceW = atlasWidth / columns, sourceH = atlasHeight / columns;
+    cx.save();
+    cx.globalAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+    cx.imageSmoothingEnabled = false;
+    cx.drawImage(atlas,
+      (iconIndex % columns) * sourceW, Math.floor(iconIndex / columns) * sourceH, sourceW, sourceH,
+      Math.round(x), Math.round(y), Math.round(iconSize), Math.round(iconSize));
+    cx.restore();
+    // Test/minimal canvas implementations may not preserve state through save/restore.
+    cx.globalAlpha = previousAlpha;
+    return true;
+  }
+  function drawNpcThemeIcon(npc, npcX, npcY) {
+    const iconSize = 24, key = npc.type === 'gym' ? 'gym' : npc.trainerId;
+    drawThemeAtlasIcon(key, npcX + (TILE - iconSize) / 2, npcY - iconSize + 1, iconSize);
+  }
+  function drawOnboardingGuide(camX, camY, now) {
+    const tour = onboardingTour();
+    if (!tour || !imgs.npc) return;
+    const x = Math.round(tour.stop.gx * TILE - camX), y = Math.round(tour.stop.gy * TILE - camY);
+    if (x < -TILE * 2 || x > VIEW_PX_W + TILE || y < -TILE * 2 || y > VIEW_PX_H + TILE) return;
+    const pulse = .5 + Math.sin(now / 240) * .5;
+    cx.fillStyle = `rgba(255,214,93,${.10 + pulse * .12})`; cx.beginPath(); cx.arc(x + 16, y + 19, 18 + pulse * 3, 0, Math.PI * 2); cx.fill();
+    cx.strokeStyle = `rgba(255,222,100,${.58 + pulse * .34})`; cx.lineWidth = 2; cx.beginPath(); cx.ellipse(x + 16, y + 29, 15 + pulse * 2, 5 + pulse, 0, 0, Math.PI * 2); cx.stroke();
+    drawCharacterShadow(x, y);
+    drawSprite(imgs.npc, tour.stop.facing || 'down', Math.floor(now / 360) % 2, x, y);
+    const label = `✦ ${tour.name}`;
+    cx.font = 'bold 8px "KanjiGo UI",sans-serif';
+    const labelW = Math.max(42, cx.measureText(label).width + 10), labelX = x + 16 - labelW / 2;
+    cx.fillStyle = 'rgba(8,18,42,.92)'; cx.fillRect(labelX, y - 15, labelW, 12);
+    cx.strokeStyle = '#ffd65d'; cx.lineWidth = 1; cx.strokeRect(labelX, y - 15, labelW, 12);
+    cx.fillStyle = '#fff3b0'; cx.textAlign = 'center'; cx.fillText(label, x + 16, y - 6); cx.textAlign = 'left';
+    if (onboardingGuideInReach()) {
+      cx.fillStyle = '#fff'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+      cx.strokeStyle = 'rgba(4,10,24,.95)'; cx.lineWidth = 3; cx.strokeText('SPACE', x + 16, y - 21); cx.fillText('SPACE', x + 16, y - 21); cx.textAlign = 'left';
+    }
   }
   function drawMapSigns(camX, camY) {
     for (const sign of MAP_SIGNS) {
@@ -2898,6 +3316,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     }
   }
   function drawPet(camX, camY) {
+    if (!followerUnlocked()) return;
     const img = monsterImg(currentPetId); if (!img) return;
     const pos = petFollowPosition(), level = petLevel(), size = petSizeFor(level);
     const ratio = img.height / img.width, w = size, h = size * ratio;
@@ -2974,10 +3393,14 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     const explorationGuide = bicycleAvailable() ? ' · B: Xe đạp' : '';
     const autoRideGuide = autoRideAvailable() ? ' · P: Auto' : '';
     const radarGuide = radar.mode === 'targeting' ? ' · R: Radar' : '';
-    const message = fishing ? '🎣 Đang câu cá...' : academy ? 'Space/Enter: Vào Giảng đường' : (compact ? `D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · D: Dex · K: Skill · Space/Enter: Tương tác`);
+    const tour = onboardingTour(), tourNearby = onboardingGuideInReach();
+    const message = tour
+      ? `🎓 ${tourNearby ? `SPACE: nói chuyện với cô ${tour.name}` : `${tour.stop.objective} • ${onboardingGuideDirection(tour)}`} · ${tour.index + 1}/${tour.total}`
+      : fishing ? '🎣 Đang câu cá...' : academy ? 'Space/Enter: Vào Giảng đường' : (compact ? `I: Hồ sơ · D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}` : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · I: Hồ sơ · D: Dex · K: Skill · Space/Enter: Tương tác`);
     cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
-    const status = `⭐${availableKP()} KP · ${captured}/${total} · Pet「${C.MONSTERS[currentPetId]?.kanji || '?'}」${isBicycleActive() ? ' · 🚲 ON' : ''}${autoRideActive ? ' · 🧭 AUTO' : ''}`;
+    const petStatus = followerUnlocked() ? `Pet「${C.MONSTERS[currentPetId]?.kanji || '?'}」` : 'Chưa có Pet';
+    const status = `⭐${availableKP()} KP · ${captured}/${total} · ${petStatus}${isBicycleActive() ? ' · 🚲 ON' : ''}${autoRideActive ? ' · 🧭 AUTO' : ''}`;
     cx.fillStyle = 'rgba(11,16,48,.72)'; cx.fillRect(statusX, statusY, statusW, 28);
     cx.fillStyle = '#ffd54a'; fitText(status, statusX + 8, statusY + 19, statusW - 16, 12);
     if (radar.mode !== 'off') {
@@ -4060,7 +4483,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       const s = ensureMastery(kinfo.char), unlocked = s.captured;
       const col = i % layout.cols, row = (i / layout.cols) | 0;
       const x = layout.ox + col * (layout.cardW + layout.gapX), y = layout.oy + row * (layout.cardH + layout.gapY);
-      const sel = actualIndex === dex.sel, isCur = unlocked && id === currentPetId;
+      const sel = actualIndex === dex.sel, isCur = unlocked && id === currentPetId && followerUnlocked();
       cx.fillStyle = sel ? (unlocked ? 'rgba(22,85,143,.85)' : 'rgba(40,45,65,.9)') : (unlocked ? 'rgba(20,28,60,.9)' : 'rgba(12,14,24,.95)');
       cx.fillRect(x, y, layout.cardW, layout.cardH);
       cx.strokeStyle = sel ? '#6cc0ff' : (unlocked ? '#2a3a66' : '#242638'); cx.lineWidth = sel ? 3 : 1; cx.strokeRect(x, y, layout.cardW, layout.cardH);
@@ -4148,7 +4571,7 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
       row.list.forEach((char, col) => {
         const index = dex.indexByChar.get(char) ?? -1, info = kanjiInfo(char); if (!info) return;
         const id = info.monId, monster = C.MONSTERS[id]; if (!monster) return;
-        const stat = ensureMastery(char), unlocked = stat.captured, selected = index === dex.sel, following = unlocked && id === currentPetId;
+        const stat = ensureMastery(char), unlocked = stat.captured, selected = index === dex.sel, following = unlocked && id === currentPetId && followerUnlocked();
         const x = layout.ox + col * (layout.cardW + layout.gapX);
         cx.fillStyle = selected ? (unlocked ? 'rgba(22,85,143,.92)' : 'rgba(40,45,65,.94)') : (unlocked ? 'rgba(20,28,60,.94)' : 'rgba(12,14,24,.97)'); cx.fillRect(x, y, layout.cardW, layout.cardH);
         cx.strokeStyle = selected ? '#6cc0ff' : unlocked ? '#2a3a66' : '#242638'; cx.lineWidth = selected ? 3 : 1; cx.strokeRect(x, y, layout.cardW, layout.cardH);
@@ -4252,10 +4675,12 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
   }
 
   // ---------- KHỞI ĐỘNG ----------
-  const toLoad = [loadImg('player', C.ASSETS.player), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles)];
+  const activeAppearance = activeCharacterProfile()?.appearance;
+  const activePlayerAsset = activeAppearance === 'blue' && C.ASSETS.playerBlue ? C.ASSETS.playerBlue : C.ASSETS.player;
+  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
-  if (C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
+  if (petData[currentPetId] && C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
   Promise.all(toLoad).then(() => {
     if (loadError) {
       cx.setTransform(1, 0, 0, 1, 0, 0); cx.fillStyle = '#111'; cx.fillRect(0, 0, cv.width, cv.height);
@@ -4274,7 +4699,11 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
   const debugApi = {
     state: () => state, startBattle, answer, tryRun, endBattle,
     getBattle: () => battle, getPlayer: () => player,
-    getPet: () => { const s = petMastery(); return { id: currentPetId, level: s.level, mp: s.mp, recall: s.recall, ...petData[currentPetId] }; },
+    getPet: () => {
+      if (!followerUnlocked()) return null;
+      const s = petMastery(); return { id: currentPetId, level: s.level, mp: s.mp, recall: s.recall, ...petData[currentPetId] };
+    },
+    hasFollower: followerUnlocked,
     petData: () => petData, mastery: () => learning.mastery, makeQuestion, updateBattle,
     pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: (id) => { if (petData[id]) { currentPetId = id; ensureMastery(C.MONSTERS[id].kanji).captured = true; } saveGame(); },
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
@@ -4298,9 +4727,12 @@ capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ?
     validateSkillDefinitions, skillDefinitions: () => SKILL_DEFINITIONS.map((definition) => ({ ...definition })),
     skillStatus, purchaseSkill, resetPerks, hasSkill, capturedKanjiCount, kanjiAtLevelCount, resolveSkillEffects,
     openSkillTree, onSkillKey, getSkillUi: () => ({ ...skillUi, hitboxes: [...skillUi.hitboxes] }),
+    openProfile, onProfileKey, getProfileStats: profileStats, getProfileUi: () => ({ ...profileUi, hitboxes: [...profileUi.hitboxes] }),
     useMeaningLens, radarSummary, cycleRadarTarget, radarEncounterMultiplier, getRadarTarget: () => radarTarget,
     getOverworldHudLayout: () => ({ ...overworldHudLayout() }),
     toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk, onSpace, academyEntranceInReach,
+    getOnboardingTour: () => { const tour = onboardingTour(); return tour ? { ...tour, profile: { ...tour.profile }, stop: { ...tour.stop } } : null; },
+    getDialog: () => dialog.active ? { active: true, idx: dialog.idx, npc: { ...dialog.npc, lines: [...dialog.npc.lines] } } : { active: false },
     toggleAutoRide, stopAutoRide, isAutoRideActive: () => autoRideActive, findAutoRidePath, nextAutoRideDirection,
     getPveResult: () => pveResult, getCanvasSize: () => ({ width: SCREEN_W, height: SCREEN_H }), getWorldZoom: () => worldZoom,
     getRenderMetrics: () => ({

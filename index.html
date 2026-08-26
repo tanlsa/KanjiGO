@@ -34,10 +34,11 @@
   #touch-controls button:active,#touch-actions button:active{background:rgba(22,85,143,.95);transform:scale(.94)}
   .touch-hidden{display:none!important}
   #touch-up{left:50px;top:0}.touch-left{left:0;top:50px}.touch-right{right:0;top:50px}.touch-down{left:50px;bottom:0}
-  #touch-actions{right:18px;bottom:28px;width:352px;height:58px;gap:8px}
+  #touch-actions{right:18px;bottom:28px;width:424px;height:58px;gap:8px}
   #touch-actions button{position:static;width:64px;height:52px;font-size:14px;font-weight:700}
   #touch-actions .touch-dex{color:#ffd54a}
   #touch-actions .touch-skills{color:#7ff7ff}
+  #touch-actions .touch-profile{color:#ffb5e8}
   #touch-actions .touch-bike{color:#ffcf6c}
   #touch-actions .touch-auto{color:#8fffb0}
   #touch-back{right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:10;
@@ -50,7 +51,9 @@
   #touch-back.continue-action{background:rgba(18,92,62,.95);border-color:rgba(126,255,190,.9)}
   #settings-open{display:block;position:fixed;z-index:12;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));
     width:46px;height:46px;padding:0;border:2px solid rgba(159,216,245,.82);border-radius:14px;background:rgba(11,16,48,.94);
-    color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+    color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.35);
+    opacity:1;visibility:visible;transition:opacity .12s ease,visibility .12s ease}
+  #settings-open.game-ui-hidden{opacity:0;visibility:hidden;pointer-events:none}
   #settings-open .settings-key{position:absolute;right:-5px;bottom:-5px;display:grid;place-items:center;width:18px;height:18px;
     border:1px solid #ffd54a;border-radius:6px;background:#172640;color:#ffd54a;font:800 10px var(--kanjigo-font)}
   #settings-open:focus-visible,#settings-close:focus-visible,#settings-reset:focus-visible,
@@ -59,11 +62,51 @@
     background:rgba(5,9,24,.78);overflow:auto}
   #settings-overlay.is-open{display:flex}
   #settings-panel{width:min(500px,100%);box-sizing:border-box;padding:24px;background:#141c3c;color:#e9eef7;border:2px solid #2f7fc0;
-    box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--kanjigo-font)}
+    max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--kanjigo-font)}
   #settings-panel h2{margin:0 0 6px;color:#fff;font-size:24px}
   #settings-panel>p{margin:0 0 20px;color:#9fd8f5;font-size:13px}
+  .settings-page-hidden{display:none!important}
+  .settings-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .settings-menu-card{min-height:150px;padding:20px;border:2px solid #385f88;border-radius:14px;background:linear-gradient(145deg,#122748,#0b1732);
+    color:#fff;text-align:left;cursor:pointer;box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 20px rgba(0,0,0,.2)}
+  .settings-menu-card:hover,.settings-menu-card:focus-visible{border-color:#69d8ff;transform:translateY(-2px)}
+  .settings-menu-icon{display:block;margin-bottom:12px;font-size:34px}.settings-menu-card strong{display:block;font-size:17px;color:#fff}
+  .settings-menu-card small{display:block;margin-top:7px;color:#a9bed9;font-size:12px;line-height:1.5}
+  .settings-page-heading{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .settings-page-heading button{width:40px;height:40px;padding:0;border:1px solid #526b91;border-radius:9px;background:#213555;color:#fff;font-size:20px;cursor:pointer}
+  .settings-page-heading div{min-width:0}.settings-page-heading h3{margin:0;color:#ffd970;font-size:17px}.settings-page-heading p{margin:3px 0 0;color:#aebdd4;font-size:11px}
   .settings-section{padding:16px;border:1px solid rgba(82,126,170,.55);border-radius:10px;background:rgba(8,18,45,.46)}
   .settings-section h3{margin:0 0 12px;color:#ffd970;font-size:15px;letter-spacing:.6px;text-transform:uppercase}
+  .settings-section+.settings-section{margin-top:14px}
+  .settings-section>p{margin:0 0 12px;color:#aebdd4;font-size:12px;line-height:1.45}
+  .character-slots{display:grid;gap:9px}
+  .character-slot{display:grid;grid-template-columns:64px minmax(0,1fr);gap:7px 12px;padding:12px;border:1px solid #415578;
+    border-radius:9px;background:rgba(11,22,49,.74)}
+  .character-slot.is-active{border-color:#55dca0;box-shadow:inset 3px 0 #55dca0}
+  .character-slot.is-empty{border-style:dashed;opacity:.88}
+  .character-slot.is-empty .character-slot-heading{grid-column:1/-1}
+  .character-slot-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#9fd8f5}
+  .character-slot-heading strong{color:#fff;font-size:13px}.character-slot.is-active .character-slot-heading span{color:#70f0ae}
+  .character-avatar,.character-creator-avatar,.onboarding-avatar{display:block;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated}
+  .character-avatar{grid-row:1/3;width:64px;height:64px;background-size:256px 256px;border:1px solid #49698f;border-radius:10px;background-color:#0a1530}
+  .appearance-orange{background-image:url('assets/characters/player-v2.png')}.appearance-blue{background-image:url('assets/characters/npc-v2.png')}
+  .character-slot-copy{min-width:0}.character-slot p{margin:4px 0 0;color:#8fa5c4;font-size:11px}
+  .character-empty-copy{grid-column:1/-1}.character-empty-copy strong,.character-empty-copy small{display:block}.character-empty-copy small{margin-top:4px;color:#8fa5c4}
+  .character-slot-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+  .character-slot-actions button{min-height:34px;padding:5px 10px;border:1px solid #2f7fc0;border-radius:6px;background:#16558f;
+    color:#fff;font:700 11px var(--kanjigo-font);cursor:pointer}
+  .character-slot-actions button.secondary{background:#273858;border-color:#526b91}
+  .character-slot-actions button.danger{background:#602d3b;border-color:#a85368}
+  #character-slot-status{min-height:16px;margin:8px 0 0;color:#70f0ae;font-size:11px}
+  .character-creator{display:grid;grid-template-columns:112px minmax(0,1fr);gap:18px;align-items:start;padding:16px;border:1px solid #415578;border-radius:12px;background:#0b1733}
+  .character-creator-avatar{width:96px;height:96px;background-size:384px 384px;border:2px solid #69d8ff;border-radius:14px;background-color:#071229;box-shadow:0 8px 20px rgba(0,0,0,.28)}
+  .character-creator-fields{display:grid;gap:14px}.character-creator-fields label>span,.character-picker-label{display:block;margin-bottom:6px;color:#9fd8f5;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  #character-creator-name{width:100%;height:42px;box-sizing:border-box;padding:8px 11px;border:1px solid #526b91;border-radius:8px;background:#07142e;color:#fff;font:700 14px var(--kanjigo-font)}
+  .character-picker{display:flex;gap:7px;flex-wrap:wrap}.character-picker button{min-height:38px;padding:7px 11px;border:1px solid #526b91;border-radius:8px;background:#203451;color:#cbd8ec;font:700 11px var(--kanjigo-font);cursor:pointer}
+  .character-picker button.selected{border-color:#65e0ae;background:#164d43;color:#fff;box-shadow:0 0 0 2px rgba(101,224,174,.13)}
+  .character-creator-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}.character-creator-actions button{min-height:42px;padding:8px 14px;border:1px solid #2f7fc0;border-radius:8px;background:#16558f;color:#fff;font-weight:800;cursor:pointer}.character-creator-actions .secondary{background:#273858;border-color:#526b91}
+  .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;
+    clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
   .audio-setting-row{display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:center;margin:16px 0}
   .audio-setting-row label{font-weight:600}
   .audio-setting-row output{min-width:42px;color:#ffd54a;text-align:right;font-variant-numeric:tabular-nums}
@@ -73,6 +116,17 @@
   .settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
   .settings-actions button{min-height:42px;padding:8px 16px;border:1px solid #2f7fc0;border-radius:8px;background:#16558f;color:#fff;font-weight:700;cursor:pointer}
   .settings-actions button.secondary{background:transparent;color:#c8d5ee;border-color:#52617b}
+  #onboarding-overlay{display:none;position:fixed;z-index:60;inset:0;align-items:center;justify-content:center;padding:22px;background:radial-gradient(circle at 50% 35%,rgba(27,78,121,.94),rgba(3,8,23,.98));font-family:var(--kanjigo-font)}
+  #onboarding-overlay.is-open{display:flex}.onboarding-card{width:min(660px,100%);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box;padding:30px;border:2px solid #48b9e6;border-radius:18px;background:linear-gradient(155deg,#142b50,#080f28);box-shadow:0 24px 70px rgba(0,0,0,.55);text-align:center}
+  .onboarding-avatar{width:96px;height:96px;margin:0 auto 14px;background-size:384px 384px;border:2px solid #ffd65d;border-radius:50%;background-color:#07142c;box-shadow:0 0 28px rgba(255,214,93,.2)}
+  #onboarding-eyebrow{margin:0;color:#72dfff;font-size:11px;font-weight:900;letter-spacing:1.2px}#onboarding-title{margin:8px 0 12px;color:#fff;font-size:25px}
+  #onboarding-copy{min-height:70px;margin:0 auto;color:#d6e3f5;font-size:14px;line-height:1.65;max-width:560px}#onboarding-hint{margin:14px auto 0;padding:10px 12px;border-radius:9px;background:#0a1835;color:#9ec8e8;font-size:11px;line-height:1.45}
+  #onboarding-kanji-options{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px auto 2px;max-width:560px}
+  #onboarding-kanji-options.is-open{display:grid}.onboarding-kanji-choice{min-height:112px;padding:10px;border:1px solid #315c8e;border-radius:12px;background:linear-gradient(155deg,#10254a,#09142c);color:#dbeaff;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}
+  .onboarding-kanji-choice:hover,.onboarding-kanji-choice:focus-visible{border-color:#63d8ff;transform:translateY(-1px)}.onboarding-kanji-choice.selected{border-color:#ffd65d;background:linear-gradient(155deg,#254b70,#14284d);box-shadow:0 0 0 2px rgba(255,214,93,.16),0 10px 24px rgba(0,0,0,.22)}
+  .onboarding-kanji-choice strong{display:block;color:#fff;font-family:var(--kanjigo-font);font-size:36px;line-height:1}.onboarding-kanji-choice b{display:block;margin-top:7px;color:#ffd65d;font-size:11px;letter-spacing:.7px}.onboarding-kanji-choice small{display:block;margin-top:5px;color:#9ec8e8;font-size:10px;line-height:1.35}
+  #onboarding-progress{display:flex;justify-content:center;gap:7px;margin:20px 0}#onboarding-progress i{width:28px;height:5px;border-radius:3px;background:#30476c}#onboarding-progress i.active{background:#ffd65d}
+  .onboarding-actions{display:flex;justify-content:center;gap:10px}.onboarding-actions button{min-height:44px;padding:8px 18px;border:1px solid #2f7fc0;border-radius:9px;background:#1765a4;color:#fff;font-weight:900;cursor:pointer}.onboarding-actions button.secondary{background:transparent;border-color:#526b91;color:#b9c9df}.onboarding-actions button:disabled{opacity:.35;cursor:default}
   @media(pointer:coarse), (max-width:700px){#settings-open{top:auto;bottom:max(18px,env(safe-area-inset-bottom));right:max(166px,calc(50% - 23px))}}
   kbd{background:#0f3460;border-radius:4px;padding:1px 6px;
     font-family:monospace;color:#fff;border:1px solid #16558f}
@@ -85,14 +139,23 @@
     #touch-actions{right:max(12px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom))}
   }
   @media (max-width:430px){
-    #touch-actions{width:138px;height:168px;flex-wrap:wrap;align-content:flex-end;justify-content:flex-end}
+    #touch-actions{width:138px;height:176px;flex-wrap:wrap;align-content:flex-end;justify-content:flex-end}
+  }
+  @media (max-width:520px){
+    #settings-overlay{padding:12px}#settings-panel{padding:16px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
+    .settings-menu{grid-template-columns:1fr}.settings-menu-card{min-height:112px}.character-slot{grid-template-columns:56px 1fr}.character-avatar{width:56px;height:56px;background-size:224px 224px}
+    .character-slot-actions{justify-content:flex-start}
+    .character-creator{grid-template-columns:1fr}.character-creator-avatar{margin:auto}.onboarding-card{padding:22px 16px}#onboarding-title{font-size:21px}#onboarding-copy{font-size:13px}#onboarding-kanji-options{gap:7px}.onboarding-kanji-choice{min-height:104px;padding:8px 5px}.onboarding-kanji-choice strong{font-size:31px}
+  }
+  @media (max-height:520px){
+    #onboarding-overlay{padding:10px}.onboarding-card{padding:14px 18px}.onboarding-avatar{width:54px;height:54px;margin-bottom:7px;background-size:216px 216px}#onboarding-title{margin:4px 0 7px;font-size:18px}#onboarding-copy{min-height:0;font-size:12px;line-height:1.4}#onboarding-hint{margin-top:7px;padding:6px 9px}#onboarding-kanji-options{margin-top:8px}.onboarding-kanji-choice{min-height:78px}.onboarding-kanji-choice strong{font-size:26px}.onboarding-kanji-choice b{margin-top:3px}#onboarding-progress{margin:9px 0}.onboarding-actions button{min-height:40px}
   }
 </style>
 </head>
 <body>
 <h1>🎮 Kanji<span class="go">GO</span> — Học Kanji kiểu Pokémon</h1>
 <div id="hint">
-  Di chuyển <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> • Tương tác <kbd>Space</kbd> • Kanji Dex <kbd>D</kbd>
+  Di chuyển <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> • Tương tác <kbd>Space</kbd> • Hồ sơ <kbd>I</kbd> • Kanji Dex <kbd>D</kbd>
 
   ⚔️ Trong trận: bấm <kbd>1</kbd>–<kbd>4</kbd> để ra đòn • Trả lời nhanh nhận PERFECT • <kbd>Esc</kbd> bỏ chạy
 </div>
@@ -107,6 +170,7 @@
   <button data-action="interact" aria-label="Tương tác">SPACE</button>
   <button class="touch-dex" data-action="dex" aria-label="Mở Kanji Dex">DEX</button>
   <button class="touch-skills" data-action="skills" aria-label="Mở Skill Tree">SKILL</button>
+  <button class="touch-profile" data-action="profile" aria-label="Mở Hồ sơ nhân vật">INFO</button>
   <button class="touch-bike" data-action="bicycle" aria-label="Bật hoặc tắt xe đạp">BIKE</button>
   <button class="touch-auto" data-action="auto-ride" aria-label="Bật hoặc tắt Auto Ride">AUTO</button>
 </div>
@@ -115,9 +179,39 @@
 <div id="settings-overlay" role="presentation" aria-hidden="true">
   <section id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
     <h2 id="settings-title">Cài đặt</h2>
-    <p>Nhấn <strong>O</strong> để mở/đóng nhanh hoặc <strong>Esc</strong> để quay lại game.</p>
-    <div class="settings-section" aria-labelledby="settings-audio-title">
-      <h3 id="settings-audio-title">🔊 Âm thanh</h3>
+    <p id="settings-intro">Chọn mục bạn muốn điều chỉnh. Nhấn <strong>O</strong> để mở nhanh.</p>
+    <div id="settings-home" class="settings-menu">
+      <button class="settings-menu-card" type="button" data-settings-page="audio">
+        <span class="settings-menu-icon" aria-hidden="true">🔊</span><strong>Âm thanh</strong><small>Nhạc nền, hiệu ứng, giao diện và âm thanh môi trường.</small>
+      </button>
+      <button class="settings-menu-card" type="button" data-settings-page="characters">
+        <span class="settings-menu-icon" aria-hidden="true">👤</span><strong>Đổi nhân vật</strong><small>Chọn, tạo hoặc chỉnh sửa tối đa 3 nhân vật với tiến độ riêng.</small>
+      </button>
+    </div>
+    <div id="settings-character-view" class="settings-page-hidden">
+      <div class="settings-page-heading"><button type="button" data-settings-back aria-label="Quay lại">←</button><div><h3>Đổi nhân vật</h3><p>Mỗi nhân vật có tiến độ, pet, KP và huy hiệu riêng.</p></div></div>
+      <div id="character-list-view">
+        <div id="character-slots" class="character-slots"></div>
+        <p id="character-slot-status" role="status" aria-live="polite"></p>
+      </div>
+      <div id="character-creator-view" class="settings-page-hidden">
+        <div class="character-creator">
+          <span id="character-creator-avatar" class="character-creator-avatar appearance-orange" aria-hidden="true"></span>
+          <div class="character-creator-fields">
+            <label><span>Tên nhân vật</span><input id="character-creator-name" type="text" maxlength="24" autocomplete="off" placeholder="Nhập tên nhân vật" /></label>
+            <div><span class="character-picker-label">Giới tính</span><div class="character-picker">
+              <button type="button" data-character-gender="male">Nam</button><button type="button" data-character-gender="female">Nữ</button><button type="button" data-character-gender="neutral">Tự do</button>
+            </div></div>
+            <div><span class="character-picker-label">Ngoại hình</span><div class="character-picker">
+              <button type="button" data-character-appearance="orange">Đồng phục cam</button><button type="button" data-character-appearance="blue">Đồng phục xanh</button>
+            </div></div>
+          </div>
+          <div class="character-creator-actions"><button id="character-creator-cancel" class="secondary" type="button">Huỷ</button><button id="character-creator-save" type="button">Tạo & bắt đầu</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="settings-audio-view" class="settings-page-hidden">
+      <div class="settings-page-heading"><button type="button" data-settings-back aria-label="Quay lại">←</button><div><h3 id="settings-audio-title">Âm thanh</h3><p>Tinh chỉnh riêng từng lớp âm thanh trong game.</p></div></div>
       <div class="audio-setting-row">
         <label for="audio-master">Master Volume</label><output id="audio-master-value" for="audio-master">100%</output>
         <input id="audio-master" type="range" min="0" max="100" step="1" value="100" data-audio-setting="master" />
@@ -141,9 +235,18 @@
       <label class="audio-setting-check" for="audio-muted"><input id="audio-muted" type="checkbox" data-audio-setting="muted" /> Tắt toàn bộ âm thanh</label>
     </div>
     <div class="settings-actions">
-      <button id="settings-reset" class="secondary" type="button">Khôi phục mặc định</button>
+      <button id="settings-reset" class="secondary" type="button">Khôi phục âm thanh</button>
       <button id="settings-close" type="button">Xong</button>
     </div>
+  </section>
+</div>
+<div id="onboarding-overlay" aria-hidden="true">
+  <section class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <span id="onboarding-avatar" class="onboarding-avatar appearance-orange" aria-hidden="true"></span>
+    <p id="onboarding-eyebrow"></p><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p><p id="onboarding-hint"></p>
+    <div id="onboarding-kanji-options" role="radiogroup" aria-label="Chọn Kanji đầu tiên"></div>
+    <div id="onboarding-progress" aria-label="Tiến độ hướng dẫn"></div>
+    <div class="onboarding-actions"><button id="onboarding-back" class="secondary" type="button">Quay lại</button><button id="onboarding-next" type="button">Tiếp tục</button></div>
   </section>
 </div>
 <div id="admin-link">🛠️ Admin nhập chữ/câu: mở <a href="admin.html">admin.html</a></div>
@@ -152,6 +255,7 @@
 <script src="js/config.js"></script>
 <script src="js/audio-config.js"></script>
 <script src="js/audio-manager.js"></script>
+<script src="js/character-slots.js"></script>
 <script src="js/audio-settings-ui.js"></script>
 <script src="js/kanji.js"></script>
 <script src="js/data-loader.js"></script>

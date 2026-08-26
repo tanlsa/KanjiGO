@@ -13,6 +13,7 @@ window.CONFIG = {
 
   ASSETS: {
     player:  'assets/characters/player-v2.png',
+    playerBlue: 'assets/characters/npc-v2.png',
     bicycleOverlay: 'assets/characters/bicycle-overlay-v2.png',
     npc:     'assets/characters/npc-v2.png',
     tileset: 'assets/world/tileset.png',
@@ -20,6 +21,7 @@ window.CONFIG = {
     academy: 'assets/world/academy-grand.png',
     tulipTiles: 'assets/world/tulip-tiles.png',
     arenaWallTiles: 'assets/world/arena-wall-tiles.png',
+    trainerThemeIcons: 'assets/world/trainer-theme-icons.png',
   },
 
   TILE: 32, ZOOM: 2, CANVAS_W: 640, CANVAS_H: 480,
@@ -49,6 +51,18 @@ window.CONFIG = {
   },
   BLOCKED_TILES: [1, 2, 6, 8, 9],
   ACADEMY: { gx: 2, gy: 2, width: 11, height: 7, doorGx: 7, doorGy: 8 },
+
+  // --- 🌱 ONBOARDING ---
+  // Ba chữ nhập môn đều thuộc N5, có đầy đủ Learning Card, câu hỏi và mascot.
+  // `char` là khoá ổn định được lưu theo từng character slot.
+  ONBOARDING: {
+    guideName: 'Aoi',
+    starterKanji: [
+      { char: '一', hanViet: 'NHẤT', meaning: 'một', reading: 'いち' },
+      { char: '日', hanViet: 'NHẬT', meaning: 'ngày / mặt trời', reading: 'にち' },
+      { char: '人', hanViet: 'NHÂN', meaning: 'người', reading: 'ひと' },
+    ],
+  },
 
   ENCOUNTER: {
     TALLGRASS: 0.22, SURF: 0.15, FISH: 0.55,
@@ -195,8 +209,7 @@ window.CONFIG = {
         { id: 'level10', reward: 1, level: 10 },
       ],
     },
-    // TEMP QA: mở tier để test Giảng đường/KanjiDex mà không cần huy hiệu.
-    // Xóa 'N4' khỏi mảng này trước khi release để khôi phục luồng N5 -> Gym -> N4.
+    // Chỉ áp dụng cho profile SANDBOX mặc định; nhân vật mới vẫn theo N5 -> Gym -> N4.
     testUnlockedTiers: ['N4'],
     gym: {
       N5: { questions: 10, passRatio: 0.8, badge: 'N5', unlocks: 'N4' },
@@ -208,8 +221,7 @@ window.CONFIG = {
   // sau khi effect gameplay tương ứng đã có test và feedback rõ ràng.
   SKILL_TREE: {
     version: 1,
-    // TEMP QA: cấp đủ breadth/depth thật qua mastery + milestone ledger để test
-    // toàn bộ node đã release. Đổi `enabled` thành false trước khi phát hành.
+    // Chỉ áp dụng cho profile SANDBOX mặc định để test toàn bộ node đã release.
     qaSeed: { enabled: true, capturedKanji: 45, level: 5 },
     layout: {
       width: 1100,

@@ -8,22 +8,43 @@ const ROOT = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 function createGame({ learningSave = null, gameSave = null, disableTestUnlocks = false, enableSkillQaSeed = false,
-  viewportWidth = 1280, viewportHeight = 720, devicePixelRatio = 1, canvasRect = null, mockFonts = false } = {}) {
+  characterSlotsSave = null, sandboxCharacter = false, viewportWidth = 1280, viewportHeight = 720, devicePixelRatio = 1, canvasRect = null, mockFonts = false } = {}) {
   const storage = new Map();
   const windowListeners = new Map();
   const canvasListeners = new Map();
   const touchBackListeners = new Map();
   let paintCalls = 0;
-  if (learningSave) storage.set('KANJIGO_LEARNING_V1', JSON.stringify(learningSave));
-  if (gameSave) storage.set('KANJIGO_GAME_V1', JSON.stringify(gameSave));
+  const drawCalls = [];
+  const effectiveCharacterSlots = characterSlotsSave || {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: sandboxCharacter ? 'Tester KanjiGO' : 'Test Player', gender: 'neutral', appearance: 'orange',
+      sandbox: sandboxCharacter, onboardingComplete: true }],
+  };
+  storage.set('KANJIGO_CHARACTER_SLOTS_V1', JSON.stringify(effectiveCharacterSlots));
+  const activeSlot = Math.max(1, Math.min(3, Math.floor(Number(effectiveCharacterSlots.activeSlot)) || 1));
+  const characterKey = (base) => activeSlot === 1 ? base : `${base}__CHARACTER_${activeSlot}`;
+  if (learningSave) storage.set(characterKey('KANJIGO_LEARNING_V1'), JSON.stringify(learningSave));
+  if (gameSave) storage.set(characterKey('KANJIGO_GAME_V1'), JSON.stringify(gameSave));
   const noop = () => {};
   const imageRequests = [];
   const textCalls = [];
   const canvasContext = new Proxy({
     measureText: (text) => ({ width: String(text).length * 8 }),
-    drawImage: (image) => { if (!image) throw new TypeError('drawImage received an unloaded image'); },
-    fillRect: () => { paintCalls++; },
-    fillText(text, x, y) { textCalls.push({ text: String(text), x, y, font: this.font || '', fillStyle: this.fillStyle || '' }); },
+    drawImage(image, ...args) {
+      if (!image) throw new TypeError('drawImage received an unloaded image');
+      drawCalls.push({ type: 'drawImage', src: image.src || '', args,
+        filter: typeof this.filter === 'string' ? this.filter : 'none',
+        globalAlpha: Number.isFinite(this.globalAlpha) ? this.globalAlpha : 1 });
+    },
+    fillRect(x, y, width, height) {
+      paintCalls++;
+      drawCalls.push({ type: 'fillRect', x, y, width, height, fillStyle: this.fillStyle || '' });
+    },
+    fillText(text, x, y) {
+      const call = { text: String(text), x, y, font: this.font || '', fillStyle: this.fillStyle || '',
+        filter: typeof this.filter === 'string' ? this.filter : 'none', globalAlpha: Number.isFinite(this.globalAlpha) ? this.globalAlpha : 1 };
+      textCalls.push(call); drawCalls.push({ type: 'fillText', ...call });
+    },
     createLinearGradient: () => ({ addColorStop: noop }),
     createRadialGradient: () => ({ addColorStop: noop }),
   }, {
@@ -60,6 +81,21 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
       touchBackListeners.get(type).push(listener);
     },
   };
+  const settingsOpenClasses = new Set();
+  const settingsOpenAttributes = new Map();
+  const settingsOpen = {
+    tabIndex: 0,
+    classList: {
+      toggle: (name, force) => {
+        const enabled = force === undefined ? !settingsOpenClasses.has(name) : Boolean(force);
+        if (enabled) settingsOpenClasses.add(name); else settingsOpenClasses.delete(name);
+        return enabled;
+      },
+      contains: (name) => settingsOpenClasses.has(name),
+    },
+    setAttribute: (name, value) => settingsOpenAttributes.set(name, String(value)),
+    getAttribute: (name) => settingsOpenAttributes.get(name) || null,
+  };
   const createCanvas = () => ({ width: 0, height: 0, getContext: () => canvasContext });
   class MockImage {
     set src(value) { this._src = value; imageRequests.push(value); if (this.onload) queueMicrotask(() => this.onload()); }
@@ -74,7 +110,9 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
       windowListeners.get(type).push(listener);
     },
     document: {
-      getElementById: (id) => id === 'game' ? canvas : id === 'touch-back' ? touchBack : null,
+      getElementById: (id) => id === 'game' ? canvas
+        : id === 'touch-back' ? touchBack
+          : id === 'settings-open' ? settingsOpen : null,
       querySelectorAll: () => [],
       createElement: (tag) => tag === 'canvas' ? createCanvas() : {},
       ...(mockFonts ? { fonts: { load: () => Promise.resolve([]), check: () => true } } : {}),
@@ -88,11 +126,13 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   };
   context.window = context;
   vm.createContext(context);
+  vm.runInContext(read('js/character-slots.js'), context, { filename: 'js/character-slots.js' });
   for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   context.CONFIG.SKILL_TREE.qaSeed.enabled = enableSkillQaSeed;
-  if (disableTestUnlocks) context.CONFIG.PROGRESSION.testUnlockedTiers = [];
+  context.CONFIG.SKILL_TREE.qaSeed.allowStandardQa = enableSkillQaSeed;
+  context.CONFIG.PROGRESSION.allowStandardQa = !disableTestUnlocks;
   vm.runInContext(read('js/game.js'), context, { filename: 'js/game.js' });
   const dispatchWindowEvent = (type, event) => {
     for (const listener of windowListeners.get(type) || []) listener(event);
@@ -104,18 +144,45 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     for (const listener of canvasListeners.get(type) || []) listener({ preventDefault: noop, pointerId: 1, ...event });
   };
   return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent, dispatchTouchBack,
-    dispatchCanvasEvent, textCalls, getPaintCalls: () => paintCalls,
+    dispatchCanvasEvent, textCalls, drawCalls, getPaintCalls: () => paintCalls,
     getTouchBack: () => ({ text: touchBack.textContent, title: touchBack.title,
-      ariaLabel: touchBack.getAttribute('aria-label'), classes: [...touchBackClasses] }) };
+      ariaLabel: touchBack.getAttribute('aria-label'), classes: [...touchBackClasses] }),
+    getSettingsOpen: () => ({ tabIndex: settingsOpen.tabIndex,
+      ariaHidden: settingsOpen.getAttribute('aria-hidden'), classes: [...settingsOpenClasses] }) };
 }
 
 test('game boots and exposes a usable QA API', () => {
   const { debug } = createGame();
   assert.equal(debug.state(), 'overworld');
   assert.equal(debug.getPet().id, 'kuni');
-  assert.equal(debug.getKanjiStat('魚').level, 10);
+  assert.equal(debug.getKanjiStat('魚').level, 1);
   assert.ok(debug.availableSpawn('grass').includes('kuni'));
-  assert.ok(debug.availableSpawn('water').includes('fish'));
+  assert.equal(debug.availableSpawn('water').includes('fish'), false);
+});
+
+test('default sandbox account unlocks test content while a new journey starts clean', () => {
+  const sandbox = createGame({ sandboxCharacter: true });
+  assert.equal(sandbox.debug.getKanjiStat('魚').level, 10);
+  assert.equal(sandbox.debug.availableSpawn('water').includes('fish'), true);
+  assert.equal(sandbox.debug.isTierUnlocked('N4'), true);
+  for (const definition of sandbox.debug.skillDefinitions().filter((item) => item.released !== false)) {
+    assert.equal(sandbox.debug.hasSkill(definition.id), true, `${definition.id} should be active in the sandbox profile`);
+  }
+
+  const fresh = createGame({ disableTestUnlocks: true });
+  assert.equal(fresh.debug.getKanjiStat('魚').level, 1);
+  assert.equal(fresh.debug.hasSkill('bicycle'), false);
+  assert.equal(fresh.debug.isTierUnlocked('N4'), false);
+});
+
+test('selected character appearance chooses the matching overworld animation sheet', () => {
+  const blue = createGame({ characterSlotsSave: {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: 'Aoi', gender: 'female', appearance: 'blue', sandbox: false, onboardingComplete: true }],
+  } });
+  assert.equal(blue.imageRequests.includes('assets/characters/player-v2.png'), false);
+  assert.equal(blue.imageRequests.filter((asset) => asset === 'assets/characters/npc-v2.png').length, 2,
+    'blue sheet should be loaded once for the player and once for NPCs');
 });
 
 test('successful bootstrap paints synchronously and resize repaints the cleared canvas', async () => {
@@ -213,6 +280,78 @@ test('desktop HUD reserves a dedicated right-side gutter for the Settings contro
   }
 });
 
+test('I opens a responsive character profile with live learning stats and badge progress', async () => {
+  const game = createGame({
+    learningSave: {
+      total: 10, correct: 8, wrong: 2, best: 4,
+      mastery: { 日: { captured: true, lectured: true, mp: 90, recall: 80 } },
+      vocabulary: {
+        'test-seen': { stage: 'seen', seenAt: 1 },
+        'test-mastered': { stage: 'mastered', seenAt: 1, masteredAt: 2 },
+      },
+      badges: { N5: true },
+    },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  game.dispatchWindowEvent('keydown', { key: 'i', repeat: false, preventDefault() {} });
+  assert.equal(game.debug.state(), 'profile');
+  assert.doesNotThrow(() => game.debug.renderOnce());
+  assert.ok(game.getSettingsOpen().classes.includes('game-ui-hidden'));
+  assert.equal(game.getSettingsOpen().ariaHidden, 'true');
+  assert.equal(game.getSettingsOpen().tabIndex, -1);
+
+  const stats = game.debug.getProfileStats();
+  assert.equal(stats.accuracy, 80);
+  assert.ok(stats.captured >= 1);
+  assert.ok(stats.levelsGained >= 4);
+  assert.equal(stats.vocabularySeen, 2);
+  assert.equal(stats.vocabularyMastered, 1);
+  assert.equal(stats.tiers.find((tier) => tier.id === 'N5').earned, true);
+  assert.ok(game.textCalls.some((call) => call.text === 'HỒ SƠ NHÂN VẬT'));
+  assert.ok(game.textCalls.some((call) => call.text === 'HUY HIỆU N5'));
+  const close = game.debug.getProfileUi().hitboxes.find((box) => box.action === 'close');
+  assert.ok(close && close.x >= 0 && close.y >= 0 && close.x + close.w <= game.debug.getCanvasSize().width);
+
+  game.dispatchWindowEvent('keydown', { key: 'I', repeat: false, preventDefault() {} });
+  assert.equal(game.debug.state(), 'overworld');
+  game.debug.renderOnce();
+  assert.ok(!game.getSettingsOpen().classes.includes('game-ui-hidden'));
+  assert.equal(game.getSettingsOpen().ariaHidden, 'false');
+  assert.equal(game.getSettingsOpen().tabIndex, 0);
+});
+
+test('active character slot scopes both saves and supplies the Profile display name', async () => {
+  const characterSlotsSave = {
+    version: 1, activeSlot: 2,
+    slots: [
+      { id: 1, name: 'Nhân vật 1', createdAt: 1, lastPlayedAt: 1 },
+      { id: 2, name: 'Akari', createdAt: 2, lastPlayedAt: 2 },
+    ],
+  };
+  const game = createGame({
+    characterSlotsSave,
+    learningSave: { mastery: { 日: { captured: true, lectured: true, mp: 30 } } },
+    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'kuni', stamina: 2 },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(game.debug.getKanjiStat('日').captured, true);
+  assert.ok(game.storage.has('KANJIGO_LEARNING_V1__CHARACTER_2'));
+  assert.ok(game.storage.has('KANJIGO_GAME_V1__CHARACTER_2'));
+  assert.equal(game.storage.has('KANJIGO_LEARNING_V1'), false, 'Slot 2 must not write into the legacy Slot 1 save');
+  game.debug.openProfile(); game.debug.renderOnce();
+  assert.ok(game.textCalls.some((call) => call.text === 'Akari'));
+});
+
+test('mobile profile renders in portrait and closes through the shared Back control', async () => {
+  const game = createGame({ viewportWidth: 390, viewportHeight: 844 });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(game.debug.openProfile(), true);
+  assert.doesNotThrow(() => game.debug.renderOnce());
+  assert.equal(game.getTouchBack().text, 'ĐÓNG');
+  game.dispatchTouchBack();
+  assert.equal(game.debug.state(), 'overworld');
+});
+
 test('academy interaction works from the approach tile and while standing in the doorway', () => {
   for (const position of [
     { gx: 7, gy: 9, facing: 'up', label: 'approach tile', input: 'space' },
@@ -226,7 +365,84 @@ test('academy interaction works from the approach tile and while standing in the
     assert.equal(debug.academyEntranceInReach(), true, `${position.label} should reach the academy`);
     dispatchWindowEvent('keydown', { key: position.input === 'enter' ? 'Enter' : ' ', preventDefault() {} });
     assert.equal(debug.state(), 'lecture', `${position.label} should enter the academy`);
+    debug.renderOnce();
   }
+});
+
+test('new character learns the selected starter while Aoi guides every onboarding location', () => {
+  const characterSlotsSave = {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false,
+      starterKanji: '日', onboardingComplete: false, onboardingIntroComplete: true, onboardingStep: 3, onboardingTourStep: 0 }],
+  };
+  const game = createGame({ characterSlotsSave, disableTestUnlocks: true });
+  const player = game.debug.getPlayer();
+  const placePlayer = (gx, gy, facing) => Object.assign(player, {
+    gx, gy, px: gx * 32, py: gy * 32, facing, moving: false,
+  });
+  const finishTwoLineGuideDialog = () => { game.debug.onSpace(); game.debug.onSpace(); };
+
+  let tour = game.debug.getOnboardingTour();
+  assert.equal(tour.stop.id, 'academy');
+  assert.equal(tour.profile.starterKanji, '日');
+  assert.equal(game.debug.getPet(), null, 'a new character must not receive the legacy default pet');
+  assert.equal(game.debug.hasFollower(), false);
+  assert.deepEqual(Object.keys(game.debug.petData()), []);
+  assert.equal(game.debug.getKanjiStat('国').captured, false);
+  assert.equal(game.debug.canWalk(tour.stop.gx, tour.stop.gy), false, 'active guide occupies her map tile');
+  placePlayer(8, 10, 'up');
+  game.debug.onSpace();
+  assert.equal(game.debug.getDialog().npc.name, 'Aoi');
+  finishTwoLineGuideDialog();
+  assert.equal(game.debug.state(), 'lecture');
+  assert.equal(game.debug.getLecture().char, '日', 'Academy opens the chosen starter instead of a random curriculum item');
+
+  assert.equal(game.debug.getOnboardingTour().stop.id, 'academy', 'opening the lesson alone must not advance onboarding');
+  game.debug.onLectureKey('enter');
+  game.debug.onLectureKey('enter');
+  revealAllAcademyCards(game.debug);
+  for (let index = 0; index < 3; index++) {
+    game.debug.answerLecture(game.debug.getLecture().q.correctIndex);
+    game.debug.onLectureKey('enter');
+  }
+  assert.equal(game.debug.getLecture().phase, 'ready');
+  game.debug.onLectureKey('enter');
+  assert.equal(game.debug.state(), 'capture');
+  for (let index = 0; index < 5; index++) {
+    game.debug.answerCapture(game.debug.getCapture().q.correctIndex);
+    game.debug.updateCapture(700);
+  }
+  assert.equal(game.debug.getCapture().passed, true);
+  assert.equal(game.debug.getKanjiStat('日').captured, true);
+  assert.equal(game.debug.getOnboardingTour().stop.id, 'wilderness', 'only capturing the selected starter advances the tour');
+  assert.equal(game.debug.getPet(), null, 'captured starter stays hidden until the mandatory tour is complete');
+  assert.equal(game.debug.hasFollower(), false);
+
+  game.debug.onCaptureKey('enter');
+  game.debug.onLectureKey('escape'); game.debug.onLectureKey('escape');
+  assert.equal(game.debug.state(), 'overworld');
+  tour = game.debug.getOnboardingTour();
+  assert.equal(tour.stop.id, 'wilderness');
+  placePlayer(31, 9, 'down');
+  game.debug.onSpace(); finishTwoLineGuideDialog();
+  assert.equal(game.debug.getOnboardingTour().stop.id, 'arena');
+
+  placePlayer(20, 15, 'down');
+  game.debug.onSpace(); finishTwoLineGuideDialog();
+  assert.equal(game.context.KanjiGOCharacters.active().onboardingComplete, true);
+  assert.equal(game.debug.getOnboardingTour(), null);
+  assert.equal(game.debug.hasFollower(), true);
+  assert.equal(game.context.CONFIG.MONSTERS[game.debug.getPet().id].kanji, '日');
+});
+
+test('Settings corner control stays out of the Academy canvas UI', () => {
+  const game = createGame();
+  game.debug.enterLecture();
+  game.debug.renderOnce();
+  const settings = game.getSettingsOpen();
+  assert.ok(settings.classes.includes('game-ui-hidden'));
+  assert.equal(settings.ariaHidden, 'true');
+  assert.equal(settings.tabIndex, -1);
 });
 
 function enterAcademyCards(debug, char = '日') {
@@ -469,11 +685,12 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 9);
+  assert.equal(imageRequests.length, 10);
   assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v2.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
+  assert.ok(imageRequests.includes('assets/world/trainer-theme-icons.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
 });
 
@@ -517,6 +734,33 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
   assert.doesNotThrow(() => debug.renderOnce());
   assert.equal(debug.state(), 'battle');
   assert.ok(debug.getBattle().q.options.length >= 2);
+});
+
+test('Trainer image icons stay crisp above the Arena tint and skip off-screen work', async () => {
+  const { debug, drawCalls } = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  drawCalls.length = 0;
+  debug.renderOnce();
+  assert.equal(drawCalls.some((call) => call.type === 'drawImage' && call.src === 'assets/world/trainer-theme-icons.png'), false,
+    'off-screen Trainer icons should not be rendered');
+
+  const player = debug.getPlayer();
+  player.gx = 20; player.gy = 23; player.px = 20 * 32; player.py = 23 * 32; player.moving = false;
+  drawCalls.length = 0;
+  debug.renderOnce();
+
+  const tintIndex = drawCalls.findIndex((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(17,25,48,.12)');
+  const iconIndex = drawCalls.findIndex((call) => call.type === 'drawImage'
+    && call.src === 'assets/world/trainer-theme-icons.png' && call.args[0] === 0 && call.args[1] === 0);
+  assert.ok(tintIndex >= 0, 'Arena tint should render');
+  assert.ok(iconIndex > tintIndex, 'Trainer icon must render after the translucent Arena floor');
+  assert.equal(drawCalls[iconIndex].filter, 'none', 'Trainer markers should avoid expensive per-frame filters');
+  assert.equal(drawCalls[iconIndex].globalAlpha, 1, 'Trainer icons must never inherit a translucent canvas state');
+  assert.equal(drawCalls.slice(iconIndex + 1).some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(17,25,48,.12)'), false,
+    'Arena tint must never wash out an already-rendered Trainer icon');
+  assert.ok(drawCalls.some((call) => call.type === 'drawImage' && call.src === 'assets/world/trainer-theme-icons.png'
+    && call.args[0] === 64 && call.args[1] === 192),
+    'the Librarian should use the bright open-book image from the atlas');
 });
 
 test('mobile battle quiz keeps touch answers and footer inside separate safe areas', () => {
@@ -625,16 +869,16 @@ test('fresh progression save records each eligible KP milestone once', () => {
   const progression = debug.getProgression();
 
   assert.equal(progression.version, 1);
-  assert.equal(progression.earnedKP, 6);
-  assert.equal(debug.availableKP(), 6);
+  assert.equal(progression.earnedKP, 1);
+  assert.equal(debug.availableKP(), 1);
   assert.deepEqual(
     Object.keys(progression.claimedMilestones).sort(),
-    ['capture:国', 'capture:魚', 'level10:魚', 'level3:魚', 'level5:魚', 'level7:魚'].sort(),
+    ['capture:国'],
   );
 
   const saved = JSON.parse(storage.get('KANJIGO_LEARNING_V1'));
-  assert.equal(saved.progression.earnedKP, 6);
-  assert.equal(Object.keys(saved.progression.claimedMilestones).length, 6);
+  assert.equal(saved.progression.earnedKP, 1);
+  assert.equal(Object.keys(saved.progression.claimedMilestones).length, 1);
 });
 
 test('legacy progress receives retroactive KP exactly once', () => {
@@ -646,19 +890,19 @@ test('legacy progress receives retroactive KP exactly once', () => {
   const first = createGame({ learningSave: legacySave });
   const firstProgression = first.debug.getProgression();
 
-  assert.equal(firstProgression.earnedKP, 9);
+  assert.equal(firstProgression.earnedKP, 4);
   assert.equal(firstProgression.claimedMilestones['capture:日'].migrated, true);
   assert.equal(firstProgression.claimedMilestones['level3:日'].migrated, true);
   assert.equal(firstProgression.claimedMilestones['level5:日'].migrated, true);
   const notice = first.debug.getProgressionNotice();
-  assert.equal(notice.kp, 9);
-  assert.equal(notice.milestones, 9);
+  assert.equal(notice.kp, 4);
+  assert.equal(notice.milestones, 4);
   assert.equal(notice.migrated, true);
 
   const persisted = JSON.parse(first.storage.get('KANJIGO_LEARNING_V1'));
   const second = createGame({ learningSave: persisted });
-  assert.equal(second.debug.getProgression().earnedKP, 9);
-  assert.equal(Object.keys(second.debug.getProgression().claimedMilestones).length, 9);
+  assert.equal(second.debug.getProgression().earnedKP, 4);
+  assert.equal(Object.keys(second.debug.getProgression().claimedMilestones).length, 4);
   assert.equal(second.debug.getProgressionNotice(), null);
 });
 
@@ -671,12 +915,12 @@ test('a level jump claims every crossed KP milestone without duplication', () =>
   const first = debug.evaluateKanjiMilestones('日');
   assert.equal(first.kp, 5);
   assert.deepEqual(Array.from(first.milestones).sort(), ['capture:日', 'level3:日', 'level5:日', 'level7:日', 'level10:日'].sort());
-  assert.equal(debug.availableKP(), 11);
+  assert.equal(debug.availableKP(), 6);
 
   const second = debug.evaluateKanjiMilestones('日');
   assert.equal(second.kp, 0);
   assert.equal(second.milestones.length, 0);
-  assert.equal(debug.availableKP(), 11);
+  assert.equal(debug.availableKP(), 6);
 });
 
 test('malformed progression data is sanitized without losing the learning save', () => {
@@ -698,12 +942,12 @@ test('malformed progression data is sanitized without losing the learning save',
 
   assert.equal(debug.getLearningStats().total, 4);
   assert.equal(progression.version, 1);
-  assert.equal(progression.earnedKP, 8);
+  assert.equal(progression.earnedKP, 3);
   assert.equal(progression.skillPurchases.broken, undefined);
   assert.equal(progression.skillPurchases.future_perk.type, 'perk');
   assert.equal(progression.skillPurchases.future_perk.cost, 2);
   assert.equal(progression.skillPurchases.future_perk.purchasedAt, 123);
-  assert.equal(debug.availableKP(), 6);
+  assert.equal(debug.availableKP(), 1);
 });
 
 function prepareSkillProfile(debug, count = 12, level = 5) {
@@ -939,7 +1183,7 @@ test('skill validation rejects duplicate IDs, cycles, and unknown effects', () =
 
 test('released skill effects resolve through the registry and change gameplay', () => {
   const { debug } = createGame();
-  prepareSkillProfile(debug, 12, 5);
+  prepareSkillProfile(debug, 20, 5);
 
   const weakStat = debug.mastery()['日'];
   weakStat.recall = 20;

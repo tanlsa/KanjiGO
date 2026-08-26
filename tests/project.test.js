@@ -142,13 +142,20 @@ test('every configured semantic monster effect is implemented by the renderer', 
 });
 
 test('spawn pools, assets, map, and progression references are valid', () => {
-  const { CONFIG, MAP_DATA, KANJI_CATALOG } = loadDataContext();
+  const { CONFIG, MAP_DATA, KANJI_CATALOG, KANJI_DB } = loadDataContext();
   for (const asset of Object.values(CONFIG.ASSETS)) assert.ok(fs.existsSync(path.join(ROOT, asset)), `missing asset ${asset}`);
   for (const [kind, ids] of Object.entries(CONFIG.SPAWN)) {
     assert.equal(new Set(ids).size, ids.length, `${kind} spawn pool contains duplicates`);
     ids.forEach((id) => assert.ok(CONFIG.MONSTERS[id], `${kind} spawn references missing monster ${id}`));
   }
   assert.ok(CONFIG.MONSTERS[CONFIG.PET.monId], 'starter pet is not configured');
+  const n5 = new Set(KANJI_CATALOG.tiers.N5.kanji), metadata = new Map(Object.values(KANJI_DB.KANJI).map((info) => [info.char, info]));
+  for (const starter of CONFIG.ONBOARDING.starterKanji) {
+    assert.ok(n5.has(starter.char), `onboarding starter ${starter.char} must belong to N5`);
+    assert.ok(starter.hanViet && starter.meaning && starter.reading, `onboarding starter ${starter.char} is missing display data`);
+    assert.ok(metadata.has(starter.char) && KANJI_DB.QUESTIONS.some((question) => question.target === starter.char), `onboarding starter ${starter.char} has incomplete lesson content`);
+    assert.ok(CONFIG.MONSTERS[metadata.get(starter.char).monId], `onboarding starter ${starter.char} has no mascot`);
+  }
   for (const seed of CONFIG.INITIAL_PETS) assert.ok(CONFIG.MONSTERS[seed.monId] && seed.level >= 1 && seed.level <= CONFIG.KLEVEL.maxLevel, 'invalid initial pet');
   const width = MAP_DATA.TILES[0].length;
   assert.ok(width > 0 && MAP_DATA.TILES.every((row) => row.length === width), 'map must be rectangular');
@@ -158,6 +165,7 @@ test('spawn pools, assets, map, and progression references are valid', () => {
   assert.ok(spawnTile !== undefined && !CONFIG.BLOCKED_TILES.includes(spawnTile), 'player starts outside the walkable map');
   assert.equal(MAP_DATA.TILES[CONFIG.ACADEMY.doorGy][CONFIG.ACADEMY.doorGx], CONFIG.TILE_KEYS.ACADEMY_DOOR, 'academy door config does not match map');
   for (const npc of MAP_DATA.NPCS) assert.ok(MAP_DATA.TILES[npc.gy]?.[npc.gx] !== undefined, `NPC at ${npc.gx},${npc.gy} is outside map`);
+  assert.equal((MAP_DATA.ONBOARDING_GUIDE?.stops || []).map((stop) => stop.id).join(','), 'academy,wilderness,arena');
   for (const [tier, definition] of Object.entries(KANJI_CATALOG.tiers)) {
     if (definition.requiresBadge) assert.ok(CONFIG.PROGRESSION.gym[definition.requiresBadge], `${tier} requires an unconfigured badge`);
   }
@@ -210,6 +218,7 @@ test('three world zones and every NPC are reachable from the campus start', () =
     [MAP_DATA.AREAS.wilderness.signGx, MAP_DATA.AREAS.wilderness.signGy, 'wilderness entrance'],
     [MAP_DATA.ARENA.centerGx, MAP_DATA.ARENA.centerGy, 'arena boss'],
     ...MAP_DATA.NPCS.map((npc) => [npc.gx, npc.gy, `NPC ${npc.gx},${npc.gy}`]),
+    ...(MAP_DATA.ONBOARDING_GUIDE?.stops || []).map((stop) => [stop.gx, stop.gy, `onboarding ${stop.id}`]),
   ];
   for (const [x, y, label] of destinations) assert.ok(visited.has(`${x},${y}`), `${label} is unreachable from player start`);
   const wilderness = MAP_DATA.AREAS.wilderness;
@@ -285,6 +294,11 @@ test('Trainer Arena has a single odd center axis and a complete wall tile atlas'
   assert.equal(png.width, 6 * CONFIG.TILE);
   assert.equal(png.height, CONFIG.TILE);
   assert.ok(png.colorType === 2 || png.colorType === 6, 'arena wall atlas must be RGB/RGBA');
+
+  const iconAtlas = pngInfo(CONFIG.ASSETS.trainerThemeIcons);
+  assert.equal(iconAtlas.width, 256);
+  assert.equal(iconAtlas.height, 256);
+  assert.equal(iconAtlas.colorType, 6, 'Trainer icon atlas must preserve transparent RGBA pixels');
 });
 
 test('CSV templates exactly mirror packaged runtime data', () => {
@@ -340,6 +354,8 @@ test('HTML loads game scripts in dependency order', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(scripts, ['js/content-catalog.js', 'js/config.js', 'js/audio-config.js', 'js/audio-manager.js',
-    'js/audio-settings-ui.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
+    'js/character-slots.js', 'js/audio-settings-ui.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
   assert.match(html, /<canvas\s+id="game"/);
+  assert.match(html, /data-action="profile"[^>]*aria-label="Mở Hồ sơ nhân vật"/);
+  assert.match(html, /Hồ sơ <kbd>I<\/kbd>/);
 });
