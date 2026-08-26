@@ -110,7 +110,13 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
     if (imageLoads[name]) return imageLoads[name];
     imageLoads[name] = new Promise((res) => {
       const im = new Image();
-      im.onload = () => { imgs[name] = im; delete imageLoads[name]; res(im); };
+      im.onload = () => {
+        imgs[name] = im; delete imageLoads[name];
+        // Mascot được nạp lazy khi đổi pet trong KanjiDex. Repaint ngay khi
+        // ảnh sẵn sàng để pet không trông như đã biến mất ở frame đầu tiên.
+        if (gameReady) render();
+        res(im);
+      };
       im.onerror = () => { failedImages.add(name); if (required) loadError = src; delete imageLoads[name]; res(null); };
       im.src = src;
     });
@@ -858,7 +864,15 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
           }
           petData[id] = { evolveStage: Math.max(0, Number(data.evolveStage) || 0) };
         }
-        if (C.MONSTERS[saved.currentPetId] && petData[saved.currentPetId]) currentPetId = saved.currentPetId;
+        if (C.MONSTERS[saved.currentPetId]) {
+          const savedMonster = C.MONSTERS[saved.currentPetId];
+          // Một số save cũ lưu currentPetId sau khi chọn trong Dex nhưng thiếu
+          // petData. Nếu mastery xác nhận đã thu phục thì khôi phục kho pet luôn.
+          if (!petData[saved.currentPetId] && ensureMastery(savedMonster.kanji).captured) {
+            petData[saved.currentPetId] = { evolveStage: 0 };
+          }
+          if (petData[saved.currentPetId]) currentPetId = saved.currentPetId;
+        }
         if (Number.isFinite(saved.stamina)) stamina = Math.max(0, Math.min(C.CAPTURE.stamina, saved.stamina));
         bicycleActive = saved.bicycleActive === true;
         autoRideActive = saved.autoRideActive === true;
@@ -931,6 +945,14 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   // Save cũ có pet thì xem như chữ tương ứng đã thu phục.
   for (const id of Object.keys(petData)) {
     if (C.MONSTERS[id]) ensureMastery(C.MONSTERS[id].kanji).captured = true;
+  }
+  // Chiều ngược lại cũng phải đúng: `captured` là nguồn dữ liệu học tập cũ,
+  // còn follower kiểm tra petData. Đồng bộ hai phía để mascot từ save migrate
+  // hoặc QA seed đều có thể được chọn và đi theo bình thường.
+  for (const info of Object.values(KDB.KANJI)) {
+    if (info && C.MONSTERS[info.monId] && ensureMastery(info.char).captured && !petData[info.monId]) {
+      petData[info.monId] = { evolveStage: 0 };
+    }
   }
   evaluateAllKpMilestones({ migrated: loadedLearningSave, toast: loadedLearningSave, save: false });
   saveLearning(); saveGame();
@@ -1702,7 +1724,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function endBattle() { state = 'overworld'; battle = null; }
 
   function isCollected(id) { return !!petData[id]; }
-  function collect(id) { if (!petData[id]) petData[id] = { evolveStage: 0 }; saveGame(); }
+  function collect(id) {
+    if (!C.MONSTERS[id]) return false;
+    if (!petData[id]) petData[id] = { evolveStage: 0 };
+    saveGame();
+    return true;
+  }
+  function equipPet(id) {
+    const monster = C.MONSTERS[id];
+    if (!monster || !ensureMastery(monster.kanji).captured || !collect(id)) return false;
+    currentPetId = id;
+    resetPetTrail();
+    monsterImg(id);
+    saveGame();
+    return true;
+  }
 
   // ---------- 📖 GIẢNG ĐƯỜNG + NGHI THỨC THU PHỤC ----------
   let lecture = null, capture = null;
@@ -2350,7 +2386,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     else if (k === 'enter' || k === ' ') {
       const info = kanjiInfo(dex.list[dex.sel]);
       if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) { showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return; }
-      currentPetId = info.monId; resetPetTrail(); saveGame();
+      if (!equipPet(info.monId)) { showToast('Không thể chọn mascot này. Hãy thử thu phục lại trong Giảng đường.'); return; }
       showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
       state = 'overworld';
     }
@@ -4775,7 +4811,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     },
     hasFollower: followerUnlocked,
     petData: () => petData, mastery: () => learning.mastery, makeQuestion, updateBattle,
-    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: (id) => { if (petData[id]) { currentPetId = id; ensureMastery(C.MONSTERS[id].kanji).captured = true; } saveGame(); },
+    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: equipPet,
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
     levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight,
     getKanjiStat: (kanji) => ({ ...ensureMastery(kanji) }), getStreak: (kanji) => { const s = ensureMastery(kanji); return { winStreak: s.winStreak, lossStreak: s.lossStreak, bestWinStreak: s.bestWinStreak }; },

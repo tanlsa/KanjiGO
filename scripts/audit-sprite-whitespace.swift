@@ -21,7 +21,7 @@ for path in CommandLine.arguments.dropFirst() {
     let i = position * bpp, r = Int(pixels[i]), g = Int(pixels[i + 1]), b = Int(pixels[i + 2]), a = Int(pixels[i + 3])
     return a > 220 && min(r, g, b) >= 205 && max(r, g, b) - min(r, g, b) <= 28
   }
-  var seen = [Bool](repeating: false, count: width * height), components: [(Int, Int, Int, Int, Int)] = []
+  var seen = [Bool](repeating: false, count: width * height), components: [(Int, Int, Int, Int, Int, Int, Int)] = []
   for start in 0..<(width * height) where !seen[start] && isWhite(start) {
     var queue = [start], cursor = 0, count = 0
     var minX = width, minY = height, maxX = 0, maxY = 0
@@ -35,8 +35,10 @@ for path in CommandLine.arguments.dropFirst() {
         if !seen[n] && isWhite(n) { seen[n] = true; queue.append(n) }
       }
     }
-    if count >= 8 { components.append((count, minX, minY, maxX, maxY)) }
+    if count >= 8 { components.append((count, minX, minY, maxX, maxY, start % width, start / width)) }
   }
-  let details = components.sorted { $0.0 > $1.0 }.prefix(12).map { "\($0.0)@[\($0.1),\($0.2)-\($0.3),\($0.4)]" }.joined(separator: " ")
+  let details = components.sorted { $0.0 > $1.0 }.prefix(12).map {
+    "\($0.0)@[\($0.1),\($0.2)-\($0.3),\($0.4)] seed(\($0.5),\($0.6))"
+  }.joined(separator: " ")
   print("\(path): \(details)")
 }

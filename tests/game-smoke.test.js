@@ -806,6 +806,43 @@ test('pet follow distance stays stable regardless of trail sample density', () =
   assert.ok(debug.getPetTrail().length < 12, 'old trail points were not pruned');
 });
 
+test('KanjiDex repairs a captured mascot missing from petData before equipping it', () => {
+  const game = createGame();
+  game.debug.mastery()['水'].captured = true;
+  assert.equal(game.debug.isCollected('mizu'), false, 'fixture must reproduce the split captured/petData state');
+
+  game.debug.openDex();
+  game.debug.onDexKey('home');
+  const targetIndex = game.debug.getDex().list.indexOf('水');
+  assert.ok(targetIndex >= 0, 'captured mascot must be present in KanjiDex');
+  for (let index = 0; index < targetIndex; index++) game.debug.onDexKey('arrowright');
+  game.debug.onDexKey('enter');
+
+  assert.equal(game.debug.isCollected('mizu'), true, 'equipping must reconcile the pet collection');
+  assert.equal(game.debug.getPet().id, 'mizu');
+  assert.equal(game.debug.hasFollower(), true);
+  assert.ok(game.imageRequests.includes('assets/monsters/mizu/sprite.png'), 'equipping must lazy-load the selected mascot');
+});
+
+test('legacy save restores a selected captured mascot even when its petData entry is missing', () => {
+  const game = createGame({
+    learningSave: { mastery: { 水: { captured: true, lectured: true, mp: 30 } } },
+    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'mizu', stamina: 3 },
+  });
+  assert.equal(game.debug.isCollected('mizu'), true);
+  assert.equal(game.debug.getPet().id, 'mizu');
+  assert.equal(game.debug.hasFollower(), true);
+});
+
+test('every configured captured Kanji mascot can be equipped as the active follower', () => {
+  const game = createGame();
+  for (const [id, monster] of Object.entries(game.context.CONFIG.MONSTERS)) {
+    game.debug.mastery()[monster.kanji].captured = true;
+    assert.equal(game.debug.setPet(id), true, `${monster.kanji}/${id} could not be equipped`);
+    assert.equal(game.debug.getPet().id, id, `${monster.kanji}/${id} did not become the active follower`);
+  }
+});
+
 test('N4 is badge-gated when the temporary QA override is disabled', () => {
   const { debug } = createGame({ disableTestUnlocks: true });
   assert.equal(debug.isTierUnlocked('N5'), true);

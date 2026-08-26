@@ -53,17 +53,29 @@ guard let cutoutContext = CGContext(data: &pixels, width: width, height: height,
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
       let cutout = cutoutContext.makeImage() else { exit(1) }
 
+var minX = width, minY = height, maxX = -1, maxY = -1
+for y in 0..<height { for x in 0..<width {
+  if pixels[(y * width + x) * bytesPerPixel + 3] > 0 {
+    minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y)
+  }
+}}
+guard maxX >= minX, maxY >= minY,
+      let cropped = cutout.cropping(to: CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)) else {
+  fputs("No foreground pixels remain after background cleanup.\n", stderr)
+  exit(1)
+}
+
 let canvasSize = 256, inset = 12
 var outputPixels = [UInt8](repeating: 0, count: canvasSize * canvasSize * bytesPerPixel)
 guard let outputContext = CGContext(data: &outputPixels, width: canvasSize, height: canvasSize, bitsPerComponent: 8,
                                     bytesPerRow: canvasSize * bytesPerPixel, space: colorSpace,
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { exit(1) }
 outputContext.interpolationQuality = .none
-let scale = min(CGFloat(canvasSize - inset * 2) / CGFloat(width), CGFloat(canvasSize - inset * 2) / CGFloat(height))
-let drawWidth = CGFloat(width) * scale, drawHeight = CGFloat(height) * scale
+let scale = min(CGFloat(canvasSize - inset * 2) / CGFloat(cropped.width), CGFloat(canvasSize - inset * 2) / CGFloat(cropped.height))
+let drawWidth = CGFloat(cropped.width) * scale, drawHeight = CGFloat(cropped.height) * scale
 let rect = CGRect(x: (CGFloat(canvasSize) - drawWidth) / 2, y: (CGFloat(canvasSize) - drawHeight) / 2,
                   width: drawWidth, height: drawHeight)
-outputContext.draw(cutout, in: rect)
+outputContext.draw(cropped, in: rect)
 
 guard let outputImage = outputContext.makeImage(),
       let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, UTType.png.identifier as CFString, 1, nil) else { exit(1) }
