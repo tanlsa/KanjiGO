@@ -126,6 +126,12 @@ test('index exposes a general Settings shell and keeps it above mobile Back', ()
   assert.match(html, /tối đa 3 nhân vật/i);
   assert.match(html, /id="settings-panel"[\s\S]*id="settings-audio-title"/);
   assert.match(html, /id="character-creator-view"[\s\S]*data-character-gender="female"[\s\S]*data-character-appearance="blue"/);
+  assert.match(html, /data-character-appearance="orange">Polo cam FSoft<\/button>/);
+  assert.match(html, /data-character-appearance="blue">Polo xanh FSoft<\/button>/,
+    'the legacy blue appearance ID should present the approved green polo uniform');
+  assert.doesNotMatch(html, /data-character-gender="neutral"/, 'the temporary Free-form gender option must stay hidden');
+  assert.match(html, /\.gender-female\.appearance-orange\{background-image:url\('assets\/characters\/player-female-orange-v4\.png'\)\}/);
+  assert.match(html, /\.gender-female\.appearance-blue\{background-image:url\('assets\/characters\/player-female-blue-v4\.png'\)\}/);
   assert.match(html, /id="onboarding-overlay"[\s\S]*id="onboarding-progress"/);
   const backZ = Number(html.match(/#touch-back\{[^}]*z-index:(\d+)/)?.[1]);
   const overlayZ = Number(html.match(/#settings-overlay\{[^}]*z-index:(\d+)/)?.[1]);

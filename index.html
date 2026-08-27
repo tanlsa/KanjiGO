@@ -92,7 +92,9 @@
   .character-slot-heading strong{color:#fff;font-size:13px}.character-slot.is-active .character-slot-heading span{color:#70f0ae}
   .character-avatar,.character-creator-avatar,.onboarding-avatar{display:block;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated}
   .character-avatar{grid-row:1/3;width:64px;height:64px;background-size:256px 256px;border:1px solid #49698f;border-radius:10px;background-color:#0a1530}
-  .appearance-orange{background-image:url('assets/characters/player-v2.png')}.appearance-blue{background-image:url('assets/characters/npc-v2.png')}
+  .appearance-orange{background-image:url('assets/characters/player-v4.png')}.appearance-blue{background-image:url('assets/characters/player-blue-v4.png')}
+  .gender-female.appearance-orange{background-image:url('assets/characters/player-female-orange-v4.png')}
+  .gender-female.appearance-blue{background-image:url('assets/characters/player-female-blue-v4.png')}
   .character-slot-copy{min-width:0}.character-slot p{margin:4px 0 0;color:#8fa5c4;font-size:11px}
   .character-empty-copy{grid-column:1/-1}.character-empty-copy strong,.character-empty-copy small{display:block}.character-empty-copy small{margin-top:4px;color:#8fa5c4}
   .character-slot-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
@@ -209,10 +211,10 @@
           <div class="character-creator-fields">
             <label><span>Tên nhân vật</span><input id="character-creator-name" type="text" maxlength="24" autocomplete="off" placeholder="Nhập tên nhân vật" /></label>
             <div><span class="character-picker-label">Giới tính</span><div class="character-picker">
-              <button type="button" data-character-gender="male">Nam</button><button type="button" data-character-gender="female">Nữ</button><button type="button" data-character-gender="neutral">Tự do</button>
+              <button type="button" data-character-gender="male">Nam</button><button type="button" data-character-gender="female">Nữ</button>
             </div></div>
             <div><span class="character-picker-label">Ngoại hình</span><div class="character-picker">
-              <button type="button" data-character-appearance="orange">Đồng phục cam</button><button type="button" data-character-appearance="blue">Đồng phục xanh</button>
+              <button type="button" data-character-appearance="orange">Polo cam FSoft</button><button type="button" data-character-appearance="blue">Polo xanh FSoft</button>
             </div></div>
           </div>
           <div class="character-creator-actions"><button id="character-creator-cancel" class="secondary" type="button">Huỷ</button><button id="character-creator-save" type="button">Tạo & bắt đầu</button></div>

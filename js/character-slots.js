@@ -9,7 +9,9 @@
   const GENDERS = ['male', 'female', 'neutral'];
   const APPEARANCES = ['orange', 'blue'];
   const GENDER_LABELS = { male: 'Nam', female: 'Nữ', neutral: 'Tự do' };
-  const APPEARANCE_LABELS = { orange: 'Đồng phục cam', blue: 'Đồng phục xanh' };
+  // Keep the persisted `blue` value for existing character saves; the visual
+  // option is now the approved dark-green FPT/GHC polo uniform.
+  const APPEARANCE_LABELS = { orange: 'Polo cam FSoft', blue: 'Polo xanh FSoft' };
   const ONBOARDING_STEPS = 4;
   const FALLBACK_STARTERS = [
     { char: '一', hanViet: 'NHẤT', meaning: 'một', reading: 'いち' },
@@ -189,7 +191,7 @@
     return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   }
   function avatarMarkup(slot, className = 'character-avatar') {
-    return `<span class="${className} appearance-${cleanAppearance(slot.appearance)}" aria-hidden="true"></span>`;
+    return `<span class="${className} gender-${cleanGender(slot.gender)} appearance-${cleanAppearance(slot.appearance)}" aria-hidden="true"></span>`;
   }
   function slotMarkup(id) {
     const slot = state.slots.find((value) => value.id === id);
@@ -246,7 +248,7 @@
     const save = document.getElementById('character-creator-save');
     if (title) title.textContent = creatorDraft.edit ? 'Chỉnh sửa nhân vật' : 'Tạo nhân vật mới';
     if (name) name.value = creatorDraft.name;
-    if (preview) preview.className = `character-creator-avatar appearance-${creatorDraft.appearance}`;
+    if (preview) preview.className = `character-creator-avatar gender-${creatorDraft.gender} appearance-${creatorDraft.appearance}`;
     if (save) save.textContent = creatorDraft.edit ? 'Lưu thay đổi' : 'Tạo & bắt đầu';
     document.querySelectorAll?.('[data-character-gender]').forEach((button) => {
       button.classList.toggle('selected', button.dataset.characterGender === creatorDraft.gender);
@@ -259,7 +261,7 @@
     const slot = state.slots.find((value) => value.id === Number(id));
     creatorDraft = {
       id: Number(id), edit: Boolean(slot), name: slot ? slot.name : `Nhân vật ${id}`,
-      gender: slot ? slot.gender : 'neutral', appearance: slot ? slot.appearance : 'orange',
+      gender: slot ? slot.gender : 'male', appearance: slot ? slot.appearance : 'orange',
     };
     document.getElementById('character-list-view')?.classList.add('settings-page-hidden');
     document.getElementById('character-creator-view')?.classList.remove('settings-page-hidden');
@@ -273,11 +275,16 @@
     refreshSettings();
   }
   function bindCreator() {
+    const nameInput = document.getElementById('character-creator-name');
+    const preserveTypedName = () => {
+      if (creatorDraft && nameInput) creatorDraft.name = nameInput.value;
+    };
+    nameInput?.addEventListener('input', preserveTypedName);
     document.querySelectorAll?.('[data-character-gender]').forEach((button) => {
-      button.addEventListener('click', () => { if (creatorDraft) { creatorDraft.gender = cleanGender(button.dataset.characterGender); syncCreatorUi(); } });
+      button.addEventListener('click', () => { if (creatorDraft) { preserveTypedName(); creatorDraft.gender = cleanGender(button.dataset.characterGender); syncCreatorUi(); } });
     });
     document.querySelectorAll?.('[data-character-appearance]').forEach((button) => {
-      button.addEventListener('click', () => { if (creatorDraft) { creatorDraft.appearance = cleanAppearance(button.dataset.characterAppearance); syncCreatorUi(); } });
+      button.addEventListener('click', () => { if (creatorDraft) { preserveTypedName(); creatorDraft.appearance = cleanAppearance(button.dataset.characterAppearance); syncCreatorUi(); } });
     });
     document.getElementById('character-creator-cancel')?.addEventListener('click', showCharacterList);
     document.getElementById('character-creator-save')?.addEventListener('click', () => {
@@ -328,7 +335,7 @@
     if (!open) return;
     const copy = onboardingCopy(step, slot);
     const avatar = document.getElementById('onboarding-avatar');
-    if (avatar) avatar.className = `onboarding-avatar appearance-${slot.appearance}`;
+    if (avatar) avatar.className = `onboarding-avatar gender-${slot.gender} appearance-${slot.appearance}`;
     const eyebrow = document.getElementById('onboarding-eyebrow'); if (eyebrow) eyebrow.textContent = copy.eyebrow;
     const title = document.getElementById('onboarding-title'); if (title) title.innerHTML = copy.title;
     const body = document.getElementById('onboarding-copy'); if (body) body.textContent = copy.body;

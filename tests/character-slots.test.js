@@ -9,8 +9,37 @@ const source = fs.readFileSync(path.join(ROOT, 'js/character-slots.js'), 'utf8')
 
 function createManager(seed = {}) {
   const storage = new Map(Object.entries(seed).map(([key, value]) => [key, typeof value === 'string' ? value : JSON.stringify(value)]));
-  const slotsElement = { innerHTML: '', querySelectorAll: () => [], querySelector: () => null };
-  const statusElement = { textContent: '' };
+  const createElement = (id, dataset = {}) => {
+    const listeners = new Map(), classes = new Set();
+    return {
+      id, dataset, innerHTML: '', value: '', textContent: '', className: '', disabled: false,
+      classList: {
+        add: (...names) => names.forEach((name) => classes.add(name)),
+        remove: (...names) => names.forEach((name) => classes.delete(name)),
+        toggle(name, force) {
+          const enabled = force === undefined ? !classes.has(name) : Boolean(force);
+          if (enabled) classes.add(name); else classes.delete(name);
+          return enabled;
+        },
+        contains: (name) => classes.has(name),
+      },
+      addEventListener(type, listener) {
+        if (!listeners.has(type)) listeners.set(type, []);
+        listeners.get(type).push(listener);
+      },
+      dispatch(type, event = {}) {
+        for (const listener of listeners.get(type) || []) listener({ target: this, preventDefault() {}, ...event });
+      },
+      setAttribute() {}, focus() {}, querySelectorAll: () => [], querySelector: () => null,
+    };
+  };
+  const elements = new Map();
+  ['character-slots', 'character-slot-status', 'character-list-view', 'character-creator-view',
+    'character-creator-title', 'character-creator-name', 'character-creator-avatar',
+    'character-creator-save', 'character-creator-cancel'].forEach((id) => elements.set(id, createElement(id)));
+  const slotsElement = elements.get('character-slots');
+  const genderButtons = ['male', 'female'].map((gender) => createElement(`gender-${gender}`, { characterGender: gender }));
+  const appearanceButtons = ['orange', 'blue'].map((appearance) => createElement(`appearance-${appearance}`, { characterAppearance: appearance }));
   let reloads = 0;
   const context = {
     console,
@@ -19,14 +48,19 @@ function createManager(seed = {}) {
       setItem: (key, value) => storage.set(key, String(value)),
       removeItem: (key) => storage.delete(key),
     },
-    document: { getElementById: (id) => id === 'character-slots' ? slotsElement : id === 'character-slot-status' ? statusElement : null },
+    document: {
+      getElementById: (id) => elements.get(id) || null,
+      querySelectorAll: (selector) => selector === '[data-character-gender]' ? genderButtons
+        : selector === '[data-character-appearance]' ? appearanceButtons : [],
+    },
     location: { reload: () => { reloads++; } },
     confirm: () => true,
   };
   context.window = context;
   vm.createContext(context);
   vm.runInContext(source, context, { filename: 'js/character-slots.js' });
-  return { api: context.KanjiGOCharacters, storage, slotsElement, getReloads: () => reloads };
+  return { api: context.KanjiGOCharacters, storage, slotsElement, elements, genderButtons, appearanceButtons,
+    getReloads: () => reloads };
 }
 
 test('legacy progress remains Slot 1 and up to three isolated characters can be created', () => {
@@ -129,4 +163,23 @@ test('character switching is blocked when the game cannot safely flush the activ
   assert.equal(manager.api.remove(1).reason, 'busy');
   assert.equal(manager.api.active().id, 1);
   assert.equal(manager.getReloads(), 0);
+});
+
+test('creator preserves the typed name while gender and uniform previews change', () => {
+  const manager = createManager();
+  manager.api.openCreator(2);
+  const name = manager.elements.get('character-creator-name');
+  name.value = 'Mai Anh';
+  name.dispatch('input');
+
+  manager.appearanceButtons.find((button) => button.dataset.characterAppearance === 'blue').dispatch('click');
+  assert.equal(name.value, 'Mai Anh');
+  manager.genderButtons.find((button) => button.dataset.characterGender === 'female').dispatch('click');
+  assert.equal(name.value, 'Mai Anh');
+  assert.match(manager.elements.get('character-creator-avatar').className, /gender-female appearance-blue/);
+
+  manager.elements.get('character-creator-save').dispatch('click');
+  assert.equal(manager.api.active().name, 'Mai Anh');
+  assert.equal(manager.api.active().gender, 'female');
+  assert.equal(manager.api.active().appearance, 'blue');
 });

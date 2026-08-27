@@ -175,14 +175,21 @@ test('default sandbox account unlocks test content while a new journey starts cl
   assert.equal(fresh.debug.isTierUnlocked('N4'), false);
 });
 
-test('selected character appearance chooses the matching overworld animation sheet', () => {
+test('selected character gender and appearance choose the matching overworld animation sheet', () => {
   const blue = createGame({ characterSlotsSave: {
     version: 2, activeSlot: 1,
     slots: [{ id: 1, name: 'Aoi', gender: 'female', appearance: 'blue', sandbox: false, onboardingComplete: true }],
   } });
-  assert.equal(blue.imageRequests.includes('assets/characters/player-v2.png'), false);
-  assert.equal(blue.imageRequests.filter((asset) => asset === 'assets/characters/npc-v2.png').length, 2,
-    'blue sheet should be loaded once for the player and once for NPCs');
+  assert.equal(blue.imageRequests.includes('assets/characters/player-v4.png'), false);
+  assert.equal(blue.imageRequests.includes('assets/characters/player-female-blue-v4.png'), true);
+  assert.equal(blue.imageRequests.filter((asset) => asset === 'assets/characters/npc-v4.png').length, 1,
+    'the NPC sheet should no longer double as the female player sheet');
+
+  const orange = createGame({ characterSlotsSave: {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false, onboardingComplete: true }],
+  } });
+  assert.equal(orange.imageRequests.includes('assets/characters/player-female-orange-v4.png'), true);
 });
 
 test('successful bootstrap paints synchronously and resize repaints the cleared canvas', async () => {
@@ -688,7 +695,7 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
   assert.equal(imageRequests.length, 10);
-  assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v2.png'));
+  assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
@@ -724,6 +731,30 @@ test('walking animation preserves its phase across connected tile steps', () => 
   assert.equal(player.frame, 1, 'tile boundary must not snap the walk cycle to frame zero');
   debug.updateOverworld(1);
   assert.equal(player.frame, 0, 'idle pose should still reset to frame zero');
+});
+
+test('walking cadence preserves elapsed remainder and resets cleanly when turning', () => {
+  const { debug } = createGame();
+  const player = debug.getPlayer();
+
+  debug.tryMove('down');
+  debug.updateOverworld(250);
+  assert.equal(player.frame, 2, 'a delayed update must advance every elapsed animation frame');
+  assert.equal(player.animT, 10, 'animation timing must retain the unconsumed remainder');
+
+  player.moving = false;
+  player.frame = 3;
+  player.animT = 47;
+  debug.tryMove('left');
+  assert.equal(player.frame, 0, 'changing direction must begin on the contact pose');
+  assert.equal(player.animT, 0, 'changing direction must not inherit timing from another sprite row');
+
+  player.moving = false;
+  player.frame = 2;
+  player.animT = 31;
+  debug.updateOverworld(1);
+  assert.equal(player.frame, 0);
+  assert.equal(player.animT, 0, 'idle must fully reset the next walking cycle');
 });
 
 test('battle renders its HUD and quiz while a lazy enemy sprite is still loading', async () => {

@@ -12,9 +12,26 @@ assets/
 │   ├── player-bicycle.png
 │   ├── npc.png
 │   ├── player-v2.png
+│   ├── player-female-orange-v2.png
+│   ├── player-female-blue-v2.png
 │   ├── player-canonical-v2.png
 │   ├── bicycle-overlay-v2.png
-│   └── npc-v2.png
+│   ├── npc-v2.png
+│   ├── player-v3.png
+│   ├── player-v4.png
+│   ├── player-blue-v4.png
+│   ├── player-hd96.png
+│   ├── player-female-orange-v3.png
+│   ├── player-female-orange-v4.png
+│   ├── player-female-orange-hd96.png
+│   ├── player-female-blue-v3.png
+│   ├── player-female-blue-v4.png
+│   ├── player-female-blue-hd96.png
+│   ├── bicycle-overlay-v3.png
+│   ├── bicycle-overlay-v4.png
+│   ├── npc-v3.png
+│   ├── npc-hd96.png
+│   └── npc-v4.png
 ├── world/
 │   ├── tileset.png
 │   ├── terrain-tiles.png
@@ -42,15 +59,83 @@ giữa Windows, macOS và mobile.
 
 ## Characters
 
-Các resource runtime `player-v2.png`, `bicycle-overlay-v2.png` và `npc-v2.png` là spritesheet RGBA `128×128 px`, gồm `4×4` cell `32×32 px`. Thứ tự hàng khớp `DIR_ROW`: `down`, `left`, `right`, `up`. Player/NPC dùng chung canonical head trước/sau từ `player-canonical-v2.png`; hai hàng trái/phải giữ nguyên animation đã duyệt. Hướng phải được mirror deterministic từ hướng trái. Player giữ áo cam và thẻ nhân viên, NPC dùng áo xanh để đọc vai trò rõ hơn trên map.
+Các sheet player V4 (`player-v4.png`, `player-blue-v4.png` và hai biến thể nữ)
+đều là RGBA `512×512 px`, gồm `4×4` cell `128×128 px`. Renderer lấy trực tiếp
+mỗi cell và thu về `32×32 px` lúc vẽ trên map. Cả sheet nam và nữ đều giữ chi
+tiết nguồn native `128px`; các điểm lấy mẫu ở mắt chính diện được kiểm tra đối
+xứng sau khi thu nhỏ để không rơi mất riêng một mắt. Điểm neo chân và collision
+vẫn đúng một tile. `npc-v4.png` dùng cùng skeleton và polo xanh lá V4, cũng render `128→32`,
+để NPC khớp tỷ lệ và phong cách với player. Hàng `up` chừa safe padding trên
+crown/ponytail để tóc không bị cắt.
 
-Khi lên xe, renderer nâng `player-v2.png` lên theo `BICYCLE.riderLift`, sau đó chồng `bicycle-overlay-v2.png` ở foreground. Hướng trước/sau hạ riêng overlay bằng `verticalOverlayDrop` để tay lái nằm ở ngực thay vì che mặt. Riêng hàng `up` chỉ giữ một bánh sau đen/xám ở chính giữa vì hai bánh chồng trục khi nhìn từ phía sau; không có trục cam chọc vào lưng. Overlay không chứa rider, nên tóc, mặt, đồng phục và animation không đổi khi bật/tắt xe. Các file không có hậu tố `-v2` và `player-bicycle-v2.png` được giữ làm resource legacy.
+Các resource runtime HD `player-hd96.png`, hai biến thể
+`player-female-*-hd96.png` và `npc-hd96.png` là spritesheet RGBA `384×384 px`,
+gồm `4×4` cell nguồn `96×96 px`. Thứ tự hàng khớp `DIR_ROW`: `down`, `left`,
+`right`, `up`. Renderer thu chính xác `96→48 px`, neo chân bottom-center vào
+tile va chạm `32px` khi dùng làm resource legacy; runtime hiện dùng NPC V4.
+Nhân vật có thể phủ lên tile phía trên nhưng logic map, camera và collision
+không đổi. Các sheet v3 `256×256`/cell `64px` được giữ làm
+bản so sánh và fallback; `bicycle-overlay-v3.png` vẫn dùng cell `64px` riêng.
 
-Nếu sheet runtime đã được duyệt và chỉ cần sửa mắt chính diện, dùng chế độ surgical để giữ nguyên toàn bộ pixel khác; mắt phải được copy đối xứng trực tiếp từ mắt trái:
+Hai lựa chọn màu dùng chung silhouette polo nhân viên FSoft: cam và xanh lá
+đậm, với cổ áo, tay ngắn, logo nhỏ và thẻ nhân viên. Path ngoại hình runtime
+mang ID legacy `blue` hiển thị polo xanh qua các sheet V4; ID `blue` được giữ
+để save nhân vật cũ không cần migration. Tất cả
+sheet được dựng như một nhân vật hoàn chỉnh, không ghép đầu/thân/chân giữa V2
+và V3. V2 chỉ là tham chiếu cho nhịp `contact → stride A → contact → stride B`;
+toàn bộ anatomy V3 được vẽ lại cùng một skeleton. Sau khi chuẩn hóa, đầu của
+frame contact trong chính hướng đó được khóa cho cả hàng, hàng phải được mirror
+từ hàng trái và mọi pixel runtime là cụm nguồn `2×2`. Vì vậy canvas thu
+`96→48 px` không làm rơi riêng một mắt hoặc tạo rung nửa pixel. Renderer phát
+trực tiếp `0 → 1 → 2 → 3`. Các file v2 `128×128` chỉ được giữ làm nguồn
+legacy/fallback và tham chiếu timing.
+
+Khi lên xe, renderer nâng player lên theo `BICYCLE.riderLift`, sau đó chồng
+`bicycle-overlay-v4.png` ở foreground. Overlay dùng cell nguồn native `128px`,
+không chứa rider và render `32px` cùng player V4. Hàng trái/phải mirror
+deterministic; trước/sau có đúng một bánh nhìn thấy theo trục phối cảnh. Bốn
+frame khóa chung tâm xe và baseline, chỉ thay nhịp pedal/highlight bánh.
+
+Để chuẩn hóa một sheet hoàn chỉnh do ImageGen xuất, loại checkerboard nối với
+mép, giữ component nhân vật chính, đưa footprint nguồn về `84 px`, khóa baseline và
+trục thân, khóa đầu theo từng hướng, căn đúng grid runtime và mirror hướng phải:
 
 ```sh
-swift scripts/prepare-character-spritesheet.swift INPUT.png OUTPUT.png --eye-fix-only
+node scripts/normalize-character-v3.js GENERATED.png \
+  assets/characters/player-hd96.png \
+  --frame-size 96 --uniform-height --target-height 84 --stabilize \
+  --runtime-grid --lock-heads
 ```
+
+Sheet nữ thêm căn trục mặt và mắt chính diện ở đúng grid hiển thị:
+
+```sh
+node scripts/normalize-character-v3.js GENERATED_FEMALE.png \
+  assets/characters/player-female-orange-hd96.png \
+  --frame-size 96 --uniform-height --target-height 84 --stabilize \
+  --runtime-grid --lock-heads --female-front-align
+```
+
+Chuẩn hóa V4 128px/frame mà vẫn giữ chi tiết nguồn native:
+
+```sh
+node scripts/normalize-character-v3.js GENERATED_V4.png \
+  assets/characters/player-v4.png \
+  --frame-size 128 --runtime-size 32 --uniform-height --target-height 112 \
+  --stabilize --lock-heads
+```
+
+Chuẩn hóa overlay xe đạp, khóa tâm/baseline và tạo hướng phải từ hướng trái:
+
+```sh
+swift scripts/normalize-grid-spritesheet.swift GENERATED_BICYCLE.png \
+  assets/characters/bicycle-overlay-v4.png 128 \
+  --center-frames --mirror-right
+```
+
+Không dùng lại pipeline ghép vùng chân từ một sheet khác: cách đó phá tỉ lệ cơ
+thể và tạo seam ở hông. Kiểm tra production sheet bằng
+`scripts/audit-character-animation.swift` và `tests/character-animation.test.js`.
 
 Chuẩn hóa sheet nguồn do image generator xuất theo thứ tự `up`, `left`, `right`, `down`:
 
@@ -60,6 +145,28 @@ swift scripts/prepare-character-spritesheet.swift INPUT.png OUTPUT.png \
 ```
 
 Pipeline flood-fill checkerboard từ mép ảnh, giữ lại màu trắng kín bên trong mắt/thẻ/xe; dùng một scale chung cho 16 frame, khóa đầu theo từng hướng và căn chung baseline để animation không bị co giãn hoặc rung mặt.
+
+Với sheet đã có đúng thứ tự runtime `down`, `left`, `right`, `up` nhưng gutter
+không chia đúng tuyệt đối theo bốn phần bằng nhau, nhận diện 16 character
+component trước khi đưa từng frame về cell `32×32`:
+
+```sh
+swift scripts/prepare-character-spritesheet.swift INPUT.png OUTPUT.png \
+  --detect-components --lock-head \
+  --head-source APPROVED_SHEET.png --all-direction-heads
+```
+
+Đây là pipeline legacy cho sheet `128×128`. Asset runtime HD phải dùng
+`normalize-character-v3.js` ở trên để kiểm tra trực tiếp footprint `96→48`.
+Thêm `--safe-margin` cho asset legacy cần viền trống `2px` ở trên và dưới.
+
+Tạo biến thể đồng phục xanh từ sheet nữ cam đã duyệt:
+
+```sh
+swift scripts/recolor-character-uniform.swift \
+  assets/characters/player-female-orange-hd96.png \
+  assets/characters/player-female-blue-hd96.png
+```
 
 Tạo lại sheet xe đạp từ turnaround xe `2×2` (`down`, `left`, `right`, `up`):
 

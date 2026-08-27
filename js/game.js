@@ -1278,7 +1278,12 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     return direction;
   }
   function tryMove(dir) {
+    const changedDirection = player.facing !== dir;
     player.facing = dir;
+    // A turn starts from the authored contact pose. Keeping the previous row's
+    // phase made the torso appear to jump when the source row changed while a
+    // stride frame was active.
+    if (changedDirection) { player.frame = 0; player.animT = 0; }
     const [dx, dy] = delta(dir);
     const nx = player.gx + dx, ny = player.gy + dy;
     if (!canWalk(nx, ny)) return;
@@ -2789,7 +2794,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillText('HỌC GIẢ KANJI', x + w / 2, y + 23);
     const spriteSize = compact ? Math.min(56, h - 48) : Math.min(82, w * .38, h * .3);
     const spriteY = compact ? y + 34 : y + 40;
-    if (imgs.player) cx.drawImage(imgs.player, 0, 0, TILE, TILE, x + 13, spriteY, spriteSize, spriteSize);
+    const characterFrame = activePlayerFrameSize;
+    if (imgs.player) cx.drawImage(imgs.player, 0, 0, characterFrame, characterFrame, x + 13, spriteY, spriteSize, spriteSize);
     const petImage = followerUnlocked() ? monsterImg(currentPetId) : null;
     if (petImage) {
       const sourceW = petImage.naturalWidth || petImage.width || 1, sourceH = petImage.naturalHeight || petImage.height || sourceW;
@@ -2938,7 +2944,14 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       player.py = player.fromY + (player.toY - player.fromY) * k;
       const animMs = isBicycleActive() ? C.ANIM_MS * Math.max(.3, Number(C.BICYCLE && C.BICYCLE.animMultiplier) || .55)
         : player.running ? (C.RUN_ANIM_MS || C.ANIM_MS * 0.6) : C.ANIM_MS;
-      player.animT += dt; if (player.animT >= animMs) { player.animT = 0; player.frame = (player.frame + 1) % C.FRAMES; }
+      player.animT += dt;
+      // Preserve elapsed-time remainder and catch up after a slow render frame.
+      // Resetting to zero here accumulated visual drift and produced irregular
+      // contact/stride durations on lower-end devices.
+      while (player.animT >= animMs) {
+        player.animT -= animMs;
+        player.frame = (player.frame + 1) % C.FRAMES;
+      }
       // Preserve the animation phase at tile boundaries. Holding a direction
       // therefore continues the same four-frame cycle instead of snapping to
       // frame zero after every 32 px step. The idle branch resets it naturally.
@@ -2950,7 +2963,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       else if (pressedRight()) tryMove('right');
       else if (pressed('up')) tryMove('up');
       else if (pressed('down')) tryMove('down');
-      else player.frame = 0;
+      else { player.frame = 0; player.animT = 0; }
     }
     if (player.moving) recordPlayerTrail();
     else recordPlayerTrail(true);
@@ -3037,9 +3050,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     context.drawImage(atlas, atlasIndex * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
   }
   function drawTile(idx, sx, sy) { drawTileOn(cx, idx, sx, sy); }
-  function drawSprite(img, dir, frame, sx, sy, size = TILE) {
-    const offsetX = (size - TILE) / 2, offsetY = size - TILE;
-    cx.drawImage(img, frame * TILE, C.DIR_ROW[dir] * TILE, TILE, TILE, sx - offsetX, sy - offsetY, size, size);
+  function drawSprite(img, dir, frame, sx, sy,
+    size = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE),
+    frameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.frameSize) || TILE)) {
+    const drawSize = Math.max(TILE, Math.round(size));
+    const offsetX = (drawSize - TILE) / 2, offsetY = drawSize - TILE;
+    cx.drawImage(img, frame * frameSize, C.DIR_ROW[dir] * frameSize, frameSize, frameSize,
+      Math.round(sx - offsetX), Math.round(sy - offsetY), drawSize, drawSize);
   }
   function drawCharacterShadow(sx, sy, width = 18) {
     cx.fillStyle = 'rgba(16,24,28,.22)';
@@ -3222,7 +3239,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
       if (npcX < -TILE * 2 || npcX > VIEW_PX_W + TILE || npcY < -TILE * 2 || npcY > VIEW_PX_H + TILE) continue;
       drawCharacterShadow(npcX, npcY);
-      drawSprite(imgs.npc, 'down', 0, npcX, npcY);
+      drawSprite(imgs.npc, 'down', 0, npcX, npcY,
+        C.CHARACTER.npcV4DrawSize, C.CHARACTER.npcV4FrameSize);
       if (n.icon) drawNpcThemeIcon(n, npcX, npcY);
       if (n.type === 'trainer') {
         const status = trainerStatus(n.trainerId), marker = status.state === 'defeated' ? '✓' : status.state === 'locked' ? '×' : '!';
@@ -3243,11 +3261,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (!player.onBoat) drawCharacterShadow(playerX, playerY, riding ? 27 : 18);
     // Keep the bicycle in the foreground and lift the canonical player behind
     // it. Mounting never swaps the rider's face, uniform or animation source.
-    const riderY = playerY - (riding ? Math.max(0, Number(C.BICYCLE.riderLift) || 0) : 0);
-    const bicycleY = playerY + (riding && (player.facing === 'down' || player.facing === 'up')
-      ? Math.max(0, Number(C.BICYCLE.verticalOverlayDrop) || 0) : 0);
-    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY);
-    if (riding) drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY, TILE * (C.BICYCLE.spriteScale || 1));
+    const riderY = playerY - (riding
+      ? Math.round(Math.max(0, Number(C.BICYCLE.riderLift) || 0) * activePlayerDrawScale) : 0);
+    const bicycleOverlayDrop = player.facing === 'down' || player.facing === 'up'
+      ? C.BICYCLE.verticalOverlayDrop : C.BICYCLE.sideOverlayDrop;
+    const bicycleY = playerY + (riding
+      ? Math.round(Math.max(0, Number(bicycleOverlayDrop) || 0) * activePlayerDrawScale) : 0);
+    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY,
+      activePlayerDrawSize, activePlayerFrameSize);
+    if (riding) {
+      const bicycleDrawSize = Math.max(TILE, Math.round(
+        (Number(C.CHARACTER && C.CHARACTER.bicycleDrawSize) || TILE) * activePlayerDrawScale));
+      const bicycleFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.bicycleFrameSize) || TILE);
+      drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY,
+        bicycleDrawSize, bicycleFrameSize);
+    }
     drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
     drawMapSigns(camX, camY);
@@ -3344,7 +3372,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = `rgba(255,214,93,${.10 + pulse * .12})`; cx.beginPath(); cx.arc(x + 16, y + 19, 18 + pulse * 3, 0, Math.PI * 2); cx.fill();
     cx.strokeStyle = `rgba(255,222,100,${.58 + pulse * .34})`; cx.lineWidth = 2; cx.beginPath(); cx.ellipse(x + 16, y + 29, 15 + pulse * 2, 5 + pulse, 0, 0, Math.PI * 2); cx.stroke();
     drawCharacterShadow(x, y);
-    drawSprite(imgs.npc, tour.stop.facing || 'down', Math.floor(now / 360) % 2, x, y);
+    drawSprite(imgs.npc, tour.stop.facing || 'down', Math.floor(now / 360) % 2, x, y,
+      C.CHARACTER.npcV4DrawSize, C.CHARACTER.npcV4FrameSize);
     const label = `✦ ${tour.name}`;
     cx.font = 'bold 8px "KanjiGo UI",sans-serif';
     const labelW = Math.max(42, cx.measureText(label).width + 10), labelX = x + 16 - labelW / 2;
@@ -4781,8 +4810,20 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
 
   // ---------- KHỞI ĐỘNG ----------
-  const activeAppearance = activeCharacterProfile()?.appearance;
-  const activePlayerAsset = activeAppearance === 'blue' && C.ASSETS.playerBlue ? C.ASSETS.playerBlue : C.ASSETS.player;
+  const activeProfile = activeCharacterProfile();
+  const activeAppearance = activeProfile?.appearance;
+  const activePlayerAsset = activeProfile?.gender === 'female'
+    ? (activeAppearance === 'blue' && C.ASSETS.playerFemaleBlue
+      ? C.ASSETS.playerFemaleBlue : (C.ASSETS.playerFemale || C.ASSETS.player))
+    : (activeAppearance === 'blue' && C.ASSETS.playerBlue ? C.ASSETS.playerBlue : C.ASSETS.player);
+  const activePlayerUsesV4 = [C.ASSETS.player, C.ASSETS.playerBlue,
+    C.ASSETS.playerFemale, C.ASSETS.playerFemaleBlue].includes(activePlayerAsset);
+  const activePlayerFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER[
+    activePlayerUsesV4 ? 'playerV4FrameSize' : 'frameSize']) || TILE);
+  const activePlayerDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER[
+    activePlayerUsesV4 ? 'playerV4DrawSize' : 'drawSize']) || TILE);
+  const defaultCharacterDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE);
+  const activePlayerDrawScale = activePlayerDrawSize / defaultCharacterDrawSize;
   const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.

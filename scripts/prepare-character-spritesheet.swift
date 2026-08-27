@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 guard CommandLine.arguments.count >= 3 else {
-  fputs("Usage: prepare-character-spritesheet.swift INPUT OUTPUT [--eye-fix-only] [--turnaround] [--turnaround-offsets] [--generated-order] [--mirror-right] [--consistent-scale] [--safe-margin] [--lock-head] [--symmetric-front-eyes] [--head-source SHEET] [--player PLAYER_SHEET]\n", stderr)
+  fputs("Usage: prepare-character-spritesheet.swift INPUT OUTPUT [--eye-fix-only] [--female-front-head-fix-only] [--female-consistency-fix-only] [--turnaround] [--turnaround-offsets] [--generated-order] [--detect-components] [--mirror-right] [--consistent-scale] [--safe-margin] [--lock-head] [--all-direction-heads] [--symmetric-front-eyes] [--head-source SHEET] [--player PLAYER_SHEET]\n", stderr)
   exit(2)
 }
 
@@ -12,12 +12,16 @@ let inputURL = URL(fileURLWithPath: CommandLine.arguments[1])
 let outputURL = URL(fileURLWithPath: CommandLine.arguments[2])
 let options = Array(CommandLine.arguments.dropFirst(3))
 let eyeFixOnly = options.contains("--eye-fix-only")
+let femaleFrontHeadFixOnly = options.contains("--female-front-head-fix-only")
+let femaleConsistencyFixOnly = options.contains("--female-consistency-fix-only")
 let turnaroundMode = options.contains("--turnaround")
 let turnaroundOffsets = options.contains("--turnaround-offsets")
 let generatedOrder = options.contains("--generated-order")
+let detectComponents = options.contains("--detect-components")
 let mirrorRight = options.contains("--mirror-right")
 let consistentScale = options.contains("--consistent-scale")
 let lockHead = options.contains("--lock-head")
+let allDirectionHeads = options.contains("--all-direction-heads")
 let symmetricFrontEyes = options.contains("--symmetric-front-eyes")
 let safeMargin = options.contains("--safe-margin")
 let headSourcePath: String? = {
@@ -78,6 +82,78 @@ if eyeFixOnly {
   exit(0)
 }
 
+// Front-only optical alignment for the approved female sheet. The generated
+// head's opaque centre sits almost one pixel to the right of the torso, so move
+// only rows 1...14 left by one pixel. Then mirror the complete 2x3 right eye
+// onto the left around the corrected face axis x=15. Rows 15...127, including
+// the collar/body and every other direction, remain byte-for-byte unchanged.
+if femaleFrontHeadFixOnly {
+  guard width == 128, height == 128 else {
+    fputs("--female-front-head-fix-only requires a 128x128 character sheet.\n", stderr)
+    exit(1)
+  }
+
+  let originalPixels = pixels
+  for frame in 0..<4 {
+    let frameX = frame * 32
+    for localY in 1...14 { for localX in 0..<32 {
+      let destinationIndex = ((localY * width) + frameX + localX) * bpp
+      if localX < 31 {
+        let sourceIndex = ((localY * width) + frameX + localX + 1) * bpp
+        for channel in 0..<bpp { pixels[destinationIndex + channel] = originalPixels[sourceIndex + channel] }
+      } else {
+        for channel in 0..<bpp { pixels[destinationIndex + channel] = 0 }
+      }
+    }}
+
+    for localY in 10...12 {
+      for (rightX, leftX) in [(18, 12), (17, 13)] {
+        let sourceIndex = ((localY * width) + frameX + rightX) * bpp
+        let destinationIndex = ((localY * width) + frameX + leftX) * bpp
+        for channel in 0..<bpp { pixels[destinationIndex + channel] = pixels[sourceIndex + channel] }
+      }
+    }
+  }
+
+  guard writePNG(&pixels, width: width, height: height, to: outputURL) else { exit(1) }
+  exit(0)
+}
+
+// Surgical consistency repair for the approved female runtime sheet. Keep the
+// character design and every unrelated pixel intact. The visible right eye is
+// mirrored onto the left around face centre x=16, and the complete right-facing
+// row becomes an exact counterpart of the approved left-facing animation.
+if femaleConsistencyFixOnly {
+  guard width == 128, height == 128 else {
+    fputs("--female-consistency-fix-only requires a 128x128 character sheet.\n", stderr)
+    exit(1)
+  }
+
+  for frame in 0..<4 {
+    let frameX = frame * 32
+    for localY in 11...12 {
+      for (rightX, leftX) in [(19, 13), (18, 14)] {
+        let sourceIndex = ((localY * width) + frameX + rightX) * bpp
+        let destinationIndex = ((localY * width) + frameX + leftX) * bpp
+        for channel in 0..<bpp { pixels[destinationIndex + channel] = pixels[sourceIndex + channel] }
+      }
+    }
+  }
+
+  let leftRowY = 32, rightRowY = 64, cellSize = 32
+  let leftRow = pixels
+  for frame in 0..<4 { for localY in 0..<cellSize { for localX in 0..<cellSize {
+    let sourceX = frame * cellSize + localX
+    let destinationX = frame * cellSize + (cellSize - 1 - localX)
+    let sourceIndex = (((leftRowY + localY) * width) + sourceX) * bpp
+    let destinationIndex = (((rightRowY + localY) * width) + destinationX) * bpp
+    for channel in 0..<bpp { pixels[destinationIndex + channel] = leftRow[sourceIndex + channel] }
+  }}}
+
+  guard writePNG(&pixels, width: width, height: height, to: outputURL) else { exit(1) }
+  exit(0)
+}
+
 // Generated sprite sheets sometimes contain a fake white/gray checkerboard.
 // Flood-fill only the neutral background connected to the canvas edge. This
 // preserves enclosed whites such as eyes, badges and bicycle highlights.
@@ -101,13 +177,60 @@ while backgroundCursor < backgroundQueue.count {
   let position = backgroundQueue[backgroundCursor]; backgroundCursor += 1
   let x = position % width, y = position / width, i = position * bpp
   pixels[i] = 0; pixels[i + 1] = 0; pixels[i + 2] = 0; pixels[i + 3] = 0
-  enqueueBackground(x - 1, y); enqueueBackground(x + 1, y)
-  enqueueBackground(x, y - 1); enqueueBackground(x, y + 1)
+  // Checkerboard cells usually touch only at their corners. Eight-neighbour
+  // traversal removes the entire artificial background while still keeping
+  // enclosed neutral details such as eyes, teeth and badge highlights.
+  for offsetY in -1...1 { for offsetX in -1...1 where offsetX != 0 || offsetY != 0 {
+    enqueueBackground(x + offsetX, y + offsetY)
+  }}
 }
 
 let outputSize = 128, grid = 4, sourceGrid = turnaroundMode ? 2 : 4, targetCell = outputSize / grid
 let inset = safeMargin ? 2 : 1
 var outputPixels = [UInt8](repeating: 0, count: outputSize * outputSize * bpp)
+
+// Image generators often center the sprites visually but do not place the
+// gutters at exact quarter coordinates. Detecting the sixteen largest opaque
+// components avoids cropping a neighbouring frame and shrinking every sprite.
+let detectedBounds: [(left: Int, top: Int, right: Int, bottom: Int)]? = {
+  guard detectComponents, !turnaroundMode else { return nil }
+  var visited = [Bool](repeating: false, count: width * height)
+  var components = [(left: Int, top: Int, right: Int, bottom: Int, area: Int)]()
+  for startY in 0..<height { for startX in 0..<width {
+    let start = startY * width + startX
+    guard !visited[start], pixels[start * bpp + 3] > 0 else { continue }
+    var queue = [start], cursor = 0, left = startX, right = startX, top = startY, bottom = startY
+    visited[start] = true
+    while cursor < queue.count {
+      let position = queue[cursor]; cursor += 1
+      let x = position % width, y = position / width
+      left = min(left, x); right = max(right, x); top = min(top, y); bottom = max(bottom, y)
+      for offsetY in -1...1 { for offsetX in -1...1 where offsetX != 0 || offsetY != 0 {
+        let nextX = x + offsetX, nextY = y + offsetY
+        guard nextX >= 0, nextY >= 0, nextX < width, nextY < height else { continue }
+        let next = nextY * width + nextX
+        guard !visited[next], pixels[next * bpp + 3] > 0 else { continue }
+        visited[next] = true; queue.append(next)
+      }}
+    }
+    components.append((left, top, right, bottom, queue.count))
+  }}
+  guard components.count >= grid * grid else {
+    fputs("--detect-components could not find sixteen sprite components.\n", stderr)
+    exit(1)
+  }
+  let largest = Array(components.sorted { $0.area > $1.area }.prefix(grid * grid))
+    .sorted { ($0.top + $0.bottom) == ($1.top + $1.bottom)
+      ? ($0.left + $0.right) < ($1.left + $1.right)
+      : ($0.top + $0.bottom) < ($1.top + $1.bottom) }
+  var ordered = [(left: Int, top: Int, right: Int, bottom: Int)]()
+  for row in 0..<grid {
+    let rowComponents = largest[(row * grid)..<((row + 1) * grid)]
+      .sorted { ($0.left + $0.right) < ($1.left + $1.right) }
+    ordered.append(contentsOf: rowComponents.map { ($0.left, $0.top, $0.right, $0.bottom) })
+  }
+  return ordered
+}()
 
 func sourceCell(for targetRow: Int, column: Int) -> (x: Int, y: Int, flipX: Bool) {
   if turnaroundMode {
@@ -121,15 +244,23 @@ func sourceCell(for targetRow: Int, column: Int) -> (x: Int, y: Int, flipX: Bool
   return (column, sourceRow, mirrorRight && targetRow == 2)
 }
 
+func sourceBounds(for targetRow: Int, column: Int) -> (minX: Int, minY: Int, maxX: Int, maxY: Int, flipX: Bool) {
+  if let detectedBounds {
+    let box = detectedBounds[targetRow * grid + column]
+    return (box.left, box.top, box.right, box.bottom, mirrorRight && targetRow == 2)
+  }
+  let cell = sourceCell(for: targetRow, column: column)
+  return (cell.x * width / sourceGrid, cell.y * height / sourceGrid,
+          (cell.x + 1) * width / sourceGrid - 1, (cell.y + 1) * height / sourceGrid - 1, cell.flipX)
+}
+
 let sharedScale: Double? = {
   guard consistentScale, !turnaroundMode else { return nil }
   var widest = 1, tallest = 1
   for targetRow in 0..<grid { for column in 0..<grid {
-    let cell = sourceCell(for: targetRow, column: column)
-    let minY = cell.y * height / sourceGrid, maxY = (cell.y + 1) * height / sourceGrid
-    let minX = cell.x * width / sourceGrid, maxX = (cell.x + 1) * width / sourceGrid
-    var left = maxX, top = maxY, right = minX - 1, bottom = minY - 1
-    for y in minY..<maxY { for x in minX..<maxX where pixels[(y * width + x) * bpp + 3] > 0 {
+    let bounds = sourceBounds(for: targetRow, column: column)
+    var left = bounds.maxX + 1, top = bounds.maxY + 1, right = bounds.minX - 1, bottom = bounds.minY - 1
+    for y in bounds.minY...bounds.maxY { for x in bounds.minX...bounds.maxX where pixels[(y * width + x) * bpp + 3] > 0 {
       left = min(left, x); right = max(right, x); top = min(top, y); bottom = max(bottom, y)
     }}
     if right >= left && bottom >= top {
@@ -147,13 +278,12 @@ for gridY in 0..<grid {
     // Turnaround source: TL front, TR left, BL right (ignored), BR back.
     // Runtime row order: down, left, right, up. Right is a deterministic
     // mirror of the canonical left view so both sides remain pixel-consistent.
-    let sourcePosition = sourceCell(for: gridY, column: gridX)
+    let sourcePosition = sourceBounds(for: gridY, column: gridX)
     let flipX = sourcePosition.flipX
-    let sourceMinY = sourcePosition.y * height / sourceGrid, sourceMaxY = (sourcePosition.y + 1) * height / sourceGrid
-    let sourceMinX = sourcePosition.x * width / sourceGrid, sourceMaxX = (sourcePosition.x + 1) * width / sourceGrid
-    var minX = sourceMaxX, minY = sourceMaxY, maxX = sourceMinX - 1, maxY = sourceMinY - 1
-    for y in sourceMinY..<sourceMaxY {
-      for x in sourceMinX..<sourceMaxX where pixels[(y * width + x) * bpp + 3] > 0 {
+    var minX = sourcePosition.maxX + 1, minY = sourcePosition.maxY + 1
+    var maxX = sourcePosition.minX - 1, maxY = sourcePosition.minY - 1
+    for y in sourcePosition.minY...sourcePosition.maxY {
+      for x in sourcePosition.minX...sourcePosition.maxX where pixels[(y * width + x) * bpp + 3] > 0 {
         minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
       }
     }
@@ -259,9 +389,10 @@ if safeMargin {
   }}
 }
 
-// Replace only front/back heads with one approved canonical turnaround. Side
-// rows remain byte-for-byte from the source animation. Copying transparent
-// pixels too prevents the old flat hair silhouette from leaking around it.
+// Restore approved canonical heads after generated body work. By default this
+// repairs front/back only for legacy assets; --all-direction-heads restores a
+// fixed frame-zero head layer in every direction. Copying transparent pixels
+// too prevents generated hair silhouettes from leaking around the source.
 if let headSourcePath {
   let headURL = URL(fileURLWithPath: headSourcePath)
   guard let headSource = CGImageSourceCreateWithURL(headURL as CFURL, nil),
@@ -277,10 +408,15 @@ if let headSourcePath {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { exit(1) }
   headContext.interpolationQuality = .none
   headContext.draw(headImage, in: CGRect(x: 0, y: 0, width: outputSize, height: outputSize))
-  let headRows = 16
-  for directionRow in [0, 3] { for frame in 0..<grid {
+  let headRows = allDirectionHeads ? 17 : 16
+  let headDirections = allDirectionHeads ? Array(0..<grid) : [0, 3]
+  for directionRow in headDirections { for frame in 0..<grid {
     for localY in 0..<headRows { for localX in 0..<targetCell {
-      let sourceIndex = (((directionRow * targetCell + localY) * outputSize) + localX) * bpp
+      // In full head-lock mode frame zero is the canonical immutable layer for
+      // the direction. This guarantees that an AI body edit cannot introduce
+      // hair/face jitter into later walk frames.
+      let sourceFrame = allDirectionHeads ? 0 : frame
+      let sourceIndex = (((directionRow * targetCell + localY) * outputSize) + sourceFrame * targetCell + localX) * bpp
       let destinationIndex = (((directionRow * targetCell + localY) * outputSize) + frame * targetCell + localX) * bpp
       for channel in 0..<bpp { outputPixels[destinationIndex + channel] = headPixels[sourceIndex + channel] }
     }}

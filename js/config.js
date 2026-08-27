@@ -12,10 +12,12 @@ window.CONFIG = {
   },
 
   ASSETS: {
-    player:  'assets/characters/player-v2.png',
-    playerBlue: 'assets/characters/npc-v2.png',
-    bicycleOverlay: 'assets/characters/bicycle-overlay-v2.png',
-    npc:     'assets/characters/npc-v2.png',
+    player:  'assets/characters/player-v4.png',
+    playerBlue: 'assets/characters/player-blue-v4.png',
+    playerFemale: 'assets/characters/player-female-orange-v4.png',
+    playerFemaleBlue: 'assets/characters/player-female-blue-v4.png',
+    bicycleOverlay: 'assets/characters/bicycle-overlay-v4.png',
+    npc:     'assets/characters/npc-v4.png',
     tileset: 'assets/world/tileset.png',
     terrainTiles: 'assets/world/terrain-tiles.png',
     academy: 'assets/world/academy-grand.png',
@@ -40,6 +42,18 @@ window.CONFIG = {
   MOVE_MS: 180, RUN_MOVE_MS: 105,
   ANIM_MS: 120, RUN_ANIM_MS: 72, FRAMES: 4,
   DIR_ROW: { down: 0, left: 1, right: 2, up: 3 },
+  // Player and NPC V4 sheets use native 128px cells rendered into one tile.
+  // The legacy 96→48 values remain available for archived HD96 resources.
+  CHARACTER: {
+    frameSize: 96,
+    drawSize: 48,
+    playerV4FrameSize: 128,
+    playerV4DrawSize: 32,
+    npcV4FrameSize: 128,
+    npcV4DrawSize: 32,
+    bicycleFrameSize: 128,
+    bicycleDrawSize: 48,
+  },
 
   TILE_KEYS: {
     GRASS: 0, TREE: 1, WATER: 2, PATH: 3, FLOWER: 4, TALLGRASS: 5, BOAT: 6,
@@ -71,7 +85,13 @@ window.CONFIG = {
   FISHING: { castMs: 320, waitMs: 900, reelMs: 420 },
 
   // --- 🚲 / 📡 EXPLORATION SKILLS ---
-  BICYCLE: { moveMultiplier: 0.42, animMultiplier: 0.55, spriteScale: 1.12, riderLift: 3, verticalOverlayDrop: 4 },
+  BICYCLE: {
+    moveMultiplier: 0.42,
+    animMultiplier: 0.55,
+    riderLift: 3,
+    sideOverlayDrop: 10,
+    verticalOverlayDrop: 24,
+  },
   RADAR: {
     targetMultiplier: 4,
     targets: ['balanced', 'due', 'weak', 'pet'],

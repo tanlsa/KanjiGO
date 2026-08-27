@@ -228,14 +228,35 @@ test('three world zones and every NPC are reachable from the campus start', () =
   assert.ok(wildernessTiles.includes(CONFIG.TILE_KEYS.TALLGRASS), 'wilderness must contain encounter grass');
 });
 
-test('character animation sheets use the shared transparent 4x4 layout', () => {
+test('character animation sheets use the configured high-detail transparent 4x4 layout', () => {
   const { CONFIG } = loadDataContext();
-  for (const asset of [CONFIG.ASSETS.player, CONFIG.ASSETS.bicycleOverlay, CONFIG.ASSETS.npc]) {
+  const frameSize = CONFIG.CHARACTER.npcV4FrameSize;
+  assert.equal(frameSize, 128, 'V4 NPC frames should retain their native 128px detail');
+  assert.equal(CONFIG.CHARACTER.npcV4DrawSize, 32,
+    'V4 NPCs should share the player scale of exactly one map tile');
+  for (const asset of new Set([CONFIG.ASSETS.npc])) {
     const png = pngInfo(asset);
-    assert.equal(png.width, 128, `${asset} must be 128px wide`);
-    assert.equal(png.height, 128, `${asset} must be 128px high`);
+    assert.equal(png.width, frameSize * 4, `${asset} must contain four ${frameSize}px columns`);
+    assert.equal(png.height, frameSize * 4, `${asset} must contain four ${frameSize}px rows`);
     assert.ok(png.colorType === 4 || png.colorType === 6, `${asset} must contain an alpha channel`);
   }
+  assert.equal(CONFIG.CHARACTER.playerV4FrameSize, 128,
+    'V4 player cells should retain their native 128px detail');
+  assert.equal(CONFIG.CHARACTER.playerV4DrawSize, 32,
+    'V4 player should be sampled into exactly one map tile');
+  for (const asset of new Set([CONFIG.ASSETS.player, CONFIG.ASSETS.playerBlue,
+    CONFIG.ASSETS.playerFemale, CONFIG.ASSETS.playerFemaleBlue])) {
+    const playerV4 = pngInfo(asset);
+    assert.equal(playerV4.width, CONFIG.CHARACTER.playerV4FrameSize * 4);
+    assert.equal(playerV4.height, CONFIG.CHARACTER.playerV4FrameSize * 4);
+    assert.ok(playerV4.colorType === 4 || playerV4.colorType === 6,
+      `${asset} must contain an alpha channel`);
+  }
+  const bicycle = pngInfo(CONFIG.ASSETS.bicycleOverlay);
+  assert.equal(bicycle.width, CONFIG.CHARACTER.bicycleFrameSize * 4);
+  assert.equal(bicycle.height, CONFIG.CHARACTER.bicycleFrameSize * 4);
+  assert.ok(bicycle.colorType === 4 || bicycle.colorType === 6,
+    `${CONFIG.ASSETS.bicycleOverlay} must contain an alpha channel`);
 });
 
 test('extended terrain atlas contains sixteen 32px tiles', () => {
