@@ -7,6 +7,15 @@
   window.AUDIO_CONFIG = {
     settingsKey: 'KANJIGO_AUDIO_SETTINGS_V1',
     categories: ['music', 'sfx', 'ui', 'ambient'],
+    // Kanji pronunciation audio. Files follow a deterministic convention:
+    //   on  -> <kanji>_on.mp3  under kanjiAudio.on
+    //   kun -> <kanji>_kun.mp3 under kanjiAudio.kun
+    // These paths stay in the audio manifest; gameplay code only ever refers
+    // to a Kanji character through AudioManager.playKanjiOnYomi/playKanjiKunYomi.
+    kanjiAudio: {
+      on: 'assets/sounds/kanji_audio_on/',
+      kun: 'assets/sounds/kanji_audio_kun/',
+    },
     assets: {
       UI_BUTTON_CLICK: asset('ui', ['assets/sounds/click.mp3']),
       UI_POOL_CLICK: asset('ui', ['assets/sounds/click_on_pool.mp3']),

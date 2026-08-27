@@ -122,6 +122,55 @@
     return true;
   }
 
+  // --- Kanji pronunciation audio --------------------------------
+  // Resolved from the semantic kanjiAudio manifest (not from gameplay code).
+  let lastKanjiAudio = null;
+
+  function kanjiPath(char, type) {
+    if (typeof char !== 'string' || !char.trim()) return '';
+    const kanjiAudio = config.kanjiAudio || {};
+    const dir = type === 'kun' ? kanjiAudio.kun : kanjiAudio.on;
+    if (!dir) return '';
+    return `${dir}${char.trim()}_${type}.mp3`;
+  }
+
+  function stopKanjiAudio() {
+    const audio = lastKanjiAudio;
+    lastKanjiAudio = null;
+    if (audio) {
+      try { audio.pause(); audio.currentTime = 0; } catch (error) { /* ignore */ }
+    }
+  }
+
+  function playKanjiAudio(char, type) {
+    if (typeof Audio === 'undefined') return false;
+    const file = kanjiPath(char, type);
+    if (!file) return false;
+    const template = templateFor(file);
+    if (!template) return false;
+    stopKanjiAudio();
+    const audio = template.cloneNode();
+    audio.audioId = '__kanji_audio__';
+    audio.category = 'sfx';
+    audio.volume = getVolume('sfx');
+    audio.preload = 'auto';
+    activeSfx.add(audio);
+    const cleanup = () => {
+      if (lastKanjiAudio === audio) lastKanjiAudio = null;
+      activeSfx.delete(audio);
+    };
+    audio.addEventListener('ended', cleanup, { once: true });
+    audio.addEventListener('error', cleanup, { once: true });
+    if (!unlocked) unlock();
+    const result = audio.play();
+    if (result && result.catch) result.catch(cleanup);
+    lastKanjiAudio = audio;
+    return true;
+  }
+
+  function playKanjiOnYomi(char) { return playKanjiAudio(char, 'on'); }
+  function playKanjiKunYomi(char) { return playKanjiAudio(char, 'kun'); }
+
   function playMusic(id) {
     const definition = getDefinition(id);
     if (!definition || !definition.files.length || typeof Audio === 'undefined') return false;
@@ -152,7 +201,8 @@
     if (music) music.volume = getVolume('music');
     activeSfx.forEach((audio) => {
       const definition = getDefinition(audio.audioId);
-      if (definition) audio.volume = getVolume(definition.category);
+      const category = definition ? definition.category : audio.category;
+      if (category) audio.volume = getVolume(category);
     });
   }
 
@@ -176,6 +226,9 @@
     preloadAll: () => Promise.all(Object.keys(config.assets || {}).map(preload)),
     unlock,
     playSFX,
+    playKanjiOnYomi,
+    playKanjiKunYomi,
+    stopKanjiAudio,
     playMusic,
     stopMusic,
     getSettings,
