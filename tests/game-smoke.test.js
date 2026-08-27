@@ -127,7 +127,7 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   context.window = context;
   vm.createContext(context);
   vm.runInContext(read('js/character-slots.js'), context, { filename: 'js/character-slots.js' });
-  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js']) {
+  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   context.CONFIG.SKILL_TREE.qaSeed.enabled = enableSkillQaSeed;
@@ -570,6 +570,30 @@ test('every vocabulary row supports sentence reading, kana-to-Kanji, and furigan
   assert.ok(meaning.options.includes('nước'));
 });
 
+test('question formats unlock monotonically and workbook context modes use curated choices', () => {
+  const { context, debug } = createGame();
+  const levels = Array.from({ length: 10 }, (_, index) => new Set(debug.questionModesForLevel(index + 1)));
+  assert.deepEqual([...levels[0]].sort(), ['m1', 'm6']);
+  for (let index = 1; index < levels.length; index++) {
+    for (const mode of levels[index - 1]) assert.ok(levels[index].has(mode), `${mode} was re-locked at level ${index + 1}`);
+  }
+  assert.equal(levels[4].has('m11'), false);
+  assert.equal(levels[5].has('m11'), true);
+  assert.equal(levels[6].has('m12'), false);
+  assert.equal(levels[7].has('m12'), true);
+  assert.equal(levels[8].has('m10'), true);
+
+  const source = context.KANJI_DB.CHALLENGES[0];
+  const reading = debug.makeQuestion(source.target, '', 'm11', true, [source]);
+  assert.equal(reading.mode, 'm11');
+  assert.equal(reading.answer, source.wordReading);
+  assert.deepEqual(new Set(reading.options), new Set(source.options.m11));
+  const spelling = debug.makeQuestion(source.target, '', 'm12', true, [source]);
+  assert.equal(spelling.mode, 'm12');
+  assert.equal(spelling.answer, source.word);
+  assert.deepEqual(new Set(spelling.options), new Set(source.options.m12));
+});
+
 test('mobile Back presents the correct action and exits completed battle states', () => {
   const { debug, dispatchTouchBack, getTouchBack } = createGame();
   debug.openDex(); debug.renderOnce();
@@ -668,6 +692,7 @@ test('Capture tests taught vocabulary and changes the SRS box at most once per s
   for (let index = 0; index < 5; index++) {
     const capture = debug.getCapture();
     assert.ok(taughtIds.has(capture.q.vocabId), 'Capture selected vocabulary outside the lesson cards');
+    assert.ok(['m1', 'm6'].includes(capture.q.mode), 'Level 1 Capture must not jump to a locked question format');
     debug.answerCapture(capture.q.correctIndex); debug.updateCapture(700);
   }
   assert.equal(debug.getCapture().phase, 'end');

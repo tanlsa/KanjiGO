@@ -13,6 +13,7 @@
   const MAP_SIGNS = window.MAP_DATA.SIGNS || [];
   const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
   const KDB = window.KANJI_DB;
+  const QUESTION_CHALLENGES = Array.isArray(KDB.CHALLENGES) ? KDB.CHALLENGES : [];
 const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false; } catch (error) { return false; } };
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
@@ -1448,9 +1449,18 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     return pool[pool.length - 1];
   }
   function shuffle(options) { for (let i = options.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [options[i], options[j]] = [options[j], options[i]]; } return options; }
-  function chooseMode() {
+  function questionModesForLevel(level) {
+    const config = C.QUESTION_MODES || {};
+    const weights = config.weights || { m1: 1 };
+    const unlockAt = config.unlockAt || {};
+    const currentLevel = Math.max(1, Math.min(C.KLEVEL.maxLevel, Math.floor(Number(level) || 1)));
+    return Object.keys(weights).filter((mode) => Number(weights[mode]) > 0 && currentLevel >= (Number(unlockAt[mode]) || 1));
+  }
+  function chooseMode(level = 1, availableModes = null) {
     const weights = (C.QUESTION_MODES && C.QUESTION_MODES.weights) || { m1: 1 };
-    const entries = Object.entries(weights).filter(([, weight]) => Number(weight) > 0);
+    const allowed = new Set(Array.isArray(availableModes) ? availableModes : questionModesForLevel(level));
+    const entries = Object.entries(weights).filter(([mode, weight]) => allowed.has(mode) && Number(weight) > 0);
+    if (!entries.length) return 'm1';
     const total = entries.reduce((sum, [, weight]) => sum + Number(weight), 0);
     let roll = Math.random() * total;
     for (const [mode, weight] of entries) { roll -= Number(weight); if (roll <= 0) return mode; }
@@ -1464,9 +1474,24 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
   // Sinh câu hỏi đa hướng; SRS vẫn chỉ ghi nhận theo q.target.
   function makeQuestion(monKanji, previousKey = '', modeOverride = '', fair = false, sourcePool = null) {
     if (typeof previousKey === 'number') { modeOverride = `m${previousKey}`; previousKey = ''; }
-    if (typeof previousKey === 'string' && /^m(?:[1-9]|10)$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
-    let pool = (Array.isArray(sourcePool) && sourcePool.length ? sourcePool : KDB.QUESTIONS).filter((q) => q.target === monKanji);
-    if (pool.length === 0) pool = KDB.QUESTIONS;
+    if (typeof previousKey === 'string' && /^m(?:[1-9]|1[0-2])$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
+    const level = ensureMastery(monKanji).level;
+    const targetChallenges = QUESTION_CHALLENGES.filter((q) => q.target === monKanji);
+    const availableModes = questionModesForLevel(level).filter((mode) => !['m11', 'm12'].includes(mode) || targetChallenges.length);
+    let mode = modeOverride || chooseMode(level, availableModes);
+    const explicitPool = Array.isArray(sourcePool) && sourcePool.length ? sourcePool : null;
+    let candidates;
+    if (explicitPool) candidates = explicitPool;
+    else if (mode === 'm11' || mode === 'm12') candidates = targetChallenges;
+    else if (mode === 'm6' && level >= (Number(C.QUESTION_MODES && C.QUESTION_MODES.workbookReadingLevel) || 6)) {
+      candidates = [...KDB.QUESTIONS, ...targetChallenges];
+    } else candidates = KDB.QUESTIONS;
+    let pool = candidates.filter((q) => q.target === monKanji
+      && (!['m11', 'm12'].includes(mode) || (q.options && Array.isArray(q.options[mode]))));
+    if (!pool.length && (mode === 'm11' || mode === 'm12')) {
+      mode = 'm1'; candidates = explicitPool || KDB.QUESTIONS; pool = candidates.filter((q) => q.target === monKanji);
+    }
+    if (pool.length === 0) pool = candidates.length ? candidates : KDB.QUESTIONS;
     if (C.LEARNING && C.LEARNING.avoidRepeat && pool.length > 1) {
       const withoutPrevious = pool.filter((q) => questionKey(q) !== previousKey
         && !String(previousKey).includes(questionKey(q)) && !String(previousKey).includes(vocabularyId(q)));
@@ -1477,7 +1502,6 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     const scores = pool.map(questionScore), minScore = Math.min(...scores);
     const weakPool = pool.filter((q) => questionScore(q) <= minScore + 1);
     const q = (fair ? pool : weakPool)[Math.floor(Math.random() * (fair ? pool : weakPool).length)];
-    let mode = modeOverride || chooseMode();
     const infos = Object.values(KDB.KANJI);
     const otherInfos = infos.filter((info) => info.char !== q.target && ensureMastery(info.char).captured);
     const targetReading = q.answer;
@@ -1499,7 +1523,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     if (mode === 'm6') {
       const readings = KDB.QUESTIONS.filter((item) => item !== q && item.wordReading).map((item) => item.wordReading);
       if (!q.wordReading || new Set(readings).size < 3) mode = 'm1';
-      else { answer = q.wordReading; options = optionSet(answer, readings); }
+      else { answer = q.wordReading; options = q.challengeOnly ? shuffle([...q.options.m6]) : optionSet(answer, readings); }
     }
     if (mode === 'm7') {
       const meanings = KDB.QUESTIONS.filter((item) => item !== q && item.mean).map((item) => item.mean);
@@ -1522,15 +1546,19 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
       if (new Set(meanings).size < 3) meanings = KDB.QUESTIONS.filter((item) => item !== q).map((item) => item.mean);
       answer = q.mean; options = optionSet(answer, meanings);
     }
+    if (mode === 'm11') { answer = q.wordReading; options = shuffle([...q.options.m11]); }
+    if (mode === 'm12') { answer = q.word; options = shuffle([...q.options.m12]); }
     if (mode === 'm1') { answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
     const result = { word, mean, target: q.target, answer, romaji: q.romaji, type, mode, options, correctIndex: options.indexOf(answer), vocabId: q.id,
       targetReading, wordReading: q.wordReading || '', wordRomaji: q.wordRomaji || '',
-      sentence: q.sentence || '', sentenceReading: q.sentenceReading || '', sentenceMeaning: q.sentenceMeaning || '',
+      sentence: q.sentence || '', sentenceReading: q.sentenceReading || '', sentenceMeaning: q.sentenceMeaning || '', challengeOnly: q.challengeOnly === true,
       parts: Array.isArray(q.parts) ? q.parts.map((part) => ({ ...part })) : [] };
     result.key = `${mode}|${q.id}`;
     return result;
   }
   function questionCorrection(q) {
+    if (q.mode === 'm11') return `Trong câu này, 「${q.word}」 đọc là「${q.answer}」`;
+    if (q.mode === 'm12') return `Trong câu này, 「${q.targetReading}」 được viết là「${q.answer}」`;
     if (q.mode === 'm6') return `「${q.word}」 đọc là「${q.answer}」${q.wordRomaji ? ` (${q.wordRomaji})` : ''}`;
     if (q.mode === 'm7' || q.mode === 'm10') return `「${q.word}」 nghĩa là “${q.answer}”`;
     if (q.mode === 'm9') return `Trong câu này, 「${q.targetReading}」 được viết là「${q.answer}」`;
@@ -2087,7 +2115,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     return true;
   }
   function captureQuestion(target, index, previousKey = '', sourcePool = null) {
-    const modes = ['m8', 'm9', 'm10', 'm6', 'm1'];
+    const captureModes = new Set(['m1', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12']);
+    const modes = questionModesForLevel(ensureMastery(target).level).filter((mode) => captureModes.has(mode));
     return makeQuestion(target, previousKey, modes[index % modes.length], false, sourcePool);
   }
   function finishCapture() {
@@ -4482,6 +4511,16 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     fitText(`Recall ${s.recall}% · 🔥${s.winStreak}`, bx, isNarrow ? statsY2 : statsY1, Math.min(140, w), 10);
   }
   function quizPresentation(q, compact = false) {
+    if (q.mode === 'm11') return {
+      instruction: compact ? 'Đọc TỪ GHÉP trong câu:' : 'Chọn cách đọc của TOÀN BỘ từ ghép trong câu:',
+      prompt: q.sentence || q.word,
+      support: `(${q.sentenceMeaning || q.mean}) · từ cần đọc: 「${q.word}」`,
+    };
+    if (q.mode === 'm12') return {
+      instruction: compact ? 'Chọn TỪ GHÉP Kanji:' : 'Chọn từ ghép Kanji đúng cho phần kana trong câu:',
+      prompt: q.sentenceReading || q.wordReading || q.word,
+      support: `(${q.sentenceMeaning || q.mean}) · cách đọc cần đổi: 「${q.targetReading || ''}」`,
+    };
     if (q.mode === 'm8') return {
       instruction: compact ? 'Đọc KANJI trong câu:' : 'Chọn cách đọc của KANJI được nhấn trong câu:',
       prompt: q.sentence || q.word,
@@ -4891,7 +4930,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const s = petMastery(); return { id: currentPetId, level: s.level, mp: s.mp, recall: s.recall, ...petData[currentPetId] };
     },
     hasFollower: followerUnlocked,
-    petData: () => petData, mastery: () => learning.mastery, makeQuestion, updateBattle,
+    petData: () => petData, mastery: () => learning.mastery, makeQuestion, questionModesForLevel, updateBattle,
     pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: equipPet,
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
     levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight,

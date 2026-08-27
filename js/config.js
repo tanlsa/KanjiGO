@@ -177,9 +177,11 @@ window.CONFIG = {
     relaxFromAttempt: 3,
   },
   QUESTION_MODES: {
-    // m8: đọc Kanji trong câu · m9: chọn Kanji từ câu kana
-    // m10: chọn nghĩa của từ/cụm có kèm furigana.
-    weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2, m8: 2, m9: 2, m10: 2 },
+    // Mỗi level giữ lại dạng cũ và mở thêm dạng mới. m11 hỏi cách đọc cả
+    // từ ghép trong câu; m12 đổi phần kana trong câu về đúng từ ghép Kanji.
+    weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2, m8: 2, m9: 2, m10: 2, m11: 2, m12: 2 },
+    unlockAt: { m1: 1, m6: 1, m2: 2, m3: 2, m4: 3, m5: 3, m7: 4, m8: 5, m11: 6, m9: 7, m12: 8, m10: 9 },
+    workbookReadingLevel: 6,
   },
   PVE: {
     questions: 10,

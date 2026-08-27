@@ -19,7 +19,7 @@ function loadDataContext() {
   };
   context.window = context;
   vm.createContext(context);
-  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js']) {
+  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   return context;
@@ -353,6 +353,23 @@ test('Admin ships offline Excel import/export and the workbook engine round-trip
   assert.equal(rows[1][3], 'Hằng ngày tôi uống nước.');
 });
 
+test('lesson workbook supplement is generated as a valid sourced challenge bank', () => {
+  const { KANJI_DB } = loadDataContext();
+  const supported = new Set(Object.values(KANJI_DB.KANJI).map((info) => info.char));
+  assert.equal(KANJI_DB.CHALLENGES.length, 189);
+  assert.equal(new Set(KANJI_DB.CHALLENGES.map((question) => question.id)).size, KANJI_DB.CHALLENGES.length);
+  for (const question of KANJI_DB.CHALLENGES) {
+    assert.ok(supported.has(question.target), `${question.id} targets an unavailable Kanji`);
+    assert.ok(question.sentence && question.sentenceReading && question.sentenceMeaning);
+    assert.ok(question.sources.vocabulary && question.sources.license, `${question.id} is missing attribution`);
+    for (const [mode, answer] of [['m6', question.wordReading], ['m11', question.wordReading], ['m12', question.word]]) {
+      assert.equal(question.options[mode].length, 4, `${question.id}/${mode} must have four choices`);
+      assert.equal(new Set(question.options[mode]).size, 4, `${question.id}/${mode} contains duplicate choices`);
+      assert.equal(question.options[mode].filter((option) => option === answer).length, 1, `${question.id}/${mode} lost its answer`);
+    }
+  }
+});
+
 test('imported browser data merges safely without hiding packaged content', () => {
   const context = loadDataContext();
   const packagedCount = Object.keys(context.KANJI_DB.KANJI).length;
@@ -375,7 +392,7 @@ test('HTML loads game scripts in dependency order', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(scripts, ['js/content-catalog.js', 'js/config.js', 'js/audio-config.js', 'js/audio-manager.js',
-    'js/character-slots.js', 'js/audio-settings-ui.js', 'js/kanji.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
+    'js/character-slots.js', 'js/audio-settings-ui.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
   assert.match(html, /<canvas\s+id="game"/);
   assert.match(html, /data-action="profile"[^>]*aria-label="Mở Hồ sơ nhân vật"/);
   assert.match(html, /Hồ sơ <kbd>I<\/kbd>/);
