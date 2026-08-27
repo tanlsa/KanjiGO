@@ -694,12 +694,14 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 10);
+  assert.equal(imageRequests.length, 12);
   assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/trainer-theme-icons.png'));
+  assert.ok(imageRequests.includes('assets/backgrounds/battle-forest.png'));
+  assert.ok(imageRequests.includes('assets/backgrounds/battle-stand.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
 });
 
