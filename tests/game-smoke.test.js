@@ -247,6 +247,7 @@ test('pointer mapping uses logical coordinates instead of the HiDPI backing buff
   assert.deepEqual({ ...debug.clientToLogical(rect.left + rect.width * .75, rect.top + rect.height * .25, rect) }, { x: 960, y: 180 });
 
   assert.equal(debug.startBattle('grass'), true);
+  debug.updateBattle(1500);
   debug.renderOnce();
   const battle = debug.getBattle(), beforeHp = battle.monHp, layout = debug.getQuizLayout();
   const index = battle.q.correctIndex, col = index % 2, row = Math.floor(index / 2);
@@ -851,6 +852,37 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
   assert.ok(debug.getBattle().q.options.length >= 2);
 });
 
+test('wild grass encounters play a locked cinematic lunge before the quiz timer starts', () => {
+  const { debug, textCalls } = createGame();
+  assert.equal(debug.startBattle('grass'), true);
+  const battle = debug.getBattle(), initialGauge = battle.botNextIn;
+  assert.equal(battle.entranceT, 1450);
+  debug.updateBattle(220);
+  debug.renderOnce();
+  assert.ok(textCalls.some((call) => call.text === 'BỤI CỎ BỖNG RUNG LÊN…'));
+  assert.equal(battle.questionElapsed, 0);
+  assert.equal(battle.botNextIn, initialGauge, 'the attack gauge must pause during the encounter cutscene');
+  debug.updateBattle(760);
+  debug.renderOnce();
+  assert.ok(textCalls.some((call) => call.text.includes(`KANJI HOANG DÃ「${battle.mon.kanji}」LAO TỚI!`)));
+  assert.equal(battle.entranceSfxPlayed, true);
+  assert.ok(battle.encounterImpactT > 0);
+  debug.updateBattle(600);
+  assert.equal(battle.entranceT, 0);
+});
+
+test('wild water encounters use the lake reveal before combat', () => {
+  const { debug, textCalls } = createGame();
+  debug.mastery()['魚'].captured = true;
+  assert.equal(debug.startBattle('water', 'fish'), true);
+  assert.equal(debug.getBattle().kind, 'water');
+  debug.updateBattle(220);
+  debug.renderOnce();
+  assert.ok(textCalls.some((call) => call.text === 'MẶT NƯỚC BỖNG CHUYỂN ĐỘNG…'));
+  assert.doesNotThrow(() => debug.updateBattle(1300));
+  assert.equal(debug.getBattle().entranceT, 0);
+});
+
 test('battle scales and computes each side from its own Kanji level', () => {
   const { context, debug } = createGame();
   const enemyStat = debug.mastery()['年'];
@@ -982,8 +1014,8 @@ test('N4 is badge-gated when the temporary QA override is disabled', () => {
   assert.equal(debug.tierProgress('N4').total, 140);
 });
 
-test('themed Trainer unlocks at its collection threshold and uses at most five captured Kanji', () => {
-  const { debug, storage } = createGame();
+test('themed Trainer unlocks at its collection threshold and uses an animated duel', () => {
+  const { debug, storage, textCalls } = createGame();
   assert.equal(debug.trainerStatus('gardener').state, 'locked');
   for (const char of ['木', '山', '川']) debug.mastery()[char].captured = true;
   const ready = debug.trainerStatus('gardener');
@@ -992,6 +1024,16 @@ test('themed Trainer unlocks at its collection threshold and uses at most five c
   assert.equal(debug.startTrainer('gardener'), true);
   assert.equal(debug.getPve().mode, 'trainer');
   assert.ok(debug.getPve().pool.length <= 5);
+  assert.ok(debug.getPve().trainerIntroT > 0);
+  debug.renderOnce();
+  assert.ok(textCalls.some((call) => call.text === 'VS'));
+  assert.ok(textCalls.some((call) => call.text.startsWith('ĐỐI THỦ')),
+    'Trainer battles should render the current Kanji as an active opponent instead of a static lineup');
+  debug.answerPve(debug.getPve().q.correctIndex);
+  assert.ok(debug.getPve().petAttackT > 0);
+  assert.equal(debug.getPve().impactSide, 'enemy');
+  assert.ok(debug.getPve().arenaShakeT > 0);
+  debug.updatePve(600);
   while (debug.getPve().phase === 'fight') {
     debug.answerPve(debug.getPve().q.correctIndex);
     debug.updatePve(600);
@@ -999,6 +1041,19 @@ test('themed Trainer unlocks at its collection threshold and uses at most five c
   assert.equal(debug.trainerStatus('gardener').state, 'defeated');
   assert.equal(debug.trainerWinsCount(), 1);
   assert.equal(JSON.parse(storage.get('KANJIGO_LEARNING_V1')).trainerWins.gardener, true);
+});
+
+test('wrong Trainer answers animate the opponent counterattack', () => {
+  const { debug } = createGame();
+  for (const char of ['木', '山', '川']) debug.mastery()[char].captured = true;
+  assert.equal(debug.startTrainer('gardener'), true);
+  const current = debug.getPve();
+  const wrong = current.q.options.findIndex((_, index) => index !== current.q.correctIndex);
+  debug.answerPve(wrong);
+  assert.ok(debug.getPve().enemyAttackT > 0);
+  assert.ok(debug.getPve().playerHitT > 0);
+  assert.equal(debug.getPve().impactSide, 'player');
+  assert.doesNotThrow(() => debug.renderOnce());
 });
 
 test('N5 Gym requires 50 captures and 20 Kanji at Lv5, without Trainer wins', () => {
@@ -1172,6 +1227,7 @@ test('PASS N5 reveals N4 Gym, which also needs full N5 plus 50 captures and 20 L
 test('a selected answer lights up while wrong feedback holds, fades, and retries the same question', () => {
   const { debug, drawCalls } = createGame();
   assert.equal(debug.startBattle('grass'), true);
+  debug.updateBattle(1500);
   const battle = debug.getBattle();
   const originalKey = battle.q.key;
   const wrongIndex = (battle.q.correctIndex + 1) % battle.q.options.length;
@@ -1469,6 +1525,7 @@ test('Auto Ride paths to tall grass, pauses for battle, resumes, and persists', 
   assert.equal(debug.state(), 'battle');
   assert.equal(debug.getLearningStats().total, answeredBeforePatrol, 'Auto Ride must not answer questions');
   assert.equal(debug.isAutoRideActive(), true, 'battle should pause rather than disable Auto Ride');
+  debug.updateBattle(1500);
   debug.getBattle().pendingWin = 1;
   debug.updateBattle(2);
   assert.equal(debug.getBattle().result, 'win');
@@ -1479,6 +1536,7 @@ test('Auto Ride paths to tall grass, pauses for battle, resumes, and persists', 
   assert.equal(debug.getPlayer().moving, true, 'Auto Ride did not resume after battle');
 
   assert.equal(debug.startBattle('grass'), true);
+  debug.updateBattle(1500);
   debug.getBattle().pendingLose = 1;
   debug.updateBattle(2);
   assert.equal(debug.getBattle().result, 'lose');
