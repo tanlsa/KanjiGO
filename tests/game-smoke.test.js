@@ -29,6 +29,7 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const noop = () => {};
   const imageRequests = [];
   const textCalls = [];
+  const audioCalls = [];
   const canvasContext = new Proxy({
     measureText: (text) => ({ width: String(text).length * 8 }),
     drawImage(image, ...args) {
@@ -125,6 +126,12 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     },
     setTimeout, clearTimeout, queueMicrotask,
     SettingsUI: { encounterAnimationEnabled: () => encounterAnimation },
+    AudioManager: {
+      preloadAll: () => Promise.resolve([]),
+      playSFX: (id) => { audioCalls.push({ kind: 'sfx', id }); return true; },
+      playKanjiOnYomi: (char) => { audioCalls.push({ kind: 'on', char }); return true; },
+      playKanjiKunYomi: (char) => { audioCalls.push({ kind: 'kun', char }); return true; },
+    },
   };
   context.window = context;
   vm.createContext(context);
@@ -146,7 +153,7 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
     for (const listener of canvasListeners.get(type) || []) listener({ preventDefault: noop, pointerId: 1, ...event });
   };
   return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent, dispatchTouchBack,
-    dispatchCanvasEvent, textCalls, drawCalls, getPaintCalls: () => paintCalls,
+    dispatchCanvasEvent, textCalls, drawCalls, audioCalls, getPaintCalls: () => paintCalls,
     getTouchBack: () => ({ text: touchBack.textContent, title: touchBack.title,
       ariaLabel: touchBack.getAttribute('aria-label'), classes: [...touchBackClasses] }),
     getSettingsOpen: () => ({ tabIndex: settingsOpen.tabIndex,
@@ -285,6 +292,16 @@ test('campus camera stays centered on the player instead of jumping to frame the
   const camera = debug.getOverworldCamera();
   const viewHeight = debug.getCanvasSize().height / debug.getWorldZoom();
   assert.equal(player.py + 16 - camera.camY, viewHeight / 2);
+});
+
+test('FTown approach softly reveals the full facade above the player', () => {
+  const { debug } = createGame({ viewportWidth: 1280, viewportHeight: 720 });
+  const player = debug.getPlayer();
+  player.gx = 53; player.gy = 12; player.px = 53 * 32; player.py = 12 * 32;
+  const camera = debug.getOverworldCamera();
+  const viewHeight = debug.getCanvasSize().height / debug.getWorldZoom();
+  assert.ok(player.py + 16 - camera.camY >= viewHeight / 2 + 140,
+    'camera should place the player lower while framing the tall FTown landmark');
 });
 
 test('desktop HUD reserves a dedicated right-side gutter for the Settings control', () => {
@@ -570,6 +587,21 @@ test('Academy flashcards can navigate back through previous cards, readings, and
   assert.equal(debug.getLecture().cardRevealed, true, 'a previously learned card should reopen on its revealed face');
 });
 
+test('Academy reading step plays the selected Kanji ON and KUN audio from inline speakers', () => {
+  const game = createGame();
+  assert.equal(game.debug.startAcademyLesson('日'), true);
+  game.debug.onLectureKey('enter');
+  assert.equal(game.debug.getLecture().phase, 'readings');
+  game.debug.renderOnce();
+  const speakers = game.debug.getLecture().hitboxes.filter((box) => box.action === 'reading_audio');
+  assert.equal(Array.from(speakers, (box) => box.value.type).sort().join(','), 'kun,on');
+  for (const speaker of speakers) {
+    game.dispatchCanvasEvent('pointerdown', { clientX: speaker.x + speaker.w / 2, clientY: speaker.y + speaker.h / 2 });
+  }
+  assert.ok(game.audioCalls.some((call) => call.kind === 'on' && call.char === '日'));
+  assert.ok(game.audioCalls.some((call) => call.kind === 'kun' && call.char === '日'));
+});
+
 test('Academy action keys ignore browser repeat and mobile Back remains usable', () => {
   const { debug, dispatchWindowEvent, dispatchTouchBack } = createGame();
   assert.equal(debug.startAcademyLesson('日'), true);
@@ -592,6 +624,19 @@ test('Academy and KanjiDex highlight the Hán Việt part of mascot names', () =
   dex.debug.openDex(); dex.debug.renderOnce();
   assert.ok(dex.textCalls.some((call) => call.text === 'Quốc' && call.fillStyle === '#ffd54a'));
   assert.ok(dex.textCalls.some((call) => call.text.includes('Vương') && call.fillStyle === '#fff'));
+});
+
+test('KanjiDex pronunciation speakers sit directly beside their ON and KUN readings', () => {
+  const game = createGame({ sandboxCharacter: true });
+  game.debug.openDex(); game.debug.renderOnce();
+  const audioBoxes = game.debug.getDex().hitboxes.filter((box) => box.action === 'kanji-audio');
+  const onBox = audioBoxes.find((box) => box.value.type === 'on');
+  const kunBox = audioBoxes.find((box) => box.value.type === 'kun');
+  const onText = game.textCalls.findLast((call) => call.text.startsWith('Âm ON:'));
+  const kunText = game.textCalls.findLast((call) => call.text.startsWith('Âm KUN:'));
+  assert.ok(onBox && kunBox && onText && kunText, 'both readable pronunciations need a speaker action');
+  assert.equal(onBox.x, onText.x + onText.text.length * 8 + 5, 'ON speaker drifted away from its rendered reading');
+  assert.equal(kunBox.x, kunText.x + kunText.text.length * 8 + 5, 'KUN speaker drifted away from its rendered reading');
 });
 
 test('every vocabulary row supports sentence reading, kana-to-Kanji, and furigana meaning questions', () => {
@@ -870,9 +915,12 @@ test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs'
 
 test('generated FPT props block only their authored footprints', () => {
   const { debug } = createGame();
-  assert.equal(debug.canWalk(54, 36), false, 'Cuder pedestal should block movement');
+  assert.equal(debug.canWalk(57, 36), false, 'Cuder pedestal should block movement');
   assert.equal(debug.canWalk(56, 36), true, 'Cuder must not block the F-Ville main road');
-  assert.equal(debug.canWalk(23, 32), false, 'campus garden island should block movement');
+  assert.equal(debug.canWalk(25, 32), false, 'campus garden fountain should block its opaque top');
+  assert.equal(debug.canWalk(23, 32), true, 'transparent campus garden corners must remain walkable');
+  assert.equal(debug.canWalk(16, 3), false, 'campus shrub core should block movement');
+  assert.equal(debug.canWalk(15, 3), true, 'transparent campus shrub edge should remain walkable');
   assert.equal(debug.canWalk(22, 36), false, 'campus guide NPC should block its own tile');
   assert.equal(debug.canWalk(21, 4), true, 'FPT monument approach should remain walkable');
 });

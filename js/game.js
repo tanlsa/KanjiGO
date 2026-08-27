@@ -1544,6 +1544,11 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     x /= scale; y /= scale;
     const hit = (lecture.hitboxes || []).find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
     if (!hit) return;
+    if (hit.action === 'reading_audio') {
+      if (hit.value && hit.value.type === 'kun') playKanjiKunYomi(hit.value.char);
+      else if (hit.value && hit.value.char) playKanjiOnYomi(hit.value.char);
+      return;
+    }
     playSFX('UI_BUTTON_CLICK');
     if (hit.action === 'menu') selectAcademyMenu(hit.value.action, hit.value.char);
     else if (hit.action === 'pick') startAcademyLesson(hit.value);
@@ -1940,7 +1945,15 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     const level = ensureMastery(monKanji).level;
     const targetChallenges = QUESTION_CHALLENGES.filter((q) => q.target === monKanji);
     const contextualModes = ['m11', 'm12'];
-    const availableModes = questionModesForLevel(level).filter((mode) => !contextualModes.includes(mode) || targetChallenges.length);
+    const capturedOtherCount = Object.values(KDB.KANJI)
+      .filter((info) => info.char !== monKanji && ensureMastery(info.char).captured).length;
+    const availableModes = questionModesForLevel(level).filter((mode) => {
+      if (contextualModes.includes(mode) && !targetChallenges.length) return false;
+      // m2/m3 cần ba Kanji khác làm distractor. Loại từ trước thay vì chọn rồi
+      // fallback về m1, vì fallback đó có thể lặp đúng mode của câu vừa hỏi.
+      if ((mode === 'm2' || mode === 'm3') && capturedOtherCount < 3) return false;
+      return true;
+    });
     const previousMode = String(previousKey || '').match(/(?:^|\|)(m(?:[1-9]|1[0-5]))(?:\||$)/)?.[1] || '';
     const nonRepeatingModes = availableModes.length > 1 ? availableModes.filter((mode) => mode !== previousMode) : availableModes;
     let mode = modeOverride || chooseMode(level, nonRepeatingModes);
@@ -3939,6 +3952,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     [K.TECH_PROMENADE, 'campus_tech_tile'],
     [K.CAMPUS_COURTYARD, 'campus_courtyard_tile'],
   ]);
+  const CAMPUS_HARD_SURFACES = new Set([K.CAMPUS_PLAZA, K.TECH_PROMENADE, K.CAMPUS_COURTYARD]);
   function drawTileOn(context, idx, sx, sy, gx = 0, gy = 0) {
     const campusAsset = campusTileAssets.get(idx);
     if (campusAsset && imgs[campusAsset]) {
@@ -3953,6 +3967,14 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const isTerrain = idx >= K.PLAZA && idx <= K.WORN_PATH && imgs.terrain_tiles;
     const atlas = isTerrain ? imgs.terrain_tiles : imgs.tileset;
     const atlasIndex = isTerrain ? idx - K.PLAZA : idx;
+    if (idx === K.FLOWER && ((gx * 7 + gy * 11) & 1)) {
+      // Mirror có seed giúp các flower patch dùng cùng atlas nhưng không lặp
+      // đúng một silhouette theo ma trận.
+      context.save(); context.translate(sx + TILE, sy); context.scale(-1, 1);
+      context.drawImage(atlas, atlasIndex * TILE, 0, TILE, TILE, 0, 0, TILE, TILE);
+      context.restore();
+      return;
+    }
     context.drawImage(atlas, atlasIndex * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
   }
   function drawTile(idx, sx, sy) { drawTileOn(cx, idx, sx, sy); }
@@ -3973,7 +3995,38 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       context.fillStyle = 'rgba(120,92,52,.22)'; context.fillRect(sx + 7, sy + 21, 2, 1); context.fillRect(sx + 23, sy + 8, 1, 2);
     } else if (idx === K.GRASS && ((gx * 17 + gy * 19) % 11 === 0)) {
       context.fillStyle = 'rgba(28,112,50,.24)'; context.fillRect(sx + 8, sy + 12, 1, 3); context.fillRect(sx + 10, sy + 13, 1, 2);
+    } else if (idx === K.CAMPUS_LAWN && ((gx * 29 + gy * 17) % 13 === 0)) {
+      // Biến thể nhỏ có seed theo ô để các mảng lawn lớn không lặp như giấy dán.
+      context.fillStyle = 'rgba(238,255,181,.42)'; context.fillRect(sx + 7, sy + 10, 1, 2);
+      context.fillStyle = 'rgba(24,112,47,.28)'; context.fillRect(sx + 22, sy + 20, 2, 1);
     }
+
+    const tile = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) ? -1 : TILES[y][x];
+    const north = tile(gx, gy - 1), south = tile(gx, gy + 1), west = tile(gx - 1, gy), east = tile(gx + 1, gy);
+    if (idx === K.WATER) {
+      // Viền nước được suy ra từ hàng xóm nên hồ có shoreline đủ bốn cạnh,
+      // kể cả khi shape được cắt góc mà không cần thêm atlas riêng.
+      context.fillStyle = 'rgba(196,243,255,.72)';
+      if (north !== K.WATER) context.fillRect(sx, sy, TILE, 2);
+      if (south !== K.WATER) context.fillRect(sx, sy + TILE - 2, TILE, 2);
+      if (west !== K.WATER) context.fillRect(sx, sy, 2, TILE);
+      if (east !== K.WATER) context.fillRect(sx + TILE - 2, sy, 2, TILE);
+      context.fillStyle = 'rgba(20,95,145,.42)';
+      if (north !== K.WATER) context.fillRect(sx, sy + 2, TILE, 1);
+      if (south !== K.WATER) context.fillRect(sx, sy + TILE - 3, TILE, 1);
+      if (west !== K.WATER) context.fillRect(sx + 2, sy, 1, TILE);
+      if (east !== K.WATER) context.fillRect(sx + TILE - 3, sy, 1, TILE);
+      return;
+    }
+
+    if (!CAMPUS_HARD_SURFACES.has(idx)) return;
+    const border = idx === K.CAMPUS_PLAZA ? 'rgba(255,249,220,.78)'
+      : idx === K.TECH_PROMENADE ? 'rgba(121,144,169,.62)' : 'rgba(255,205,169,.68)';
+    context.fillStyle = border;
+    if (north !== idx) context.fillRect(sx, sy, TILE, CAMPUS_HARD_SURFACES.has(north) ? 1 : 2);
+    if (south !== idx) context.fillRect(sx, sy + TILE - (CAMPUS_HARD_SURFACES.has(south) ? 1 : 2), TILE, CAMPUS_HARD_SURFACES.has(south) ? 1 : 2);
+    if (west !== idx) context.fillRect(sx, sy, CAMPUS_HARD_SURFACES.has(west) ? 1 : 2, TILE);
+    if (east !== idx) context.fillRect(sx + TILE - (CAMPUS_HARD_SURFACES.has(east) ? 1 : 2), sy, CAMPUS_HARD_SURFACES.has(east) ? 1 : 2, TILE);
   }
   function ensureWorldGroundCache() {
     if (worldGroundCache || !imgs.tileset || typeof document.createElement !== 'function') return worldGroundCache;
@@ -3983,7 +4036,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const source = TILES[gy][gx], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
       const sx = gx * TILE, sy = gy * TILE;
       drawTileOn(context, idx, sx, sy, gx, gy);
-      if (idx !== K.WATER) drawStaticGroundDetail(context, idx, sx, sy, gx, gy);
+      drawStaticGroundDetail(context, idx, sx, sy, gx, gy);
     }
     worldGroundCache = canvas;
     return worldGroundCache;
@@ -4128,7 +4181,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     for (let y = bounds.startY; y <= bounds.endY; y++) for (let x = bounds.startX; x <= bounds.endX; x++) {
       const source = TILES[y][x], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
       const sx = x * TILE - camX, sy = y * TILE - camY;
-      if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); if (idx !== K.WATER) drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
+      if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
       if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
     }
     // Arena floor effects belong below actors. Drawing this translucent layer
@@ -4138,19 +4191,24 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
       const sx = x * TILE - camX, sy = y * TILE - camY;
       if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
-      cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17, sy + 27, 13, 5, 0, 0, Math.PI * 2); cx.fill();
-      drawTile(K.TREE, sx, sy);
+      const jitterX = x > 0 && x < MAP_W - 1 ? ((x * 13 + y * 7) % 5) - 2 : 0;
+      const jitterY = y > 0 && y < MAP_H - 1 ? ((x * 5 + y * 11) % 3) - 1 : 0;
+      cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17 + jitterX, sy + 27 + jitterY, 13, 5, 0, 0, Math.PI * 2); cx.fill();
+      drawTile(K.TREE, sx + jitterX, sy + jitterY);
     }
     drawAcademy(camX, camY);
     drawTulipGardens(camX, camY, frameNow);
     drawCampusLandmarks(camX, camY);
     drawWorldProps(camX, camY);
     drawTechParkDecorations(camX, camY, frameNow);
+    // Biển thuộc lớp cảnh quan: actor đi ngang phải luôn nổi phía trước thay
+    // vì bị tấm biển che mất toàn bộ thân người/Kanji đi theo.
+    drawMapSigns(camX, camY);
     for (const n of NPCS) {
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
       if (npcX < -TILE * 2 || npcX > VIEW_PX_W + TILE || npcY < -TILE * 2 || npcY > VIEW_PX_H + TILE) continue;
       drawCharacterShadow(npcX, npcY);
-      drawSprite(imgs.npc, 'down', 0, npcX, npcY,
+      drawSprite(imgs.npc, n.facing || 'down', 0, npcX, npcY,
         C.CHARACTER.npcV4DrawSize, C.CHARACTER.npcV4FrameSize);
       if (n.icon) drawNpcThemeIcon(n, npcX, npcY);
       if (n.type === 'trainer') {
@@ -4198,11 +4256,16 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (riding && player.facing !== 'up') drawBicycle();
     drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
-    drawMapSigns(camX, camY);
   }
   function overworldCamera() {
     let camX = player.px + TILE / 2 - VIEW_PX_W / 2;
     let camY = player.py + TILE / 2 - VIEW_PX_H / 2;
+    // Khi tiến vào FTown, dịch camera lên theo một bell curve liên tục để toàn
+    // bộ facade/logo xuất hiện mà không tạo cú jump tại ranh giới khu vực.
+    const gx = player.px / TILE, gy = player.py / TILE;
+    const ftownHorizontal = Math.max(0, 1 - Math.abs(gx - 53.5) / 9);
+    const ftownVertical = gy < 9 || gy > 15 ? 0 : gy <= 12 ? (gy - 9) / 3 : (15 - gy) / 3;
+    camY -= TILE * 4.75 * ftownHorizontal * Math.max(0, ftownVertical);
     camX = Math.max(0, Math.min(camX, MAP_W * TILE - VIEW_PX_W)); camY = Math.max(0, Math.min(camY, MAP_H * TILE - VIEW_PX_H));
     return { camX, camY };
   }
@@ -4456,9 +4519,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const { compact, statusW, statusX, statusY, hintW } = overworldHudLayout();
     const radar = radarSummary(), total = KANJI_BY_CHAR.size, captured = capturedKanjiCount();
     const touchUi = usesTouchUi();
-    const explorationGuide = bicycleAvailable() ? ' · B: Xe đạp' : '';
-    const autoRideGuide = autoRideAvailable() ? ' · P: Auto' : '';
-    const radarGuide = radar.mode === 'targeting' ? ' · R: Radar' : '';
+    const explorationGuide = bicycleAvailable() ? ' · B Bike' : '';
+    const autoRideGuide = autoRideAvailable() ? ' · P Auto' : '';
+    const radarGuide = radar.mode === 'targeting' ? ' · R Radar' : '';
     const tour = onboardingTour(), tourNearby = onboardingGuideInReach();
     const message = tour
       ? `🎓 ${tourNearby ? `SPACE: nói chuyện với cô ${tour.name}` : `${tour.stop.objective} • ${onboardingGuideDirection(tour)}`} · ${tour.index + 1}/${tour.total}`
@@ -4466,8 +4529,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         : academy ? `${touchUi ? 'SPACE' : 'Space/Enter'}: Vào Giảng đường`
           : compact && touchUi ? 'Dùng nút bên dưới để di chuyển, tương tác và mở menu'
             : compact ? `I: Hồ sơ · D: Dex · K: Skill${explorationGuide}${autoRideGuide}${radarGuide}`
-              : `↑↓←→ Di chuyển · Shift: Chạy${explorationGuide}${autoRideGuide}${radarGuide} · I: Hồ sơ · D: Dex · K: Skill · Space/Enter: Tương tác`;
-    cx.fillStyle = 'rgba(11,16,48,.82)'; cx.fillRect(8, 8, hintW, 28);
+              : `↑↓←→ Đi · Shift Chạy · Space Tương tác · D Dex · K Skill · I Hồ sơ${explorationGuide}${autoRideGuide}${radarGuide}`;
+    cx.fillStyle = 'rgba(11,16,48,.68)'; cx.fillRect(8, 8, hintW, 28);
     cx.fillStyle = '#9fd8f5'; fitText(message, 16, 27, hintW - 16, 13);
     const petStatus = followerUnlocked() ? `Pet「${C.MONSTERS[currentPetId]?.kanji || '?'}」` : 'Chưa có Pet';
     const status = `⭐${availableKP()} KP · ${captured}/${total} · ${petStatus}${isBicycleActive() ? ' · 🚲 ON' : ''}${autoRideActive ? ' · 🧭 AUTO' : ''}`;
@@ -5403,9 +5466,19 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const cardH = narrow ? Math.min(104, (bodyH - 102) / 2) : Math.min(150, bodyH - 92);
       const onX = area.x + 28, onY = cardY, kunX = narrow ? onX : area.x + 46 + cardW, kunY = narrow ? cardY + cardH + gap : cardY;
       drawAcademyCard(onX, onY, cardW, cardH, true); drawAcademyCard(kunX, kunY, cardW, cardH, true);
-      cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 14 : 17}px "KanjiGo UI",sans-serif`; cx.fillText('ÂM ON', onX + 20, onY + 30);
+      const drawReadingAudio = (label, labelX, labelY, char, type, active) => {
+        const iconW = 28, iconH = 28, iconX = labelX + cx.measureText(label).width + 7, iconY = labelY - 22;
+        cx.fillStyle = active ? '#dff8ff' : '#667087'; cx.font = `${narrow ? 15 : 17}px "KanjiGo UI",sans-serif`; cx.textAlign = 'center';
+        cx.fillText(active ? '🔊' : '🔇', iconX + iconW / 2, iconY + 20); cx.textAlign = 'left';
+        if (active) lecture.hitboxes.push({ x: iconX, y: iconY, w: iconW, h: iconH, action: 'reading_audio', value: { char, type } });
+      };
+      const onLabelX = onX + 20, onLabelY = onY + 30, onAudio = Array.isArray(info.on) && info.on.length > 0;
+      cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 14 : 17}px "KanjiGo UI",sans-serif`; cx.fillText('ÂM ON', onLabelX, onLabelY);
+      drawReadingAudio('ÂM ON', onLabelX, onLabelY, info.char, 'on', onAudio);
       cx.fillStyle = '#fff'; cx.font = `${compact ? 16 : 22}px ${JPFONT}`; wrap((info.on || []).join('  ·  ') || '—', onX + 20, onY + (narrow ? 61 : 72), cardW - 40, narrow ? 24 : 30);
-      cx.fillStyle = '#6effa1'; cx.font = `bold ${narrow ? 14 : 17}px "KanjiGo UI",sans-serif`; cx.fillText('ÂM KUN', kunX + 20, kunY + 30);
+      const kunLabelX = kunX + 20, kunLabelY = kunY + 30, kunAudio = Array.isArray(info.kun) && info.kun.length > 0;
+      cx.fillStyle = '#6effa1'; cx.font = `bold ${narrow ? 14 : 17}px "KanjiGo UI",sans-serif`; cx.fillText('ÂM KUN', kunLabelX, kunLabelY);
+      drawReadingAudio('ÂM KUN', kunLabelX, kunLabelY, info.char, 'kun', kunAudio);
       cx.fillStyle = '#fff'; cx.font = `${compact ? 16 : 22}px ${JPFONT}`; wrap((info.kun || []).join('  ·  ') || '—', kunX + 20, kunY + (narrow ? 61 : 72), cardW - 40, narrow ? 24 : 30);
     } else if (lecture.phase === 'cards') {
       renderAcademyLearningCard(area, bodyY, bodyH, lecture.examples[lecture.cardIndex], false);
@@ -6400,21 +6473,22 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
       cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
       drawMonsterName(C.MONSTERS[selected.monId], 20, panelY + 52, W - 40, 13, { label: true });
-      const btnW = 28, btnH = 22, onX = 20, kunX = narrow ? 20 : 320;
+      const btnW = 24, btnH = 22, onX = 20, kunX = narrow ? 20 : 320;
       const onMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : 250;
       const kunMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : Math.max(80, W - 40 - kunX - btnW - 8);
-      const onBtnX = onX + onMaxW + 6, onBtnY = panelY + 76 - btnH + 4;
-      const kunBtnY = (narrow ? panelY + 97 : panelY + 76) - btnH + 4, kunBtnX = kunX + kunMaxW + 6;
+      const onY = panelY + 76, kunY = panelY + (narrow ? 97 : 76);
+      const onText = `Âm ON: ${selected.on.join(', ')}`, kunText = `Âm KUN: ${selected.kun.join(', ') || '—'}`;
+      cx.fillStyle = '#ffd54a'; const onTextW = fitText(onText, onX, onY, onMaxW, 14);
+      cx.fillStyle = '#6effa1'; const kunTextW = fitText(kunText, kunX, kunY, kunMaxW, 14);
+      // Neo icon vào chiều rộng chữ đã render, thay vì cuối chiều rộng tối đa
+      // của cột. Hitbox vẫn rộng để loa nhỏ dễ bấm trên màn hình cảm ứng.
+      const onBtnX = onX + onTextW + 5, onBtnY = onY - btnH + 4;
+      const kunBtnX = kunX + kunTextW + 5, kunBtnY = kunY - btnH + 4;
       const drawAudioBtn = (bx, by, active) => {
-        cx.fillStyle = active ? 'rgba(24,102,151,.92)' : 'rgba(60,68,96,.45)';
-        cx.fillRect(bx, by, btnW, btnH);
-        cx.strokeStyle = active ? '#72ddff' : '#3a4a6b'; cx.lineWidth = 1; cx.strokeRect(bx, by, btnW, btnH);
-        cx.fillStyle = active ? '#fff' : '#767e92'; cx.font = '15px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+        cx.fillStyle = active ? '#dff8ff' : '#667087'; cx.font = '15px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
         cx.fillText('🔊', bx + btnW / 2, by + btnH - 5); cx.textAlign = 'left';
       };
       const onAudio = true, kunAudio = Array.isArray(selected.kun) && selected.kun.length > 0;
-      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ')}`, onX, panelY + 76, onMaxW, 14);
-      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, kunX, panelY + (narrow ? 97 : 76), kunMaxW, 14);
       drawAudioBtn(onBtnX, onBtnY, onAudio);
       dex.hitboxes.push({ x: onBtnX, y: onBtnY, w: btnW, h: btnH, action: 'kanji-audio', value: { char: selected.char, type: 'on' } });
       drawAudioBtn(kunBtnX, kunBtnY, kunAudio);
@@ -6453,6 +6527,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       output += '…';
     }
     cx.fillText(output, x, y);
+    return cx.measureText(output).width;
   }
   function monsterHanViet(monster) {
     if (!monster) return '';

@@ -164,6 +164,14 @@ test('spawn pools, assets, map, and progression references are valid', () => {
   const spawnTile = MAP_DATA.TILES[CONFIG.PLAYER.startGy]?.[CONFIG.PLAYER.startGx];
   assert.ok(spawnTile !== undefined && !CONFIG.BLOCKED_TILES.includes(spawnTile), 'player starts outside the walkable map');
   assert.equal(MAP_DATA.TILES[CONFIG.ACADEMY.doorGy][CONFIG.ACADEMY.doorGx], CONFIG.TILE_KEYS.ACADEMY_DOOR, 'academy door config does not match map');
+  assert.equal(MAP_DATA.TILES[9][6], CONFIG.TILE_KEYS.VIVID_GRASS,
+    'academy facade must not retain one stray worn-path tile');
+  for (let x = 16; x <= 20; x++) assert.equal(MAP_DATA.TILES[8][x], CONFIG.TILE_KEYS.TALLGRASS,
+    `north Hub brown strip should be encounter grass at ${x},8`);
+  for (let x = 20; x <= 34; x++) for (const y of [11, 12]) {
+    assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+      `Hub-Wilderness connector should use white campus brick at ${x},${y}`);
+  }
   for (const npc of MAP_DATA.NPCS) assert.ok(MAP_DATA.TILES[npc.gy]?.[npc.gx] !== undefined, `NPC at ${npc.gx},${npc.gy} is outside map`);
   assert.equal((MAP_DATA.ONBOARDING_GUIDE?.stops || []).map((stop) => stop.id).join(','), 'academy,wilderness,arena');
   for (const [tier, definition] of Object.entries(KANJI_CATALOG.tiers)) {
@@ -272,14 +280,18 @@ test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid col
   const features = MAP_DATA.DECORATIONS?.campusFeatures;
   assert.ok(features?.innovationHub && features?.hoaLacLake && features?.heritageGarden,
     'expanded world should contain FPT-themed campus features');
-  for (let y = 10; y <= 13; y++) {
-    for (let x = 46; x <= 61; x++) {
-      assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
-        `FTown white plaza must remain continuous at ${x},${y}`);
-    }
+  for (let y = 10; y <= 11; y++) for (let x = 46; x <= 61; x++) {
+    assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+      `FTown upper plaza must remain continuous at ${x},${y}`);
+  }
+  for (let y = 12; y <= 13; y++) {
+    for (let x = 49; x <= 58; x++) assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+      `FTown central approach must remain open at ${x},${y}`);
+    for (const x of [46,47,48,59,60,61]) assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_LAWN,
+      `FTown side planter must break up the empty plaza at ${x},${y}`);
   }
   for (let y = 21; y <= 22; y++) {
-    for (let x = 46; x <= 55; x++) {
+    for (let x = 47; x <= 54; x++) {
       const expected = x === 51 ? CONFIG.TILE_KEYS.CAMPUS_PLAZA : CONFIG.TILE_KEYS.TECH_PROMENADE;
       assert.equal(MAP_DATA.TILES[y][x], expected, `Innovation Hub forecourt has a hole at ${x},${y}`);
     }
@@ -301,6 +313,19 @@ test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid col
   const monument = props.find((prop) => prop.id === 'fpt_software_monument');
   assert.equal(monument.gx + monument.width / 2, 21.5, 'FPT monument should align to the north plaza centerline');
   assert.ok(monument.width >= 7, 'FPT monument should remain large enough for its logo text to read clearly');
+  const garden = props.find((prop) => prop.id === 'fpt_campus_garden');
+  assert.ok(garden.collisions.length > 1, 'round campus garden should use a shaped collision footprint');
+  assert.ok(!garden.collisions.some((collision) => collision.x <= 23 && 23 < collision.x + collision.width
+    && collision.y <= 32 && 32 < collision.y + collision.height), 'transparent garden corner must not be blocked');
+  assert.equal(MAP_DATA.TILES[37][57], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+    'Cuder statue should sit on an authored plaza connected to the east road');
+  assert.equal(MAP_DATA.TILES[36][56], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+    'Cuder pocket plaza should blend into the east road instead of floating on the lawn');
+  const smallLake = MAP_DATA.DECORATIONS.campusFeatures.hoaLacLake;
+  for (const [x, y] of [[smallLake.x, smallLake.y], [smallLake.x + smallLake.width - 1, smallLake.y],
+    [smallLake.x, smallLake.y + smallLake.height - 1], [smallLake.x + smallLake.width - 1, smallLake.y + smallLake.height - 1]]) {
+    assert.notEqual(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.WATER, `campus lake corner ${x},${y} should be softened`);
+  }
 });
 
 test('generated FPT campus PNG assets preserve transparent alpha and runtime dimensions', () => {

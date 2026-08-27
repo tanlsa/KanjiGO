@@ -42,7 +42,7 @@
     },
     campusFeatures: {
       innovationHub: { x: 47, y: 17, width: 8, height: 4, doorGx: 51, doorGy: 20 },
-      hoaLacLake: { x: 32, y: 33, width: 4, height: 3 },
+      hoaLacLake: { x: 31, y: 32, width: 5, height: 5 },
       heritageGarden: { x: 2, y: 31, width: 6, height: 9 },
       encounterGroves: [
         { x: 45, y: 25, width: 3, height: 3 },
@@ -64,18 +64,30 @@
       collisions: [{ x: 18, y: 3, width: 7, height: 1 }],
     },
     {
-      id: 'cuder_statue', asset: 'prop_cuder', gx: 54, gy: 34, width: 2, height: 3,
-      collisions: [{ x: 54, y: 36, width: 2, height: 1 }],
+      id: 'cuder_statue', asset: 'prop_cuder', gx: 57, gy: 34, width: 2, height: 3,
+      collisions: [{ x: 57, y: 36, width: 2, height: 1 }],
     },
     {
       id: 'fpt_campus_garden', asset: 'prop_campus_garden', gx: 23, gy: 32, width: 6, height: 4,
-      collisions: [{ x: 23, y: 32, width: 6, height: 4 }],
+      // Footprint theo silhouette tròn của fountain thay vì chặn nguyên khối
+      // 6x4. Bốn góc PNG trong suốt vì vậy vẫn đi qua được, không còn ghost block.
+      collisions: [
+        { x: 25, y: 32, width: 2, height: 1 },
+        { x: 24, y: 33, width: 4, height: 1 },
+        { x: 23, y: 34, width: 6, height: 1 },
+        { x: 24, y: 35, width: 4, height: 1 },
+      ],
     },
     ...[
-      [15,2],[26,3],[11,32],[28,38],[12,40],
-      [46,14],[55,15],[45,24],[52,29],[33,41],
-    ].map(([gx, gy], index) => ({
+      [15,2,true],[26,3,true],[11,32,true],[28,38,true],[12,40,true],
+      [46,14,true],[55,15,true],[45,24,true],[52,29,false],[33,41,false],
+      // Planter dùng lại asset authored để chia nhỏ các khoảng sân rộng.
+      [46,11,false],[59,11,false],[14,34,true],[29,34,true],[8,33,true],[35,38,true],
+    ].map(([gx, gy, solid], index) => ({
       id: `campus_shrub_${index + 1}`, asset: 'prop_campus_shrub', gx, gy, width: 3, height: 1.5,
+      // Chặn đúng lõi bụi cây, vẫn cho phép đi sát hai mép trong suốt. Hai cụm
+      // đặt sát promenade chỉ đóng vai trò foreground để không bóp hẹp đường.
+      collisions: solid ? [{ x: gx + 1, y: gy + 1, width: 1, height: 1 }] : [],
     })),
   ];
   const propCollisions = props.flatMap((prop) => (prop.collisions || []).map((collision) => ({
@@ -105,33 +117,39 @@
   // Ba trục chính gặp nhau tại Hub. Mỗi lối rộng hai ô ở điểm chuyển khu.
   lineH(6, 20, 8, T.WORN_PATH); lineH(6, 20, 9, T.WORN_PATH);
   lineH(20, 34, 11, T.WORN_PATH); lineH(20, 34, 12, T.WORN_PATH);
-  lineV(20, 11, 17, T.COBBLE); lineV(21, 11, 17, T.COBBLE);
+  lineV(20, 11, 17, T.CAMPUS_PLAZA); lineV(21, 11, 17, T.CAMPUS_PLAZA);
   rect(16, 9, 10, 5, T.PLAZA);
   lineH(2, 10, 23, T.WORN_PATH); lineH(30, 41, 23, T.WORN_PATH);
 
   // Hai campus công nghệ nằm ở phần bản đồ mở rộng, có quảng trường riêng và
   // promenade dài để cảm giác quy mô lớn hơn thay vì chen vào Hub cũ.
   rect(47, 2, 14, 8, T.ROOF); rect(46, 10, 16, 4, T.CAMPUS_PLAZA);
+  // Hai đảo cỏ/planter phá khối sân trắng 16x4 nhưng giữ trục cửa rộng 10 ô.
+  rect(46, 12, 3, 2, T.CAMPUS_LAWN); rect(59, 12, 3, 2, T.CAMPUS_LAWN);
   lineH(41, 45, 11, T.TECH_PROMENADE); lineH(41, 45, 12, T.TECH_PROMENADE);
   rect(38, 33, 16, 8, T.ROOF); rect(37, 41, 18, 2, T.CAMPUS_COURTYARD);
-  lineH(41, 56, 23, T.WORN_PATH); lineV(56, 23, 41, T.WORN_PATH); lineH(46, 56, 41, T.WORN_PATH);
+  // Trục campus phía đông dùng gravel nhất quán; sân gạch cam F-Ville không
+  // còn bị một dải đất cắt ngang ngay dưới bậc thềm.
+  lineH(41, 56, 23, T.GRAVEL); lineV(56, 23, 41, T.GRAVEL); lineH(46, 55, 41, T.CAMPUS_COURTYARD);
 
   // Quảng trường nhận diện ở phía bắc Hub dành cho monument FPT SOFTWARE.
   // Hai lối cobble giữ monument nhìn rõ nhưng vẫn kết nối thẳng xuống Hub.
   rect(18, 1, 8, 5, T.CAMPUS_LAWN); rect(18, 3, 8, 2, T.CAMPUS_PLAZA);
-  lineV(21, 4, 8, T.COBBLE); lineV(22, 4, 8, T.COBBLE);
+  lineV(21, 4, 8, T.CAMPUS_PLAZA); lineV(22, 4, 8, T.CAMPUS_PLAZA);
   [[17,1],[27,1],[17,4],[27,4],[18,6],[25,6]].forEach(([x,y]) => put(x,y,T.FLOWER));
 
   // Innovation Hub có PNG landmark riêng phủ kín footprint; sân trước giữ một
   // bề mặt tech liền mạch và trục gạch sáng dẫn thẳng vào cửa chính.
   rect(47, 17, 8, 2, T.ROOF); rect(47, 19, 8, 2, T.WALL); put(51, 20, T.DOOR);
-  rect(46, 21, 10, 2, T.TECH_PROMENADE); lineV(51, 20, 23, T.CAMPUS_PLAZA);
+  rect(47, 21, 8, 2, T.TECH_PROMENADE); lineV(51, 20, 23, T.CAMPUS_PLAZA);
   [[45,17],[56,17],[45,20],[56,20],[48,24],[54,24],[57,29]].forEach(([x,y]) => put(x,y,T.FLOWER));
   rect(45, 25, 3, 3, T.TALL); rect(52, 25, 3, 4, T.TALL);
   lineH(45, 55, 30, T.GRAVEL); lineV(49, 23, 30, T.GRAVEL);
 
   // Hồ phản chiếu và vườn tre thu nhỏ làm vùng chuyển tiếp vào F-Ville bớt trống.
-  lineH(32, 35, 32, T.SHORE); rect(32, 33, 4, 3, T.WATER); lineH(32, 35, 36, T.SHORE);
+  rect(31, 32, 5, 5, T.SHORE); rect(31, 33, 5, 3, T.WATER);
+  // Ba hàng nước 3–5–3 tạo hồ oval; hàng shore bao quanh giữ mép hồ kín.
+  put(31,33,T.SHORE); put(35,33,T.SHORE); put(31,35,T.SHORE); put(35,35,T.SHORE);
   lineV(36, 32, 41, T.GRAVEL); lineH(36, 38, 41, T.GRAVEL);
   rect(32, 38, 4, 3, T.TALL);
   [[32,31],[35,31],[32,37],[35,37],[33,41],[36,42],[55,34],[55,38]].forEach(([x,y]) => put(x,y,T.FLOWER));
@@ -163,20 +181,40 @@
   rect(1, 1, 13, 8, T.PLAZA);
   rect(2, 8, 3, 4, T.GARDEN); rect(9, 8, 3, 4, T.GARDEN);
   [2, 3, 5, 7, 9, 11, 12].forEach((x) => put(x, 1, T.TREE));
-  lineV(7, 8, 13, T.COBBLE);
-  lineH(7, 15, 8, T.COBBLE); lineH(7, 15, 9, T.COBBLE);
+  lineV(7, 8, 13, T.CAMPUS_PLAZA);
+  lineH(7, 15, 8, T.CAMPUS_PLAZA); lineH(7, 15, 9, T.CAMPUS_PLAZA);
   rect(2, 2, 11, 4, T.ROOF);
   rect(2, 6, 11, 3, T.WALL);
   put(7, 8, T.DOOR);
 
+  // Dọn seam giữa Giảng đường và Hub: phần đường đất còn dư biến thành bụi
+  // cỏ encounter, còn ô (6,9) sát facade trở về đúng lawn của campus.
+  rect(16, 8, 5, 1, T.TALL); put(6, 9, T.VIVID_GRASS);
+
   // WILDERNESS: hồ ở phía bắc, hai đồng cỏ encounter ở phía nam.
   rect(34, 2, 8, 7, T.WATER);
-  put(34,2,T.MOSS); put(41,2,T.MOSS); put(34,8,T.SHORE); put(41,8,T.SHORE);
+  put(34,2,T.MOSS); put(41,2,T.MOSS); put(34,3,T.SHORE); put(41,3,T.SHORE);
+  put(34,8,T.SHORE); put(41,8,T.SHORE);
   put(33,5,T.BOAT); put(34,5,T.WATER);
   lineH(31, 38, 10, T.GRAVEL); lineV(33, 5, 13, T.GRAVEL);
   rect(31, 11, 4, 4, T.TALL); rect(37, 10, 5, 5, T.TALL);
-  lineH(20, 34, 11, T.GRAVEL); lineH(20, 34, 12, T.GRAVEL);
+  lineH(20, 34, 11, T.CAMPUS_PLAZA); lineH(20, 34, 12, T.CAMPUS_PLAZA);
+  lineV(20, 13, 17, T.CAMPUS_PLAZA); lineV(21, 13, 17, T.CAMPUS_PLAZA);
   [[31,2],[32,3],[40,10],[36,13],[41,14],[30,7]].forEach(([x,y]) => put(x,y,T.FLOWER));
+
+  // Phá các ma trận encounter/rừng quá vuông bằng các hốc cỏ và khoảng thở có
+  // chủ đích. Biên ngoài vẫn kín, còn mọi grove vẫn giữ đủ tall grass để spawn.
+  [[34,14],[37,10],[41,13]].forEach(([x,y]) => put(x,y,T.DARK_GRASS));
+  [[45,25],[47,27],[52,25],[54,28],[10,32],[13,34],[28,37],[30,40],[32,38],[35,40]]
+    .forEach(([x,y]) => put(x,y,T.CAMPUS_LAWN));
+  [[58,19],[58,23],[60,27],[58,33],[58,37],[60,40],[62,35]].forEach(([x,y]) => put(x,y,T.GRASS));
+
+  // Tượng Cuder có pocket plaza riêng phía đông trục chính, đủ rộng để đọc
+  // silhouette và không đè lên footprint F-Ville hoặc bóp hẹp con đường.
+  rect(57, 34, 3, 4, T.CAMPUS_PLAZA);
+  put(59,34,T.GRASS); put(59,37,T.GRASS);
+  put(56,35,T.CAMPUS_PLAZA); put(56,36,T.CAMPUS_PLAZA);
+  lineH(56, 58, 37, T.CAMPUS_PLAZA); put(56,37,T.GRAVEL);
 
   // TRAINER ARENA: vành đai đá, bốn cổng, 15 bục Trainer và Boss giữa sân.
   rect(arena.x - 1, arena.y - 1, arena.width + 2, arena.height + 2, T.COBBLE);
@@ -199,9 +237,13 @@
 
   // Landmark nhỏ ngoài công trình, tránh đặt lên các trục giao thông.
   [[3,13],[11,13],[16,6],[27,10],[8,14],[32,20],[40,25]].forEach(([x,y]) => put(x,y,T.FLOWER));
-  const trainerNpcs = (((window.CONFIG || {}).TRAINER_ARENA || {}).trainers || []).map((trainer, index) => ({
-    gx: trainerPositions[index][0], gy: trainerPositions[index][1], type: 'trainer', trainerId: trainer.id, icon: trainer.icon,
-  }));
+  const trainerNpcs = (((window.CONFIG || {}).TRAINER_ARENA || {}).trainers || []).map((trainer, index) => {
+    const [gx, gy] = trainerPositions[index];
+    // Trainer nhìn về vòng đấu thay vì 15 bản sao cùng quay xuống màn hình.
+    const facing = Math.abs(gx - arena.centerGx) > Math.abs(gy - arena.centerGy)
+      ? (gx < arena.centerGx ? 'right' : 'left') : (gy < arena.centerGy ? 'down' : 'up');
+    return { gx, gy, facing, type: 'trainer', trainerId: trainer.id, icon: trainer.icon };
+  });
 
   window.MAP_DATA = {
     TILES: tiles,
@@ -215,11 +257,11 @@
       { gx: 31, gy: 9, label: 'WILDERNESS', color: '#4b9b65' },
       { gx: 46, gy: 12, label: 'FTOWN', color: '#56636b' },
       { gx: 54, gy: 41, label: 'F-VILLE · HÒA LẠC', color: '#397a5c' },
-      { gx: 2, gy: 22, label: '404 GARDEN', color: '#56488d' },
-      { gx: 46, gy: 22, label: 'FPT INNOVATION HUB', color: '#247da2' },
-      { gx: 2, gy: 37, label: 'HERITAGE GARDEN', color: '#6d8240' },
+      { gx: 1, gy: 21, label: '404 GARDEN', color: '#397a68' },
+      { gx: 45, gy: 22, label: 'INNOVATION HUB', color: '#397a68' },
+      { gx: 1, gy: 36, label: 'HERITAGE GARDEN', color: '#397a68' },
       { gx: 36, gy: 37, label: 'HỒ CAMPUS', color: '#3b8ba4' },
-      { gx: 21, gy: 36, label: 'FPT CAMPUS PARK', color: '#31876a' },
+      { gx: 15, gy: 35, label: 'CAMPUS PARK', color: '#397a68' },
     ],
     // NPC onboarding được engine đặt ở đúng chặng đang học. Các điểm đứng đều
     // nằm cạnh trục chính để người mới không bị kẹt trong collision map.
@@ -292,7 +334,7 @@
         ],
       },
       {
-        gx: 55, gy: 38,
+        gx: 57, gy: 38,
         lines: [
           'Đây là Cuder — biểu tượng của lập trình viên FPT Software: đầu to, kính tròn, bụng ỏng và chiếc cuốc khai phá.',
           'Tượng từng được rước về F-Ville và trở thành một biểu tượng may mắn của cộng đồng FSOFT.',
