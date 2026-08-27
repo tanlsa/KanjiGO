@@ -1152,6 +1152,24 @@ test('Bicycle toggles only after unlock and reuses normal collision movement', (
   assert.equal(player.moveDuration, debug.bicycleMoveDuration());
 });
 
+test('Bicycle swaps its left/right artwork to match travel direction', async () => {
+  const { debug, drawCalls } = createGame({ enableSkillQaSeed: true });
+  assert.equal(debug.purchaseSkill('bicycle').ok, true);
+  assert.equal(debug.toggleBicycle(), true);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  const player = debug.getPlayer();
+  for (const [facing, expectedSourceY] of [['left', 256], ['right', 128]]) {
+    player.facing = facing; player.moving = false; player.frame = 0;
+    drawCalls.length = 0; debug.renderOnce();
+    const bicycle = drawCalls.find((call) => call.type === 'drawImage'
+      && call.src === 'assets/characters/bicycle-overlay-v4.png');
+    assert.ok(bicycle, `missing bicycle draw for ${facing}`);
+    assert.equal(bicycle.args[1], expectedSourceY,
+      `${facing} should use the opposite source row from the current sheet`);
+  }
+});
+
 test('Auto Ride paths to tall grass, pauses for battle, resumes, and persists', () => {
   const first = createGame({ enableSkillQaSeed: true });
   const { debug, storage } = first;

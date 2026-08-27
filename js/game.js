@@ -3274,7 +3274,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const bicycleDrawSize = Math.max(TILE, Math.round(
         (Number(C.CHARACTER && C.CHARACTER.bicycleDrawSize) || TILE) * activePlayerDrawScale));
       const bicycleFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.bicycleFrameSize) || TILE);
-      drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY,
+      const bicycleFacing = player.facing === 'left' ? 'right'
+        : player.facing === 'right' ? 'left' : player.facing;
+      drawSprite(imgs.bicycle_overlay, bicycleFacing, player.frame, playerX, bicycleY,
         bicycleDrawSize, bicycleFrameSize);
     };
     // Rear-view steering geometry belongs behind the rider. The other three

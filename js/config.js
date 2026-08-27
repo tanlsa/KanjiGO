@@ -91,9 +91,9 @@ window.CONFIG = {
     moveMultiplier: 0.42,
     animMultiplier: 0.55,
     riderLift: 12,
-    sideRiderLift: 20,
+    sideRiderLift: 8,
     sideOverlayDrop: 10,
-    verticalOverlayDrop: 16,
+    verticalOverlayDrop: 12,
   },
   RADAR: {
     targetMultiplier: 4,

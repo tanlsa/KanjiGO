@@ -185,6 +185,20 @@ test('V4 rear-view bicycle hides its handlebar behind the rider', () => {
   }
 });
 
+test('V4 side-view bicycle frame openings remain genuinely transparent', () => {
+  const sheet = decodeRgba('assets/characters/bicycle-overlay-v4.png'), cell = 128;
+  const openings = [
+    { row: 1, points: [[64, 60], [44, 69]] },
+    { row: 2, points: [[63, 60], [84, 69]] },
+  ];
+  for (const { row, points } of openings) for (let frame = 0; frame < 4; frame += 1) {
+    for (const [localX, localY] of points) {
+      assert.equal(pixel(sheet, frame * cell + localX, row * cell + localY)[3], 0,
+        `white frame remnant remains in direction ${row}, frame ${frame}, ${localX},${localY}`);
+    }
+  }
+});
+
 test('male V4 rear-view hair ends in stable nape locks instead of a flat seam', () => {
   for (const relativePath of [
     'assets/characters/player-v4.png',

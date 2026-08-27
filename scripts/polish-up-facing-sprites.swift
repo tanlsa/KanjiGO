@@ -42,6 +42,35 @@ func pixelOffset(x: Int, y: Int) -> Int { (y * size + x) * bytesPerPixel }
 
 let bicyclePath = CommandLine.arguments[1]
 editPNG(at: bicyclePath) { pixels in
+  func clearNeutralComponent(frame: Int, row: Int, seedX: Int, seedY: Int) {
+    func isNeutral(_ localX: Int, _ localY: Int) -> Bool {
+      let offset = pixelOffset(x: frame * cell + localX, y: row * cell + localY)
+      let red = Int(pixels[offset]), green = Int(pixels[offset + 1]), blue = Int(pixels[offset + 2])
+      return pixels[offset + 3] > 0 && min(red, green, blue) >= 120
+        && max(red, green, blue) - min(red, green, blue) <= 90
+    }
+
+    guard isNeutral(seedX, seedY) else { return }
+    var seen = Set<Int>(), queue = [seedY * cell + seedX], cursor = 0
+    seen.insert(queue[0])
+    while cursor < queue.count {
+      let point = queue[cursor]; cursor += 1
+      let x = point % cell, y = point / cell
+      for dy in -1...1 { for dx in -1...1 where dx != 0 || dy != 0 {
+        let nextX = x + dx, nextY = y + dy
+        guard nextX >= 0, nextY >= 0, nextX < cell, nextY < cell else { continue }
+        let next = nextY * cell + nextX
+        if !seen.contains(next) && isNeutral(nextX, nextY) {
+          seen.insert(next); queue.append(next)
+        }
+      }}
+    }
+    for point in seen {
+      let offset = pixelOffset(x: frame * cell + point % cell, y: row * cell + point / cell)
+      pixels[offset] = 0; pixels[offset + 1] = 0; pixels[offset + 2] = 0; pixels[offset + 3] = 0
+    }
+  }
+
   // In the rear view the rider sits in front of the steering assembly. A wide
   // horizontal bar reads as a second handlebar across the rider's back, so the
   // overlay begins at the centered stem instead.
@@ -53,8 +82,18 @@ editPNG(at: bicyclePath) { pixels in
       }
     }
   }
+
+  // Generated side-view art retained two neutral-white panels inside the
+  // orange frame triangles. Flood only those enclosed neutral regions; wheel
+  // rims, spokes, handlebar metal, pedals and orange highlights stay intact.
+  for frame in 0..<4 {
+    clearNeutralComponent(frame: frame, row: 1, seedX: 64, seedY: 60)
+    clearNeutralComponent(frame: frame, row: 1, seedX: 44, seedY: 69)
+    clearNeutralComponent(frame: frame, row: 2, seedX: 63, seedY: 60)
+    clearNeutralComponent(frame: frame, row: 2, seedX: 84, seedY: 69)
+  }
 }
-print("\(bicyclePath): removed rear-view handlebar band")
+print("\(bicyclePath): removed rear-view handlebar band and white frame remnants")
 
 for characterPath in CommandLine.arguments.dropFirst(2) {
   editPNG(at: characterPath) { pixels in
