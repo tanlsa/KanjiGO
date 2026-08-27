@@ -61,8 +61,8 @@
         'assets/sounds/KanjiGo_Wild_Kanji_Encounter_2.mp3',
       ]),
 
-      WORLD_GRASS_RUSTLE: asset('ambient', ['assets/sounds/KanjiGo_Grass_Rustling.mp3']),
-      WORLD_POND: asset('ambient', ['assets/sounds/KanjiGo_Kanji_Pond.mp3']),
+      WORLD_GRASS_RUSTLE: asset('sfx', ['assets/sounds/KanjiGo_Grass_Rustling.mp3']),
+      WORLD_POND: asset('sfx', ['assets/sounds/KanjiGo_Kanji_Pond.mp3']),
       WORLD_KNOWLEDGE_HALL: asset('sfx', ['assets/sounds/KanjiGo_Knowledge_Hall.mp3']),
       WORLD_OPEN_ARENA: asset('sfx', ['assets/sounds/KanjiGo_Open_Arena.mp3']),
       WORLD_TRANSIT: asset('sfx', ['assets/sounds/transit.mp3']),
@@ -82,13 +82,32 @@
       CAPTURE_START: asset('sfx', ['assets/sounds/Capture/KanjiGo_Capture_Start.mp3']),
       CAPTURE_FAILURE: asset('sfx', ['assets/sounds/Capture/KanjiGo_Capture_Failure.mp3']),
 
-      // Future BGM slots intentionally have no files yet.
-      BGM_OVERWORLD: asset('music', []),
+      // Background music (BGM). Gameplay code never references a file path
+      // directly; it only drives BGM through AudioManager.syncMusic(state),
+      // which resolves the current game state to a semantic BGM ID below.
+      // BGM_OVERWORLD reuses the shared background_music track for the world.
+      BGM_OVERWORLD: asset('music', ['assets/sounds/background_music.mp3']),
+      // Slots below intentionally have no files yet; silence is preferred over
+      // inventing audio until the user provides dedicated tracks.
       BGM_BATTLE: asset('music', []),
       BGM_LECTURE: asset('music', []),
       BGM_DEX: asset('music', []),
       BGM_CAPTURE: asset('music', []),
       BGM_PVE: asset('music', []),
+    },
+    // Maps each distinct game state to the semantic BGM ID that should play.
+    // States absent from this map (or mapped to an empty slot) play no music.
+    // Menu overlays that remain layered on the overworld keep the world track.
+    stateMusic: {
+      overworld: 'BGM_OVERWORLD',
+      dex: 'BGM_OVERWORLD',
+      skills: 'BGM_OVERWORLD',
+      profile: 'BGM_OVERWORLD',
+      gym_select: 'BGM_OVERWORLD',
+      battle: 'BGM_BATTLE',
+      lecture: 'BGM_LECTURE',
+      capture: 'BGM_CAPTURE',
+      pve: 'BGM_PVE',
     },
   };
 })();

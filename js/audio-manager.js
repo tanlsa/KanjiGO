@@ -197,6 +197,19 @@
     musicId = '';
   }
 
+  // Drive BGM from the current game state. Resolves the state to a semantic
+  // BGM ID via audio-config.stateMusic, then plays it through playMusic (which
+  // avoids restarting the same track) or stops when the target has no files.
+  function syncMusic(state) {
+    if (typeof Audio === 'undefined') return false;
+    const map = config.stateMusic || {};
+    const id = map[state];
+    if (!id) { stopMusic(); return false; }
+    const definition = getDefinition(id);
+    if (!definition || !definition.files || !definition.files.length) { stopMusic(); return false; }
+    return playMusic(id);
+  }
+
   function applyVolumes() {
     if (music) music.volume = getVolume('music');
     activeSfx.forEach((audio) => {
@@ -231,6 +244,7 @@
     stopKanjiAudio,
     playMusic,
     stopMusic,
+    syncMusic,
     getSettings,
     setMasterVolume: (value) => setVolume('master', value),
     setMusicVolume: (value) => setVolume('music', value),
