@@ -1,14 +1,16 @@
 // ============================================================
-//  MAP.JS — BA KHU VỰC: CAMPUS / WILDERNESS / TRAINER ARENA.
+//  MAP.JS — THẾ GIỚI MỞ RỘNG: HỌC VIỆN / WILDERNESS / ARENA / TECH CAMPUS.
 //  Tile 0–9: atlas gốc / kiến trúc. Tile 10–25: terrain mở rộng.
+//  Tile 26–29: PNG campus chuyên biệt, đồng bộ với các landmark FPT mới.
 // ============================================================
 (function () {
-  const W = 44, H = 32;
+  const W = 64, H = 44;
   const T = {
     GRASS: 0, TREE: 1, WATER: 2, PATH: 3, FLOWER: 4, TALL: 5, BOAT: 6, DOOR: 7, WALL: 8, ROOF: 9,
     PLAZA: 10, COBBLE: 11, ARENA: 12, DARK_STONE: 13, GOLD: 14, BRICK: 15, SOIL: 16, GARDEN: 17,
     VIVID_GRASS: 18, DARK_GRASS: 19, MOSS: 20, SHORE: 21, RED_CARPET: 22, BLUE_CARPET: 23,
     GRAVEL: 24, WORN_PATH: 25,
+    CAMPUS_LAWN: 26, CAMPUS_PLAZA: 27, TECH_PROMENADE: 28, CAMPUS_COURTYARD: 29,
   };
   const tiles = Array.from({ length: H }, () => Array(W).fill(T.GRASS));
   const put = (x, y, tile) => { if (x >= 0 && y >= 0 && x < W && y < H) tiles[y][x] = tile; };
@@ -20,9 +22,13 @@
 
   const areas = {
     campus: { id: 'campus', label: 'GIẢNG ĐƯỜNG', x: 1, y: 1, width: 13, height: 13 },
+    ftown: { id: 'ftown', label: 'FTOWN TECH CAMPUS', x: 45, y: 1, width: 18, height: 14, approachGx: 53, approachGy: 12 },
     hub: { id: 'hub', label: 'QUẢNG TRƯỜNG', x: 15, y: 8, width: 13, height: 7 },
     wilderness: { id: 'wilderness', label: 'WILDERNESS', x: 30, y: 1, width: 13, height: 15, signGx: 31, signGy: 9 },
     arena: { id: 'arena', label: 'KANJI TRAINER ARENA', x: 10, y: 17, width: 21, height: 13, centerGx: 20, centerGy: 23 },
+    debugGarden: { id: 'debugGarden', label: '404 GARDEN', x: 1, y: 16, width: 8, height: 9, approachGx: 5, approachGy: 23 },
+    campusPark: { id: 'campusPark', label: 'FPT CAMPUS PARK', x: 9, y: 31, width: 23, height: 12, approachGx: 22, approachGy: 37 },
+    hoaLac: { id: 'hoaLac', label: 'F-VILLE HÒA LẠC', x: 35, y: 31, width: 22, height: 12, approachGx: 46, approachGy: 41 },
   };
   const arena = areas.arena;
   const decorations = {
@@ -30,7 +36,50 @@
       { x: 2, y: 8, width: 3, height: 4, phase: 0 },
       { x: 9, y: 8, width: 3, height: 4, phase: 2.4 },
     ],
+    techPark: {
+      server: { gx: 3, gy: 20 }, portal: { gx: 6, gy: 18 }, duck: { gx: 7, gy: 21 },
+      binaryFlowers: [[2,17,0],[3,17,1],[4,17,0],[2,18,1],[4,18,1],[6,21,0],[7,19,1]],
+    },
+    campusFeatures: {
+      innovationHub: { x: 47, y: 17, width: 8, height: 4, doorGx: 51, doorGy: 20 },
+      hoaLacLake: { x: 32, y: 33, width: 4, height: 3 },
+      heritageGarden: { x: 2, y: 31, width: 6, height: 9 },
+      encounterGroves: [
+        { x: 45, y: 25, width: 3, height: 3 },
+        { x: 52, y: 25, width: 3, height: 4 },
+        { x: 32, y: 38, width: 4, height: 3 },
+        { x: 2, y: 38, width: 3, height: 3 },
+      ],
+    },
   };
+  const landmarks = [
+    { id: 'ftown', label: 'FTOWN', subtitle: 'TECH CAMPUS', gx: 47, gy: 2, width: 14, height: 8, style: 'ftown', asset: 'landmark_ftown' },
+    { id: 'innovation_hub', label: 'INNOVATION HUB', subtitle: 'GREEN TECH LAB', gx: 47, gy: 17, width: 8, height: 4, style: 'innovation', asset: 'landmark_innovation_hub' },
+    { id: 'hoa_lac', label: 'F-VILLE', subtitle: 'HÒA LẠC', gx: 38, gy: 33, width: 16, height: 8, style: 'hoa_lac', asset: 'landmark_hoa_lac' },
+  ];
+  const props = [
+    {
+      id: 'fpt_software_monument', asset: 'prop_fpt_sign', gx: 18, gy: 0.9, width: 7, height: 2.8125,
+      collisions: [{ x: 18, y: 3, width: 7, height: 1 }],
+    },
+    {
+      id: 'cuder_statue', asset: 'prop_cuder', gx: 54, gy: 34, width: 2, height: 3,
+      collisions: [{ x: 54, y: 36, width: 2, height: 1 }],
+    },
+    {
+      id: 'fpt_campus_garden', asset: 'prop_campus_garden', gx: 23, gy: 32, width: 6, height: 4,
+      collisions: [{ x: 23, y: 32, width: 6, height: 4 }],
+    },
+    ...[
+      [15,2],[26,3],[11,32],[28,38],[12,40],
+      [46,14],[55,15],[45,24],[52,29],[33,41],
+    ].map(([gx, gy], index) => ({
+      id: `campus_shrub_${index + 1}`, asset: 'prop_campus_shrub', gx, gy, width: 3, height: 1.5,
+    })),
+  ];
+  const propCollisions = props.flatMap((prop) => (prop.collisions || []).map((collision) => ({
+    propId: prop.id, ...collision,
+  })));
 
   // Nền màu riêng giúp người chơi nhận ra mình đang ở khu nào ngay lập tức.
   rect(areas.campus.x, areas.campus.y, areas.campus.width, areas.campus.height, T.VIVID_GRASS);
@@ -38,6 +87,8 @@
   rect(areas.wilderness.x, areas.wilderness.y, areas.wilderness.width, areas.wilderness.height, T.DARK_GRASS);
   rect(1, 16, 8, 14, T.SOIL);
   rect(32, 17, 11, 13, T.MOSS);
+  rect(areas.ftown.x, areas.ftown.y, areas.ftown.width, areas.ftown.height, T.CAMPUS_LAWN);
+  rect(areas.hoaLac.x, areas.hoaLac.y, areas.hoaLac.width, areas.hoaLac.height, T.CAMPUS_LAWN);
 
   // Rừng bao quanh bản đồ và các dải cây đóng vai trò vách ngăn tự nhiên.
   lineH(0, W - 1, 0, T.TREE); lineH(0, W - 1, H - 1, T.TREE);
@@ -46,6 +97,8 @@
   lineV(29, 1, 8, T.TREE); lineV(29, 13, 15, T.TREE);
   lineH(1, 18, 15, T.TREE); lineH(22, 42, 15, T.TREE);
   rect(2, 25, 6, 5, T.TREE); rect(34, 25, 8, 5, T.TREE);
+  lineV(44, 1, 9, T.TREE); lineV(44, 14, 30, T.TREE);
+  rect(58, 18, 5, 10, T.TREE); rect(58, 31, 5, 11, T.TREE);
   [[2,2],[12,2],[2,12],[12,12],[16,2],[18,3],[25,2],[27,5],[32,18],[41,18],[7,20],[36,20]].forEach(([x,y]) => put(x,y,T.TREE));
 
   // Ba trục chính gặp nhau tại Hub. Mỗi lối rộng hai ô ở điểm chuyển khu.
@@ -54,6 +107,56 @@
   lineV(20, 11, 17, T.COBBLE); lineV(21, 11, 17, T.COBBLE);
   rect(16, 9, 10, 5, T.PLAZA);
   lineH(2, 10, 23, T.WORN_PATH); lineH(30, 41, 23, T.WORN_PATH);
+
+  // Hai campus công nghệ nằm ở phần bản đồ mở rộng, có quảng trường riêng và
+  // promenade dài để cảm giác quy mô lớn hơn thay vì chen vào Hub cũ.
+  rect(47, 2, 14, 8, T.ROOF); rect(46, 10, 16, 4, T.CAMPUS_PLAZA);
+  lineH(41, 45, 11, T.TECH_PROMENADE); lineH(41, 45, 12, T.TECH_PROMENADE);
+  rect(38, 33, 16, 8, T.ROOF); rect(37, 41, 18, 2, T.CAMPUS_COURTYARD);
+  lineH(41, 56, 23, T.WORN_PATH); lineV(56, 23, 41, T.WORN_PATH); lineH(46, 56, 41, T.WORN_PATH);
+
+  // Quảng trường nhận diện ở phía bắc Hub dành cho monument FPT SOFTWARE.
+  // Hai lối cobble giữ monument nhìn rõ nhưng vẫn kết nối thẳng xuống Hub.
+  rect(18, 1, 8, 5, T.CAMPUS_LAWN); rect(18, 3, 8, 2, T.CAMPUS_PLAZA);
+  lineV(21, 4, 8, T.COBBLE); lineV(22, 4, 8, T.COBBLE);
+  [[17,1],[27,1],[17,4],[27,4],[18,6],[25,6]].forEach(([x,y]) => put(x,y,T.FLOWER));
+
+  // Innovation Hub có PNG landmark riêng phủ kín footprint; sân trước giữ một
+  // bề mặt tech liền mạch và trục gạch sáng dẫn thẳng vào cửa chính.
+  rect(47, 17, 8, 2, T.ROOF); rect(47, 19, 8, 2, T.WALL); put(51, 20, T.DOOR);
+  rect(46, 21, 10, 2, T.TECH_PROMENADE); lineV(51, 20, 23, T.CAMPUS_PLAZA);
+  [[45,17],[56,17],[45,20],[56,20],[48,24],[54,24],[57,29]].forEach(([x,y]) => put(x,y,T.FLOWER));
+  rect(45, 25, 3, 3, T.TALL); rect(52, 25, 3, 4, T.TALL);
+  lineH(45, 55, 30, T.GRAVEL); lineV(49, 23, 30, T.GRAVEL);
+
+  // Hồ phản chiếu và vườn tre thu nhỏ làm vùng chuyển tiếp vào F-Ville bớt trống.
+  lineH(32, 35, 32, T.SHORE); rect(32, 33, 4, 3, T.WATER); lineH(32, 35, 36, T.SHORE);
+  lineV(36, 32, 41, T.GRAVEL); lineH(36, 38, 41, T.GRAVEL);
+  rect(32, 38, 4, 3, T.TALL);
+  [[32,31],[35,31],[32,37],[35,37],[33,41],[36,42],[55,34],[55,38]].forEach(([x,y]) => put(x,y,T.FLOWER));
+
+  // Heritage Garden phía tây nam là một điểm nghỉ có pavilion mái ngói, vườn
+  // cây và một lối xuyên rừng nối lại tuyến 404 Garden.
+  lineV(5, 23, 38, T.WORN_PATH); rect(2, 31, 6, 7, T.CAMPUS_LAWN);
+  rect(3, 32, 4, 1, T.ROOF); rect(3, 33, 4, 1, T.WALL); put(5, 33, T.DOOR);
+  rect(2, 34, 6, 4, T.GARDEN); lineV(5, 33, 38, T.COBBLE);
+  rect(2, 38, 3, 3, T.TALL); lineH(5, 8, 39, T.WORN_PATH);
+  [[2,31],[7,31],[2,35],[7,35],[6,38],[7,40]].forEach(([x,y]) => put(x,y,T.FLOWER));
+
+  // Campus Park mở rộng vùng nam Arena thành một quảng trường xanh hoàn chỉnh.
+  // Trục giữa nối cổng Arena với Hòa Lạc; các cụm cỏ hai bên là encounter mới.
+  rect(9, 31, 23, 12, T.CAMPUS_LAWN);
+  lineV(20, 30, 41, T.COBBLE); lineV(21, 30, 41, T.COBBLE);
+  lineH(8, 37, 41, T.WORN_PATH); lineH(20, 23, 36, T.GRAVEL);
+  rect(10, 32, 4, 3, T.TALL); rect(28, 37, 3, 4, T.TALL); rect(10, 38, 3, 3, T.TALL);
+  rect(23, 32, 6, 4, T.GARDEN);
+  [[10,31],[14,31],[29,31],[31,34],[15,36],[30,36],[14,40],[31,40]].forEach(([x,y]) => put(x,y,T.FLOWER));
+
+  // Góc tây nam trở thành công viên khám phá thay vì một bãi đất trống.
+  rect(1, 16, 8, 7, T.VIVID_GRASS); lineH(2, 7, 22, T.WORN_PATH);
+  lineV(5, 20, 23, T.WORN_PATH); rect(2, 17, 3, 2, T.GARDEN);
+  put(decorations.techPark.server.gx, decorations.techPark.server.gy, T.ROOF);
+  put(decorations.techPark.portal.gx, decorations.techPark.portal.gy, T.ROOF);
 
   // CAMPUS: Giảng đường, sân lát đá và hai vườn đối xứng, không có encounter.
   rect(1, 1, 13, 8, T.PLAZA);
@@ -94,7 +197,7 @@
   trainerPositions.forEach(([x, y]) => put(x, y, T.ARENA));
 
   // Landmark nhỏ ngoài công trình, tránh đặt lên các trục giao thông.
-  [[3,13],[11,13],[16,6],[27,10],[8,14],[32,20],[40,20]].forEach(([x,y]) => put(x,y,T.FLOWER));
+  [[3,13],[11,13],[16,6],[27,10],[8,14],[32,20],[40,25]].forEach(([x,y]) => put(x,y,T.FLOWER));
   const trainerNpcs = (((window.CONFIG || {}).TRAINER_ARENA || {}).trainers || []).map((trainer, index) => ({
     gx: trainerPositions[index][0], gy: trainerPositions[index][1], type: 'trainer', trainerId: trainer.id, icon: trainer.icon,
   }));
@@ -103,8 +206,20 @@
     TILES: tiles,
     AREAS: areas,
     ARENA: arena,
+    LANDMARKS: landmarks,
+    PROPS: props,
+    PROP_COLLISIONS: propCollisions,
     DECORATIONS: decorations,
-    SIGNS: [{ gx: 31, gy: 9, label: 'WILDERNESS', color: '#4b9b65' }],
+    SIGNS: [
+      { gx: 31, gy: 9, label: 'WILDERNESS', color: '#4b9b65' },
+      { gx: 46, gy: 12, label: 'FTOWN', color: '#56636b' },
+      { gx: 54, gy: 41, label: 'F-VILLE · HÒA LẠC', color: '#397a5c' },
+      { gx: 2, gy: 22, label: '404 GARDEN', color: '#56488d' },
+      { gx: 46, gy: 22, label: 'FPT INNOVATION HUB', color: '#247da2' },
+      { gx: 2, gy: 37, label: 'HERITAGE GARDEN', color: '#6d8240' },
+      { gx: 36, gy: 37, label: 'HỒ CAMPUS', color: '#3b8ba4' },
+      { gx: 21, gy: 36, label: 'FPT CAMPUS PARK', color: '#31876a' },
+    ],
     // NPC onboarding được engine đặt ở đúng chặng đang học. Các điểm đứng đều
     // nằm cạnh trục chính để người mới không bị kẹt trong collision map.
     ONBOARDING_GUIDE: {
@@ -145,6 +260,56 @@
           '→ Wilderness: bụi cỏ, hồ nước và hoạt động khám phá.',
           '↓ Trainer Arena: đấu Trainer chủ đề và chinh phục Boss N5.',
           'Các đường chính đều rộng và nối trực tiếp qua quảng trường này.',
+        ],
+      },
+      {
+        gx: 53, gy: 12,
+        lines: [
+          'Chào mừng tới FTown Tech Campus — tòa nhà facade trắng và các dải kính tối phía đông Wilderness.',
+          'Ban đêm, hãy thử nhìn các ô cửa sổ: một vài phòng vẫn đang “deploy”.',
+        ],
+      },
+      {
+        gx: 46, gy: 41,
+        lines: [
+          'Đây là F-Ville Hòa Lạc: mái xanh, sân trong và kiến trúc hòa vào cảnh quan.',
+          'Các vòng tròn trên mái là một lời chào tới khu campus xanh ngoài đời thực.',
+        ],
+      },
+      {
+        gx: 50, gy: 22,
+        lines: [
+          'Innovation Hub dùng chung ngôn ngữ kiến trúc của campus: mái sáng, sân mở và ba dải màu nhận diện.',
+          'Những bụi cỏ quanh đại lộ là khu encounter mới — vừa tham quan campus vừa luyện Kanji được nhé!',
+        ],
+      },
+      {
+        gx: 5, gy: 37,
+        lines: [
+          'Heritage Garden là góc nghỉ giữa khu công nghệ: pavilion nhỏ, lối lát đá và vườn cây đan xen.',
+          'Đi xuyên qua hàng cây phía bắc sẽ quay lại 404 Garden.',
+        ],
+      },
+      {
+        gx: 55, gy: 38,
+        lines: [
+          'Đây là Cuder — biểu tượng của lập trình viên FPT Software: đầu to, kính tròn, bụng ỏng và chiếc cuốc khai phá.',
+          'Tượng từng được rước về F-Ville và trở thành một biểu tượng may mắn của cộng đồng FSOFT.',
+        ],
+      },
+      {
+        gx: 22, gy: 36,
+        lines: [
+          'Campus Park nối Trainer Arena với khu F-Ville bằng đại lộ xanh và vườn công nghệ ba màu.',
+          'Hai bên quảng trường có thêm bụi cỏ encounter; thử khám phá nếu bạn muốn ôn Kanji nhanh nhé!',
+        ],
+      },
+      {
+        gx: 5, gy: 21,
+        lines: [
+          'Bạn đã tìm thấy 404 Garden — khu vườn không có trong tài liệu hướng dẫn! 🥚',
+          'Nếu code không chạy, hãy trình bày vấn đề cho chú vịt cao su ở góc phải. Nó chưa từng ngắt lời ai.',
+          'Cổng nhị phân đang phát 0–1–0–1… hay đó là mã Konami nhỉ?',
         ],
       },
       ...trainerNpcs,

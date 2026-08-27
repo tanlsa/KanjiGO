@@ -775,12 +775,23 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 12);
+  assert.equal(imageRequests.length, 23);
   assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/trainer-theme-icons.png'));
+  assert.ok(imageRequests.includes('assets/world/ftown-campus-v3.png'));
+  assert.ok(imageRequests.includes('assets/world/innovation-hub.png'));
+  assert.ok(imageRequests.includes('assets/world/hoa-lac-campus-v2.png'));
+  assert.ok(imageRequests.includes('assets/world/cuder-statue.png'));
+  assert.ok(imageRequests.includes('assets/world/fpt-software-sign-v2.png'));
+  assert.ok(imageRequests.includes('assets/world/campus-shrub-cluster.png'));
+  assert.ok(imageRequests.includes('assets/world/fpt-campus-garden.png'));
+  assert.ok(imageRequests.includes('assets/world/campus-lawn-tile.png'));
+  assert.ok(imageRequests.includes('assets/world/campus-plaza-tile.png'));
+  assert.ok(imageRequests.includes('assets/world/campus-tech-tile.png'));
+  assert.ok(imageRequests.includes('assets/world/campus-courtyard-tile.png'));
   assert.ok(imageRequests.includes('assets/backgrounds/battle-forest.png'));
   assert.ok(imageRequests.includes('assets/backgrounds/battle-stand.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
@@ -794,6 +805,41 @@ test('world render builds and reuses one static ground layer', async () => {
   assert.ok(first);
   debug.renderOnce();
   assert.equal(debug.ensureWorldGroundCache(), first);
+});
+
+test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs', async () => {
+  const { debug, textCalls, drawCalls } = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  const player = debug.getPlayer();
+  const visit = (gx, gy) => {
+    player.gx = gx; player.gy = gy; player.px = gx * 32; player.py = gy * 32; player.moving = false;
+    textCalls.length = 0; drawCalls.length = 0; debug.renderOnce();
+    return { texts: textCalls.map((call) => call.text), draws: [...drawCalls] };
+  };
+  const ftown = visit(53, 12);
+  assert.ok(ftown.texts.includes('FTOWN'));
+  assert.ok(ftown.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/ftown-campus-v3.png'));
+  const innovation = visit(51, 22);
+  assert.ok(innovation.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/innovation-hub.png'));
+  const hoaLac = visit(46, 41);
+  assert.ok(hoaLac.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/hoa-lac-campus-v2.png'));
+  assert.ok(hoaLac.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/cuder-statue.png'));
+  const campusPark = visit(22, 36);
+  assert.ok(campusPark.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/fpt-campus-garden.png'));
+  const northMonument = visit(21, 4);
+  assert.ok(northMonument.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/fpt-software-sign-v2.png'));
+  const garden = visit(5, 21);
+  assert.ok(garden.texts.includes('01'), 'the binary portal easter egg should render inside 404 Garden');
+  assert.ok(garden.texts.some((text) => text.includes('404 GARDEN')));
+});
+
+test('generated FPT props block only their authored footprints', () => {
+  const { debug } = createGame();
+  assert.equal(debug.canWalk(54, 36), false, 'Cuder pedestal should block movement');
+  assert.equal(debug.canWalk(56, 36), true, 'Cuder must not block the F-Ville main road');
+  assert.equal(debug.canWalk(23, 32), false, 'campus garden island should block movement');
+  assert.equal(debug.canWalk(22, 36), false, 'campus guide NPC should block its own tile');
+  assert.equal(debug.canWalk(21, 4), true, 'FPT monument approach should remain walkable');
 });
 
 test('frame budget uses 60 FPS for action and 30 FPS for idle UI', () => {

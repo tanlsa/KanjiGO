@@ -204,12 +204,19 @@ test('three world zones and every NPC are reachable from the campus start', () =
   const { CONFIG, MAP_DATA } = loadDataContext();
   for (const id of ['campus', 'wilderness', 'arena']) assert.ok(MAP_DATA.AREAS[id], `missing world zone ${id}`);
   const blocked = new Set(CONFIG.BLOCKED_TILES), height = MAP_DATA.TILES.length, width = MAP_DATA.TILES[0].length;
+  const propBlocked = new Set();
+  for (const collision of MAP_DATA.PROP_COLLISIONS || []) {
+    for (let y = collision.y; y < collision.y + collision.height; y++) {
+      for (let x = collision.x; x < collision.x + collision.width; x++) propBlocked.add(`${x},${y}`);
+    }
+  }
   const start = [CONFIG.PLAYER.startGx, CONFIG.PLAYER.startGy], queue = [start], visited = new Set([start.join(',')]);
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const [x, y] = queue[cursor];
     for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
       const nx = x + dx, ny = y + dy, key = `${nx},${ny}`;
-      if (nx < 0 || ny < 0 || nx >= width || ny >= height || visited.has(key) || blocked.has(MAP_DATA.TILES[ny][nx])) continue;
+      if (nx < 0 || ny < 0 || nx >= width || ny >= height || visited.has(key)
+        || blocked.has(MAP_DATA.TILES[ny][nx]) || propBlocked.has(key)) continue;
       visited.add(key); queue.push([nx, ny]);
     }
   }
@@ -226,6 +233,106 @@ test('three world zones and every NPC are reachable from the campus start', () =
     .flatMap((row) => row.slice(wilderness.x, wilderness.x + wilderness.width));
   assert.ok(wildernessTiles.includes(CONFIG.TILE_KEYS.WATER), 'wilderness must contain water');
   assert.ok(wildernessTiles.includes(CONFIG.TILE_KEYS.TALLGRASS), 'wilderness must contain encounter grass');
+});
+
+test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid collision', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  assert.equal(MAP_DATA.TILES[0].length, 64, 'the expanded world should be 64 tiles wide');
+  assert.equal(MAP_DATA.TILES.length, 44, 'the expanded world should be 44 tiles tall');
+  for (const id of ['ftown', 'hoaLac', 'debugGarden']) assert.ok(MAP_DATA.AREAS[id], `missing decorated area ${id}`);
+  const landmarks = MAP_DATA.LANDMARKS || [];
+  assert.deepEqual(new Set(landmarks.map((item) => item.id)), new Set(['ftown', 'innovation_hub', 'hoa_lac']));
+  const landmarkAssets = {
+    ftown: CONFIG.ASSETS.ftownCampus,
+    innovation_hub: CONFIG.ASSETS.innovationHub,
+    hoa_lac: CONFIG.ASSETS.hoaLacCampus,
+  };
+  for (const landmark of landmarks) {
+    assert.ok(landmark.asset, `${landmark.id} must use a dedicated world asset instead of a canvas-only building`);
+    const assetPath = landmarkAssets[landmark.id];
+    assert.ok(fs.existsSync(path.join(ROOT, assetPath)), `${landmark.id} asset is missing: ${assetPath}`);
+    for (let y = landmark.gy; y < landmark.gy + landmark.height; y++) {
+      for (let x = landmark.gx; x < landmark.gx + landmark.width; x++) {
+        if (landmark.id === 'innovation_hub' && x === 51 && y === 20) continue;
+        assert.ok(CONFIG.BLOCKED_TILES.includes(MAP_DATA.TILES[y][x]), `${landmark.id} footprint leaks collision at ${x},${y}`);
+      }
+    }
+  }
+  for (const area of [MAP_DATA.AREAS.ftown, MAP_DATA.AREAS.hoaLac, MAP_DATA.AREAS.debugGarden]) {
+    assert.ok(!CONFIG.BLOCKED_TILES.includes(MAP_DATA.TILES[area.approachGy][area.approachGx]), `${area.id} approach is blocked`);
+  }
+  const techPark = MAP_DATA.DECORATIONS?.techPark;
+  assert.ok(techPark?.server && techPark?.portal && techPark?.duck);
+  assert.ok((techPark.binaryFlowers || []).some((entry) => entry[2] === 0));
+  assert.ok((techPark.binaryFlowers || []).some((entry) => entry[2] === 1));
+  const features = MAP_DATA.DECORATIONS?.campusFeatures;
+  assert.ok(features?.innovationHub && features?.hoaLacLake && features?.heritageGarden,
+    'expanded world should contain FPT-themed campus features');
+  for (let y = 10; y <= 13; y++) {
+    for (let x = 46; x <= 61; x++) {
+      assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+        `FTown white plaza must remain continuous at ${x},${y}`);
+    }
+  }
+  for (let y = 21; y <= 22; y++) {
+    for (let x = 46; x <= 55; x++) {
+      const expected = x === 51 ? CONFIG.TILE_KEYS.CAMPUS_PLAZA : CONFIG.TILE_KEYS.TECH_PROMENADE;
+      assert.equal(MAP_DATA.TILES[y][x], expected, `Innovation Hub forecourt has a hole at ${x},${y}`);
+    }
+  }
+  assert.ok((features.encounterGroves || []).length >= 4, 'expanded world should add several encounter groves');
+  for (const grove of features.encounterGroves) {
+    const groveTiles = MAP_DATA.TILES.slice(grove.y, grove.y + grove.height)
+      .flatMap((row) => row.slice(grove.x, grove.x + grove.width));
+    assert.ok(groveTiles.includes(CONFIG.TILE_KEYS.TALLGRASS), `encounter grove at ${grove.x},${grove.y} has no tall grass`);
+  }
+  assert.ok(MAP_DATA.AREAS.campusPark, 'the expanded south campus park is missing');
+  const props = MAP_DATA.PROPS || [];
+  assert.ok(props.some((prop) => prop.id === 'fpt_software_monument'));
+  assert.ok(props.some((prop) => prop.id === 'cuder_statue'));
+  assert.ok(props.some((prop) => prop.id === 'fpt_campus_garden'));
+  assert.ok(props.filter((prop) => prop.asset === 'prop_campus_shrub').length >= 8);
+  assert.ok(!(MAP_DATA.PROP_COLLISIONS || []).some((collision) => collision.x <= 56 && 56 < collision.x + collision.width
+    && collision.y <= 36 && 36 < collision.y + collision.height), 'Cuder must leave the F-Ville road open');
+  const monument = props.find((prop) => prop.id === 'fpt_software_monument');
+  assert.equal(monument.gx + monument.width / 2, 21.5, 'FPT monument should align to the north plaza centerline');
+  assert.ok(monument.width >= 7, 'FPT monument should remain large enough for its logo text to read clearly');
+});
+
+test('generated FPT campus PNG assets preserve transparent alpha and runtime dimensions', () => {
+  const { CONFIG } = loadDataContext();
+  const expected = new Map([
+    [CONFIG.ASSETS.ftownCampus, [448, 256]],
+    [CONFIG.ASSETS.innovationHub, [256, 128]],
+    [CONFIG.ASSETS.hoaLacCampus, [512, 256]],
+    [CONFIG.ASSETS.cuderStatue, [128, 128]],
+    [CONFIG.ASSETS.fptSoftwareSign, [224, 90]],
+    [CONFIG.ASSETS.campusShrubCluster, [96, 48]],
+    [CONFIG.ASSETS.fptCampusGarden, [192, 128]],
+  ]);
+  for (const [asset, [width, height]] of expected) {
+    const png = pngInfo(asset);
+    assert.equal(png.width, width, `${asset} width should match its authored runtime scale`);
+    assert.equal(png.height, height, `${asset} height should match its authored runtime scale`);
+    assert.ok(png.colorType === 4 || png.colorType === 6, `${asset} must preserve an alpha channel`);
+  }
+});
+
+test('new campus terrain tiles are valid 32px PNGs and all appear on the expanded map', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  const assets = [CONFIG.ASSETS.campusLawnTile, CONFIG.ASSETS.campusPlazaTile,
+    CONFIG.ASSETS.campusTechTile, CONFIG.ASSETS.campusCourtyardTile];
+  for (const asset of assets) {
+    const png = pngInfo(asset);
+    assert.equal(png.width, 32, `${asset} must fit one map tile`);
+    assert.equal(png.height, 32, `${asset} must fit one map tile`);
+    assert.ok(png.colorType === 2 || png.colorType === 6, `${asset} must be an RGB/RGBA PNG`);
+  }
+  const mapTiles = new Set(MAP_DATA.TILES.flat());
+  for (const tile of [CONFIG.TILE_KEYS.CAMPUS_LAWN, CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+    CONFIG.TILE_KEYS.TECH_PROMENADE, CONFIG.TILE_KEYS.CAMPUS_COURTYARD]) {
+    assert.ok(mapTiles.has(tile), `campus terrain tile ${tile} must be used in the world`);
+  }
 });
 
 test('character animation sheets use the configured high-detail transparent 4x4 layout', () => {

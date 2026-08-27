@@ -11,7 +11,11 @@
   const ARENA = window.MAP_DATA.ARENA || null;
   const ONBOARDING_GUIDE = window.MAP_DATA.ONBOARDING_GUIDE || null;
   const MAP_SIGNS = window.MAP_DATA.SIGNS || [];
+  const MAP_LANDMARKS = window.MAP_DATA.LANDMARKS || [];
+  const MAP_PROPS = window.MAP_DATA.PROPS || [];
+  const PROP_COLLISIONS = window.MAP_DATA.PROP_COLLISIONS || [];
   const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
+  const TECH_PARK = (((window.MAP_DATA || {}).DECORATIONS || {}).techPark || null);
   const KDB = window.KANJI_DB;
   const QUESTION_CHALLENGES = Array.isArray(KDB.CHALLENGES) ? KDB.CHALLENGES : [];
 const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false; } catch (error) { return false; } };
@@ -29,6 +33,12 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   const MAP_H = TILES.length, MAP_W = TILES[0].length;
   const K = C.TILE_KEYS;
   const BLOCKED = new Set(C.BLOCKED_TILES);
+  const PROP_BLOCKED = new Set();
+  for (const collision of PROP_COLLISIONS) {
+    for (let gy = collision.y; gy < collision.y + collision.height; gy++) {
+      for (let gx = collision.x; gx < collision.x + collision.width; gx++) PROP_BLOCKED.add(`${gx},${gy}`);
+    }
+  }
   const ACADEMY_TILES = new Set([K.ACADEMY_DOOR, K.ACADEMY_WALL, K.ACADEMY_ROOF]);
   const TREE_CELLS = [];
   for (let gy = 0; gy < MAP_H; gy++) for (let gx = 0; gx < MAP_W; gx++) if (TILES[gy][gx] === K.TREE) TREE_CELLS.push({ gx, gy });
@@ -1253,6 +1263,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
   function canWalk(gx, gy) {
     const t = tileAt(gx, gy);
     if (t < 0) return false;
+    if (PROP_BLOCKED.has(`${gx},${gy}`)) return false;
     if (NPCS.some((n) => n.gx === gx && n.gy === gy)) return false;
     const guide = onboardingTour();
     if (guide && guide.stop.gx === gx && guide.stop.gy === gy) return false;
@@ -1389,7 +1400,8 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     }
     if (academyEntrance) { enterLecture(); return; }
     if (!player.onBoat && f.t === K.BOAT) { board(f); return; }
-    if (player.onBoat && f.t >= 0 && f.t !== K.WATER && f.t !== K.BOAT && !BLOCKED.has(f.t)) { disembark(f); return; }
+    if (player.onBoat && f.t >= 0 && f.t !== K.WATER && f.t !== K.BOAT
+      && !BLOCKED.has(f.t) && !PROP_BLOCKED.has(`${f.gx},${f.gy}`)) { disembark(f); return; }
     if (!player.onBoat && f.t === K.WATER) { fish(); return; }
   }
 function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: false }); player.onBoat = true; player.gx = f.gx; player.gy = f.gy; player.px = f.gx * TILE; player.py = f.gy * TILE; resetPetTrail(); saveGame(); playSFX('WORLD_TRANSIT'); showToast('🚤 Đã lên thuyền!'); }
@@ -3480,7 +3492,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
 
   // ---------- VẼ ----------
   let worldGroundCache = null;
+  const campusTileAssets = new Map([
+    [K.CAMPUS_LAWN, 'campus_lawn_tile'],
+    [K.CAMPUS_PLAZA, 'campus_plaza_tile'],
+    [K.TECH_PROMENADE, 'campus_tech_tile'],
+    [K.CAMPUS_COURTYARD, 'campus_courtyard_tile'],
+  ]);
   function drawTileOn(context, idx, sx, sy, gx = 0, gy = 0) {
+    const campusAsset = campusTileAssets.get(idx);
+    if (campusAsset && imgs[campusAsset]) {
+      context.drawImage(imgs[campusAsset], 0, 0, TILE, TILE, sx, sy, TILE, TILE);
+      return;
+    }
     if (idx === K.GARDEN && imgs.tulip_tiles) {
       const variant = (Math.abs(gx) % 2) + (Math.abs(gy) % 2) * 2;
       context.drawImage(imgs.tulip_tiles, variant * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
@@ -3679,6 +3702,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     }
     drawAcademy(camX, camY);
     drawTulipGardens(camX, camY, frameNow);
+    drawCampusLandmarks(camX, camY);
+    drawWorldProps(camX, camY);
+    drawTechParkDecorations(camX, camY, frameNow);
     for (const n of NPCS) {
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
       if (npcX < -TILE * 2 || npcX > VIEW_PX_W + TILE || npcY < -TILE * 2 || npcY > VIEW_PX_H + TILE) continue;
@@ -3873,6 +3899,63 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.strokeStyle = '#4b321f'; cx.strokeRect(plaqueX, plaqueY, plaqueW, 14);
     cx.fillStyle = '#fff1c1'; cx.font = 'bold 8px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
     cx.fillText('GIẢNG ĐƯỜNG KANJI', x + w / 2, plaqueY + 11); cx.textAlign = 'left';
+  }
+  function landmarkVisible(landmark, camX, camY) {
+    const x = landmark.gx * TILE - camX, y = landmark.gy * TILE - camY;
+    return x + landmark.width * TILE >= -TILE && x <= VIEW_PX_W + TILE
+      && y + landmark.height * TILE >= -TILE && y <= VIEW_PX_H + TILE;
+  }
+  function drawCampusLandmarks(camX, camY) {
+    for (const landmark of MAP_LANDMARKS) {
+      if (!landmarkVisible(landmark, camX, camY)) continue;
+      const image = imgs[landmark.asset];
+      if (!image) continue;
+      const x = Math.round(landmark.gx * TILE - camX), y = Math.round(landmark.gy * TILE - camY);
+      const w = landmark.width * TILE, h = landmark.height * TILE;
+      cx.fillStyle = 'rgba(8,22,25,.25)'; cx.beginPath(); cx.ellipse(x + w / 2, y + h - 5, w * .47, 10, 0, 0, Math.PI * 2); cx.fill();
+      cx.save(); cx.imageSmoothingEnabled = false; cx.drawImage(image, x, y, w, h); cx.restore();
+    }
+  }
+  function drawWorldProps(camX, camY) {
+    for (const prop of MAP_PROPS) {
+      const x = Math.round(prop.gx * TILE - camX), y = Math.round(prop.gy * TILE - camY);
+      const w = prop.width * TILE, h = prop.height * TILE;
+      if (x + w < -TILE || x > VIEW_PX_W + TILE || y + h < -TILE || y > VIEW_PX_H + TILE) continue;
+      const image = imgs[prop.asset];
+      if (!image) continue;
+      cx.save(); cx.imageSmoothingEnabled = false; cx.drawImage(image, x, y, w, h); cx.restore();
+    }
+  }
+  function drawTechParkDecorations(camX, camY, now) {
+    if (!TECH_PARK) return;
+    const point = (entry) => ({ x: entry.gx * TILE - camX, y: entry.gy * TILE - camY });
+    const server = point(TECH_PARK.server);
+    if (server.x > -TILE && server.x < VIEW_PX_W && server.y > -TILE && server.y < VIEW_PX_H) {
+      cx.fillStyle = 'rgba(0,0,0,.2)'; cx.beginPath(); cx.ellipse(server.x + 16, server.y + 29, 13, 4, 0, 0, Math.PI * 2); cx.fill();
+      cx.fillStyle = '#1b2638'; cx.fillRect(server.x + 5, server.y + 2, 22, 27); cx.strokeStyle = '#6a7890'; cx.strokeRect(server.x + 5, server.y + 2, 22, 27);
+      for (let row = 0; row < 4; row++) {
+        cx.fillStyle = '#34445b'; cx.fillRect(server.x + 8, server.y + 6 + row * 5, 16, 3);
+        cx.fillStyle = Math.sin(now / 180 + row) > 0 ? '#68ffc0' : '#31a3da'; cx.fillRect(server.x + 20, server.y + 7 + row * 5, 2, 1);
+      }
+    }
+    const portal = point(TECH_PARK.portal), pulse = 1 + Math.sin(now / 260) * .12;
+    if (portal.x > -TILE && portal.x < VIEW_PX_W && portal.y > -TILE && portal.y < VIEW_PX_H) {
+      cx.fillStyle = 'rgba(27,15,73,.28)'; cx.beginPath(); cx.ellipse(portal.x + 16, portal.y + 28, 14, 4, 0, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = '#a78bff'; cx.lineWidth = 3; cx.beginPath(); cx.arc(portal.x + 16, portal.y + 16, 11 * pulse, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = '#56eaff'; cx.lineWidth = 1; cx.beginPath(); cx.arc(portal.x + 16, portal.y + 16, 6 / pulse, 0, Math.PI * 2); cx.stroke();
+      cx.fillStyle = '#d7cbff'; cx.font = 'bold 6px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText('01', portal.x + 16, portal.y + 18); cx.textAlign = 'left';
+    }
+    const duck = point(TECH_PARK.duck);
+    if (duck.x > -TILE && duck.x < VIEW_PX_W && duck.y > -TILE && duck.y < VIEW_PX_H) {
+      const bob = Math.round(Math.sin(now / 310)); cx.fillStyle = '#f6cf35'; cx.fillRect(duck.x + 9, duck.y + 14 + bob, 14, 9); cx.fillRect(duck.x + 16, duck.y + 9 + bob, 8, 8);
+      cx.fillStyle = '#f08a27'; cx.fillRect(duck.x + 23, duck.y + 14 + bob, 6, 3); cx.fillStyle = '#1a2634'; cx.fillRect(duck.x + 21, duck.y + 11 + bob, 2, 2);
+      cx.strokeStyle = 'rgba(116,210,243,.62)'; cx.beginPath(); cx.ellipse(duck.x + 16, duck.y + 25, 13, 4, 0, 0, Math.PI * 2); cx.stroke();
+    }
+    for (const [gx, gy, bit] of TECH_PARK.binaryFlowers || []) {
+      const x = gx * TILE - camX, y = gy * TILE - camY; if (x < -TILE || x > VIEW_PX_W || y < -TILE || y > VIEW_PX_H) continue;
+      cx.fillStyle = '#3c893f'; cx.fillRect(x + 15, y + 18, 2, 10); cx.fillStyle = bit ? '#ff9fc7' : '#73d9ff'; cx.fillRect(x + 12, y + 14, 8, 6);
+      cx.fillStyle = '#10223b'; cx.font = 'bold 6px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText(String(bit), x + 16, y + 20); cx.textAlign = 'left';
+    }
   }
   function drawTulipGardens(camX, camY, now) {
     if (!TULIP_GARDENS.length) return;
@@ -5655,7 +5738,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     activePlayerUsesV4 ? 'playerV4DrawSize' : 'drawSize']) || TILE);
   const defaultCharacterDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE);
   const activePlayerDrawScale = activePlayerDrawSize / defaultCharacterDrawSize;
-  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
+  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('landmark_ftown', C.ASSETS.ftownCampus), loadImg('landmark_innovation_hub', C.ASSETS.innovationHub), loadImg('landmark_hoa_lac', C.ASSETS.hoaLacCampus), loadImg('prop_cuder', C.ASSETS.cuderStatue), loadImg('prop_fpt_sign', C.ASSETS.fptSoftwareSign), loadImg('prop_campus_shrub', C.ASSETS.campusShrubCluster), loadImg('prop_campus_garden', C.ASSETS.fptCampusGarden), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (petData[currentPetId] && C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
