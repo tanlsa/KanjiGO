@@ -1808,7 +1808,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
   function enemyAttack(b, reason = '') {
     if (!b || b.phase !== 'fight' || b.pendingLose > 0) return;
-    playSFX('BATTLE_ATTACK');
+    playSFX('BATTLE_ENEMY_ATTACK');
     const dmg = rnd(b.mon.atk);
     player.hp = Math.max(0, player.hp - dmg);
     playSFX('BATTLE_PLAYER_DAMAGE');
@@ -2131,6 +2131,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (!lecture || !['check', 'confirm'].includes(lecture.phase) || lecture.answerLocked || !lecture.q) return;
     const correct = idx === lecture.q.correctIndex;
     recordVocabularyEvidence(lecture.q, correct, { context: 'academy', allowRecall: false, allowMastery: false });
+    playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (lecture.phase === 'check') {
       if (correct) lecture.lessonScore++;
       lecture.checkResults.push({ vocabId: lecture.q.vocabId, mode: lecture.q.mode, correct });

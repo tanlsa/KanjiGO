@@ -20,22 +20,17 @@
       ]),
       BATTLE_DEFEATED: asset('sfx', [
         'assets/sounds/Defeated/KanjiGo_Defeated_01.mp3',
-        'assets/sounds/Defeated/KanjiGo_Defeated_02.mp3',
-        'assets/sounds/Defeated/KanjiGo_Defeated_03.mp3',
-        'assets/sounds/Defeated/KanjiGo_Defeated_04.mp3',
-        'assets/sounds/Defeated/KanjiGo_Defeated_05.mp3',
       ]),
       BATTLE_CUT: asset('sfx', ['assets/sounds/cut.mp3']),
       BATTLE_GAME_OVER: asset('sfx', ['assets/sounds/game_over.mp3']),
       BATTLE_LIGHTNING_STRIKE: asset('sfx', ['assets/sounds/lightning-strike.mp3']),
       BATTLE_STUN: asset('sfx', ['assets/sounds/stun.mp3']),
-      BATTLE_PLAYER_DAMAGE: asset('sfx', [
-        'assets/sounds/Battle/KANJIGO_Player_Damage_01.mp3',
-        'assets/sounds/Battle/KANJIGO_Player_Damage_02.mp3',
-        'assets/sounds/Battle/KANJIGO_Player_Damage_03.mp3',
-      ]),
-      BATTLE_ESCAPE_SUCCESS: asset('sfx', ['assets/sounds/Battle/KanjiGo_Escape_Success.mp3']),
-      BATTLE_ESCAPE_FAIL: asset('sfx', ['assets/sounds/Battle/KanjiGo_Escape_Failure.mp3']),
+      // Empty mappings retain gameplay semantics without pointing at files
+      // that are not currently present in assets/sounds/.
+      BATTLE_ENEMY_ATTACK: asset('sfx', []),
+      BATTLE_PLAYER_DAMAGE: asset('sfx', []),
+      BATTLE_ESCAPE_SUCCESS: asset('sfx', []),
+      BATTLE_ESCAPE_FAIL: asset('sfx', []),
       KANJI_CORRECT: asset('sfx', [
         'assets/sounds/UI/KANJIGO_Kanji_Correct_01.mp3',
         'assets/sounds/UI/KANJIGO_Kanji_Correct_02.mp3',
