@@ -90,9 +90,10 @@ window.CONFIG = {
   BICYCLE: {
     moveMultiplier: 0.42,
     animMultiplier: 0.55,
-    riderLift: 3,
+    riderLift: 12,
+    sideRiderLift: 20,
     sideOverlayDrop: 10,
-    verticalOverlayDrop: 24,
+    verticalOverlayDrop: 16,
   },
   RADAR: {
     targetMultiplier: 4,

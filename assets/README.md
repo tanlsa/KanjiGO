@@ -90,11 +90,24 @@ từ hàng trái và mọi pixel runtime là cụm nguồn `2×2`. Vì vậy can
 trực tiếp `0 → 1 → 2 → 3`. Các file v2 `128×128` chỉ được giữ làm nguồn
 legacy/fallback và tham chiếu timing.
 
-Khi lên xe, renderer nâng player lên theo `BICYCLE.riderLift`, sau đó chồng
-`bicycle-overlay-v4.png` ở foreground. Overlay dùng cell nguồn native `128px`,
+Khi lên xe, renderer nâng player theo offset dọc/ngang riêng để chân khớp pedal,
+sau đó chồng `bicycle-overlay-v4.png` ở foreground cho hướng trước/trái/phải.
+Riêng hướng `up`, overlay được vẽ sau lưng rider và không chứa dải tay lái ngang,
+tránh tay lái xuyên qua lưng nhân vật. Overlay dùng cell nguồn native `128px`,
 không chứa rider và render `32px` cùng player V4. Hàng trái/phải mirror
 deterministic; trước/sau có đúng một bánh nhìn thấy theo trục phối cảnh. Bốn
 frame khóa chung tâm xe và baseline, chỉ thay nhịp pedal/highlight bánh.
+
+Để áp lại chỉnh sửa deterministic cho tay lái phía sau và lọn tóc gáy của nhân
+vật nam/NPC V4:
+
+```sh
+swift scripts/polish-up-facing-sprites.swift \
+  assets/characters/bicycle-overlay-v4.png \
+  assets/characters/player-v4.png \
+  assets/characters/player-blue-v4.png \
+  assets/characters/npc-v4.png
+```
 
 Để chuẩn hóa một sheet hoàn chỉnh do ImageGen xuất, loại checkerboard nối với
 mép, giữ component nhân vật chính, đưa footprint nguồn về `84 px`, khóa baseline và

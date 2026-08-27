@@ -3259,23 +3259,30 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const playerX = Math.round(player.px - camX), playerY = Math.round(player.py - camY);
     const riding = isBicycleActive();
     if (!player.onBoat) drawCharacterShadow(playerX, playerY, riding ? 27 : 18);
-    // Keep the bicycle in the foreground and lift the canonical player behind
-    // it. Mounting never swaps the rider's face, uniform or animation source.
+    // Lift the canonical player into a riding pose without swapping face,
+    // uniform or animation source. Layering is direction-aware below.
+    const sideFacing = player.facing === 'left' || player.facing === 'right';
+    const riderLift = sideFacing && C.BICYCLE.sideRiderLift != null
+      ? C.BICYCLE.sideRiderLift : C.BICYCLE.riderLift;
     const riderY = playerY - (riding
-      ? Math.round(Math.max(0, Number(C.BICYCLE.riderLift) || 0) * activePlayerDrawScale) : 0);
+      ? Math.round(Math.max(0, Number(riderLift) || 0) * activePlayerDrawScale) : 0);
     const bicycleOverlayDrop = player.facing === 'down' || player.facing === 'up'
       ? C.BICYCLE.verticalOverlayDrop : C.BICYCLE.sideOverlayDrop;
     const bicycleY = playerY + (riding
       ? Math.round(Math.max(0, Number(bicycleOverlayDrop) || 0) * activePlayerDrawScale) : 0);
-    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY,
-      activePlayerDrawSize, activePlayerFrameSize);
-    if (riding) {
+    const drawBicycle = () => {
       const bicycleDrawSize = Math.max(TILE, Math.round(
         (Number(C.CHARACTER && C.CHARACTER.bicycleDrawSize) || TILE) * activePlayerDrawScale));
       const bicycleFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.bicycleFrameSize) || TILE);
       drawSprite(imgs.bicycle_overlay, player.facing, player.frame, playerX, bicycleY,
         bicycleDrawSize, bicycleFrameSize);
-    }
+    };
+    // Rear-view steering geometry belongs behind the rider. The other three
+    // directions keep the bicycle in front so wheels/frame cover the legs.
+    if (riding && player.facing === 'up') drawBicycle();
+    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY,
+      activePlayerDrawSize, activePlayerFrameSize);
+    if (riding && player.facing !== 'up') drawBicycle();
     drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
     drawMapSigns(camX, camY);

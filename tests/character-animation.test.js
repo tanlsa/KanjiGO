@@ -175,6 +175,31 @@ test('V4 bicycle locks its center and tire baseline between animation frames', (
   }
 });
 
+test('V4 rear-view bicycle hides its handlebar behind the rider', () => {
+  const sheet = decodeRgba('assets/characters/bicycle-overlay-v4.png'), cell = 128;
+  for (let frame = 0; frame < 4; frame += 1) {
+    for (let localY = 26; localY <= 35; localY += 1) for (let localX = 36; localX <= 91; localX += 1) {
+      assert.equal(pixel(sheet, frame * cell + localX, 3 * cell + localY)[3], 0,
+        `rear handlebar remains visible in frame ${frame} at ${localX},${localY}`);
+    }
+  }
+});
+
+test('male V4 rear-view hair ends in stable nape locks instead of a flat seam', () => {
+  for (const relativePath of [
+    'assets/characters/player-v4.png',
+    'assets/characters/player-blue-v4.png',
+    'assets/characters/npc-v4.png',
+  ]) {
+    const sheet = decodeRgba(relativePath), cell = 128;
+    for (const localX of [54, 64, 74]) for (let frame = 0; frame < 4; frame += 1) {
+      const sample = pixel(sheet, frame * cell + localX, 3 * cell + 58);
+      assert.ok(sample[3] > 20 && sample[0] < 90 && sample[1] < 90 && sample[2] < 90,
+        `rear nape lock is missing in ${relativePath}, frame ${frame}, x=${localX}`);
+    }
+  }
+});
+
 test('female V4 front eyes remain symmetric at the 32px runtime sample points', () => {
   for (const relativePath of [
     'assets/characters/player-female-orange-v4.png',
