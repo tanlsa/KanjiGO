@@ -36,9 +36,12 @@ function createSettingsContext() {
   const documentListeners = new Map(), storage = new Map();
   const elements = new Map();
   ['settings-overlay', 'settings-panel', 'settings-open', 'settings-close', 'settings-reset',
-    'settings-home', 'settings-audio-view', 'settings-character-view', 'settings-intro'].forEach((id) => elements.set(id, createElement(id)));
-  const pageButtons = ['audio', 'characters'].map((page) => createElement(`settings-page-${page}`, { settingsPage: page }));
-  const backButtons = [createElement('settings-back-audio'), createElement('settings-back-characters')];
+    'settings-home', 'settings-audio-view', 'settings-character-view', 'settings-animation-view',
+    'animation-encounter', 'settings-intro'].forEach((id) => elements.set(id, createElement(id)));
+  elements.get('animation-encounter').tagName = 'INPUT';
+  elements.get('animation-encounter').checked = true;
+  const pageButtons = ['audio', 'characters', 'animation'].map((page) => createElement(`settings-page-${page}`, { settingsPage: page }));
+  const backButtons = [createElement('settings-back-audio'), createElement('settings-back-characters'), createElement('settings-back-animation')];
   const controls = ['master', 'music', 'sfx', 'ui', 'ambient', 'muted'].map((name) => {
     const element = createElement(`audio-${name}`, { audioSetting: name });
     if (name === 'muted') element.tagName = 'INPUT';
@@ -115,13 +118,31 @@ test('Settings uses a two-level menu for Audio and Character switching', () => {
   assert.equal(context.SettingsUI.currentPage(), 'characters');
   assert.equal(elements.get('settings-character-view').classList.contains('settings-page-hidden'), false);
   assert.equal(elements.get('settings-reset').classList.contains('settings-page-hidden'), true);
+
+  backButtons[1].dispatch('click');
+  pageButtons.find((button) => button.dataset.settingsPage === 'animation').dispatch('click');
+  assert.equal(context.SettingsUI.currentPage(), 'animation');
+  assert.equal(elements.get('settings-animation-view').classList.contains('settings-page-hidden'), false);
+  assert.equal(elements.get('settings-reset').classList.contains('settings-page-hidden'), true);
+});
+
+test('Animation setting persists and controls the wild encounter cutscene', () => {
+  const { context, elements, pageButtons } = createSettingsContext();
+  pageButtons.find((button) => button.dataset.settingsPage === 'animation').dispatch('click');
+  const toggle = elements.get('animation-encounter');
+  assert.equal(context.SettingsUI.encounterAnimationEnabled(), true);
+  toggle.checked = false;
+  toggle.dispatch('change');
+  assert.equal(context.SettingsUI.encounterAnimationEnabled(), false);
+  assert.match(context.localStorage.getItem('KANJIGO_GAMEPLAY_SETTINGS_V1'), /"encounterAnimation":false/);
 });
 
 test('index exposes a general Settings shell and keeps it above mobile Back', () => {
   const html = read('index.html');
   assert.match(html, /id="settings-open"[^>]*aria-keyshortcuts="O"/);
   assert.match(html, /#settings-open\.game-ui-hidden\{[^}]*visibility:hidden[^}]*pointer-events:none/);
-  assert.match(html, /data-settings-page="audio"[\s\S]*data-settings-page="characters"/);
+  assert.match(html, /data-settings-page="audio"[\s\S]*data-settings-page="characters"[\s\S]*data-settings-page="animation"/);
+  assert.match(html, /id="settings-animation-view"[\s\S]*id="animation-encounter"/);
   assert.match(html, /id="settings-character-view"[\s\S]*id="character-slots"/);
   assert.match(html, /tối đa 3 nhân vật/i);
   assert.match(html, /id="settings-panel"[\s\S]*id="settings-audio-title"/);

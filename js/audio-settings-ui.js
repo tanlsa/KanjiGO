@@ -14,13 +14,31 @@
   const home = document.getElementById('settings-home');
   const audioView = document.getElementById('settings-audio-view');
   const characterView = document.getElementById('settings-character-view');
+  const animationView = document.getElementById('settings-animation-view');
+  const encounterAnimation = document.getElementById('animation-encounter');
   const intro = document.getElementById('settings-intro');
   const controls = [...document.querySelectorAll('[data-audio-setting]')];
   let lastFocused = null;
   let open = false;
   let page = 'home';
+  const GAMEPLAY_SETTINGS_KEY = 'KANJIGO_GAMEPLAY_SETTINGS_V1';
+  let gameplaySettings = loadGameplaySettings();
 
   if (!overlay || !panel || !openButton || !closeButton || !resetButton) return;
+
+  function loadGameplaySettings() {
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem(GAMEPLAY_SETTINGS_KEY) || 'null'); } catch (error) { stored = null; }
+    return { encounterAnimation: stored?.encounterAnimation !== false };
+  }
+
+  function saveGameplaySettings() {
+    try { localStorage.setItem(GAMEPLAY_SETTINGS_KEY, JSON.stringify(gameplaySettings)); } catch (error) { /* storage optional */ }
+  }
+
+  function refreshAnimation() {
+    if (encounterAnimation) encounterAnimation.checked = gameplaySettings.encounterAnimation;
+  }
 
   function refresh() {
     const settings = manager.getSettings();
@@ -57,13 +75,15 @@
   }
 
   function showPage(nextPage = 'home') {
-    page = ['audio', 'characters'].includes(nextPage) ? nextPage : 'home';
+    page = ['audio', 'characters', 'animation'].includes(nextPage) ? nextPage : 'home';
     home?.classList.toggle('settings-page-hidden', page !== 'home');
     audioView?.classList.toggle('settings-page-hidden', page !== 'audio');
     characterView?.classList.toggle('settings-page-hidden', page !== 'characters');
+    animationView?.classList.toggle('settings-page-hidden', page !== 'animation');
     resetButton.classList.toggle('settings-page-hidden', page !== 'audio');
     if (intro) intro.classList.toggle('settings-page-hidden', page !== 'home');
     if (page === 'audio') refresh();
+    if (page === 'animation') refreshAnimation();
     if (page === 'characters') {
       window.KanjiGOCharacters?.showCharacterList?.();
       window.KanjiGOCharacters?.refreshSettings?.();
@@ -96,6 +116,10 @@
       if (name === 'muted') manager.setMuted(control.checked);
       else updateVolume(name, control.value);
     });
+  });
+  encounterAnimation?.addEventListener('change', () => {
+    gameplaySettings.encounterAnimation = encounterAnimation.checked;
+    saveGameplaySettings();
   });
 
   openButton.setAttribute('aria-expanded', 'false');
@@ -135,5 +159,6 @@
     isOpen: () => open,
     showPage,
     currentPage: () => page,
+    encounterAnimationEnabled: () => gameplaySettings.encounterAnimation,
   };
 })();

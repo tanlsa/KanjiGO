@@ -118,6 +118,14 @@
   .audio-setting-row input[type="range"]{grid-column:1 / -1;width:100%;accent-color:#6cc0ff}
   .audio-setting-check{display:flex;align-items:center;gap:10px;margin:22px 0;font-weight:600}
   .audio-setting-check input{width:18px;height:18px;accent-color:#6cc0ff}
+  .animation-setting-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 18px;align-items:center;padding:18px;
+    border:1px solid #416589;border-radius:12px;background:linear-gradient(145deg,rgba(21,48,83,.82),rgba(9,23,51,.9))}
+  .animation-setting-card strong{display:block;color:#fff;font-size:15px}.animation-setting-card small{display:block;margin-top:5px;color:#a9bed9;font-size:11px;line-height:1.5}
+  .settings-switch{position:relative;width:54px;height:30px}.settings-switch input{position:absolute;opacity:0;pointer-events:none}
+  .settings-switch span{display:block;width:54px;height:30px;border-radius:17px;background:#40516d;cursor:pointer;transition:.18s ease}
+  .settings-switch span::after{content:'';display:block;width:22px;height:22px;margin:4px;border-radius:50%;background:#dce7f5;box-shadow:0 2px 5px rgba(0,0,0,.35);transition:.18s ease}
+  .settings-switch input:checked+span{background:#167e6c;box-shadow:0 0 0 2px rgba(91,240,190,.15)}
+  .settings-switch input:checked+span::after{transform:translateX(24px);background:#7fffc4}
   .settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
   .settings-actions button{min-height:42px;padding:8px 16px;border:1px solid #2f7fc0;border-radius:8px;background:#16558f;color:#fff;font-weight:700;cursor:pointer}
   .settings-actions button.secondary{background:transparent;color:#c8d5ee;border-color:#52617b}
@@ -198,6 +206,9 @@
       <button class="settings-menu-card" type="button" data-settings-page="characters">
         <span class="settings-menu-icon" aria-hidden="true">👤</span><strong>Đổi nhân vật</strong><small>Chọn, tạo hoặc chỉnh sửa tối đa 3 nhân vật với tiến độ riêng.</small>
       </button>
+      <button class="settings-menu-card" type="button" data-settings-page="animation">
+        <span class="settings-menu-icon" aria-hidden="true">🎬</span><strong>Animation</strong><small>Bật hoặc tắt cutscene Kanji hoang dã lao ra tấn công.</small>
+      </button>
     </div>
     <div id="settings-character-view" class="settings-page-hidden">
       <div class="settings-page-heading"><button type="button" data-settings-back aria-label="Quay lại">←</button><div><h3>Đổi nhân vật</h3><p>Mỗi nhân vật có tiến độ, pet, KP và huy hiệu riêng.</p></div></div>
@@ -244,6 +255,13 @@
         <input id="audio-ambient" type="range" min="0" max="100" step="1" value="60" data-audio-setting="ambient" />
       </div>
       <label class="audio-setting-check" for="audio-muted"><input id="audio-muted" type="checkbox" data-audio-setting="muted" /> Tắt toàn bộ âm thanh</label>
+    </div>
+    <div id="settings-animation-view" class="settings-page-hidden">
+      <div class="settings-page-heading"><button type="button" data-settings-back aria-label="Quay lại">←</button><div><h3>Animation</h3><p>Điều chỉnh chuyển cảnh khi chạm trán Kanji hoang dã.</p></div></div>
+      <div class="animation-setting-card">
+        <div><strong>Cutscene quái xuất hiện</strong><small>Hiện cảnh bụi cỏ hoặc mặt nước chuyển động, sau đó Kanji lao tới tấn công.</small></div>
+        <label class="settings-switch" for="animation-encounter"><span class="sr-only">Bật cutscene quái xuất hiện</span><input id="animation-encounter" type="checkbox" checked /><span aria-hidden="true"></span></label>
+      </div>
     </div>
     <div class="settings-actions">
       <button id="settings-reset" class="secondary" type="button">Khôi phục âm thanh</button>

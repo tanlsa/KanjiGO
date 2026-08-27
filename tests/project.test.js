@@ -241,19 +241,23 @@ test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid col
   assert.equal(MAP_DATA.TILES.length, 44, 'the expanded world should be 44 tiles tall');
   for (const id of ['ftown', 'hoaLac', 'debugGarden']) assert.ok(MAP_DATA.AREAS[id], `missing decorated area ${id}`);
   const landmarks = MAP_DATA.LANDMARKS || [];
-  assert.deepEqual(new Set(landmarks.map((item) => item.id)), new Set(['ftown', 'innovation_hub', 'hoa_lac']));
+  assert.deepEqual(new Set(landmarks.map((item) => item.id)),
+    new Set(['ftown', 'innovation_hub', 'heritage_pavilion', 'hoa_lac']));
   const landmarkAssets = {
     ftown: CONFIG.ASSETS.ftownCampus,
     innovation_hub: CONFIG.ASSETS.innovationHub,
+    heritage_pavilion: CONFIG.ASSETS.heritageGardenPavilion,
     hoa_lac: CONFIG.ASSETS.hoaLacCampus,
   };
   for (const landmark of landmarks) {
     assert.ok(landmark.asset, `${landmark.id} must use a dedicated world asset instead of a canvas-only building`);
     const assetPath = landmarkAssets[landmark.id];
     assert.ok(fs.existsSync(path.join(ROOT, assetPath)), `${landmark.id} asset is missing: ${assetPath}`);
-    for (let y = landmark.gy; y < landmark.gy + landmark.height; y++) {
-      for (let x = landmark.gx; x < landmark.gx + landmark.width; x++) {
-        if (landmark.id === 'innovation_hub' && x === 51 && y === 20) continue;
+    const collision = landmark.collision || landmark;
+    const entrances = new Set((collision.entrances || []).map(([x, y]) => `${x},${y}`));
+    for (let y = collision.gy; y < collision.gy + collision.height; y++) {
+      for (let x = collision.gx; x < collision.gx + collision.width; x++) {
+        if (entrances.has(`${x},${y}`)) continue;
         assert.ok(CONFIG.BLOCKED_TILES.includes(MAP_DATA.TILES[y][x]), `${landmark.id} footprint leaks collision at ${x},${y}`);
       }
     }
@@ -304,6 +308,7 @@ test('generated FPT campus PNG assets preserve transparent alpha and runtime dim
   const expected = new Map([
     [CONFIG.ASSETS.ftownCampus, [448, 256]],
     [CONFIG.ASSETS.innovationHub, [256, 128]],
+    [CONFIG.ASSETS.heritageGardenPavilion, [320, 160]],
     [CONFIG.ASSETS.hoaLacCampus, [512, 256]],
     [CONFIG.ASSETS.cuderStatue, [128, 128]],
     [CONFIG.ASSETS.fptSoftwareSign, [224, 90]],
@@ -332,6 +337,39 @@ test('new campus terrain tiles are valid 32px PNGs and all appear on the expande
   for (const tile of [CONFIG.TILE_KEYS.CAMPUS_LAWN, CONFIG.TILE_KEYS.CAMPUS_PLAZA,
     CONFIG.TILE_KEYS.TECH_PROMENADE, CONFIG.TILE_KEYS.CAMPUS_COURTYARD]) {
     assert.ok(mapTiles.has(tile), `campus terrain tile ${tile} must be used in the world`);
+  }
+});
+
+test('every blocked architecture tile has a visible building or authored decoration', () => {
+  const { CONFIG, MAP_DATA } = loadDataContext();
+  const covered = new Set();
+  const coverRect = ({ gx, gy, width, height }) => {
+    for (let y = gy; y < gy + height; y++) for (let x = gx; x < gx + width; x++) covered.add(`${x},${y}`);
+  };
+  coverRect({ gx: CONFIG.ACADEMY.gx, gy: CONFIG.ACADEMY.gy,
+    width: CONFIG.ACADEMY.width, height: CONFIG.ACADEMY.height });
+  for (const landmark of MAP_DATA.LANDMARKS || []) coverRect(landmark.collision || landmark);
+  const arena = MAP_DATA.ARENA;
+  if (arena) {
+    for (let x = arena.x; x < arena.x + arena.width; x++) {
+      covered.add(`${x},${arena.y}`); covered.add(`${x},${arena.y + arena.height - 1}`);
+    }
+    for (let y = arena.y; y < arena.y + arena.height; y++) {
+      covered.add(`${arena.x},${y}`); covered.add(`${arena.x + arena.width - 1},${y}`);
+    }
+  }
+  const techPark = MAP_DATA.DECORATIONS?.techPark;
+  for (const decoration of [techPark?.server, techPark?.portal]) {
+    if (decoration) covered.add(`${decoration.gx},${decoration.gy}`);
+  }
+  const architecture = new Set([CONFIG.TILE_KEYS.ACADEMY_DOOR,
+    CONFIG.TILE_KEYS.ACADEMY_WALL, CONFIG.TILE_KEYS.ACADEMY_ROOF]);
+  for (let y = 0; y < MAP_DATA.TILES.length; y++) {
+    for (let x = 0; x < MAP_DATA.TILES[y].length; x++) {
+      if (architecture.has(MAP_DATA.TILES[y][x])) {
+        assert.ok(covered.has(`${x},${y}`), `architecture tile at ${x},${y} has collision but no visible resource`);
+      }
+    }
   }
 });
 

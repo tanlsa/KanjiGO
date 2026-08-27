@@ -8,7 +8,8 @@ const ROOT = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 function createGame({ learningSave = null, gameSave = null, disableTestUnlocks = false, enableSkillQaSeed = false,
-  characterSlotsSave = null, sandboxCharacter = false, viewportWidth = 1280, viewportHeight = 720, devicePixelRatio = 1, canvasRect = null, mockFonts = false } = {}) {
+  characterSlotsSave = null, sandboxCharacter = false, viewportWidth = 1280, viewportHeight = 720, devicePixelRatio = 1,
+  canvasRect = null, mockFonts = false, encounterAnimation = true } = {}) {
   const storage = new Map();
   const windowListeners = new Map();
   const canvasListeners = new Map();
@@ -123,6 +124,7 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
       removeItem: (key) => storage.delete(key),
     },
     setTimeout, clearTimeout, queueMicrotask,
+    SettingsUI: { encounterAnimationEnabled: () => encounterAnimation },
   };
   context.window = context;
   vm.createContext(context);
@@ -448,6 +450,11 @@ test('new character learns the selected starter while Aoi guides every onboardin
     game.debug.updateCapture(700);
   }
   assert.equal(game.debug.getCapture().passed, true);
+  assert.equal(game.debug.getCapture().catchEffectTotal, 1500, 'successful capture should start its semantic victory effect');
+  assert.equal(game.debug.resolveKanjiAnimation('ri').attack, 'solar-burst');
+  assert.doesNotThrow(() => game.debug.renderOnce(), 'semantic capture effect crashed the capture result screen');
+  game.debug.updateCapture(500);
+  assert.equal(game.debug.getCapture().catchEffectT, 1000, 'capture victory effect should animate over time');
   assert.equal(game.debug.getKanjiStat('日').captured, true);
   assert.equal(game.debug.getOnboardingTour().stop.id, 'wilderness', 'only capturing the selected starter advances the tour');
   assert.equal(game.debug.getPet(), null, 'captured starter stays hidden until the mandatory tour is complete');
@@ -775,7 +782,7 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 23);
+  assert.equal(imageRequests.length, 24);
   assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
@@ -783,6 +790,7 @@ test('startup only preloads core assets and the active pet', () => {
   assert.ok(imageRequests.includes('assets/world/trainer-theme-icons.png'));
   assert.ok(imageRequests.includes('assets/world/ftown-campus-v3.png'));
   assert.ok(imageRequests.includes('assets/world/innovation-hub.png'));
+  assert.ok(imageRequests.includes('assets/world/heritage-garden-pavilion-v2.png'));
   assert.ok(imageRequests.includes('assets/world/hoa-lac-campus-v2.png'));
   assert.ok(imageRequests.includes('assets/world/cuder-statue.png'));
   assert.ok(imageRequests.includes('assets/world/fpt-software-sign-v2.png'));
@@ -831,6 +839,9 @@ test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs'
   const garden = visit(5, 21);
   assert.ok(garden.texts.includes('01'), 'the binary portal easter egg should render inside 404 Garden');
   assert.ok(garden.texts.some((text) => text.includes('404 GARDEN')));
+  const heritageGarden = visit(5, 34);
+  assert.ok(heritageGarden.draws.some((call) => call.type === 'drawImage'
+    && call.src === 'assets/world/heritage-garden-pavilion-v2.png'));
 });
 
 test('generated FPT props block only their authored footprints', () => {
@@ -898,7 +909,7 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
   assert.ok(debug.getBattle().q.options.length >= 2);
 });
 
-test('wild grass encounters play a locked cinematic lunge before the quiz timer starts', () => {
+test('wild grass encounters use the Kanji semantic attack during the locked cutscene', () => {
   const { debug, textCalls } = createGame();
   assert.equal(debug.startBattle('grass'), true);
   const battle = debug.getBattle(), initialGauge = battle.botNextIn;
@@ -910,7 +921,7 @@ test('wild grass encounters play a locked cinematic lunge before the quiz timer 
   assert.equal(battle.botNextIn, initialGauge, 'the attack gauge must pause during the encounter cutscene');
   debug.updateBattle(760);
   debug.renderOnce();
-  assert.ok(textCalls.some((call) => call.text.includes(`KANJI HOANG DÃ「${battle.mon.kanji}」LAO TỚI!`)));
+  assert.ok(textCalls.some((call) => call.text.includes(`KANJI HOANG DÃ「${battle.mon.kanji}」TUNG TUYỆT KỸ!`)));
   assert.equal(battle.entranceSfxPlayed, true);
   assert.ok(battle.encounterImpactT > 0);
   debug.updateBattle(600);
@@ -927,6 +938,17 @@ test('wild water encounters use the lake reveal before combat', () => {
   assert.ok(textCalls.some((call) => call.text === 'MẶT NƯỚC BỖNG CHUYỂN ĐỘNG…'));
   assert.doesNotThrow(() => debug.updateBattle(1300));
   assert.equal(debug.getBattle().entranceT, 0);
+});
+
+test('Animation setting skips wild encounter cutscenes for both grass and water', () => {
+  const grassGame = createGame({ encounterAnimation: false });
+  assert.equal(grassGame.debug.startBattle('grass'), true);
+  assert.equal(grassGame.debug.getBattle().entranceT, 0);
+
+  const waterGame = createGame({ encounterAnimation: false });
+  waterGame.debug.mastery()['魚'].captured = true;
+  assert.equal(waterGame.debug.startBattle('water', 'fish'), true);
+  assert.equal(waterGame.debug.getBattle().entranceT, 0);
 });
 
 test('battle scales and computes each side from its own Kanji level', () => {
@@ -1050,6 +1072,232 @@ test('every configured captured Kanji mascot can be equipped as the active follo
     assert.equal(game.debug.setPet(id), true, `${monster.kanji}/${id} could not be equipped`);
     assert.equal(game.debug.getPet().id, id, `${monster.kanji}/${id} did not become the active follower`);
   }
+});
+
+test('all 220 Kanji expose official meaning-driven follower and attack animations', async () => {
+  const { debug, context } = createGame();
+  const expected = {
+    '火': ['hi_fire', 'ember-hop', 'flame-dash'],
+    '水': ['mizu', 'water-float', 'tidal-wave'],
+    '木': ['moku', 'tree-sway', 'vine-whip'],
+    '電': ['den', 'static-jitter', 'thunder-strike'],
+    '気': ['ki', 'wind-glide', 'wind-cutter'],
+    '日': ['ri', 'sun-orbit', 'solar-burst'],
+    '月': ['getsu', 'moon-drift', 'moon-blade'],
+    '山': ['yama', 'peak-stomp', 'mountain-crash'],
+    '川': ['kawa', 'river-flow', 'river-rush'],
+    '金': ['kin', 'gold-shine', 'golden-comet'],
+    '雨': ['ame', 'rain-bounce', 'rain-storm'],
+    '土': ['tsuchi', 'earth-stomp', 'earth-spike'],
+    '魚': ['fish', 'bubble-swim', 'bubble-torpedo'],
+    '音': ['yin', 'sound-pulse', 'sonic-wave'],
+    '生': ['sei', 'life-bloom', 'life-bloom'],
+    '一': ['bar', 'single-orbit', 'single-slash'],
+    '人': ['hito', 'people-step', 'twin-strike'],
+    '学': ['gaku', 'study-flutter', 'book-burst'],
+    '車': ['kuruma', 'wheel-roll', 'wheel-charge'],
+    '食': ['shoku', 'steam-hop', 'steam-bite'],
+    '話': ['hanashi', 'speech-bob', 'word-cannon'],
+    '書': ['sho', 'ink-brush', 'ink-slash'],
+    '時': ['ji', 'clock-tick', 'clock-stop'],
+    '上': ['ue', 'rise-float', 'rising-uppercut'],
+    '下': ['shita', 'sink-step', 'meteor-drop'],
+    '大': ['dai', 'giant-stomp', 'giant-smash'],
+    '小': ['shou', 'tiny-dart', 'needle-barrage'],
+    '国': ['kuni', 'barrier-guard', 'barrier-crush'],
+    '友': ['tomo', 'friend-sync', 'dual-heart'],
+    '休': ['yasumi', 'rest-doze', 'dream-leaf'],
+    '年': ['nen', 'life-bloom', 'season-wheel'],
+    '本': ['hon', 'study-flutter', 'book-burst'],
+    '中': ['chuu', 'barrier-guard', 'center-beam'],
+    '長': ['chou', 'rise-float', 'long-lance'],
+    '出': ['shutsu', 'wind-glide', 'outward-blast'],
+    '三': ['san', 'single-orbit', 'orbit-barrage'],
+    '行': ['gyou', 'people-step', 'step-rush'],
+    '見': ['ken', 'static-jitter', 'eye-beam'],
+    '今': ['ima', 'sound-pulse', 'now-burst'],
+    '分': ['bun', 'friend-sync', 'split-blade'],
+    '後': ['ato', 'wind-glide', 'backstab'],
+    '前': ['mae', 'wheel-roll', 'forward-charge'],
+    '五': ['go', 'single-orbit', 'orbit-barrage'],
+    '間': ['kan', 'moon-drift', 'portal-crush'],
+    '東': ['higashi', 'sun-orbit', 'sunrise-lance'],
+    '四': ['yon', 'single-orbit', 'orbit-barrage'],
+    '九': ['kyuu', 'single-orbit', 'orbit-barrage'],
+    '入': ['nyuu', 'wind-glide', 'inward-collapse'],
+    '高': ['kou', 'rise-float', 'sky-drop'],
+    '円': ['en', 'wheel-roll', 'coin-ring'],
+    '十': ['juu', 'cross-pulse', 'cross-flare'],
+    '二': ['ni', 'single-orbit', 'orbit-barrage'],
+    '子': ['ko', 'child-bounce', 'child-spring'],
+    '外': ['gai', 'wind-glide', 'outward-blast'],
+    '八': ['hachi', 'single-orbit', 'orbit-barrage'],
+    '六': ['roku', 'single-orbit', 'orbit-barrage'],
+    '来': ['rai', 'lead-step', 'forward-charge'],
+    '七': ['nana', 'single-orbit', 'orbit-barrage'],
+    '女': ['onna', 'grace-step', 'petal-dance'],
+    '北': ['kita', 'compass-hover', 'compass-star'],
+    '午': ['gozen', 'sun-orbit', 'noon-beam'],
+    '百': ['hyaku', 'grid-flicker', 'hundred-grid'],
+    '先': ['saki', 'lead-step', 'lead-arrow'],
+    '名': ['na', 'name-bob', 'name-seal'],
+    '千': ['sen', 'star-drift', 'star-barrage'],
+    '西': ['nishi', 'moon-drift', 'sunset-blade'],
+    '語': ['go_lang', 'speech-bob', 'word-cannon'],
+    '南': ['minami', 'compass-hover', 'compass-star'],
+    '何': ['nani', 'question-hover', 'question-burst'],
+    '万': ['man', 'star-drift', 'star-barrage'],
+    '半': ['han', 'friend-sync', 'split-blade'],
+    '男': ['otoko', 'giant-stomp', 'giant-smash'],
+    '校': ['kou_school', 'study-flutter', 'sonic-wave'],
+    '毎': ['mai', 'clock-tick', 'clock-stop'],
+    '白': ['shiro', 'sun-orbit', 'solar-burst'],
+    '天': ['ten', 'rise-float', 'sky-drop'],
+    '母': ['haha', 'friend-sync', 'dual-heart'],
+    '右': ['migi', 'lead-step', 'side-arrow'],
+    '読': ['yomu', 'study-flutter', 'book-burst'],
+    '左': ['hidari', 'lead-step', 'side-arrow'],
+    '父': ['chichi', 'barrier-guard', 'barrier-crush'],
+    '悪': ['aku', 'static-jitter', 'dark-rift'],
+    '暗': ['an', 'moon-drift', 'shadow-lantern'],
+    '医': ['i_med', 'life-bloom', 'healing-cross'],
+    '意': ['i_intent', 'question-hover', 'focus-burst'],
+    '以': ['i_by', 'lead-step', 'forward-charge'],
+    '引': ['hiku', 'wind-glide', 'inward-collapse'],
+    '院': ['institute', 'barrier-guard', 'healing-cross'],
+    '員': ['member', 'friend-sync', 'dual-heart'],
+    '運': ['un', 'wheel-roll', 'wheel-charge'],
+    '英': ['ei', 'gold-shine', 'golden-comet'],
+    '映': ['utsu', 'static-jitter', 'eye-beam'],
+    '遠': ['tooi', 'wind-glide', 'long-lance'],
+    '屋': ['ya', 'barrier-guard', 'house-crash'],
+    '歌': ['uta', 'sound-pulse', 'sonic-wave'],
+    '夏': ['natsu', 'sun-orbit', 'solar-burst'],
+    '家': ['ie', 'friend-sync', 'house-crash'],
+    '画': ['ga_art', 'ink-brush', 'ink-slash'],
+    '海': ['umi', 'water-float', 'tidal-wave'],
+    '回': ['kai_turn', 'single-orbit', 'orbit-barrage'],
+    '開': ['hiraku', 'portal-hover', 'portal-open'],
+    '界': ['kai_world', 'single-orbit', 'world-sphere'],
+    '楽': ['tanoshi', 'sound-pulse', 'sonic-wave'],
+    '館': ['kan_building', 'barrier-guard', 'house-crash'],
+    '漢': ['kan_han', 'ink-brush', 'ink-slash'],
+    '寒': ['samui', 'frost-shiver', 'frost-spikes'],
+    '顔': ['kao', 'question-hover', 'face-mask'],
+    '帰': ['kaeru', 'return-sway', 'return-boomerang'],
+    '起': ['okiru', 'rise-float', 'rising-uppercut'],
+    '究': ['kyuu_research', 'study-flutter', 'focus-burst'],
+    '急': ['isogu', 'static-jitter', 'thunder-strike'],
+    '牛': ['ushi', 'bull-stomp', 'bull-charge'],
+    '去': ['saru', 'wind-glide', 'outward-blast'],
+    '強': ['tsuyoi', 'giant-stomp', 'giant-smash'],
+    '教': ['oshieru', 'study-flutter', 'book-burst'],
+    '京': ['kyou_capital', 'rise-float', 'capital-tower'],
+    '業': ['gyou_business', 'wheel-roll', 'wheel-charge'],
+    '近': ['chikai', 'lead-step', 'forward-charge'],
+    '銀': ['gin', 'gold-shine', 'coin-ring'],
+    '区': ['ku_district', 'grid-flicker', 'district-grid'],
+  };
+  const animations = debug.kanjiAnimations();
+  assert.equal(Object.keys(animations).length, 220, 'every configured Kanji needs an authored choreography entry');
+  for (const kanji of Object.keys(expected)) assert.ok(animations[kanji], `${kanji} disappeared from the authored registry`);
+  for (const [kanji, [id, follow, attack]] of Object.entries(expected)) {
+    assert.equal(animations[kanji].follow, follow);
+    assert.equal(animations[kanji].attack, attack);
+    assert.equal(debug.hasMeaningAttackAnimation(id), true);
+    const idle = debug.followerMeaningMotion(id, false, 1000);
+    const moving = debug.followerMeaningMotion(id, true, 1000);
+    assert.ok(Object.values(idle).every(Number.isFinite));
+    assert.ok(Object.values(moving).every(Number.isFinite));
+    debug.mastery()[kanji].captured = true;
+    assert.equal(debug.setPet(id), true);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.doesNotThrow(() => debug.renderOnce(), `${kanji} follower animation crashed overworld render`);
+    assert.equal(debug.startPve({ pool: ['日'], allowUncaptured: true, questions: 2 }), true);
+    debug.answerPve(debug.getPve().q.correctIndex);
+    assert.ok(debug.getPve().petAttackT >= 680, `${kanji} attack should keep its stronger impact timing`);
+    assert.doesNotThrow(() => debug.renderOnce(), `${kanji} attack animation crashed battle render`);
+  }
+  assert.equal(debug.startPve({ pool: ['日'], allowUncaptured: true, questions: 2 }), true);
+  debug.answerPve((debug.getPve().q.correctIndex + 1) % debug.getPve().q.options.length);
+  assert.ok(debug.getPve().enemyAttackT >= 700, 'meaning-driven enemy counterattack should retain its impact timing');
+  assert.ok(debug.getPve().arenaShakeT >= 360, 'meaning-driven counterattack should shake the arena');
+  assert.equal(debug.hasMeaningAttackAnimation('missing_monster'), false);
+  for (const [id, monster] of Object.entries(context.CONFIG.MONSTERS)) {
+    const animation = debug.resolveKanjiAnimation(id);
+    assert.ok(animation && animation.attack, `${monster.kanji}/${id} has no official attack animation`);
+    assert.notEqual(animation.inherited, true, `${monster.kanji}/${id} still relies on semantic fallback`);
+    assert.ok(Object.values(debug.followerMeaningMotion(id, true, 1250)).every(Number.isFinite), `${monster.kanji}/${id} follower motion is invalid`);
+  }
+});
+
+test('automated animation audit renders every Kanji across follower and attack timelines', () => {
+  const { debug, context } = createGame();
+  const animations = debug.kanjiAnimations();
+  const monsters = Object.entries(context.CONFIG.MONSTERS);
+  const gameSource = read('js/game.js');
+  const supportedFollowers = new Set([...gameSource.matchAll(/animation\.follow === '([^']+)'/g)].map((match) => match[1]));
+  const supportedAttacks = new Set([...gameSource.matchAll(/animation\.attack === '([^']+)'/g)].map((match) => match[1]));
+  const followerTimes = [0, 125, 500, 1250, 5000, 30000];
+  const attackFrames = [0, .08, .2, .33, .5, .66, .82, .94, 1];
+
+  assert.equal(monsters.length, 220);
+  assert.equal(Object.keys(animations).length, monsters.length);
+  assert.deepEqual(new Set(Object.keys(animations)), new Set(monsters.map(([, monster]) => monster.kanji)));
+
+  for (const [id, monster] of monsters) {
+    const animation = animations[monster.kanji];
+    assert.ok(animation, `${monster.kanji}/${id} is absent from the animation registry`);
+    assert.equal(typeof animation.meaning, 'string');
+    assert.ok(animation.meaning.trim(), `${monster.kanji}/${id} has no semantic meaning label`);
+    assert.ok(supportedFollowers.has(animation.follow), `${monster.kanji}/${id} uses an unrendered follower motion: ${animation.follow}`);
+    assert.ok(supportedAttacks.has(animation.attack), `${monster.kanji}/${id} uses an unrendered attack: ${animation.attack}`);
+    assert.equal(animation.effect, monster.effect, `${monster.kanji}/${id} effect drifted from monster config`);
+    assert.ok(Array.isArray(animation.colors) && animation.colors.length === 2
+      && animation.colors.every((color) => typeof color === 'string' && color.trim()), `${monster.kanji}/${id} has an invalid palette`);
+    if (animation.count !== undefined) assert.ok(Number.isInteger(animation.count) && animation.count > 0, `${monster.kanji}/${id} has an invalid particle count`);
+
+    for (const now of followerTimes) for (const moving of [false, true]) {
+      const motion = debug.followerMeaningMotion(id, moving, now);
+      assert.deepEqual(Object.keys(motion).sort(), ['rotation', 'scaleX', 'scaleY', 'x', 'y']);
+      assert.ok(Object.values(motion).every(Number.isFinite), `${monster.kanji}/${id} generated a non-finite follower frame`);
+      assert.ok(motion.scaleX > 0 && motion.scaleY > 0, `${monster.kanji}/${id} generated an inverted follower frame`);
+    }
+    for (const progress of attackFrames) for (const reverse of [false, true]) {
+      assert.doesNotThrow(() => {
+        assert.equal(debug.renderMeaningAttackFrame(id, progress, reverse), true);
+      }, `${monster.kanji}/${id} attack crashed at progress ${progress} (${reverse ? 'reverse' : 'forward'})`);
+    }
+  }
+  assert.equal(debug.renderMeaningAttackFrame('ri', -.01), false);
+  assert.equal(debug.renderMeaningAttackFrame('ri', 1.01), false);
+  assert.equal(debug.renderMeaningAttackFrame('missing_monster', .5), false);
+});
+
+test('Sandbox profiles always receive all authored meaning-animation Kanji', () => {
+  const { debug } = createGame({ sandboxCharacter: true });
+  for (const char of [
+    '火', '水', '木', '電', '気', '日', '月', '山', '川', '金', '雨', '土', '魚', '音', '生',
+    '一', '人', '学', '車', '食', '話', '書', '時', '上', '下', '大', '小', '国', '友', '休',
+    '年', '本', '中', '長', '出', '三', '行', '見', '今', '分', '後', '前', '五', '間', '東', '四', '九', '入', '高', '円',
+    '十', '二', '子', '外', '八', '六', '来', '七', '女', '北', '午', '百', '先', '名', '千', '西', '語', '南', '何', '万',
+    '半', '男', '校', '毎', '白', '天', '母', '右', '読', '左', '父', '悪', '暗', '医', '意', '以', '引', '院', '員', '運', '英', '映', '遠', '屋', '歌', '夏', '家', '画', '海', '回',
+    '開', '界', '楽', '館', '漢', '寒', '顔', '帰', '起', '究', '急', '牛', '去', '強', '教', '京', '業', '近', '銀', '区',
+  ]) {
+    assert.equal(debug.getKanjiStat(char).captured, true, `${char} is missing from the Sandbox authored-animation roster`);
+  }
+});
+
+test('Sandbox unlocks exactly 200 Kanji and leaves the final 20 curriculum entries locked', () => {
+  const { debug, context } = createGame({ sandboxCharacter: true });
+  const all = Object.values(context.KANJI_DB.KANJI).map((info) => info.char);
+  const captured = all.filter((char) => debug.getKanjiStat(char).captured);
+  assert.equal(all.length, 220);
+  assert.equal(captured.length, 200);
+  assert.equal(debug.getKanjiStat('魚').captured, true, 'the initial Sandbox pet must count inside the 200 total');
+  const finalN4 = context.KANJI_CATALOG.tiers.N4.kanji.slice(-20);
+  assert.equal(finalN4.length, 20);
+  for (const char of finalN4) assert.equal(debug.getKanjiStat(char).captured, false, `${char} should remain locked in Sandbox`);
 });
 
 test('N4 is badge-gated when the temporary QA override is disabled', () => {

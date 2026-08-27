@@ -828,6 +828,370 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   saveLearning();
 
   // 🐾 PET + tiến trình
+  // Registry animation chính thức. Kanji có choreography riêng được khai báo
+  // tại đây; các chữ còn lại tự kế thừa đòn theo semantic `effect` bên dưới.
+  const KANJI_ANIMATIONS = Object.freeze({
+    '火': Object.freeze({ meaning: 'Lửa', follow: 'ember-hop', attack: 'flame-dash', effect: 'fire-embers', colors: ['#fff08a', '#ff3b1f'] }),
+    '水': Object.freeze({ meaning: 'Nước', follow: 'water-float', attack: 'tidal-wave', effect: 'water-ripple', colors: ['#d8fbff', '#2aa9ff'] }),
+    '木': Object.freeze({ meaning: 'Cây', follow: 'tree-sway', attack: 'vine-whip', effect: 'leaf-fall', colors: ['#d8ff91', '#48b84d'] }),
+    '電': Object.freeze({ meaning: 'Điện', follow: 'static-jitter', attack: 'thunder-strike', effect: 'lightning', colors: ['#fffbd0', '#ffd91f'] }),
+    '気': Object.freeze({ meaning: 'Khí', follow: 'wind-glide', attack: 'wind-cutter', effect: 'breeze', colors: ['#e4fff5', '#55d6ae'] }),
+    '日': Object.freeze({ meaning: 'Mặt trời', follow: 'sun-orbit', attack: 'solar-burst', effect: 'sun-glow', colors: ['#fff6a0', '#ff9d32'] }),
+    '月': Object.freeze({ meaning: 'Mặt trăng', follow: 'moon-drift', attack: 'moon-blade', effect: 'moon-glow', colors: ['#edf5ff', '#729dff'] }),
+    '山': Object.freeze({ meaning: 'Núi', follow: 'peak-stomp', attack: 'mountain-crash', effect: 'peaks', colors: ['#ffe0a8', '#9a633e'] }),
+    '川': Object.freeze({ meaning: 'Sông', follow: 'river-flow', attack: 'river-rush', effect: 'river-flow', colors: ['#c8f8ff', '#238bd2'] }),
+    '金': Object.freeze({ meaning: 'Vàng', follow: 'gold-shine', attack: 'golden-comet', effect: 'gold-sparkle', colors: ['#fff4ae', '#e9a51d'] }),
+    '雨': Object.freeze({ meaning: 'Mưa', follow: 'rain-bounce', attack: 'rain-storm', effect: 'rain-drops', colors: ['#d8f5ff', '#4b8ee8'] }),
+    '土': Object.freeze({ meaning: 'Đất', follow: 'earth-stomp', attack: 'earth-spike', effect: 'earth-crumble', colors: ['#ffe0ad', '#9c5d32'] }),
+    '魚': Object.freeze({ meaning: 'Cá', follow: 'bubble-swim', attack: 'bubble-torpedo', effect: 'bubbles', colors: ['#dcfbff', '#28b7d9'] }),
+    '音': Object.freeze({ meaning: 'Âm thanh', follow: 'sound-pulse', attack: 'sonic-wave', effect: 'sound-wave', colors: ['#f3ddff', '#b05fe5'] }),
+    '生': Object.freeze({ meaning: 'Sinh mệnh', follow: 'life-bloom', attack: 'life-bloom', effect: 'life', colors: ['#e5ff9e', '#45c86b'] }),
+    '一': Object.freeze({ meaning: 'Một', follow: 'single-orbit', attack: 'single-slash', effect: 'orbit-1', colors: ['#fff7c2', '#ffb340'] }),
+    '人': Object.freeze({ meaning: 'Người', follow: 'people-step', attack: 'twin-strike', effect: 'people-pair', colors: ['#ffe2c2', '#ef855b'] }),
+    '学': Object.freeze({ meaning: 'Học', follow: 'study-flutter', attack: 'book-burst', effect: 'study', colors: ['#d9f4ff', '#4a9bd8'] }),
+    '車': Object.freeze({ meaning: 'Xe', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#ffd8d3', '#d74a45'] }),
+    '食': Object.freeze({ meaning: 'Ăn', follow: 'steam-hop', attack: 'steam-bite', effect: 'steam-aroma', colors: ['#fff1c9', '#e38c3d'] }),
+    '話': Object.freeze({ meaning: 'Nói chuyện', follow: 'speech-bob', attack: 'word-cannon', effect: 'speech-bubbles', colors: ['#fff2a5', '#e8a936'] }),
+    '書': Object.freeze({ meaning: 'Viết', follow: 'ink-brush', attack: 'ink-slash', effect: 'ink-strokes', colors: ['#d7ffe5', '#278a62'] }),
+    '時': Object.freeze({ meaning: 'Thời gian', follow: 'clock-tick', attack: 'clock-stop', effect: 'clock', colors: ['#e5f6ff', '#5188c7'] }),
+    '上': Object.freeze({ meaning: 'Lên', follow: 'rise-float', attack: 'rising-uppercut', effect: 'rise', colors: ['#d8fbff', '#4dc7db'] }),
+    '下': Object.freeze({ meaning: 'Xuống', follow: 'sink-step', attack: 'meteor-drop', effect: 'sink', colors: ['#d8fff7', '#369e91'] }),
+    '大': Object.freeze({ meaning: 'Lớn', follow: 'giant-stomp', attack: 'giant-smash', effect: 'grow', colors: ['#ffe2bd', '#de7643'] }),
+    '小': Object.freeze({ meaning: 'Nhỏ', follow: 'tiny-dart', attack: 'needle-barrage', effect: 'tiny', colors: ['#ffe4c7', '#e9984c'] }),
+    '国': Object.freeze({ meaning: 'Quốc gia', follow: 'barrier-guard', attack: 'barrier-crush', effect: 'boundary', colors: ['#d7e8ff', '#4d77bd'] }),
+    '友': Object.freeze({ meaning: 'Bạn bè', follow: 'friend-sync', attack: 'dual-heart', effect: 'friendship-link', colors: ['#ffdce4', '#ec6f8c'] }),
+    '休': Object.freeze({ meaning: 'Nghỉ ngơi', follow: 'rest-doze', attack: 'dream-leaf', effect: 'rest-leaves', colors: ['#e9ffc0', '#72ae44'] }),
+    '年': Object.freeze({ meaning: 'Năm', follow: 'life-bloom', attack: 'season-wheel', effect: 'seasons', colors: ['#fff0a8', '#df795b'] }),
+    '本': Object.freeze({ meaning: 'Sách / gốc', follow: 'study-flutter', attack: 'book-burst', effect: 'page-flip', colors: ['#fff4d2', '#b67b4b'] }),
+    '中': Object.freeze({ meaning: 'Trung tâm', follow: 'barrier-guard', attack: 'center-beam', effect: 'center-pulse', colors: ['#d9f8ff', '#3aa7c8'] }),
+    '長': Object.freeze({ meaning: 'Dài / trưởng', follow: 'rise-float', attack: 'long-lance', effect: 'lengthen', colors: ['#ffd9ef', '#cb5f9d'] }),
+    '出': Object.freeze({ meaning: 'Ra ngoài', follow: 'wind-glide', attack: 'outward-blast', effect: 'outward', colors: ['#d8fff3', '#43b591'] }),
+    '三': Object.freeze({ meaning: 'Ba', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-3', count: 3, colors: ['#ffd9f3', '#d75fa8'] }),
+    '行': Object.freeze({ meaning: 'Đi / hành động', follow: 'people-step', attack: 'step-rush', effect: 'steps', colors: ['#d7ffe3', '#4ab267'] }),
+    '見': Object.freeze({ meaning: 'Nhìn', follow: 'static-jitter', attack: 'eye-beam', effect: 'scan', colors: ['#e9ddff', '#765dcc'] }),
+    '今': Object.freeze({ meaning: 'Bây giờ', follow: 'sound-pulse', attack: 'now-burst', effect: 'now-pulse', colors: ['#dbfbff', '#3ba9c6'] }),
+    '分': Object.freeze({ meaning: 'Chia', follow: 'friend-sync', attack: 'split-blade', effect: 'split', colors: ['#ffe0cd', '#d36c48'] }),
+    '後': Object.freeze({ meaning: 'Phía sau', follow: 'wind-glide', attack: 'backstab', effect: 'backtrail', colors: ['#dce5ff', '#667fc8'] }),
+    '前': Object.freeze({ meaning: 'Phía trước', follow: 'wheel-roll', attack: 'forward-charge', effect: 'forward', colors: ['#d8fff5', '#3db18f'] }),
+    '五': Object.freeze({ meaning: 'Năm', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-5', count: 5, colors: ['#ffe0bd', '#df7740'] }),
+    '間': Object.freeze({ meaning: 'Khoảng / gian', follow: 'moon-drift', attack: 'portal-crush', effect: 'portal', colors: ['#dcf7ff', '#4c7ed1'] }),
+    '東': Object.freeze({ meaning: 'Phía đông', follow: 'sun-orbit', attack: 'sunrise-lance', effect: 'sunrise', colors: ['#fff1a5', '#ef743d'] }),
+    '四': Object.freeze({ meaning: 'Bốn', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-4', count: 4, colors: ['#eadcff', '#8d62cc'] }),
+    '九': Object.freeze({ meaning: 'Chín', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-9', count: 9, colors: ['#d9fffa', '#36b7ae'] }),
+    '入': Object.freeze({ meaning: 'Đi vào', follow: 'wind-glide', attack: 'inward-collapse', effect: 'inward', colors: ['#ffe0d5', '#cf6854'] }),
+    '高': Object.freeze({ meaning: 'Cao', follow: 'rise-float', attack: 'sky-drop', effect: 'height', colors: ['#d8fff0', '#47b98b'] }),
+    '円': Object.freeze({ meaning: 'Tròn / Yên', follow: 'wheel-roll', attack: 'coin-ring', effect: 'coin-ring', colors: ['#fff0b5', '#d79b28'] }),
+    '十': Object.freeze({ meaning: 'Mười', follow: 'cross-pulse', attack: 'cross-flare', effect: 'cross-flare', colors: ['#fff3c4', '#e85f43'] }),
+    '二': Object.freeze({ meaning: 'Hai', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-2', count: 2, colors: ['#dff6ff', '#438fc9'] }),
+    '子': Object.freeze({ meaning: 'Trẻ em', follow: 'child-bounce', attack: 'child-spring', effect: 'child-bounce', colors: ['#fff0c9', '#f08d62'] }),
+    '外': Object.freeze({ meaning: 'Bên ngoài', follow: 'wind-glide', attack: 'outward-blast', effect: 'outside-drift', colors: ['#dffcff', '#479dbd'] }),
+    '八': Object.freeze({ meaning: 'Tám', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-8', count: 8, colors: ['#f2e0ff', '#955cc4'] }),
+    '六': Object.freeze({ meaning: 'Sáu', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-6', count: 6, colors: ['#e0fff1', '#42aa78'] }),
+    '来': Object.freeze({ meaning: 'Đến', follow: 'lead-step', attack: 'forward-charge', effect: 'approach', colors: ['#e1fff4', '#3cad78'] }),
+    '七': Object.freeze({ meaning: 'Bảy', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'orbit-7', count: 7, colors: ['#ffe1ef', '#d25d8e'] }),
+    '女': Object.freeze({ meaning: 'Nữ', follow: 'grace-step', attack: 'petal-dance', effect: 'grace-step', colors: ['#ffe2f0', '#e45e95'] }),
+    '北': Object.freeze({ meaning: 'Phía bắc', follow: 'compass-hover', attack: 'compass-star', effect: 'north-star', axis: -1, colors: ['#e2f5ff', '#4c7fd0'] }),
+    '午': Object.freeze({ meaning: 'Buổi trưa', follow: 'sun-orbit', attack: 'noon-beam', effect: 'noon-ray', colors: ['#fff5a8', '#ef7c31'] }),
+    '百': Object.freeze({ meaning: 'Trăm', follow: 'grid-flicker', attack: 'hundred-grid', effect: 'hundred-grid', count: 10, colors: ['#e5f0ff', '#5577c8'] }),
+    '先': Object.freeze({ meaning: 'Trước / tiên phong', follow: 'lead-step', attack: 'lead-arrow', effect: 'lead-arrow', colors: ['#e1fff1', '#36a66b'] }),
+    '名': Object.freeze({ meaning: 'Tên', follow: 'name-bob', attack: 'name-seal', effect: 'name-tag', glyph: '名', colors: ['#fff0b8', '#c98136'] }),
+    '千': Object.freeze({ meaning: 'Nghìn', follow: 'star-drift', attack: 'star-barrage', effect: 'many-sparkles', count: 12, colors: ['#fff6c0', '#e4a32c'] }),
+    '西': Object.freeze({ meaning: 'Phía tây', follow: 'moon-drift', attack: 'sunset-blade', effect: 'sunset-drift', colors: ['#ffe0c5', '#d75c65'] }),
+    '語': Object.freeze({ meaning: 'Ngôn ngữ', follow: 'speech-bob', attack: 'word-cannon', effect: 'word-sparks', colors: ['#e6ddff', '#7b5bc7'] }),
+    '南': Object.freeze({ meaning: 'Phía nam', follow: 'compass-hover', attack: 'compass-star', effect: 'south-compass', axis: 1, colors: ['#fff0c9', '#dd7541'] }),
+    '何': Object.freeze({ meaning: 'Cái gì', follow: 'question-hover', attack: 'question-burst', effect: 'question-orbit', colors: ['#eee0ff', '#8959c7'] }),
+    '万': Object.freeze({ meaning: 'Mười nghìn', follow: 'star-drift', attack: 'star-barrage', effect: 'myriad-stars', count: 16, colors: ['#e2f7ff', '#507dcc'] }),
+    '半': Object.freeze({ meaning: 'Một nửa', follow: 'friend-sync', attack: 'split-blade', effect: 'half-split', colors: ['#fff0cf', '#d47848'] }),
+    '男': Object.freeze({ meaning: 'Nam', follow: 'giant-stomp', attack: 'giant-smash', effect: 'strength-pulse', colors: ['#ffe0b8', '#c96d3f'] }),
+    '校': Object.freeze({ meaning: 'Trường học', follow: 'study-flutter', attack: 'sonic-wave', effect: 'school-bell', colors: ['#dff3ff', '#4d83c4'] }),
+    '毎': Object.freeze({ meaning: 'Mỗi', follow: 'clock-tick', attack: 'clock-stop', effect: 'repeat-loop', colors: ['#e8e1ff', '#765fc4'] }),
+    '白': Object.freeze({ meaning: 'Trắng', follow: 'sun-orbit', attack: 'solar-burst', effect: 'white-shimmer', colors: ['#ffffff', '#a9d8ef'] }),
+    '天': Object.freeze({ meaning: 'Bầu trời', follow: 'rise-float', attack: 'sky-drop', effect: 'sky-rays', colors: ['#e0f7ff', '#4d9bd2'] }),
+    '母': Object.freeze({ meaning: 'Mẹ', follow: 'friend-sync', attack: 'dual-heart', effect: 'heart-embrace', colors: ['#ffe0e8', '#e15f7e'] }),
+    '右': Object.freeze({ meaning: 'Bên phải', follow: 'lead-step', attack: 'side-arrow', effect: 'right-arrow', axis: 1, colors: ['#e0fff5', '#3eb590'] }),
+    '読': Object.freeze({ meaning: 'Đọc', follow: 'study-flutter', attack: 'book-burst', effect: 'reading-pages', colors: ['#fff1ca', '#a97245'] }),
+    '左': Object.freeze({ meaning: 'Bên trái', follow: 'lead-step', attack: 'side-arrow', effect: 'left-arrow', axis: -1, colors: ['#e5e2ff', '#6f69c8'] }),
+    '父': Object.freeze({ meaning: 'Cha', follow: 'barrier-guard', attack: 'barrier-crush', effect: 'guardian-shield', colors: ['#fff0c2', '#b77c3f'] }),
+    '悪': Object.freeze({ meaning: 'Ác / xấu', follow: 'static-jitter', attack: 'dark-rift', effect: 'dark-cracks', colors: ['#f0d8ff', '#7d35aa'] }),
+    '暗': Object.freeze({ meaning: 'Tối', follow: 'moon-drift', attack: 'shadow-lantern', effect: 'dim-lantern', colors: ['#ded9ff', '#53448f'] }),
+    '医': Object.freeze({ meaning: 'Y học', follow: 'life-bloom', attack: 'healing-cross', effect: 'healing-cross', colors: ['#d9fff1', '#3eb78b'] }),
+    '意': Object.freeze({ meaning: 'Ý / ý niệm', follow: 'question-hover', attack: 'focus-burst', effect: 'thought-focus', colors: ['#fff2b8', '#d19b39'] }),
+    '以': Object.freeze({ meaning: 'Bằng / từ', follow: 'lead-step', attack: 'forward-charge', effect: 'forward', colors: ['#e1fff1', '#4cab75'] }),
+    '引': Object.freeze({ meaning: 'Kéo / dẫn', follow: 'wind-glide', attack: 'inward-collapse', effect: 'backtrail', colors: ['#e0e8ff', '#6178bb'] }),
+    '院': Object.freeze({ meaning: 'Viện', follow: 'barrier-guard', attack: 'healing-cross', effect: 'healing-cross', colors: ['#e0fff2', '#4ba986'] }),
+    '員': Object.freeze({ meaning: 'Thành viên', follow: 'friend-sync', attack: 'dual-heart', effect: 'friendship-link', colors: ['#ffe2ea', '#d75f82'] }),
+    '運': Object.freeze({ meaning: 'Vận chuyển / may mắn', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#dff5ff', '#497fc1'] }),
+    '英': Object.freeze({ meaning: 'Anh / tinh hoa', follow: 'gold-shine', attack: 'golden-comet', effect: 'gold-sparkle', colors: ['#fff3ac', '#df9b26'] }),
+    '映': Object.freeze({ meaning: 'Chiếu / phản chiếu', follow: 'static-jitter', attack: 'eye-beam', effect: 'scan', colors: ['#e3f7ff', '#4b8fca'] }),
+    '遠': Object.freeze({ meaning: 'Xa', follow: 'wind-glide', attack: 'long-lance', effect: 'approach', colors: ['#e3ebff', '#607cc4'] }),
+    '屋': Object.freeze({ meaning: 'Nhà / cửa hàng', follow: 'barrier-guard', attack: 'house-crash', effect: 'guardian-shield', colors: ['#ffe5c4', '#a96842'] }),
+    '歌': Object.freeze({ meaning: 'Bài hát', follow: 'sound-pulse', attack: 'sonic-wave', effect: 'sound-wave', colors: ['#f1ddff', '#a957cf'] }),
+    '夏': Object.freeze({ meaning: 'Mùa hè', follow: 'sun-orbit', attack: 'solar-burst', effect: 'sky-rays', colors: ['#fff2a5', '#ef7735'] }),
+    '家': Object.freeze({ meaning: 'Nhà / gia đình', follow: 'friend-sync', attack: 'house-crash', effect: 'heart-embrace', colors: ['#ffe3d0', '#d06b50'] }),
+    '画': Object.freeze({ meaning: 'Tranh / họa', follow: 'ink-brush', attack: 'ink-slash', effect: 'ink-strokes', colors: ['#e4f0ff', '#4d658f'] }),
+    '海': Object.freeze({ meaning: 'Biển', follow: 'water-float', attack: 'tidal-wave', effect: 'water-ripple', colors: ['#d9fbff', '#258dcf'] }),
+    '回': Object.freeze({ meaning: 'Xoay / lần', follow: 'single-orbit', attack: 'orbit-barrage', effect: 'repeat-loop', count: 4, colors: ['#e6e0ff', '#7761c8'] }),
+    '開': Object.freeze({ meaning: 'Mở', follow: 'portal-hover', attack: 'portal-open', effect: 'portal', colors: ['#ddf7ff', '#4b74c9'] }),
+    '界': Object.freeze({ meaning: 'Thế giới / ranh giới', follow: 'single-orbit', attack: 'world-sphere', effect: 'boundary', colors: ['#dff4ff', '#4779bd'] }),
+    '楽': Object.freeze({ meaning: 'Vui / âm nhạc', follow: 'sound-pulse', attack: 'sonic-wave', effect: 'sound-wave', colors: ['#f3dcff', '#b15bd2'] }),
+    '館': Object.freeze({ meaning: 'Tòa nhà / quán', follow: 'barrier-guard', attack: 'house-crash', effect: 'guardian-shield', colors: ['#ffe7c7', '#a96e48'] }),
+    '漢': Object.freeze({ meaning: 'Hán / Trung Hoa', follow: 'ink-brush', attack: 'ink-slash', effect: 'ink-strokes', colors: ['#e7edf7', '#52617c'] }),
+    '寒': Object.freeze({ meaning: 'Lạnh', follow: 'frost-shiver', attack: 'frost-spikes', effect: 'white-shimmer', colors: ['#effcff', '#69b7dc'] }),
+    '顔': Object.freeze({ meaning: 'Khuôn mặt', follow: 'question-hover', attack: 'face-mask', effect: 'scan', colors: ['#ffe4ce', '#cd7551'] }),
+    '帰': Object.freeze({ meaning: 'Trở về', follow: 'return-sway', attack: 'return-boomerang', effect: 'backtrail', colors: ['#e3e9ff', '#6878bd'] }),
+    '起': Object.freeze({ meaning: 'Thức dậy / khởi', follow: 'rise-float', attack: 'rising-uppercut', effect: 'rise', colors: ['#e0fff0', '#48b178'] }),
+    '究': Object.freeze({ meaning: 'Nghiên cứu', follow: 'study-flutter', attack: 'focus-burst', effect: 'study', colors: ['#e4efff', '#5979bf'] }),
+    '急': Object.freeze({ meaning: 'Gấp', follow: 'static-jitter', attack: 'thunder-strike', effect: 'lightning', colors: ['#fff8bd', '#eb9f2e'] }),
+    '牛': Object.freeze({ meaning: 'Bò', follow: 'bull-stomp', attack: 'bull-charge', effect: 'strength-pulse', colors: ['#ffe0bd', '#a85f3f'] }),
+    '去': Object.freeze({ meaning: 'Rời đi', follow: 'wind-glide', attack: 'outward-blast', effect: 'outward', colors: ['#ddfff2', '#3ba77e'] }),
+    '強': Object.freeze({ meaning: 'Mạnh', follow: 'giant-stomp', attack: 'giant-smash', effect: 'strength-pulse', colors: ['#ffe0b5', '#ce673c'] }),
+    '教': Object.freeze({ meaning: 'Dạy', follow: 'study-flutter', attack: 'book-burst', effect: 'study', colors: ['#fff0ca', '#a46f42'] }),
+    '京': Object.freeze({ meaning: 'Kinh đô', follow: 'rise-float', attack: 'capital-tower', effect: 'sky-rays', colors: ['#e2f5ff', '#527bb6'] }),
+    '業': Object.freeze({ meaning: 'Nghề nghiệp', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#e4edff', '#5a70ad'] }),
+    '近': Object.freeze({ meaning: 'Gần', follow: 'lead-step', attack: 'forward-charge', effect: 'approach', colors: ['#e1fff1', '#43ae75'] }),
+    '銀': Object.freeze({ meaning: 'Bạc', follow: 'gold-shine', attack: 'coin-ring', effect: 'coin-ring', colors: ['#f4fbff', '#91aabd'] }),
+    '区': Object.freeze({ meaning: 'Khu vực', follow: 'grid-flicker', attack: 'district-grid', effect: 'boundary', colors: ['#e2efff', '#567bc0'] }),
+    '計': Object.freeze({ meaning: 'Tính / đo lường', follow: 'clock-tick', attack: 'clock-stop', effect: 'clock', colors: ['#e3f1ff', '#5579ba'] }),
+    '兄': Object.freeze({ meaning: 'Anh trai', follow: 'barrier-guard', attack: 'barrier-crush', effect: 'guardian-shield', colors: ['#ffe6c7', '#b36d45'] }),
+    '軽': Object.freeze({ meaning: 'Nhẹ', follow: 'wind-glide', attack: 'wind-cutter', effect: 'breeze', colors: ['#e3fff8', '#4bb99d'] }),
+    '犬': Object.freeze({ meaning: 'Chó', follow: 'people-step', attack: 'step-rush', effect: 'steps', colors: ['#ffe5c5', '#b9744d'] }),
+    '研': Object.freeze({ meaning: 'Nghiên cứu / mài', follow: 'study-flutter', attack: 'focus-burst', effect: 'study', colors: ['#e3efff', '#5879b9'] }),
+    '県': Object.freeze({ meaning: 'Tỉnh / huyện', follow: 'grid-flicker', attack: 'district-grid', effect: 'boundary', colors: ['#e4efff', '#5d78b4'] }),
+    '建': Object.freeze({ meaning: 'Xây dựng', follow: 'giant-stomp', attack: 'house-crash', effect: 'grow', colors: ['#ffe4bd', '#ad6841'] }),
+    '験': Object.freeze({ meaning: 'Kiểm tra / trải nghiệm', follow: 'static-jitter', attack: 'eye-beam', effect: 'scan', colors: ['#e7f4ff', '#5283bd'] }),
+    '元': Object.freeze({ meaning: 'Gốc / nguyên', follow: 'life-bloom', attack: 'life-bloom', effect: 'life', colors: ['#e8ffbd', '#58ad61'] }),
+    '工': Object.freeze({ meaning: 'Công / chế tác', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#e5edff', '#6175a8'] }),
+    '広': Object.freeze({ meaning: 'Rộng', follow: 'wind-glide', attack: 'outward-blast', effect: 'outward', colors: ['#e0fff3', '#43ad82'] }),
+    '考': Object.freeze({ meaning: 'Suy nghĩ', follow: 'question-hover', attack: 'focus-burst', effect: 'thought-focus', colors: ['#fff0b8', '#c58d36'] }),
+    '光': Object.freeze({ meaning: 'Ánh sáng', follow: 'sun-orbit', attack: 'solar-burst', effect: 'sun-glow', colors: ['#fff8b5', '#efa03c'] }),
+    '好': Object.freeze({ meaning: 'Thích', follow: 'friend-sync', attack: 'dual-heart', effect: 'heart-embrace', colors: ['#ffe1e9', '#df6382'] }),
+    '合': Object.freeze({ meaning: 'Hợp / ghép', follow: 'friend-sync', attack: 'inward-collapse', effect: 'inward', colors: ['#e1fff2', '#48a97a'] }),
+    '黒': Object.freeze({ meaning: 'Đen', follow: 'static-jitter', attack: 'dark-rift', effect: 'dark-cracks', colors: ['#ddd6f4', '#514071'] }),
+    '菜': Object.freeze({ meaning: 'Rau', follow: 'life-bloom', attack: 'vine-whip', effect: 'life', colors: ['#e9ffb9', '#55ad55'] }),
+    '作': Object.freeze({ meaning: 'Làm / tạo', follow: 'giant-stomp', attack: 'giant-smash', effect: 'strength-pulse', colors: ['#ffe0ba', '#c66b3f'] }),
+    '産': Object.freeze({ meaning: 'Sinh / sản xuất', follow: 'life-bloom', attack: 'life-bloom', effect: 'life', colors: ['#e5ffb8', '#4bad61'] }),
+    '紙': Object.freeze({ meaning: 'Giấy', follow: 'study-flutter', attack: 'book-burst', effect: 'page-flip', colors: ['#fff1d2', '#ac7b53'] }),
+    '思': Object.freeze({ meaning: 'Nghĩ', follow: 'question-hover', attack: 'focus-burst', effect: 'thought-focus', colors: ['#fff0b5', '#c38b35'] }),
+    '姉': Object.freeze({ meaning: 'Chị gái', follow: 'friend-sync', attack: 'dual-heart', effect: 'guardian-shield', colors: ['#ffe1eb', '#d76488'] }),
+    '止': Object.freeze({ meaning: 'Dừng', follow: 'barrier-guard', attack: 'center-beam', effect: 'center-pulse', colors: ['#ffe3d5', '#c05f50'] }),
+    '市': Object.freeze({ meaning: 'Thành phố / chợ', follow: 'rise-float', attack: 'capital-tower', effect: 'sky-rays', colors: ['#e4f2ff', '#597bb3'] }),
+    '仕': Object.freeze({ meaning: 'Làm việc', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#e4ecff', '#5d73aa'] }),
+    '死': Object.freeze({ meaning: 'Chết', follow: 'frost-shiver', attack: 'dark-rift', effect: 'dark-cracks', colors: ['#dfd6ed', '#554064'] }),
+    '使': Object.freeze({ meaning: 'Dùng', follow: 'lead-step', attack: 'forward-charge', effect: 'forward', colors: ['#e3fff2', '#49a976'] }),
+    '始': Object.freeze({ meaning: 'Bắt đầu', follow: 'sun-orbit', attack: 'sunrise-lance', effect: 'sun-glow', colors: ['#fff3aa', '#e67c3c'] }),
+    '試': Object.freeze({ meaning: 'Thử / thi', follow: 'static-jitter', attack: 'eye-beam', effect: 'scan', colors: ['#e3f1ff', '#547eb7'] }),
+    '私': Object.freeze({ meaning: 'Tôi / riêng tư', follow: 'question-hover', attack: 'inward-collapse', effect: 'inward', colors: ['#eee1ff', '#7d5eb8'] }),
+    '字': Object.freeze({ meaning: 'Chữ', follow: 'ink-brush', attack: 'name-seal', effect: 'ink-strokes', glyph: '字', colors: ['#e6edfa', '#566783'] }),
+    '自': Object.freeze({ meaning: 'Tự mình', follow: 'question-hover', attack: 'face-mask', effect: 'scan', colors: ['#e7f4ff', '#4e83bd'] }),
+    '事': Object.freeze({ meaning: 'Việc / sự', follow: 'clock-tick', attack: 'clock-stop', effect: 'clock', colors: ['#e5edff', '#6172aa'] }),
+    '持': Object.freeze({ meaning: 'Cầm / giữ', follow: 'giant-stomp', attack: 'giant-smash', effect: 'strength-pulse', colors: ['#ffe0b7', '#bd663e'] }),
+    '室': Object.freeze({ meaning: 'Phòng', follow: 'barrier-guard', attack: 'house-crash', effect: 'guardian-shield', colors: ['#ffe5c8', '#a86b46'] }),
+    '質': Object.freeze({ meaning: 'Chất / chất lượng', follow: 'static-jitter', attack: 'eye-beam', effect: 'scan', colors: ['#e4f1ff', '#577fb5'] }),
+    '写': Object.freeze({ meaning: 'Chụp / sao chép', follow: 'sun-orbit', attack: 'eye-beam', effect: 'white-shimmer', colors: ['#f8fdff', '#8abbd2'] }),
+    '者': Object.freeze({ meaning: 'Người', follow: 'people-step', attack: 'twin-strike', effect: 'steps', colors: ['#ffe4cc', '#bd7451'] }),
+    '借': Object.freeze({ meaning: 'Mượn', follow: 'return-sway', attack: 'return-boomerang', effect: 'repeat-loop', colors: ['#e9e1ff', '#7662b7'] }),
+    '弱': Object.freeze({ meaning: 'Yếu', follow: 'frost-shiver', attack: 'shadow-lantern', effect: 'dark-cracks', colors: ['#e6daf2', '#765486'] }),
+    '首': Object.freeze({ meaning: 'Cổ / đầu', follow: 'barrier-guard', attack: 'face-mask', effect: 'center-pulse', colors: ['#ffe2ca', '#bb704d'] }),
+    '主': Object.freeze({ meaning: 'Chính / chủ', follow: 'gold-shine', attack: 'golden-comet', effect: 'gold-sparkle', colors: ['#fff2ad', '#d99a2e'] }),
+    '秋': Object.freeze({ meaning: 'Mùa thu', follow: 'tree-sway', attack: 'dream-leaf', effect: 'leaf-fall', colors: ['#ffe3a9', '#c76d38'] }),
+    '集': Object.freeze({ meaning: 'Tập hợp', follow: 'friend-sync', attack: 'inward-collapse', effect: 'inward', colors: ['#e2fff2', '#4aaa78'] }),
+    '習': Object.freeze({ meaning: 'Học / luyện tập', follow: 'study-flutter', attack: 'book-burst', effect: 'study', colors: ['#e5f0ff', '#5779b7'] }),
+    '終': Object.freeze({ meaning: 'Kết thúc', follow: 'moon-drift', attack: 'sunset-blade', effect: 'sunset-drift', colors: ['#ffe0c7', '#bf5e69'] }),
+    '住': Object.freeze({ meaning: 'Sống / cư trú', follow: 'barrier-guard', attack: 'house-crash', effect: 'guardian-shield', colors: ['#ffe5c5', '#a96845'] }),
+    '重': Object.freeze({ meaning: 'Nặng / quan trọng', follow: 'sink-step', attack: 'meteor-drop', effect: 'sink', colors: ['#e1e6ee', '#606877'] }),
+    '春': Object.freeze({ meaning: 'Mùa xuân', follow: 'life-bloom', attack: 'season-wheel', effect: 'seasons', colors: ['#ffe0e9', '#e66e8b'] }),
+    '所': Object.freeze({ meaning: 'Nơi / chỗ', follow: 'grid-flicker', attack: 'district-grid', effect: 'boundary', colors: ['#e4efff', '#5978af'] }),
+    '暑': Object.freeze({ meaning: 'Nóng', follow: 'sun-orbit', attack: 'noon-beam', effect: 'sun-glow', colors: ['#fff2a6', '#ed6f34'] }),
+    '場': Object.freeze({ meaning: 'Sân / nơi', follow: 'grid-flicker', attack: 'district-grid', effect: 'boundary', colors: ['#e5efff', '#5d79ae'] }),
+    '乗': Object.freeze({ meaning: 'Lên / đi xe', follow: 'wheel-roll', attack: 'forward-charge', effect: 'forward', colors: ['#e1fff2', '#47a979'] }),
+    '色': Object.freeze({ meaning: 'Màu sắc', follow: 'star-drift', attack: 'star-barrage', effect: 'many-sparkles', count: 12, colors: ['#ffd8ea', '#647de0'] }),
+    '森': Object.freeze({ meaning: 'Rừng', follow: 'tree-sway', attack: 'vine-whip', effect: 'rest-leaves', colors: ['#e1ffb5', '#3f9d4c'] }),
+    '心': Object.freeze({ meaning: 'Tim / tâm trí', follow: 'friend-sync', attack: 'dual-heart', effect: 'heart-embrace', colors: ['#ffe0e8', '#df5d7a'] }),
+    '親': Object.freeze({ meaning: 'Cha mẹ / thân thiết', follow: 'friend-sync', attack: 'dual-heart', effect: 'guardian-shield', colors: ['#ffe3d8', '#d27359'] }),
+    '真': Object.freeze({ meaning: 'Thật / chân', follow: 'sun-orbit', attack: 'focus-burst', effect: 'white-shimmer', colors: ['#f8fdff', '#7eb2cb'] }),
+    '進': Object.freeze({ meaning: 'Tiến tới', follow: 'lead-step', attack: 'forward-charge', effect: 'forward', colors: ['#e0fff1', '#40ae73'] }),
+    '図': Object.freeze({ meaning: 'Sơ đồ / bản đồ', follow: 'grid-flicker', attack: 'district-grid', effect: 'scan', colors: ['#e4f1ff', '#527db7'] }),
+    '青': Object.freeze({ meaning: 'Xanh', follow: 'water-float', attack: 'tidal-wave', effect: 'water-ripple', colors: ['#d9faff', '#2d91cb'] }),
+    '正': Object.freeze({ meaning: 'Đúng / chính', follow: 'cross-pulse', attack: 'cross-flare', effect: 'scan', colors: ['#f1fbff', '#5a98bd'] }),
+    '声': Object.freeze({ meaning: 'Giọng / tiếng', follow: 'sound-pulse', attack: 'sonic-wave', effect: 'sound-wave', colors: ['#f0ddff', '#a958cc'] }),
+    '世': Object.freeze({ meaning: 'Thế giới / đời', follow: 'star-drift', attack: 'world-sphere', effect: 'myriad-stars', count: 12, colors: ['#e2edff', '#5b6ec0'] }),
+    '赤': Object.freeze({ meaning: 'Đỏ', follow: 'ember-hop', attack: 'flame-dash', effect: 'fire-embers', colors: ['#ffd8bd', '#df3e32'] }),
+    '夕': Object.freeze({ meaning: 'Buổi tối', follow: 'moon-drift', attack: 'sunset-blade', effect: 'sunset-drift', colors: ['#ffe0cf', '#b75d79'] }),
+    '切': Object.freeze({ meaning: 'Cắt', follow: 'friend-sync', attack: 'split-blade', effect: 'split', colors: ['#ffe2da', '#ca6250'] }),
+    '説': Object.freeze({ meaning: 'Giải thích', follow: 'speech-bob', attack: 'word-cannon', effect: 'speech-bubbles', colors: ['#fff0b4', '#d89535'] }),
+    '洗': Object.freeze({ meaning: 'Rửa', follow: 'water-float', attack: 'tidal-wave', effect: 'water-ripple', colors: ['#dafbff', '#3296cb'] }),
+    '早': Object.freeze({ meaning: 'Sớm / nhanh', follow: 'sun-orbit', attack: 'sunrise-lance', effect: 'sunrise', colors: ['#fff2a4', '#e87838'] }),
+    '走': Object.freeze({ meaning: 'Chạy', follow: 'people-step', attack: 'step-rush', effect: 'steps', colors: ['#e0fff0', '#46aa69'] }),
+    '送': Object.freeze({ meaning: 'Gửi / tiễn', follow: 'lead-step', attack: 'forward-charge', effect: 'forward', colors: ['#e1fff3', '#48a97b'] }),
+    '族': Object.freeze({ meaning: 'Gia tộc / nhóm', follow: 'friend-sync', attack: 'twin-strike', effect: 'people-pair', colors: ['#ffe3d2', '#c87354'] }),
+    '村': Object.freeze({ meaning: 'Làng', follow: 'life-bloom', attack: 'house-crash', effect: 'life', colors: ['#e5ffbd', '#5ba454'] }),
+    '体': Object.freeze({ meaning: 'Cơ thể', follow: 'giant-stomp', attack: 'giant-smash', effect: 'strength-pulse', colors: ['#ffe1bd', '#c36b44'] }),
+    '太': Object.freeze({ meaning: 'To / dày', follow: 'giant-stomp', attack: 'outward-blast', effect: 'outward', colors: ['#ffe1b8', '#c5683d'] }),
+    '待': Object.freeze({ meaning: 'Chờ / đợi', follow: 'clock-tick', attack: 'clock-stop', effect: 'clock', colors: ['#e6ecff', '#6572ab'] }),
+    '貸': Object.freeze({ meaning: 'Cho mượn', follow: 'return-sway', attack: 'outward-blast', effect: 'outward', colors: ['#e2fff1', '#48a777'] }),
+    '台': Object.freeze({ meaning: 'Bệ / đài', follow: 'rise-float', attack: 'rising-uppercut', effect: 'rise', colors: ['#e4f5ff', '#5681ba'] }),
+    '代': Object.freeze({ meaning: 'Thay thế / đời', follow: 'return-sway', attack: 'return-boomerang', effect: 'repeat-loop', colors: ['#e8e0ff', '#7761b8'] }),
+    '題': Object.freeze({ meaning: 'Đề tài / câu hỏi', follow: 'question-hover', attack: 'question-burst', effect: 'question-orbit', colors: ['#eee0ff', '#8659bf'] }),
+    '短': Object.freeze({ meaning: 'Ngắn', follow: 'tiny-dart', attack: 'needle-barrage', effect: 'tiny', colors: ['#ffe5c8', '#d1874c'] }),
+    '知': Object.freeze({ meaning: 'Biết', follow: 'question-hover', attack: 'focus-burst', effect: 'thought-focus', colors: ['#fff0b5', '#c68e36'] }),
+    '地': Object.freeze({ meaning: 'Đất', follow: 'earth-stomp', attack: 'earth-spike', effect: 'earth-crumble', colors: ['#ffe0ad', '#95603b'] }),
+    '池': Object.freeze({ meaning: 'Ao / hồ', follow: 'water-float', attack: 'tidal-wave', effect: 'water-ripple', colors: ['#d9fbff', '#3191c6'] }),
+    '茶': Object.freeze({ meaning: 'Trà', follow: 'steam-hop', attack: 'steam-bite', effect: 'steam-aroma', colors: ['#edffc2', '#759d45'] }),
+    '着': Object.freeze({ meaning: 'Mặc / đến nơi', follow: 'barrier-guard', attack: 'barrier-crush', effect: 'guardian-shield', colors: ['#ffe4ce', '#af714e'] }),
+    '昼': Object.freeze({ meaning: 'Ban trưa', follow: 'sun-orbit', attack: 'noon-beam', effect: 'noon-ray', colors: ['#fff3a4', '#ed7934'] }),
+    '注': Object.freeze({ meaning: 'Chú ý / rót', follow: 'water-float', attack: 'focus-burst', effect: 'water-ripple', colors: ['#dcfbff', '#318ec3'] }),
+    '町': Object.freeze({ meaning: 'Phố / thị trấn', follow: 'grid-flicker', attack: 'district-grid', effect: 'boundary', colors: ['#e5efff', '#5b78ad'] }),
+    '鳥': Object.freeze({ meaning: 'Chim', follow: 'wind-glide', attack: 'wind-cutter', effect: 'breeze', colors: ['#e2fff8', '#49af98'] }),
+    '朝': Object.freeze({ meaning: 'Buổi sáng', follow: 'sun-orbit', attack: 'sunrise-lance', effect: 'sunrise', colors: ['#fff2a6', '#e77b38'] }),
+    '通': Object.freeze({ meaning: 'Đi qua / thông', follow: 'lead-step', attack: 'portal-open', effect: 'forward', colors: ['#e0fff1', '#43aa73'] }),
+    '弟': Object.freeze({ meaning: 'Em trai', follow: 'child-bounce', attack: 'child-spring', effect: 'child-bounce', colors: ['#ffe7c8', '#cf7a50'] }),
+    '低': Object.freeze({ meaning: 'Thấp', follow: 'sink-step', attack: 'meteor-drop', effect: 'sink', colors: ['#e2e8f0', '#687182'] }),
+    '転': Object.freeze({ meaning: 'Chuyển / ngã', follow: 'wheel-roll', attack: 'wheel-charge', effect: 'wheel-tracks', colors: ['#e4ebff', '#5f72aa'] }),
+    '田': Object.freeze({ meaning: 'Ruộng', follow: 'life-bloom', attack: 'hundred-grid', effect: 'life', colors: ['#e8ffb9', '#65a84d'] }),
+    '都': Object.freeze({ meaning: 'Thủ đô', follow: 'rise-float', attack: 'capital-tower', effect: 'sky-rays', colors: ['#e3f3ff', '#587bb2'] }),
+    '度': Object.freeze({ meaning: 'Mức độ / lần', follow: 'clock-tick', attack: 'focus-burst', effect: 'scan', colors: ['#e5f1ff', '#577eb5'] }),
+    '答': Object.freeze({ meaning: 'Trả lời', follow: 'gold-shine', attack: 'word-cannon', effect: 'gold-sparkle', colors: ['#fff2ad', '#d8992d'] }),
+  });
+  const EFFECT_ATTACK_FALLBACKS = Object.freeze({
+    'fire-embers': 'flame-dash', 'water-ripple': 'tidal-wave', 'river-flow': 'river-rush', bubbles: 'bubble-torpedo',
+    lightning: 'thunder-strike', breeze: 'wind-cutter', 'leaf-fall': 'vine-whip', life: 'life-bloom',
+    'sun-glow': 'solar-burst', sunrise: 'solar-burst', 'noon-ray': 'solar-burst', 'moon-glow': 'moon-blade',
+    peaks: 'mountain-crash', 'earth-crumble': 'earth-spike', 'gold-sparkle': 'golden-comet', 'coin-ring': 'golden-comet',
+    'rain-drops': 'rain-storm', 'sound-wave': 'sonic-wave', 'speech-bubbles': 'word-cannon', 'word-sparks': 'word-cannon',
+    'ink-strokes': 'ink-slash', 'page-flip': 'book-burst', 'reading-pages': 'book-burst', study: 'book-burst',
+    'wheel-tracks': 'wheel-charge', clock: 'clock-stop', rise: 'rising-uppercut', height: 'rising-uppercut',
+    sink: 'meteor-drop', grow: 'giant-smash', tiny: 'needle-barrage', boundary: 'barrier-crush',
+    'guardian-shield': 'barrier-crush', 'friendship-link': 'dual-heart', 'heart-embrace': 'dual-heart',
+    'rest-leaves': 'dream-leaf', 'people-pair': 'twin-strike', 'steam-aroma': 'steam-bite',
+    forward: 'forward-charge', approach: 'forward-charge', backtrail: 'backstab', inward: 'inward-collapse', outward: 'outward-blast',
+    split: 'split-blade', 'half-split': 'split-blade', steps: 'step-rush', 'strength-pulse': 'giant-smash',
+  });
+  function semanticEffectColors(effect = '') {
+    if (/fire|sun|gold|noon|sunrise/.test(effect)) return ['#fff3a0', '#f08a32'];
+    if (/water|river|bubble|rain/.test(effect)) return ['#dcfbff', '#288fd4'];
+    if (/life|leaf|rest|steam/.test(effect)) return ['#e6ffad', '#4eaf5b'];
+    if (/dark|dim|moon|thought|question/.test(effect)) return ['#eadfff', '#795ac7'];
+    if (/earth|peak|strength|grow/.test(effect)) return ['#ffe0ad', '#9b6038'];
+    return ['#e3f7ff', '#5b91cf'];
+  }
+  function kanjiAnimation(monster) {
+    if (!monster) return null;
+    const authored = KANJI_ANIMATIONS[monster.kanji];
+    if (authored) return authored;
+    const effect = monster.effect || 'spirit';
+    const orbit = /^orbit-(\d+)$/.exec(effect);
+    return { meaning: monster.name || monster.kanji, follow: 'aura-drift',
+      attack: orbit ? 'orbit-barrage' : (EFFECT_ATTACK_FALLBACKS[effect] || 'spirit-burst'),
+      effect, count: orbit ? Number(orbit[1]) : 0, colors: semanticEffectColors(effect), inherited: true };
+  }
+  function followerMeaningMotion(monster, moving = false, now = performance.now()) {
+    const animation = kanjiAnimation(monster), t = now / 1000;
+    const motion = { x: 0, y: 0, rotation: 0, scaleX: 1, scaleY: 1 };
+    if (!animation) return motion;
+    if (animation.follow === 'ember-hop') {
+      const flame = Math.abs(Math.sin(t * (moving ? 8.8 : 5.4)));
+      motion.y = -flame * (moving ? 3.2 : 1.8); motion.rotation = Math.sin(t * 7.2) * .035;
+      motion.scaleX = 1 + flame * .035; motion.scaleY = 1 - flame * .025;
+    } else if (animation.follow === 'water-float') {
+      motion.y = Math.sin(t * 2.7) * 2.4; motion.x = Math.sin(t * 1.35) * 1.2;
+      motion.rotation = Math.sin(t * 2.1) * .025; motion.scaleX = 1 + Math.sin(t * 2.7) * .025;
+      motion.scaleY = 1 - Math.sin(t * 2.7) * .018;
+    } else if (animation.follow === 'tree-sway') {
+      motion.rotation = Math.sin(t * (moving ? 5.2 : 2.25)) * (moving ? .045 : .026);
+      motion.y = moving ? -Math.abs(Math.sin(t * 5.2)) * 1.2 : 0;
+    } else if (animation.follow === 'static-jitter') {
+      const spark = Math.sin(t * 25);
+      motion.x = spark > .45 ? 1.4 : spark < -.45 ? -1.4 : 0;
+      motion.y = Math.cos(t * 19) > .72 ? -1 : 0; motion.rotation = spark * .018;
+    } else if (animation.follow === 'wind-glide') {
+      motion.x = Math.sin(t * 2.4) * (moving ? 2.8 : 1.8); motion.y = Math.cos(t * 3.1) * 1.6;
+      motion.rotation = Math.sin(t * 2.4) * .04;
+    } else if (animation.follow === 'sun-orbit') {
+      motion.y = -1.2 - Math.abs(Math.sin(t * 3.2)) * 1.8; motion.rotation = Math.sin(t * 2.4) * .025;
+      motion.scaleX = motion.scaleY = 1 + Math.max(0, Math.sin(t * 3.2)) * .045;
+    } else if (animation.follow === 'moon-drift') {
+      motion.x = Math.sin(t * 1.55) * 2.1; motion.y = Math.cos(t * 1.8) * 2.5; motion.rotation = Math.sin(t * 1.4) * .055;
+    } else if (animation.follow === 'peak-stomp' || animation.follow === 'earth-stomp') {
+      const stomp = Math.abs(Math.sin(t * (moving ? 6.5 : 3.4)));
+      motion.y = -stomp * (moving ? 2.6 : .8); motion.scaleX = 1 + stomp * .05; motion.scaleY = 1 - stomp * .04;
+    } else if (animation.follow === 'river-flow') {
+      motion.x = Math.sin(t * 2.8) * 2.4; motion.y = Math.sin(t * 5.6) * .9; motion.rotation = Math.sin(t * 2.8) * .035;
+    } else if (animation.follow === 'gold-shine') {
+      const shine = Math.max(0, Math.sin(t * 4.6)); motion.y = -shine * 1.7; motion.scaleX = motion.scaleY = 1 + shine * .06;
+    } else if (animation.follow === 'rain-bounce') {
+      motion.y = -Math.abs(Math.sin(t * 4.2)) * 2.4; motion.rotation = Math.sin(t * 3.1) * .032;
+    } else if (animation.follow === 'bubble-swim') {
+      motion.x = Math.sin(t * 3.4) * 2.6; motion.y = Math.cos(t * 2.5) * 2.1; motion.rotation = Math.sin(t * 3.4) * .065;
+    } else if (animation.follow === 'sound-pulse') {
+      const beat = Math.max(0, Math.sin(t * 6.4)); motion.y = -beat * 2; motion.scaleX = 1 + beat * .07; motion.scaleY = 1 - beat * .045;
+    } else if (animation.follow === 'life-bloom') {
+      motion.y = Math.sin(t * 2.15) * 1.5; motion.rotation = Math.sin(t * 1.75) * .025;
+      motion.scaleX = motion.scaleY = 1 + Math.max(0, Math.sin(t * 2.15)) * .035;
+    } else if (animation.follow === 'single-orbit') {
+      motion.x = Math.sin(t * 3.2) * 1.5; motion.y = Math.cos(t * 3.2) * 1.2; motion.rotation = Math.sin(t * 2.4) * .025;
+    } else if (animation.follow === 'people-step') {
+      motion.x = Math.sin(t * 5.5) * (moving ? 1.8 : .7); motion.y = -Math.abs(Math.sin(t * 5.5)) * (moving ? 2.3 : .8);
+    } else if (animation.follow === 'study-flutter' || animation.follow === 'speech-bob') {
+      motion.y = Math.sin(t * 2.8) * 1.8; motion.rotation = Math.sin(t * 3.6) * .035;
+    } else if (animation.follow === 'wheel-roll') {
+      motion.x = Math.sin(t * 6.4) * (moving ? 2.5 : .8); motion.y = -Math.abs(Math.sin(t * 6.4)) * 1.2;
+      motion.rotation = Math.sin(t * 6.4) * .065;
+    } else if (animation.follow === 'steam-hop') {
+      motion.y = -Math.abs(Math.sin(t * 3.8)) * 2.2; motion.scaleY = 1 + Math.max(0, Math.sin(t * 3.8)) * .045;
+    } else if (animation.follow === 'ink-brush') {
+      motion.x = Math.sin(t * 2.7) * 1.7; motion.rotation = Math.sin(t * 2.7) * .07;
+    } else if (animation.follow === 'clock-tick') {
+      motion.rotation = Math.sin(t * 4.8) > 0 ? .028 : -.028; motion.y = Math.sin(t * 2.4) * .8;
+    } else if (animation.follow === 'rise-float') {
+      motion.y = -2 - Math.abs(Math.sin(t * 2.7)) * 2.3; motion.scaleY = 1 + Math.max(0, Math.sin(t * 2.7)) * .04;
+    } else if (animation.follow === 'sink-step') {
+      motion.y = Math.abs(Math.sin(t * 3.2)) * 1.7; motion.scaleY = 1 - Math.max(0, Math.sin(t * 3.2)) * .035;
+    } else if (animation.follow === 'giant-stomp') {
+      const stomp = Math.abs(Math.sin(t * (moving ? 5.8 : 3.1))); motion.y = -stomp * 2.2;
+      motion.scaleX = 1 + stomp * .08; motion.scaleY = 1 - stomp * .055;
+    } else if (animation.follow === 'tiny-dart') {
+      motion.x = Math.sin(t * 8.2) * (moving ? 2.8 : 1.2); motion.y = Math.cos(t * 6.7) * 1.1;
+    } else if (animation.follow === 'barrier-guard') {
+      motion.y = Math.sin(t * 2.1) * .8; motion.scaleX = 1 + Math.max(0, Math.sin(t * 2.1)) * .025;
+    } else if (animation.follow === 'friend-sync') {
+      motion.x = Math.sin(t * 2.9) * 1.8; motion.y = -Math.abs(Math.sin(t * 2.9)) * 1.6; motion.rotation = Math.sin(t * 2.9) * .03;
+    } else if (animation.follow === 'rest-doze') {
+      motion.y = Math.sin(t * 1.35) * .7; motion.rotation = Math.sin(t * 1.1) * .018;
+      motion.scaleY = 1 - Math.max(0, Math.sin(t * 1.35)) * .025;
+    } else if (animation.follow === 'cross-pulse' || animation.follow === 'grid-flicker') {
+      const pulse = Math.max(0, Math.sin(t * (animation.follow === 'cross-pulse' ? 4.8 : 7.2)));
+      motion.y = -pulse * 1.4; motion.scaleX = 1 + pulse * .055; motion.scaleY = 1 + pulse * .055;
+    } else if (animation.follow === 'child-bounce') {
+      const bounce = Math.abs(Math.sin(t * (moving ? 7.4 : 4.2)));
+      motion.y = -bounce * (moving ? 3.5 : 2.2); motion.rotation = Math.sin(t * 4.2) * .045;
+      motion.scaleX = 1 + bounce * .05; motion.scaleY = 1 - bounce * .04;
+    } else if (animation.follow === 'lead-step') {
+      motion.x = Math.max(0, Math.sin(t * 4.8)) * (moving ? 2.7 : 1.3); motion.y = -Math.abs(Math.sin(t * 4.8)) * 1.7;
+    } else if (animation.follow === 'grace-step') {
+      motion.x = Math.sin(t * 2.7) * 2; motion.y = -Math.abs(Math.sin(t * 2.7)) * 1.5; motion.rotation = Math.sin(t * 2.7) * .055;
+    } else if (animation.follow === 'compass-hover') {
+      motion.y = Math.sin(t * 2.1) * 1.4; motion.rotation = Math.sin(t * 3.4) * .022;
+    } else if (animation.follow === 'name-bob') {
+      motion.y = Math.sin(t * 3) * 1.6; motion.rotation = Math.sin(t * 6) * .025;
+    } else if (animation.follow === 'star-drift') {
+      motion.x = Math.sin(t * 2.2) * 1.8; motion.y = Math.cos(t * 2.8) * 2; motion.scaleX = motion.scaleY = 1 + Math.max(0, Math.sin(t * 4.4)) * .04;
+    } else if (animation.follow === 'question-hover') {
+      motion.y = Math.sin(t * 2.5) * 2.2; motion.rotation = Math.sin(t * 1.8) * .075;
+    } else if (animation.follow === 'portal-hover') {
+      motion.x = Math.sin(t * 2.3) * 1.5; motion.y = Math.cos(t * 2.3) * 1.5; motion.scaleX = 1 + Math.sin(t * 4.6) * .04;
+    } else if (animation.follow === 'frost-shiver') {
+      motion.x = Math.sin(t * 18) * (moving ? 1.5 : .9); motion.y = -Math.abs(Math.sin(t * 4)) * .9; motion.rotation = Math.sin(t * 18) * .012;
+    } else if (animation.follow === 'return-sway') {
+      motion.x = Math.sin(t * 3.2) * 2.4; motion.y = -Math.abs(Math.sin(t * 3.2)) * 1.3; motion.rotation = -Math.sin(t * 3.2) * .05;
+    } else if (animation.follow === 'bull-stomp') {
+      const stomp = Math.abs(Math.sin(t * (moving ? 7 : 3.8))); motion.x = Math.sin(t * 3.5) * .7; motion.y = -stomp * 2;
+      motion.scaleX = 1 + stomp * .065; motion.scaleY = 1 - stomp * .045;
+    } else if (animation.follow === 'aura-drift') {
+      motion.x = Math.sin(t * 2.15) * (moving ? 1.6 : .8); motion.y = Math.cos(t * 2.45) * 1.1;
+      motion.rotation = Math.sin(t * 1.9) * .018;
+    }
+    return motion;
+  }
   // Trail lưu theo quãng đường, không theo số frame. Nhờ vậy khoảng cách pet
   // không đổi khi FPS thấp hoặc khi người chơi chạy nhanh bằng Shift.
   const trail = [];
@@ -981,7 +1345,14 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
         if (!selectedSet.has(char)) { selectedSet.add(char); selected.push(char); }
       }
     } else selected.push(...ordered.slice(0, targetCount));
-    for (const [index, char] of selected.slice(0, targetCount).entries()) {
+    // SANDBOX đã có thể sở hữu pet khởi tạo (hiện là 魚). Tính các chữ đó
+    // vào target thay vì cộng thêm sau seed để `capturedKanji: 200` luôn là
+    // đúng 200, đồng thời 20 chữ cuối curriculum vẫn còn khóa để test unlock.
+    const existingCaptured = sandbox
+      ? Object.values(KDB.KANJI).map((info) => info.char).filter((char) => ensureMastery(char).captured)
+      : [];
+    const seededKanji = [...new Set([...existingCaptured, ...selected.slice(0, targetCount)])].slice(0, targetCount);
+    for (const [index, char] of seededKanji.entries()) {
       const mastery = ensureMastery(char);
       const seededLevel = levelBands[index % levelBands.length];
       mastery.mp = Math.max(mastery.mp, mpFloorOfLevel(seededLevel));
@@ -990,7 +1361,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       mastery.lectured = true;
     }
     if (sandbox) for (const badge of seed.badges || []) learning.badges[String(badge).toUpperCase()] = true;
-    return Math.min(targetCount, selected.length);
+    return seededKanji.length;
   }
   applySkillTreeQaSeed();
   // Save cũ có pet thì xem như chữ tương ứng đã thu phục.
@@ -1693,6 +2064,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     const battleMaxHp = Math.max(m.maxHp, Math.ceil(levelDamage * (C.COMBAT.enemyHpPerDamage || 1)));
     syncPlayerScale(activePetKanji, true);
 state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
+    const encounterEntranceMs = window.SettingsUI?.encounterAnimationEnabled?.() === false ? 0 : 1450;
     battle = {
       kind, monId, mon: m, monHp: battleMaxHp, monMaxHp: battleMaxHp,
       grassKanji: kind === 'grass' ? m.kanji : null,
@@ -1702,7 +2074,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       comboGuardRemaining: effects.comboGuardCharges, meaningLensRemaining: effects.meaningHintCharges,
       botNextIn: attackCycleMs, botCycleMs: attackCycleMs, questionElapsed: 0,
       shake: 0, flash: 0, botFlash: 0, hitStop: 0,
-      entranceT: 1450, entranceTotal: 1450, entranceSfxPlayed: false, encounterImpactT: 0,
+      entranceT: encounterEntranceMs, entranceTotal: encounterEntranceMs, entranceSfxPlayed: false, encounterImpactT: 0,
       petAttackT: 0, enemyAttackT: 0, enemyHitT: 0, playerHitT: 0,
       perfectT: 0, skillT: 0, skillName: '', particles: [], damageNumbers: [],
       pendingWin: 0, pendingLose: 0,
@@ -1774,8 +2146,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const push = perfect ? (C.COMBAT.perfectGaugePush || .35) : (C.COMBAT.gaugePush || .2);
       battle.botNextIn = Math.min(battle.botCycleMs, battle.botNextIn + battle.botCycleMs * push);
       battle.feedback = quizFeedback(true, `${perfect ? '⚡ PERFECT! ' : '✓ Đúng! '}${q.target} — ${q.answer}  (-${dmg} HP)`);
+      const meaningAttack = !!kanjiAnimation(C.MONSTERS[currentPetId]);
       battle.fbT = 900; battle.qCooldown = special ? 1050 : 700;
-      battle.shake = 220; battle.enemyHitT = 300; battle.petAttackT = special ? 650 : 460;
+      battle.shake = meaningAttack ? 380 : 220; battle.enemyHitT = meaningAttack ? 420 : 300;
+      battle.petAttackT = special ? 760 : meaningAttack ? 680 : 460;
       battle.petAttackTotal = battle.petAttackT;
       battle.hitStop = C.COMBAT.hitStopMs || 70;
       battle.perfectT = perfect ? 800 : 0;
@@ -1812,7 +2186,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const dmg = rnd(b.mon.atk);
     player.hp = Math.max(0, player.hp - dmg);
     playSFX('BATTLE_PLAYER_DAMAGE');
-    b.flash = 180; b.botFlash = 320; b.enemyAttackT = 520; b.enemyAttackTotal = 520; b.playerHitT = 360;
+    const meaningAttack = !!kanjiAnimation(b.mon);
+    b.flash = meaningAttack ? 260 : 180; b.shake = meaningAttack ? 340 : b.shake;
+    b.botFlash = 320; b.enemyAttackT = meaningAttack ? 680 : 520; b.enemyAttackTotal = b.enemyAttackT; b.playerHitT = meaningAttack ? 440 : 360;
     b.damageNumbers.push({ text: `-${dmg}`, side: 'player', t: 900, total: 900, color: '#ff8585' });
     b.playerHitMsg = `${b.mon.name} tấn công! -${dmg} HP`;
     if (reason && !b.feedback) { b.feedback = { good: false, text: `⚠ ${reason} — ${b.playerHitMsg}` }; b.fbT = 1000; }
@@ -2235,6 +2611,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       vocabIds: learnedQuestions.map((question) => question.id), q: captureQuestion(target, 0, '', learnedQuestions),
       index: 0, correct: 0, phase: 'fight', qCooldown: 0,
       feedback: null, fbT: 0, selectedIndex: -1, revealAnswer: false, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1,
+      catchEffectT: 0, catchEffectTotal: 0,
       learningSession: createLearningSession('capture') };
     state = 'capture';
     playSFX('CAPTURE_START');
@@ -2261,6 +2638,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       }
       saveLearning(); saveGame();
       capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}${starterCaptured ? '  •  Hoàn tất tour để mascot đi cùng!' : ''}`;
+      // Nghi thức thành công phát lại chính tuyệt kỹ semantic của
+      // Kanji vừa bắt, thay cho vòng sáng xanh dùng chung.
+      capture.catchEffectTotal = 1500;
+      capture.catchEffectT = capture.catchEffectTotal;
       playSFX('PROGRESSION_ACHIEVEMENT');
       if (learning.academyDraft && resolveKanji(learning.academyDraft.char) === capture.char) learning.academyDraft = null;
     } else {
@@ -2563,17 +2944,24 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const trainer = pve.mode === 'trainer' ? TRAINER_BY_ID.get(pve.trainerId) : null;
     pve.feedback = correct ? quizFeedback(true, `✓ Đúng! ${trainer ? 'Pet lao lên tấn công!' : 'Pet của bạn phản công!'}`)
       : quizFeedback(false, `✗ ${questionCorrection(q)}${trainer ? ` • ${trainer.name} phản công!` : ''}`);
-    pve.fbT = correct ? pve.correctTransitionMs : pve.wrongTransitionMs; pve.qCooldown = pve.fbT; pve.index++;
+    const petMeaningAttack = !!kanjiAnimation(C.MONSTERS[currentPetId]);
+    const enemyInfo = kanjiInfo(q.target), enemyMeaningAttack = !!kanjiAnimation(enemyInfo && C.MONSTERS[enemyInfo.monId]);
+    pve.fbT = correct ? pve.correctTransitionMs : pve.wrongTransitionMs;
+    if (correct && petMeaningAttack) pve.fbT = Math.max(pve.fbT, 700);
+    else if (!correct && enemyMeaningAttack) pve.fbT = Math.max(pve.fbT, 760);
+    pve.qCooldown = pve.fbT; pve.index++;
     if (correct) {
-      pve.petAttackT = 520; pve.petAttackTotal = pve.petAttackT; pve.enemyHitT = 330;
+      pve.petAttackT = petMeaningAttack ? 680 : 520; pve.petAttackTotal = pve.petAttackT; pve.enemyHitT = petMeaningAttack ? 430 : 330;
+      if (petMeaningAttack) pve.arenaShakeT = 340;
       if (pve.mode === 'trainer') {
-        pve.arenaShakeT = 240; pve.impactT = 380; pve.impactTotal = pve.impactT; pve.impactSide = 'enemy';
+        pve.arenaShakeT = petMeaningAttack ? 340 : 240; pve.impactT = 380; pve.impactTotal = pve.impactT; pve.impactSide = 'enemy';
       }
       playSFX('BATTLE_ATTACK'); playSFX('BATTLE_CUT');
     } else {
-      pve.enemyAttackT = 600; pve.enemyAttackTotal = pve.enemyAttackT; pve.playerHitT = 380;
+      pve.enemyAttackT = enemyMeaningAttack ? 700 : 600; pve.enemyAttackTotal = pve.enemyAttackT; pve.playerHitT = enemyMeaningAttack ? 460 : 380;
+      if (enemyMeaningAttack) pve.arenaShakeT = 360;
       if (pve.mode === 'trainer') {
-        pve.arenaShakeT = 300; pve.impactT = 420; pve.impactTotal = pve.impactT; pve.impactSide = 'player';
+        pve.arenaShakeT = enemyMeaningAttack ? 360 : 300; pve.impactT = 420; pve.impactTotal = pve.impactT; pve.impactSide = 'player';
       }
       playSFX('BATTLE_STUN');
     }
@@ -3441,7 +3829,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     }
   }
   function updateCapture(dt) {
-    if (!capture || capture.phase !== 'fight') return;
+    if (!capture) return;
+    if (capture.phase === 'end') {
+      if (capture.catchEffectT > 0) capture.catchEffectT = Math.max(0, capture.catchEffectT - dt);
+      return;
+    }
+    if (capture.phase !== 'fight') return;
     if (capture.fbT > 0) capture.fbT -= dt;
     if (capture.burstT > 0) capture.burstT -= dt;
     if (capture.qCooldown > 0) {
@@ -3880,12 +4273,17 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function drawPet(camX, camY) {
     if (!followerUnlocked()) return;
     const img = monsterImg(currentPetId); if (!img) return;
-    const pos = petFollowPosition(), level = petLevel(), size = petSizeFor(level);
+    const mon = C.MONSTERS[currentPetId], pos = petFollowPosition(), level = petLevel(), size = petSizeFor(level);
     const ratio = img.height / img.width, w = size, h = size * ratio;
     const bob = C.PET.bob ? Math.sin(Date.now() / 220) * 1.5 : 0;
-    const dx = pos.px - camX + (TILE - w) / 2, dy = pos.py - camY + (TILE - h) + bob;
+    const motion = followerMeaningMotion(mon, player.moving);
+    const dx = pos.px - camX + (TILE - w) / 2 + motion.x, dy = pos.py - camY + (TILE - h) + bob + motion.y;
     cx.fillStyle = 'rgba(0,0,0,.18)'; cx.beginPath(); cx.ellipse(dx + w / 2, pos.py - camY + TILE - 2, w * 0.38, 4, 0, 0, Math.PI * 2); cx.fill();
-    cx.drawImage(img, dx, dy, w, h);
+    // Aura được vẽ sau bóng nhưng trước sprite để pet không bị che mặt.
+    if (kanjiAnimation(mon)) drawMonsterMeaningEffect(mon, dx + w / 2, pos.py - camY + TILE + motion.y, w * 1.18, player.moving ? .9 : .64);
+    cx.save(); cx.imageSmoothingEnabled = false;
+    cx.translate(dx + w / 2, dy + h); cx.rotate(motion.rotation); cx.scale(motion.scaleX, motion.scaleY);
+    cx.drawImage(img, -w / 2, -h, w, h); cx.restore();
   }
   function drawAcademy(camX, camY) {
     const a = C.ACADEMY, x = a.gx * TILE - camX, y = a.gy * TILE - camY;
@@ -4305,6 +4703,281 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     }
     cx.restore();
   }
+  function drawMeaningAttackAnimation(monster, progress, originX, targetX, baseY, size = 120) {
+    const animation = kanjiAnimation(monster);
+    if (!animation || !Number.isFinite(progress) || progress < 0 || progress > 1) return false;
+    const p = Math.max(0, Math.min(1, progress)), direction = targetX >= originX ? 1 : -1;
+    const eased = p * p * (3 - 2 * p), travelX = originX + (targetX - originX) * eased;
+    const flightY = baseY - size * .56 - Math.sin(p * Math.PI) * size * .24;
+    const fade = Math.min(1, p * 7, (1 - p) * 7), unit = Math.max(.55, size / 150);
+    cx.save(); cx.lineCap = 'round'; cx.lineJoin = 'round'; cx.globalAlpha = Math.max(0, fade);
+    const [coreColor, edgeColor] = animation.colors || ['#fff', '#7ff7ff'];
+    // Mọi tuyệt kỹ đều có một nhịp tụ lực rõ và một tâm va chạm chung. Hai
+    // lớp này làm đòn đánh có trọng lượng mà vẫn giữ silhouette riêng bên dưới.
+    if (p < .3) {
+      const charge = p / .3, radius = size * (.08 + charge * .2);
+      cx.globalAlpha = Math.sin(charge * Math.PI) * .78; cx.strokeStyle = coreColor; cx.lineWidth = 3.5 * unit;
+      cx.beginPath(); cx.arc(originX, baseY - size * .48, radius, 0, Math.PI * 2); cx.stroke();
+      cx.beginPath(); cx.arc(originX, baseY - size * .48, radius * .58, 0, Math.PI * 2); cx.stroke();
+    }
+
+    if (animation.attack === 'flame-dash') {
+      const radius = (9 + Math.sin(p * Math.PI) * 7) * unit;
+      for (let i = 5; i >= 1; i--) {
+        const tx = travelX - direction * i * 13 * unit, ty = flightY + Math.sin(i * 1.9 + p * 12) * 5 * unit;
+        cx.globalAlpha = fade * (1 - i / 7) * .72; cx.fillStyle = i % 2 ? '#ff7a30' : '#ffd84d';
+        cx.beginPath(); cx.arc(tx, ty, radius * (1 - i * .1), 0, Math.PI * 2); cx.fill();
+      }
+      cx.globalAlpha = fade; cx.fillStyle = '#fff08a'; cx.beginPath(); cx.arc(travelX, flightY, radius * .72, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = '#ff3b1f'; cx.lineWidth = 4 * unit; cx.beginPath(); cx.arc(travelX, flightY, radius, 0, Math.PI * 2); cx.stroke();
+      if (p > .7) {
+        const impact = (p - .7) / .3, burst = size * (.1 + impact * .38);
+        cx.globalAlpha = (1 - impact) * .85; cx.strokeStyle = '#ffd84d'; cx.lineWidth = 5 * unit;
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; cx.beginPath(); cx.moveTo(targetX + Math.cos(a) * burst * .25, flightY + Math.sin(a) * burst * .25); cx.lineTo(targetX + Math.cos(a) * burst, flightY + Math.sin(a) * burst); cx.stroke(); }
+      }
+    } else if (animation.attack === 'tidal-wave') {
+      const waveY = baseY - size * .34;
+      cx.strokeStyle = '#78e8ff'; cx.lineWidth = 7 * unit;
+      for (let i = 0; i < 3; i++) {
+        const offset = (i - 1) * 13 * unit, lead = travelX - direction * offset;
+        cx.globalAlpha = fade * (.45 + i * .18); cx.beginPath(); cx.moveTo(originX, waveY + offset * .25);
+        cx.quadraticCurveTo((originX + lead) / 2, waveY - size * (.18 + i * .045), lead, waveY + Math.sin(p * Math.PI * 3 + i) * 7 * unit); cx.stroke();
+      }
+      cx.fillStyle = '#d8fbff';
+      for (let i = 0; i < 5; i++) { const a = i * 2.3 + p * 9, r = (7 + i * 3) * unit; cx.globalAlpha = fade * .7; cx.beginPath(); cx.arc(travelX + Math.cos(a) * r, flightY + Math.sin(a) * r, (2 + i % 2) * unit, 0, Math.PI * 2); cx.fill(); }
+    } else if (animation.attack === 'vine-whip') {
+      const reachX = originX + (targetX - originX) * Math.min(1, p * 1.35), curl = Math.sin(p * Math.PI * 2) * size * .14;
+      cx.strokeStyle = '#6ed45f'; cx.lineWidth = 8 * unit; cx.beginPath(); cx.moveTo(originX, baseY - size * .2);
+      cx.bezierCurveTo(originX + direction * size * .35, baseY - size * .72, reachX - direction * size * .3, flightY + curl, reachX, flightY); cx.stroke();
+      cx.strokeStyle = '#c8f58a'; cx.lineWidth = 2 * unit; cx.stroke();
+      for (let i = 1; i <= 5; i++) {
+        const q = i / 6, x = originX + (reachX - originX) * q, y = baseY - size * (.2 + Math.sin(q * Math.PI) * .37);
+        cx.save(); cx.translate(x, y); cx.rotate((i % 2 ? .7 : -.7) + p); cx.fillStyle = i % 2 ? '#a8ef73' : '#63cf68';
+        cx.beginPath(); cx.ellipse(0, 0, 8 * unit, 4 * unit, 0, 0, Math.PI * 2); cx.fill(); cx.restore();
+      }
+    } else if (animation.attack === 'thunder-strike') {
+      const charge = Math.min(1, p / .34), strike = p >= .28;
+      cx.globalAlpha = fade * (.45 + charge * .45); cx.strokeStyle = '#fff37a'; cx.lineWidth = 3 * unit;
+      cx.beginPath(); cx.arc(targetX, baseY - size * .18, size * (.12 + charge * .18), 0, Math.PI * 2); cx.stroke();
+      if (strike) {
+        const topY = baseY - size * 1.25, hitY = baseY - size * .38;
+        cx.globalAlpha = Math.min(1, fade * 1.25); cx.strokeStyle = '#fffbd0'; cx.lineWidth = 8 * unit; cx.beginPath(); cx.moveTo(targetX - 10 * unit, topY);
+        cx.lineTo(targetX + 17 * unit, topY + size * .25); cx.lineTo(targetX - 14 * unit, topY + size * .52); cx.lineTo(targetX + 7 * unit, topY + size * .72); cx.lineTo(targetX, hitY); cx.stroke();
+        cx.strokeStyle = '#ffe13d'; cx.lineWidth = 3 * unit; cx.stroke();
+      }
+    } else if (animation.attack === 'wind-cutter') {
+      cx.strokeStyle = '#a9ffe0'; cx.lineWidth = 5 * unit;
+      for (let i = 0; i < 3; i++) {
+        const phase = Math.max(0, Math.min(1, p * 1.35 - i * .14));
+        const x = originX + (targetX - originX) * phase, y = flightY + (i - 1) * 24 * unit;
+        cx.globalAlpha = Math.sin(phase * Math.PI) * .75; cx.beginPath();
+        cx.arc(x, y, size * (.14 + i * .025), direction > 0 ? -.65 : Math.PI - .65, direction > 0 ? .65 : Math.PI + .65); cx.stroke();
+        cx.strokeStyle = i === 1 ? '#e4fff5' : '#79e7c4';
+      }
+    } else if (animation.attack === 'solar-burst') {
+      const radius = size * (.12 + Math.sin(p * Math.PI) * .1);
+      cx.globalAlpha = fade * .38; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, radius * 1.75, 0, Math.PI * 2); cx.fill();
+      cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.beginPath(); cx.arc(travelX, flightY, radius, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = '#fff9c9'; cx.lineWidth = 4 * unit;
+      for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 + p * 2; cx.beginPath(); cx.moveTo(travelX + Math.cos(a) * radius * 1.2, flightY + Math.sin(a) * radius * 1.2); cx.lineTo(travelX + Math.cos(a) * radius * 1.8, flightY + Math.sin(a) * radius * 1.8); cx.stroke(); }
+    } else if (animation.attack === 'moon-blade') {
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 13 * unit; cx.beginPath();
+      cx.arc(travelX, flightY, size * .27, direction > 0 ? -.9 : Math.PI - .9, direction > 0 ? .9 : Math.PI + .9); cx.stroke();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit; cx.stroke();
+    } else if (animation.attack === 'mountain-crash') {
+      const drop = Math.min(1, p * 1.3), rockY = baseY - size * (1.35 - drop * .85), r = size * .28;
+      cx.fillStyle = edgeColor; cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit; cx.beginPath();
+      cx.moveTo(targetX - r, rockY + r * .65); cx.lineTo(targetX - r * .38, rockY - r); cx.lineTo(targetX + r * .08, rockY - r * .42);
+      cx.lineTo(targetX + r * .48, rockY - r * .86); cx.lineTo(targetX + r, rockY + r * .65); cx.closePath(); cx.fill(); cx.stroke();
+    } else if (animation.attack === 'river-rush') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit; cx.globalAlpha = fade * .72; cx.beginPath(); cx.moveTo(originX, baseY - size * .28);
+      cx.bezierCurveTo((originX + travelX) / 2, baseY - size * .68, (originX + travelX) / 2, baseY - size * .08, travelX, baseY - size * .42); cx.stroke();
+      cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke();
+    } else if (animation.attack === 'golden-comet') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 12 * unit; cx.globalAlpha = fade * .6; cx.beginPath(); cx.moveTo(originX, flightY + size * .12); cx.lineTo(travelX, flightY); cx.stroke();
+      cx.fillStyle = coreColor; cx.globalAlpha = fade; cx.beginPath(); cx.arc(travelX, flightY, size * .13, 0, Math.PI * 2); cx.fill();
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + p * 5, r = size * .21; cx.fillRect(travelX + Math.cos(a) * r - 3 * unit, flightY + Math.sin(a) * r - 3 * unit, 6 * unit, 6 * unit); }
+    } else if (animation.attack === 'rain-storm') {
+      const stormX = originX + (targetX - originX) * Math.min(1, p * 1.7);
+      cx.fillStyle = edgeColor; cx.globalAlpha = fade * .55; cx.beginPath(); cx.ellipse(stormX, baseY - size * .92, size * .34, size * .12, 0, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit;
+      for (let i = 0; i < 9; i++) { const x = stormX + (i - 4) * size * .07, drop = ((p * 2.4 + i * .13) % 1) * size * .52; cx.globalAlpha = fade * (.45 + i % 2 * .3); cx.beginPath(); cx.moveTo(x, baseY - size * .78 + drop); cx.lineTo(x - direction * 7 * unit, baseY - size * .62 + drop); cx.stroke(); }
+    } else if (animation.attack === 'earth-spike') {
+      const reached = Math.min(1, p * 1.45); cx.fillStyle = edgeColor; cx.strokeStyle = coreColor; cx.lineWidth = 3 * unit;
+      for (let i = 0; i < 6; i++) { const q = (i + 1) / 6; if (q > reached) continue; const x = originX + (targetX - originX) * q, h = size * (.18 + (i % 3) * .08) * Math.min(1, (reached - q) * 8); cx.beginPath(); cx.moveTo(x - size * .08, baseY); cx.lineTo(x, baseY - h); cx.lineTo(x + size * .08, baseY); cx.closePath(); cx.fill(); cx.stroke(); }
+    } else if (animation.attack === 'bubble-torpedo') {
+      const radius = size * (.17 + Math.sin(p * Math.PI) * .05); cx.fillStyle = edgeColor; cx.globalAlpha = fade * .35; cx.beginPath(); cx.arc(travelX, flightY, radius, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = coreColor; cx.globalAlpha = fade; cx.lineWidth = 5 * unit; cx.stroke();
+      for (let i = 1; i <= 5; i++) { cx.globalAlpha = fade * (1 - i / 7); cx.beginPath(); cx.arc(travelX - direction * i * 16 * unit, flightY + Math.sin(i * 2) * 11 * unit, (3 + i) * unit, 0, Math.PI * 2); cx.stroke(); }
+    } else if (animation.attack === 'sonic-wave') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit;
+      for (let i = 0; i < 4; i++) { const phase = Math.max(0, Math.min(1, p * 1.5 - i * .14)), x = originX + (targetX - originX) * phase; cx.globalAlpha = Math.sin(phase * Math.PI) * .8; cx.beginPath(); cx.arc(x, baseY - size * .48, size * (.16 + i * .055), -.62 * Math.PI, .62 * Math.PI); cx.stroke(); cx.strokeStyle = i % 2 ? coreColor : edgeColor; }
+    } else if (animation.attack === 'life-bloom') {
+      const seedY = flightY, radius = size * (.07 + p * .13); cx.strokeStyle = edgeColor; cx.lineWidth = 7 * unit; cx.beginPath(); cx.moveTo(originX, baseY - size * .15); cx.quadraticCurveTo(travelX, seedY + size * .3, travelX, seedY); cx.stroke();
+      cx.fillStyle = coreColor;
+      for (let i = 0; i < 7; i++) { const a = i * Math.PI * 2 / 7 + p * 2, x = travelX + Math.cos(a) * radius, y = seedY + Math.sin(a) * radius; cx.save(); cx.translate(x, y); cx.rotate(a); cx.beginPath(); cx.ellipse(0, 0, radius * .48, radius * .2, 0, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+    } else if (animation.attack === 'single-slash') {
+      const length = size * (.42 + Math.sin(p * Math.PI) * .3); cx.strokeStyle = edgeColor; cx.lineWidth = 13 * unit; cx.globalAlpha = fade * .45;
+      cx.beginPath(); cx.moveTo(travelX - direction * length, flightY + length * .25); cx.lineTo(travelX + direction * length, flightY - length * .25); cx.stroke();
+      cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit; cx.globalAlpha = fade; cx.stroke();
+    } else if (animation.attack === 'twin-strike') {
+      for (const side of [-1, 1]) { const x = originX + (targetX - originX) * Math.min(1, p * (side > 0 ? 1.15 : 1.35)), y = flightY + side * size * (.24 - p * .18); cx.fillStyle = side > 0 ? coreColor : edgeColor; cx.globalAlpha = fade; cx.beginPath(); cx.arc(x, y, size * .1, 0, Math.PI * 2); cx.fill(); cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.beginPath(); cx.moveTo(x - direction * size * .22, y + side * size * .1); cx.lineTo(x, y); cx.stroke(); }
+    } else if (animation.attack === 'book-burst') {
+      for (let i = 0; i < 7; i++) { const phase = Math.max(0, Math.min(1, p * 1.45 - i * .075)), x = originX + (targetX - originX) * phase, y = flightY + Math.sin(i * 1.8 + p * 8) * size * .22; cx.save(); cx.translate(x, y); cx.rotate(p * 4 + i); cx.globalAlpha = Math.sin(phase * Math.PI) * .85; cx.strokeStyle = i % 2 ? coreColor : edgeColor; cx.lineWidth = 3 * unit; cx.strokeRect(-size * .09, -size * .065, size * .18, size * .13); cx.beginPath(); cx.moveTo(0, -size * .06); cx.lineTo(0, size * .06); cx.stroke(); cx.restore(); }
+    } else if (animation.attack === 'wheel-charge') {
+      const r = size * .22; cx.save(); cx.translate(travelX, flightY); cx.rotate(p * Math.PI * 8 * direction); cx.globalAlpha = fade; cx.strokeStyle = edgeColor; cx.lineWidth = 9 * unit; cx.beginPath(); cx.arc(0, 0, r, 0, Math.PI * 2); cx.stroke(); cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit;
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * r, Math.sin(a) * r); cx.stroke(); } cx.restore();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 5 * unit; for (let i = 1; i < 5; i++) { cx.globalAlpha = fade * (1 - i / 5); cx.beginPath(); cx.moveTo(travelX - direction * i * size * .13, flightY - size * .12); cx.lineTo(travelX - direction * i * size * .13, flightY + size * .12); cx.stroke(); }
+    } else if (animation.attack === 'steam-bite') {
+      cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit;
+      for (let i = 0; i < 4; i++) { const phase = Math.max(0, Math.min(1, p * 1.45 - i * .11)), x = originX + (targetX - originX) * phase, y = flightY - Math.sin(phase * Math.PI * 2 + i) * size * .13; cx.globalAlpha = Math.sin(phase * Math.PI) * .72; cx.beginPath(); cx.arc(x, y, size * (.08 + i * .025), -.65 * Math.PI, .65 * Math.PI); cx.stroke(); }
+      const jaw = size * (.18 + Math.sin(p * Math.PI) * .08); cx.globalAlpha = fade; cx.strokeStyle = edgeColor; cx.lineWidth = 8 * unit; cx.beginPath(); cx.arc(travelX, flightY, jaw, .1, Math.PI - .1); cx.stroke(); cx.beginPath(); cx.arc(travelX, flightY, jaw, Math.PI + .1, Math.PI * 2 - .1); cx.stroke();
+    } else if (animation.attack === 'word-cannon') {
+      for (let i = 0; i < 5; i++) { const phase = Math.max(0, Math.min(1, p * 1.5 - i * .1)), x = originX + (targetX - originX) * phase, y = flightY + (i - 2) * size * .11, r = size * (.08 + i % 2 * .025); cx.globalAlpha = Math.sin(phase * Math.PI) * .8; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.ellipse(x, y, r * 1.4, r, 0, 0, Math.PI * 2); cx.fill(); cx.beginPath(); cx.moveTo(x - direction * r * .5, y + r * .6); cx.lineTo(x - direction * r, y + r * 1.15); cx.lineTo(x, y + r * .82); cx.fill(); }
+    } else if (animation.attack === 'ink-slash') {
+      const reach = originX + (targetX - originX) * Math.min(1, p * 1.35); cx.globalAlpha = fade * .4; cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit; cx.beginPath(); cx.moveTo(originX, baseY - size * .18); cx.bezierCurveTo(originX + direction * size * .4, baseY - size * .9, reach - direction * size * .35, baseY - size * .05, reach, flightY); cx.stroke();
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke();
+    } else if (animation.attack === 'clock-stop') {
+      const r = size * .23; cx.globalAlpha = fade; cx.fillStyle = 'rgba(15,34,66,.72)'; cx.strokeStyle = coreColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.arc(travelX, flightY, r, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit; cx.beginPath(); cx.moveTo(travelX, flightY); cx.lineTo(travelX + Math.cos(p * 9) * r * .72, flightY + Math.sin(p * 9) * r * .72); cx.moveTo(travelX, flightY); cx.lineTo(travelX + Math.cos(-p * 3) * r * .48, flightY + Math.sin(-p * 3) * r * .48); cx.stroke();
+    } else if (animation.attack === 'rising-uppercut') {
+      cx.strokeStyle = coreColor; cx.lineWidth = 7 * unit;
+      for (let i = 0; i < 5; i++) { const phase = Math.max(0, Math.min(1, p * 1.5 - i * .1)), y = baseY - phase * size * 1.05, x = targetX + (i - 2) * size * .08; cx.globalAlpha = Math.sin(phase * Math.PI) * .85; cx.beginPath(); cx.moveTo(x - size * .09, y + size * .09); cx.lineTo(x, y); cx.lineTo(x + size * .09, y + size * .09); cx.stroke(); }
+    } else if (animation.attack === 'meteor-drop') {
+      const drop = Math.min(1, p * 1.25), y = baseY - size * (1.35 - drop * .9), r = size * .2; cx.globalAlpha = fade * .45; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(targetX, y, r * 1.5, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.beginPath(); cx.arc(targetX, y, r, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 7 * unit; cx.beginPath(); cx.moveTo(targetX, y - r * 2.8); cx.lineTo(targetX, y - r * 1.2); cx.stroke();
+    } else if (animation.attack === 'giant-smash') {
+      const grow = Math.sin(p * Math.PI), r = size * (.15 + grow * .3); cx.globalAlpha = fade * .34; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, r * 1.35, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 7 * unit; cx.fillRect(travelX - r, flightY - r * .7, r * 2, r * 1.4); cx.strokeRect(travelX - r, flightY - r * .7, r * 2, r * 1.4);
+      for (let i = 1; i < 4; i++) { cx.beginPath(); cx.moveTo(travelX - r + i * r * .5, flightY - r * .7); cx.lineTo(travelX - r + i * r * .5, flightY - r * .15); cx.stroke(); }
+    } else if (animation.attack === 'needle-barrage') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit;
+      for (let i = 0; i < 11; i++) { const phase = Math.max(0, Math.min(1, p * 1.55 - i * .045)), x = originX + (targetX - originX) * phase, y = flightY + (i - 5) * size * .055; cx.globalAlpha = Math.sin(phase * Math.PI) * .86; cx.beginPath(); cx.moveTo(x - direction * size * .13, y + size * .04); cx.lineTo(x + direction * size * .13, y - size * .04); cx.stroke(); }
+    } else if (animation.attack === 'barrier-crush') {
+      const half = size * (.34 - Math.sin(p * Math.PI) * .13); cx.globalAlpha = fade * .28; cx.fillStyle = edgeColor; cx.fillRect(travelX - half, flightY - half, half * 2, half * 2); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 8 * unit; cx.strokeRect(travelX - half, flightY - half, half * 2, half * 2); cx.strokeStyle = edgeColor; cx.lineWidth = 3 * unit; cx.strokeRect(travelX - half * .68, flightY - half * .68, half * 1.36, half * 1.36);
+    } else if (animation.attack === 'dual-heart') {
+      const separation = size * (.23 - p * .12); cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.moveTo(travelX - separation, flightY); cx.lineTo(travelX + separation, flightY); cx.stroke();
+      for (const side of [-1, 1]) { const x = travelX + side * separation; cx.globalAlpha = fade; cx.fillStyle = side > 0 ? coreColor : edgeColor; cx.beginPath(); cx.arc(x - size * .045, flightY - size * .035, size * .065, 0, Math.PI * 2); cx.arc(x + size * .045, flightY - size * .035, size * .065, 0, Math.PI * 2); cx.lineTo(x, flightY + size * .13); cx.closePath(); cx.fill(); }
+    } else if (animation.attack === 'dream-leaf') {
+      for (let i = 0; i < 8; i++) { const phase = Math.max(0, Math.min(1, p * 1.4 - i * .065)), x = originX + (targetX - originX) * phase, y = flightY + Math.sin(i * 1.9 + p * 5) * size * .22; cx.save(); cx.translate(x, y); cx.rotate(i + p * 3); cx.globalAlpha = Math.sin(phase * Math.PI) * .82; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.ellipse(0, 0, size * .09, size * .038, .35, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+      cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.font = `bold ${Math.round(size * .22)}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText('Z', travelX, flightY - size * .2); cx.textAlign = 'left';
+    } else if (animation.attack === 'orbit-barrage') {
+      const count = Math.max(1, Number(animation.count) || 3);
+      for (let i = 0; i < count; i++) { const a = i * Math.PI * 2 / count + p * 8, radius = size * (.12 + (1 - p) * .25), x = travelX + Math.cos(a) * radius, y = flightY + Math.sin(a) * radius * .65; cx.globalAlpha = fade; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.arc(x, y, Math.max(3, size * .045), 0, Math.PI * 2); cx.fill(); }
+    } else if (animation.attack === 'forward-charge' || animation.attack === 'backstab') {
+      const reverse = animation.attack === 'backstab' ? -1 : 1, lead = travelX + direction * reverse * size * .12;
+      cx.globalAlpha = fade * .42; cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit; cx.beginPath(); cx.moveTo(originX - direction * reverse * size * .2, flightY); cx.lineTo(lead, flightY); cx.stroke();
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke();
+      cx.beginPath(); cx.moveTo(lead - direction * reverse * size * .16, flightY - size * .13); cx.lineTo(lead, flightY); cx.lineTo(lead - direction * reverse * size * .16, flightY + size * .13); cx.stroke();
+    } else if (animation.attack === 'inward-collapse' || animation.attack === 'outward-blast') {
+      const inward = animation.attack === 'inward-collapse'; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit;
+      for (const side of [-1, 1]) for (let i = 0; i < 3; i++) { const spread = size * (.18 + i * .12) * (inward ? 1 - p * .78 : .25 + p * .9), x = targetX + side * spread, y = flightY + (i - 1) * size * .12; cx.globalAlpha = fade * (.55 + i * .12); cx.beginPath(); cx.moveTo(x + side * (inward ? 1 : -1) * size * .1, y - size * .07); cx.lineTo(x, y); cx.lineTo(x + side * (inward ? 1 : -1) * size * .1, y + size * .07); cx.stroke(); }
+    } else if (animation.attack === 'split-blade') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 9 * unit;
+      for (const side of [-1, 1]) { const y = flightY + side * size * (.08 + p * .14); cx.globalAlpha = fade; cx.beginPath(); cx.moveTo(originX, flightY); cx.quadraticCurveTo((originX + travelX) / 2, y + side * size * .2, travelX, y); cx.stroke(); }
+      cx.strokeStyle = coreColor; cx.lineWidth = 3 * unit; cx.stroke();
+    } else if (animation.attack === 'step-rush') {
+      for (let i = 0; i < 8; i++) { const phase = Math.max(0, Math.min(1, p * 1.45 - i * .07)), x = originX + (targetX - originX) * phase, y = baseY - size * (.1 + (i % 2) * .14); cx.globalAlpha = Math.sin(phase * Math.PI) * .82; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.save(); cx.translate(x, y); cx.rotate(direction * (i % 2 ? .25 : -.25)); cx.beginPath(); cx.ellipse(0, 0, size * .09, size * .04, 0, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+    } else if (animation.attack === 'season-wheel') {
+      const colors = ['#ff9db6', '#72dfa0', '#ffd65c', '#8fcfff'], r = size * (.2 + Math.sin(p * Math.PI) * .12);
+      for (let i = 0; i < 4; i++) { const a = p * 7 + i * Math.PI / 2, x = travelX + Math.cos(a) * r, y = flightY + Math.sin(a) * r; cx.globalAlpha = fade; cx.fillStyle = colors[i]; cx.beginPath(); cx.arc(x, y, size * .075, 0, Math.PI * 2); cx.fill(); }
+      cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit; cx.beginPath(); cx.arc(travelX, flightY, r, 0, Math.PI * 2); cx.stroke();
+    } else if (animation.attack === 'center-beam') {
+      cx.globalAlpha = fade * .35; cx.strokeStyle = edgeColor; cx.lineWidth = 19 * unit; cx.beginPath(); cx.moveTo(originX, flightY); cx.lineTo(travelX, flightY); cx.stroke();
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke();
+      const cross = size * .2; cx.beginPath(); cx.moveTo(travelX - cross, flightY); cx.lineTo(travelX + cross, flightY); cx.moveTo(travelX, flightY - cross); cx.lineTo(travelX, flightY + cross); cx.stroke();
+    } else if (animation.attack === 'long-lance') {
+      const length = size * (.48 + p * .35), tip = travelX + direction * length * .35; cx.globalAlpha = fade; cx.strokeStyle = edgeColor; cx.lineWidth = 12 * unit; cx.beginPath(); cx.moveTo(travelX - direction * length, flightY); cx.lineTo(tip, flightY); cx.stroke();
+      cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit; cx.stroke(); cx.beginPath(); cx.moveTo(tip, flightY); cx.lineTo(tip - direction * size * .2, flightY - size * .12); cx.lineTo(tip - direction * size * .2, flightY + size * .12); cx.closePath(); cx.fillStyle = coreColor; cx.fill();
+    } else if (animation.attack === 'eye-beam') {
+      const eyeX = originX + (targetX - originX) * Math.min(1, p * .55), eyeY = flightY; cx.globalAlpha = fade; cx.fillStyle = 'rgba(15,25,58,.76)'; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.beginPath(); cx.ellipse(eyeX, eyeY, size * .2, size * .11, 0, 0, Math.PI * 2); cx.fill(); cx.stroke(); cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(eyeX, eyeY, size * .055, 0, Math.PI * 2); cx.fill();
+      if (p > .28) { cx.globalAlpha = fade * .38; cx.strokeStyle = edgeColor; cx.lineWidth = 16 * unit; cx.beginPath(); cx.moveTo(eyeX, eyeY); cx.lineTo(targetX, eyeY); cx.stroke(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 4 * unit; cx.stroke(); }
+    } else if (animation.attack === 'now-burst') {
+      const pulse = (p * 4) % 1, r = size * (.08 + pulse * .42); cx.globalAlpha = (1 - pulse) * fade; cx.strokeStyle = coreColor; cx.lineWidth = 8 * unit; cx.beginPath(); cx.arc(targetX, flightY, r, 0, Math.PI * 2); cx.stroke(); cx.strokeStyle = edgeColor; cx.lineWidth = 3 * unit; cx.beginPath(); cx.arc(targetX, flightY, r * .62, 0, Math.PI * 2); cx.stroke();
+    } else if (animation.attack === 'portal-crush') {
+      const close = Math.sin(p * Math.PI), portalW = size * (.08 + close * .22); cx.globalAlpha = fade * .3; cx.fillStyle = edgeColor; cx.beginPath(); cx.ellipse(originX, flightY, portalW, size * .35, 0, 0, Math.PI * 2); cx.fill(); cx.beginPath(); cx.ellipse(targetX, flightY, portalW, size * .35, 0, 0, Math.PI * 2); cx.fill();
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 7 * unit; cx.beginPath(); cx.ellipse(originX, flightY, portalW, size * .35, 0, 0, Math.PI * 2); cx.stroke(); cx.beginPath(); cx.ellipse(targetX, flightY, portalW, size * .35, 0, 0, Math.PI * 2); cx.stroke(); cx.fillStyle = coreColor; cx.beginPath(); cx.arc(travelX, flightY, size * .09, 0, Math.PI * 2); cx.fill();
+    } else if (animation.attack === 'sunrise-lance') {
+      const horizonY = baseY - size * .16, sunX = travelX, sunY = horizonY - Math.sin(p * Math.PI) * size * .5; cx.globalAlpha = fade * .45; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(sunX, sunY, size * .21, Math.PI, 0); cx.fill(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.moveTo(originX, horizonY); cx.lineTo(targetX, horizonY); cx.stroke(); cx.beginPath(); cx.moveTo(sunX, sunY); cx.lineTo(targetX, flightY); cx.stroke();
+    } else if (animation.attack === 'sky-drop') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 9 * unit;
+      for (let i = 0; i < 6; i++) { const delay = i * .07, phase = Math.max(0, Math.min(1, (p - delay) * 1.5)), x = targetX + (i - 2.5) * size * .1, y = baseY - size * (1.25 - phase * .82); cx.globalAlpha = Math.sin(phase * Math.PI) * .82; cx.beginPath(); cx.moveTo(x, y - size * .25); cx.lineTo(x, y); cx.lineTo(x - size * .07, y - size * .1); cx.moveTo(x, y); cx.lineTo(x + size * .07, y - size * .1); cx.stroke(); }
+    } else if (animation.attack === 'coin-ring') {
+      cx.globalAlpha = fade; cx.strokeStyle = edgeColor; cx.lineWidth = 8 * unit; cx.beginPath(); cx.ellipse(travelX, flightY, size * .24, size * (.08 + Math.abs(Math.sin(p * 10)) * .16), p * 5, 0, Math.PI * 2); cx.stroke(); cx.strokeStyle = coreColor; cx.lineWidth = 3 * unit; cx.stroke();
+      for (let i = 0; i < 4; i++) { const a = p * 7 + i * Math.PI / 2; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.arc(travelX + Math.cos(a) * size * .28, flightY + Math.sin(a) * size * .18, size * .045, 0, Math.PI * 2); cx.fill(); }
+    } else if (animation.attack === 'cross-flare') {
+      const arm = size * (.12 + Math.sin(p * Math.PI) * .18); cx.globalAlpha = fade * .28; cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit;
+      cx.beginPath(); cx.moveTo(travelX - arm, flightY); cx.lineTo(travelX + arm, flightY); cx.moveTo(travelX, flightY - arm); cx.lineTo(travelX, flightY + arm); cx.stroke();
+      cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke();
+    } else if (animation.attack === 'child-spring') {
+      const bounceY = flightY - Math.abs(Math.sin(p * Math.PI * 3)) * size * .22, r = size * .13; cx.globalAlpha = fade;
+      cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.arc(travelX, bounceY, r, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      cx.beginPath(); cx.moveTo(travelX - r * .5, bounceY + r); cx.quadraticCurveTo(travelX, bounceY + r * 1.8, travelX + r * .5, bounceY + r); cx.stroke();
+    } else if (animation.attack === 'petal-dance') {
+      for (let i = 0; i < 10; i++) { const phase = Math.max(0, Math.min(1, p * 1.45 - i * .045)), a = phase * 10 + i * 1.7, x = originX + (targetX - originX) * phase + Math.cos(a) * size * .18, y = flightY + Math.sin(a) * size * .24; cx.save(); cx.translate(x, y); cx.rotate(a); cx.globalAlpha = Math.sin(phase * Math.PI) * .86; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.ellipse(0, 0, size * .075, size * .035, .35, 0, Math.PI * 2); cx.fill(); cx.restore(); }
+    } else if (animation.attack === 'compass-star') {
+      const axis = animation.axis || 1, r = size * (.16 + Math.sin(p * Math.PI) * .13); cx.save(); cx.translate(travelX, flightY); cx.rotate(p * axis * 4); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 5 * unit; cx.beginPath();
+      for (let i = 0; i < 8; i++) { const a = -Math.PI / 2 + i * Math.PI / 4, radius = i % 2 ? r * .42 : r; const x = Math.cos(a) * radius, y = Math.sin(a) * radius; if (!i) cx.moveTo(x, y); else cx.lineTo(x, y); } cx.closePath(); cx.fill(); cx.stroke(); cx.restore();
+    } else if (animation.attack === 'noon-beam') {
+      const y = baseY - size * (1.25 - p * .72); cx.globalAlpha = fade * .35; cx.strokeStyle = edgeColor; cx.lineWidth = 22 * unit; cx.beginPath(); cx.moveTo(targetX, y - size * .48); cx.lineTo(targetX, baseY - size * .18); cx.stroke(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 7 * unit; cx.stroke();
+      cx.fillStyle = coreColor; cx.beginPath(); cx.arc(targetX, y, size * .16, 0, Math.PI * 2); cx.fill();
+    } else if (animation.attack === 'hundred-grid') {
+      const cell = size * .075, cols = 5; cx.globalAlpha = fade; cx.strokeStyle = edgeColor; cx.lineWidth = 3 * unit;
+      for (let i = 0; i < 10; i++) { const row = Math.floor(i / cols), col = i % cols, x = travelX + (col - 2) * cell * 1.25, y = flightY + (row - .5) * cell * 1.25; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.globalAlpha = fade * (.55 + (i % 3) * .18); cx.fillRect(x - cell / 2, y - cell / 2, cell, cell); cx.strokeRect(x - cell / 2, y - cell / 2, cell, cell); }
+    } else if (animation.attack === 'lead-arrow') {
+      const tip = travelX + direction * size * .18; cx.globalAlpha = fade * .3; cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit; cx.beginPath(); cx.moveTo(originX, flightY); cx.lineTo(tip, flightY); cx.stroke(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke(); cx.fillStyle = edgeColor; cx.beginPath(); cx.moveTo(tip, flightY); cx.lineTo(tip - direction * size * .2, flightY - size * .14); cx.lineTo(tip - direction * size * .2, flightY + size * .14); cx.closePath(); cx.fill();
+    } else if (animation.attack === 'name-seal') {
+      const w = size * .32, h = size * .26; cx.globalAlpha = fade * .3; cx.fillStyle = edgeColor; cx.fillRect(travelX - w * .58, flightY - h * .65, w * 1.16, h * 1.3); cx.globalAlpha = fade; cx.fillStyle = '#10223d'; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.fillRect(travelX - w / 2, flightY - h / 2, w, h); cx.strokeRect(travelX - w / 2, flightY - h / 2, w, h); cx.fillStyle = coreColor; cx.font = `bold ${Math.round(size * .2)}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText(animation.glyph || '名', travelX, flightY + size * .07); cx.textAlign = 'left';
+    } else if (animation.attack === 'star-barrage') {
+      const count = Math.max(8, Number(animation.count) || 10); for (let i = 0; i < count; i++) { const phase = Math.max(0, Math.min(1, p * 1.5 - i * .025)), a = i * 2.4 + p * 7, x = originX + (targetX - originX) * phase, y = flightY + Math.sin(a) * size * .28, r = size * (.025 + (i % 3) * .012); cx.globalAlpha = Math.sin(phase * Math.PI) * .88; cx.fillStyle = i % 2 ? coreColor : edgeColor; cx.beginPath(); cx.arc(x, y, r, 0, Math.PI * 2); cx.fill(); }
+    } else if (animation.attack === 'sunset-blade') {
+      const r = size * (.2 + Math.sin(p * Math.PI) * .08); cx.globalAlpha = fade * .32; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, r * 1.35, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.beginPath(); cx.arc(travelX, flightY, r, -.65 * Math.PI, .65 * Math.PI); cx.arc(travelX - direction * r * .38, flightY, r * .78, .65 * Math.PI, -.65 * Math.PI, true); cx.fill();
+    } else if (animation.attack === 'question-burst') {
+      cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit; cx.font = `bold ${Math.round(size * .34)}px ${JPFONT}`; cx.textAlign = 'center';
+      for (let i = 0; i < 3; i++) { const a = p * 7 + i * Math.PI * 2 / 3, x = travelX + Math.cos(a) * size * .2, y = flightY + Math.sin(a) * size * .15; cx.strokeText('?', x, y); cx.fillText('?', x, y); } cx.textAlign = 'left';
+    } else if (animation.attack === 'side-arrow') {
+      const axis = animation.axis || 1, y = flightY + axis * size * .12, tip = travelX + direction * size * .18; cx.globalAlpha = fade * .3; cx.strokeStyle = edgeColor; cx.lineWidth = 17 * unit; cx.beginPath(); cx.moveTo(originX, y); cx.lineTo(tip, y); cx.stroke(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke(); cx.beginPath(); cx.moveTo(tip - direction * size * .18, y - axis * size * .13); cx.lineTo(tip, y); cx.lineTo(tip - direction * size * .18, y + axis * size * .13); cx.stroke();
+    } else if (animation.attack === 'dark-rift') {
+      cx.strokeStyle = edgeColor; cx.lineWidth = 8 * unit; for (let i = 0; i < 5; i++) { const phase = Math.max(0, Math.min(1, p * 1.35 - i * .08)), x = originX + (targetX - originX) * phase, y = flightY + (i - 2) * size * .1; cx.globalAlpha = Math.sin(phase * Math.PI) * .9; cx.beginPath(); cx.moveTo(x - direction * size * .13, y - size * .12); cx.lineTo(x, y); cx.lineTo(x - direction * size * .08, y + size * .13); cx.stroke(); }
+    } else if (animation.attack === 'shadow-lantern') {
+      const r = size * (.12 + Math.sin(p * Math.PI) * .09); cx.globalAlpha = fade * .35; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, r * 1.7, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.fillStyle = '#17142d'; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.fillRect(travelX - r * .7, flightY - r, r * 1.4, r * 2); cx.strokeRect(travelX - r * .7, flightY - r, r * 1.4, r * 2); cx.beginPath(); cx.arc(travelX, flightY - r, r * .55, Math.PI, 0); cx.stroke();
+    } else if (animation.attack === 'healing-cross') {
+      const arm = size * (.1 + Math.sin(p * Math.PI) * .14); cx.globalAlpha = fade * .32; cx.fillStyle = edgeColor; cx.fillRect(travelX - arm * .32, flightY - arm, arm * .64, arm * 2); cx.fillRect(travelX - arm, flightY - arm * .32, arm * 2, arm * .64); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.fillRect(travelX - arm * .18, flightY - arm * .75, arm * .36, arm * 1.5); cx.fillRect(travelX - arm * .75, flightY - arm * .18, arm * 1.5, arm * .36);
+    } else if (animation.attack === 'focus-burst') {
+      const pulse = (p * 4) % 1, r = size * (.06 + pulse * .32); cx.globalAlpha = (1 - pulse) * fade; cx.strokeStyle = coreColor; cx.lineWidth = 7 * unit; cx.beginPath(); cx.arc(targetX, flightY, r, 0, Math.PI * 2); cx.stroke(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + p; cx.beginPath(); cx.moveTo(targetX + Math.cos(a) * r * .55, flightY + Math.sin(a) * r * .55); cx.lineTo(targetX + Math.cos(a) * r * 1.3, flightY + Math.sin(a) * r * 1.3); cx.stroke(); }
+    } else if (animation.attack === 'house-crash') {
+      const w = size * (.24 + Math.sin(p * Math.PI) * .1), h = w * .72; cx.globalAlpha = fade * .3; cx.fillStyle = edgeColor; cx.fillRect(travelX - w * .62, flightY - h * .25, w * 1.24, h * 1.08); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.moveTo(travelX - w / 2, flightY - h * .25); cx.lineTo(travelX, flightY - h); cx.lineTo(travelX + w / 2, flightY - h * .25); cx.closePath(); cx.fill(); cx.stroke(); cx.strokeRect(travelX - w * .42, flightY - h * .25, w * .84, h * .72);
+    } else if (animation.attack === 'portal-open') {
+      const open = Math.sin(p * Math.PI), portalW = size * (.04 + open * .28); cx.globalAlpha = fade * .28; cx.fillStyle = edgeColor; cx.beginPath(); cx.ellipse(travelX, flightY, portalW * 1.35, size * .38, 0, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 7 * unit; cx.beginPath(); cx.ellipse(travelX, flightY, portalW, size * .34, 0, 0, Math.PI * 2); cx.stroke();
+      cx.beginPath(); cx.moveTo(travelX - portalW * .5, flightY); cx.lineTo(travelX + direction * size * .35, flightY); cx.stroke();
+    } else if (animation.attack === 'world-sphere') {
+      const r = size * (.14 + Math.sin(p * Math.PI) * .12); cx.globalAlpha = fade * .3; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, r * 1.35, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.beginPath(); cx.arc(travelX, flightY, r, 0, Math.PI * 2); cx.stroke(); cx.beginPath(); cx.ellipse(travelX, flightY, r * .45, r, p * 4, 0, Math.PI * 2); cx.stroke(); cx.beginPath(); cx.ellipse(travelX, flightY, r, r * .4, 0, 0, Math.PI * 2); cx.stroke();
+    } else if (animation.attack === 'frost-spikes') {
+      cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit; for (let i = 0; i < 7; i++) { const phase = Math.max(0, Math.min(1, p * 1.5 - i * .06)), x = originX + (targetX - originX) * phase, h = size * (.13 + (i % 3) * .06), y = baseY - size * .12; cx.globalAlpha = Math.sin(phase * Math.PI) * .88; cx.beginPath(); cx.moveTo(x - size * .07, y); cx.lineTo(x, y - h); cx.lineTo(x + size * .07, y); cx.closePath(); cx.fill(); cx.stroke(); }
+    } else if (animation.attack === 'face-mask') {
+      const r = size * (.15 + Math.sin(p * Math.PI) * .1); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.ellipse(travelX, flightY, r * .82, r, 0, 0, Math.PI * 2); cx.fill(); cx.stroke(); cx.fillStyle = edgeColor;
+      for (const side of [-1, 1]) { cx.beginPath(); cx.ellipse(travelX + side * r * .3, flightY - r * .18, r * .12, r * .19, 0, 0, Math.PI * 2); cx.fill(); } cx.beginPath(); cx.arc(travelX, flightY + r * .2, r * .3, .15, Math.PI - .15); cx.stroke();
+    } else if (animation.attack === 'return-boomerang') {
+      const a = p * Math.PI * 4 * direction, r = size * .22; cx.save(); cx.translate(travelX, flightY); cx.rotate(a); cx.globalAlpha = fade * .3; cx.strokeStyle = edgeColor; cx.lineWidth = 15 * unit; cx.beginPath(); cx.moveTo(-r, -r * .45); cx.quadraticCurveTo(0, r * .2, r, -r * .45); cx.stroke(); cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; cx.stroke(); cx.restore();
+    } else if (animation.attack === 'bull-charge') {
+      const head = size * .17; cx.globalAlpha = fade * .32; cx.strokeStyle = edgeColor; cx.lineWidth = 18 * unit; cx.beginPath(); cx.moveTo(originX, flightY); cx.lineTo(travelX, flightY); cx.stroke(); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.beginPath(); cx.arc(travelX, flightY, head, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      for (const side of [-1, 1]) { cx.beginPath(); cx.moveTo(travelX + side * head * .55, flightY - head * .55); cx.quadraticCurveTo(travelX + side * head * 1.45, flightY - head * 1.2, travelX + side * head * 1.3, flightY); cx.stroke(); }
+    } else if (animation.attack === 'capital-tower') {
+      const w = size * .3, h = size * (.25 + p * .38), y = baseY - h; cx.globalAlpha = fade * .3; cx.fillStyle = edgeColor; cx.fillRect(targetX - w * .62, y, w * 1.24, h); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.strokeStyle = edgeColor; cx.lineWidth = 6 * unit; cx.fillRect(targetX - w / 2, y, w, h); cx.strokeRect(targetX - w / 2, y, w, h); for (let i = 0; i < 3; i++) { cx.fillStyle = edgeColor; cx.fillRect(targetX - w * .32 + i * w * .3, y + h * .18, w * .11, h * .48); }
+    } else if (animation.attack === 'district-grid') {
+      const cell = size * .11; cx.globalAlpha = fade; cx.strokeStyle = coreColor; cx.lineWidth = 5 * unit; for (let row = -1; row <= 1; row++) for (let col = -1; col <= 1; col++) { const spread = .6 + Math.sin(p * Math.PI) * .55, x = travelX + col * cell * spread, y = flightY + row * cell * spread; cx.globalAlpha = fade * (row === 0 && col === 0 ? 1 : .62); cx.strokeRect(x - cell * .42, y - cell * .42, cell * .84, cell * .84); }
+    } else if (animation.attack === 'spirit-burst') {
+      const r = size * (.12 + Math.sin(p * Math.PI) * .11); cx.globalAlpha = fade * .35; cx.fillStyle = edgeColor; cx.beginPath(); cx.arc(travelX, flightY, r * 1.7, 0, Math.PI * 2); cx.fill(); cx.globalAlpha = fade; cx.fillStyle = coreColor; cx.beginPath(); cx.arc(travelX, flightY, r, 0, Math.PI * 2); cx.fill();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 4 * unit; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + p * 5; cx.beginPath(); cx.moveTo(travelX + Math.cos(a) * r * 1.15, flightY + Math.sin(a) * r * 1.15); cx.lineTo(travelX + Math.cos(a) * r * 1.75, flightY + Math.sin(a) * r * 1.75); cx.stroke(); }
+    }
+    if (p > .66) {
+      const impact = (p - .66) / .34, impactY = baseY - size * .44, radius = size * (.12 + impact * .5);
+      cx.globalAlpha = (1 - impact) * .9; cx.strokeStyle = coreColor; cx.lineWidth = 6 * unit;
+      cx.beginPath(); cx.arc(targetX, impactY, radius, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = edgeColor; cx.lineWidth = 3 * unit; cx.beginPath(); cx.arc(targetX, impactY, radius * .68, 0, Math.PI * 2); cx.stroke();
+      for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, inner = radius * .78, outer = radius * 1.18; cx.beginPath(); cx.moveTo(targetX + Math.cos(a) * inner, impactY + Math.sin(a) * inner); cx.lineTo(targetX + Math.cos(a) * outer, impactY + Math.sin(a) * outer); cx.stroke(); }
+    }
+    cx.restore(); return true;
+  }
   function renderBattle() {
     const b = battle, W = SCREEN_W, H = SCREEN_H, FIELD_H = H - quizPanelLayout(W, H).panelH;
     drawBattleBackground(b.kind, W, FIELD_H);
@@ -4330,7 +5003,6 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const entranceProgress = entranceActive ? 1 - b.entranceT / Math.max(1, b.entranceTotal || 1450) : 1;
     const entranceReveal = Math.max(0, Math.min(1, entranceProgress / .42));
     const entranceAttack = Math.max(0, Math.min(1, (entranceProgress - .42) / .42));
-    const encounterLunge = entranceActive ? Math.sin(entranceAttack * Math.PI) * Math.min(155, stageW * .19) : 0;
     const encounterPetRecoil = entranceActive && entranceAttack > .45
       ? -Math.sin(Math.min(1, (entranceAttack - .45) / .55) * Math.PI) * 24 * actorScale : 0;
     const petP = b.petAttackT > 0 ? 1 - b.petAttackT / (b.petAttackTotal || 460) : 0;
@@ -4359,7 +5031,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const m = b.mon, img = monsterImg(b.monId);
     const enemyW = Math.min(240, m.drawW * 1.12) * actorScale * battleLevelScale(b.kanjiLevel);
     const enemyH = enemyW * (m.drawH / m.drawW);
-    const enemyX = monCX + (1 - entranceReveal) * Math.min(260, stageW * .34) - encounterLunge - enemyLunge + enemyRecoil;
+    const enemyX = monCX + (1 - entranceReveal) * Math.min(260, stageW * .34) - enemyLunge + enemyRecoil;
     const encounterJump = entranceActive
       ? (b.kind === 'water' ? (1 - entranceReveal) * enemyH * .82 : 0) - Math.sin(entranceReveal * Math.PI) * Math.min(72, stageH * .2)
       : 0;
@@ -4383,6 +5055,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     }
     drawMonsterMeaningEffect(m, enemyX, monBaseY - idle + encounterJump, enemyW);
 
+    // Cutscene dùng đúng tuyệt kỹ semantic của Kanji vừa xuất hiện. Pet vẫn
+    // giật lùi tại nhịp impact, nhưng quái không còn lao/cắn bằng pose chung.
+    if (entranceActive && entranceAttack > 0) {
+      drawMeaningAttackAnimation(m, entranceAttack, monCX, plCX, Math.min(plBaseY, monBaseY), 210 * actorScale);
+    }
+    if (b.petAttackT > 0) drawMeaningAttackAnimation(C.MONSTERS[currentPetId], petP, plCX, monCX, Math.min(plBaseY, monBaseY), 180 * actorScale);
+    if (b.enemyAttackT > 0) drawMeaningAttackAnimation(m, enemyP, monCX, plCX, Math.min(plBaseY, monBaseY), 200 * actorScale);
     drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, plBaseY, monBaseY, actorScale });
     if (entranceActive) {
       drawWildEncounterCutscene(b, { stageX, stageY, stageW, stageH, plCX, monCX, plBaseY, monBaseY, actorScale, enemyX, enemyW, enemyH, progress: entranceProgress });
@@ -4441,17 +5120,6 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     // Letterbox bars keep the short reveal readable on both desktop and mobile.
     cx.fillStyle = 'rgba(3,8,20,.92)';
     cx.fillRect(s.stageX, s.stageY, s.stageW, barH); cx.fillRect(s.stageX, s.stageY + s.stageH - barH, s.stageW, barH);
-    const attackP = Math.max(0, Math.min(1, (progress - .42) / .42));
-    if (attackP > 0 && attackP < 1) {
-      cx.globalAlpha = Math.sin(attackP * Math.PI) * .52;
-      cx.strokeStyle = water ? '#9eeaff' : '#e6ff9c'; cx.lineWidth = 3;
-      for (let i = 0; i < 9; i++) {
-        const y = s.stageY + barH + 22 + i * Math.max(12, (s.stageH - barH * 2 - 44) / 9);
-        const length = 42 + (i % 3) * 24, x = s.enemyX - 35 - i * 8;
-        cx.beginPath(); cx.moveTo(x + length, y); cx.lineTo(x - length, y + (i % 2 ? 7 : -7)); cx.stroke();
-      }
-      cx.globalAlpha = 1;
-    }
     // Grass encounters scatter leaves; water encounters throw droplets/ripples.
     for (let i = 0; i < 12; i++) {
       const phase = (progress * 1.45 + i * .087) % 1;
@@ -4487,7 +5155,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.globalAlpha = Math.max(0, textAlpha); cx.textAlign = 'center'; cx.shadowColor = 'rgba(0,0,0,.95)'; cx.shadowBlur = 9;
     cx.fillStyle = water ? '#c8f6ff' : '#f0ffb5'; cx.font = `bold ${Math.max(17, Math.min(30, s.stageW * .032))}px ${JPFONT}`;
     const message = progress < .4 ? (water ? 'MẶT NƯỚC BỖNG CHUYỂN ĐỘNG…' : 'BỤI CỎ BỖNG RUNG LÊN…')
-      : `KANJI HOANG DÃ「${b.mon.kanji}」LAO TỚI!`;
+      : `KANJI HOANG DÃ「${b.mon.kanji}」TUNG TUYỆT KỸ!`;
     cx.fillText(message, s.stageX + s.stageW / 2, s.stageY + barH * .68);
     cx.restore(); cx.textAlign = 'left';
   }
@@ -4977,6 +5645,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       cx.strokeStyle = `rgba(125,247,255,${capture.burstT / 520})`; cx.lineWidth = 5;
       cx.beginPath(); cx.arc(W / 2, ringY - 80, radius, 0, Math.PI * 2); cx.stroke();
     }
+    if (capture.passed && capture.catchEffectT > 0) {
+      const total = Math.max(1, capture.catchEffectTotal || 1500);
+      const progress = Math.max(0, Math.min(1, 1 - capture.catchEffectT / total));
+      const monster = C.MONSTERS[capture.info.monId], animation = kanjiAnimation(monster);
+      const [coreColor, edgeColor] = (animation && animation.colors) || ['#d7fbff', '#56eaff'];
+      const ringProgress = Math.min(1, progress * 1.35), radius = 52 + ringProgress * Math.min(190, W * .25);
+      cx.globalAlpha = Math.max(0, 1 - ringProgress) * .85; cx.strokeStyle = edgeColor; cx.lineWidth = 8;
+      cx.beginPath(); cx.arc(W / 2, ringY - 80, radius, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = coreColor; cx.lineWidth = 3; cx.beginPath(); cx.arc(W / 2, ringY - 80, radius * .72, 0, Math.PI * 2); cx.stroke();
+      cx.globalAlpha = 1;
+      drawMeaningAttackAnimation(monster, progress, W * .2, W * .8, ringY + 18, Math.min(190, fieldH * .4));
+    }
     const captureCompact = W < 600, captureHudW = Math.min(W - 36, 520), captureHudH = captureCompact ? 92 : 76;
     cx.fillStyle = 'rgba(8,13,31,.9)'; cx.fillRect(18, 16, captureHudW, captureHudH);
     cx.strokeStyle = '#275b8f'; cx.lineWidth = 2; cx.strokeRect(18, 16, captureHudW, captureHudH);
@@ -5009,7 +5689,11 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.strokeText(questionStatus, 24, 58); cx.fillText(questionStatus, 24, 58); cx.restore();
     if (pve.phase === 'fight' && pve.mode === 'gym') {
       drawPveExamHud(W);
+      const shakePower = pve.arenaShakeT > 0 ? Math.min(9, pve.arenaShakeT / 30) : 0;
+      cx.save();
+      if (shakePower) cx.translate(Math.sin(pve.arenaShakeT * .21) * shakePower, Math.cos(pve.arenaShakeT * .17) * shakePower * .45);
       drawPveDuel(W, fieldH);
+      cx.restore();
     } else if (trainer && (pve.phase === 'fight' || pve.phase === 'end')) {
       drawPveTrainerTeam(pve.pool, W, fieldH);
       const shakePower = pve.arenaShakeT > 0 ? Math.min(9, pve.arenaShakeT / 30) : 0;
@@ -5167,6 +5851,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       cx.drawImage(enemyImage, enemyX - enemyW / 2, baseY - enemyH - jumpY - idle - enemyHop + enemySink, enemyW, enemyH); cx.restore();
     } else drawPveMascotPlaceholder(target, enemyX, baseY - jumpY, enemyW);
     drawMonsterMeaningEffect(enemy, enemyX, baseY - jumpY - idle - enemyHop + enemySink, enemyW, resultWin ? .4 : .85);
+    if (pve.petAttackT > 0) drawMeaningAttackAnimation(pet, petP, petCenter, enemyCenter, baseY, Math.max(135, petW * 1.15));
+    if (pve.enemyAttackT > 0) drawMeaningAttackAnimation(enemy, enemyP, enemyCenter, petCenter, baseY, Math.max(135, enemyW * 1.15));
     cx.textAlign = 'center'; cx.font = 'bold 12px "KanjiGo UI",sans-serif';
     cx.fillStyle = '#bafbd0'; cx.fillText(`PET「${pet.kanji}」Lv.${petLevel}`, petCenter, baseY + 20);
     cx.fillStyle = '#ffd98a'; cx.fillText(`${trainerFight ? 'ĐỐI THỦ' : 'CÂU HỎI'}「${target}」Lv.${enemyLevel}`, enemyCenter, baseY + 20); cx.textAlign = 'left';
@@ -5738,7 +6424,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     activePlayerUsesV4 ? 'playerV4DrawSize' : 'drawSize']) || TILE);
   const defaultCharacterDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE);
   const activePlayerDrawScale = activePlayerDrawSize / defaultCharacterDrawSize;
-  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('landmark_ftown', C.ASSETS.ftownCampus), loadImg('landmark_innovation_hub', C.ASSETS.innovationHub), loadImg('landmark_hoa_lac', C.ASSETS.hoaLacCampus), loadImg('prop_cuder', C.ASSETS.cuderStatue), loadImg('prop_fpt_sign', C.ASSETS.fptSoftwareSign), loadImg('prop_campus_shrub', C.ASSETS.campusShrubCluster), loadImg('prop_campus_garden', C.ASSETS.fptCampusGarden), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
+  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('landmark_ftown', C.ASSETS.ftownCampus), loadImg('landmark_innovation_hub', C.ASSETS.innovationHub), loadImg('landmark_heritage_pavilion', C.ASSETS.heritageGardenPavilion), loadImg('landmark_hoa_lac', C.ASSETS.hoaLacCampus), loadImg('prop_cuder', C.ASSETS.cuderStatue), loadImg('prop_fpt_sign', C.ASSETS.fptSoftwareSign), loadImg('prop_campus_shrub', C.ASSETS.campusShrubCluster), loadImg('prop_campus_garden', C.ASSETS.fptCampusGarden), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (petData[currentPetId] && C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
@@ -5811,6 +6497,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     clientToLogical,
     getOverworldCamera: () => ({ ...overworldCamera() }), getQuizLayout: () => ({ ...quizPanelLayout(SCREEN_W, SCREEN_H) }),
     resetPetTrail, recordPlayerTrail, petFollowPosition, getPetTrail: () => trail.map((point) => ({ ...point })),
+    kanjiAnimations: () => Object.fromEntries(Object.entries(KANJI_ANIMATIONS).map(([char, value]) => [char, { ...value }])),
+    followerMeaningMotion: (id, moving = false, now = 0) => followerMeaningMotion(C.MONSTERS[id], moving, now),
+    hasMeaningAttackAnimation: (id) => !!kanjiAnimation(C.MONSTERS[id]),
+    resolveKanjiAnimation: (id) => { const animation = kanjiAnimation(C.MONSTERS[id]); return animation ? { ...animation } : null; },
+    renderMeaningAttackFrame: (id, progress, reverse = false) => drawMeaningAttackAnimation(
+      C.MONSTERS[id], progress, reverse ? 520 : 120, reverse ? 120 : 520, 360, 180),
     renderOnce: render, targetFrameMs, ensureWorldGroundCache, updateOverworld,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;

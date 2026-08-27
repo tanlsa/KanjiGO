@@ -54,7 +54,8 @@
   };
   const landmarks = [
     { id: 'ftown', label: 'FTOWN', subtitle: 'TECH CAMPUS', gx: 47, gy: 2, width: 14, height: 8, style: 'ftown', asset: 'landmark_ftown' },
-    { id: 'innovation_hub', label: 'INNOVATION HUB', subtitle: 'GREEN TECH LAB', gx: 47, gy: 17, width: 8, height: 4, style: 'innovation', asset: 'landmark_innovation_hub' },
+    { id: 'innovation_hub', label: 'INNOVATION HUB', subtitle: 'GREEN TECH LAB', gx: 47, gy: 17, width: 8, height: 4, style: 'innovation', asset: 'landmark_innovation_hub', collision: { gx: 47, gy: 17, width: 8, height: 4, entrances: [[51, 20]] } },
+    { id: 'heritage_pavilion', label: 'HERITAGE GARDEN', subtitle: 'PAVILION', gx: 2.5, gy: 31.5, width: 5, height: 2.5, style: 'heritage', asset: 'landmark_heritage_pavilion', collision: { gx: 3, gy: 32, width: 4, height: 2, entrances: [[5, 33]] } },
     { id: 'hoa_lac', label: 'F-VILLE', subtitle: 'HÒA LẠC', gx: 38, gy: 33, width: 16, height: 8, style: 'hoa_lac', asset: 'landmark_hoa_lac' },
   ];
   const props = [

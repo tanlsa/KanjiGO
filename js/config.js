@@ -26,6 +26,7 @@ window.CONFIG = {
     trainerThemeIcons: 'assets/world/trainer-theme-icons.png',
     ftownCampus: 'assets/world/ftown-campus-v3.png',
     innovationHub: 'assets/world/innovation-hub.png',
+    heritageGardenPavilion: 'assets/world/heritage-garden-pavilion-v2.png',
     hoaLacCampus: 'assets/world/hoa-lac-campus-v2.png',
     cuderStatue: 'assets/world/cuder-statue.png',
     fptSoftwareSign: 'assets/world/fpt-software-sign-v2.png',
@@ -151,8 +152,7 @@ window.CONFIG = {
   ],
   SANDBOX_QA: {
     enabled: true,
-    capturedKanji: 80,
-    tierCounts: { N5: 40, N4: 40 },
+    capturedKanji: 200,
     levelBands: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     badges: ['N5'],
   },
