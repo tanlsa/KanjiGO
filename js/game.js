@@ -19,6 +19,21 @@
   const KDB = window.KANJI_DB;
   const QUESTION_CHALLENGES = Array.isArray(KDB.CHALLENGES) ? KDB.CHALLENGES : [];
 const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false; } catch (error) { return false; } };
+  const playKanjiOnYomi = (char) => { try { return window.AudioManager?.playKanjiOnYomi(char) || false; } catch (error) { return false; } };
+  const playKanjiKunYomi = (char) => { try { return window.AudioManager?.playKanjiKunYomi(char) || false; } catch (error) { return false; } };
+  // Plays the On/Kun pronunciation audio for the exact Kanji a question is
+  // asking about. Only runs for single-Kanji pronunciation questions (the
+  // reading of a specific Kanji is tested and its type is known), so we never
+  // play a generic sound or trigger per-frame.
+  function playQuestionPronunciation(q) {
+    if (!q) return false;
+    const type = String(q.type || '').toLowerCase();
+    if (type !== 'on' && type !== 'kun') return false;
+    if (!['m1', 'm8'].includes(String(q.mode))) return false;
+    const char = String(q.target || '').trim();
+    if (!char) return false;
+    return type === 'on' ? playKanjiOnYomi(char) : playKanjiKunYomi(char);
+  }
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
   const vocabularyId = (question) => {
@@ -2082,6 +2097,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       phase: 'fight', result: null, endMsg: '', counted: false,
       learningSession: createLearningSession('battle'),
     };
+    playQuestionPronunciation(battle.q);
     return true;
   }
 
@@ -2183,7 +2199,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
   function enemyAttack(b, reason = '') {
     if (!b || b.phase !== 'fight' || b.pendingLose > 0) return;
-    playSFX('BATTLE_ATTACK');
+    playSFX('BATTLE_ENEMY_ATTACK');
     const dmg = rnd(b.mon.atk);
     player.hp = Math.max(0, player.hp - dmg);
     playSFX('BATTLE_PLAYER_DAMAGE');
@@ -2441,6 +2457,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     lecture.phase = 'check'; lecture.checkIndex = 0; lecture.lessonScore = 0;
     lecture.checkResults = []; lecture.missedVocabIds = [];
     lecture.q = academyQuestion(0); lecture.feedback = ''; lecture.answerLocked = false; lecture.selectedIndex = -1;
+    playQuestionPronunciation(lecture.q);
   }
   function prepareAcademyRecap() {
     const missed = [...new Set(lecture.missedVocabIds)].filter((id) => VOCABULARY_BY_ID.has(id));
@@ -2463,6 +2480,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const pool = lecture.recapIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean);
     lecture.phase = 'confirm'; lecture.confirmIndex = 0; lecture.answerLocked = false; lecture.selectedIndex = -1;
     lecture.feedback = ''; lecture.q = academyQuestion(lecture.checkIndex + 1, '', pool);
+    playQuestionPronunciation(lecture.q);
   }
   function finishLecture() {
     ensureMastery(lecture.char).lectured = true;
@@ -2503,6 +2521,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         const previous = lecture.q && lecture.q.key;
         lecture.q = academyQuestion(lecture.checkIndex, previous);
         lecture.feedback = ''; lecture.answerLocked = false; lecture.selectedIndex = -1;
+        playQuestionPronunciation(lecture.q);
       }
     } else if (lecture.phase === 'recap') {
       if (lecture.recapIndex < lecture.recapIds.length - 1) lecture.recapIndex++;
@@ -2514,6 +2533,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         const pool = lecture.recapIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean);
         lecture.q = academyQuestion(lecture.checkIndex + lecture.confirmIndex + 1, lecture.q && lecture.q.key, pool);
         lecture.feedback = ''; lecture.answerLocked = false; lecture.selectedIndex = -1;
+        playQuestionPronunciation(lecture.q);
       }
     } else if (lecture.phase === 'ready') startCapture(lecture.char);
     else if (lecture.phase === 'summary') openAcademyLobby();
@@ -2523,6 +2543,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (!lecture || !['check', 'confirm'].includes(lecture.phase) || lecture.answerLocked || !lecture.q) return;
     const correct = idx === lecture.q.correctIndex;
     recordVocabularyEvidence(lecture.q, correct, { context: 'academy', allowRecall: false, allowMastery: false });
+    playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (lecture.phase === 'check') {
       if (correct) lecture.lessonScore++;
       lecture.checkResults.push({ vocabId: lecture.q.vocabId, mode: lecture.q.mode, correct });
@@ -2565,6 +2586,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     };
     const restoredQ = fromDraft && draft.q && draft.q.target === target && validIds.has(draft.q.vocabId) ? draft.q : null;
     if (['check', 'confirm'].includes(phase)) lecture.q = restoredQ || (phase === 'check' ? academyQuestion(lecture.checkIndex) : academyQuestion(lecture.checkIndex + lecture.confirmIndex + 1, '', lecture.recapIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean)));
+    playQuestionPronunciation(lecture.q);
     if (phase === 'cards' && lecture.cardRevealed) markCurrentAcademyCardSeen();
     state = 'lecture'; saveAcademyDraft();
     return true;
@@ -2628,6 +2650,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       feedback: null, fbT: 0, selectedIndex: -1, revealAnswer: false, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1,
       catchEffectT: 0, catchEffectTotal: 0,
       learningSession: createLearningSession('capture') };
+    playQuestionPronunciation(capture.q);
     state = 'capture';
     playSFX('CAPTURE_START');
     saveGame(); saveLearning();
@@ -2881,6 +2904,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       rankDisplay: 0, rankTarget: 0, rankShockT: 0, rankGainT: 0,
       learningSession: createLearningSession(options.mode || 'pve') };
     pve.q = makePveQuestion(target);
+    playQuestionPronunciation(pve.q);
     const info = kanjiInfo(target); if (info) monsterImg(info.monId);
     playSFX('WORLD_OPEN_ARENA');
     state = 'pve'; pveResult = null;
@@ -3086,6 +3110,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       return;
     }
     if (hit && hit.action === 'group') { dex.group = !dex.group; dex.contentCache = null; dex.scrollY = 0; ensureDexSelectionVisible(); return; }
+    if (hit && hit.action === 'kanji-audio') {
+      if (hit.value && hit.value.char) {
+        if (hit.value.type === 'kun') playKanjiKunYomi(hit.value.char);
+        else playKanjiOnYomi(hit.value.char);
+      }
+      return;
+    }
     if (hit && hit.action === 'card') { dex.sel = hit.value; ensureDexSelectionVisible(); }
     const layout = dexLayout(dex.list.length);
     if (y >= layout.oy && y <= layout.gridBottom) dex.drag = { pointerId, startY: y, lastY: y, moved: false };
@@ -3831,7 +3862,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (b.qCooldown <= 0 && b.monHp > 0 && !b.pendingLose) {
         // Sau khi bị quái phản công, cho người học làm lại đúng câu vừa sai.
         // Chỉ câu trả lời đúng mới chuyển sang kiến thức tiếp theo.
-        if (!b.retryQuestion) b.q = makeQuestion(b.mon.kanji, b.q.key);
+        if (!b.retryQuestion) { b.q = makeQuestion(b.mon.kanji, b.q.key); playQuestionPronunciation(b.q); }
         b.retryQuestion = false;
         b.questionElapsed = 0;
         b.selectedIndex = -1; b.revealAnswer = false;
@@ -3859,6 +3890,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         else {
           const sourcePool = capture.vocabIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean);
           capture.q = captureQuestion(capture.char, capture.index, capture.q.key, sourcePool);
+          playQuestionPronunciation(capture.q);
           capture.selectedIndex = -1; capture.revealAnswer = false; capture.feedback = null;
         }
       }
@@ -3888,6 +3920,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         if (pve.pendingEnd) finishPve();
         else {
           const target = randomPveKanji(pve.q && pve.q.target); pve.q = makePveQuestion(target, pve.q.key);
+          playQuestionPronunciation(pve.q);
           pve.selectedIndex = -1; pve.revealAnswer = false; pve.feedback = null;
           pve.entranceT = 520; pve.entranceTotal = pve.entranceT;
           pve.petAttackT = 0; pve.enemyAttackT = 0; pve.enemyHitT = 0; pve.playerHitT = 0;
@@ -6367,8 +6400,25 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
       cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
       drawMonsterName(C.MONSTERS[selected.monId], 20, panelY + 52, W - 40, 13, { label: true });
-      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ') || '—'}`, 20, panelY + 76, narrow ? W - 40 : 280, 14);
-      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, narrow ? 20 : 320, narrow ? panelY + 97 : panelY + 76, narrow ? W - 40 : W - 340, 14);
+      const btnW = 28, btnH = 22, onX = 20, kunX = narrow ? 20 : 320;
+      const onMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : 250;
+      const kunMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : Math.max(80, W - 40 - kunX - btnW - 8);
+      const onBtnX = onX + onMaxW + 6, onBtnY = panelY + 76 - btnH + 4;
+      const kunBtnY = (narrow ? panelY + 97 : panelY + 76) - btnH + 4, kunBtnX = kunX + kunMaxW + 6;
+      const drawAudioBtn = (bx, by, active) => {
+        cx.fillStyle = active ? 'rgba(24,102,151,.92)' : 'rgba(60,68,96,.45)';
+        cx.fillRect(bx, by, btnW, btnH);
+        cx.strokeStyle = active ? '#72ddff' : '#3a4a6b'; cx.lineWidth = 1; cx.strokeRect(bx, by, btnW, btnH);
+        cx.fillStyle = active ? '#fff' : '#767e92'; cx.font = '15px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+        cx.fillText('🔊', bx + btnW / 2, by + btnH - 5); cx.textAlign = 'left';
+      };
+      const onAudio = true, kunAudio = Array.isArray(selected.kun) && selected.kun.length > 0;
+      cx.fillStyle = '#ffd54a'; fitText(`Âm ON: ${selected.on.join(', ')}`, onX, panelY + 76, onMaxW, 14);
+      cx.fillStyle = '#6effa1'; fitText(`Âm KUN: ${selected.kun.join(', ') || '—'}`, kunX, panelY + (narrow ? 97 : 76), kunMaxW, 14);
+      drawAudioBtn(onBtnX, onBtnY, onAudio);
+      dex.hitboxes.push({ x: onBtnX, y: onBtnY, w: btnW, h: btnH, action: 'kanji-audio', value: { char: selected.char, type: 'on' } });
+      drawAudioBtn(kunBtnX, kunBtnY, kunAudio);
+      if (kunAudio) dex.hitboxes.push({ x: kunBtnX, y: kunBtnY, w: btnW, h: btnH, action: 'kanji-audio', value: { char: selected.char, type: 'kun' } });
       cx.fillStyle = recallColor; cx.font = '12px "KanjiGo UI",sans-serif'; fitText(`Recall ${stat.recall}% · 🔥 ${stat.winStreak} (best ${stat.bestWinStreak})`, 20, narrow ? panelY + 119 : panelY + 100, W - 40, 12);
     } else {
       cx.fillStyle = '#9ab'; cx.font = `18px ${JPFONT}`; cx.fillText('？？？', 20, panelY + 34); cx.font = '14px "KanjiGo UI",sans-serif'; cx.fillText('Tới 🏛️ Giảng đường để thu phục chữ này.', 20, panelY + 65);
