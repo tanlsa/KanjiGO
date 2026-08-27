@@ -124,12 +124,26 @@ window.CONFIG = {
     loseExpPenalty: 10,   // THUA: trừ EXP của pet đang theo
   },
 
+  QUESTION_FEEDBACK: {
+    // Sai: giữ nguyên đủ lâu để đọc correction rồi fade mượt trước câu kế.
+    wrongHoldMs: 1500,
+    wrongFadeMs: 700,
+    correctFadeMs: 180,
+  },
+
   // --- 🐾 PET đi theo + EXP/Level ---
   PET: { monId: 'kuni', size: 30, followDistance: 44, trailStep: 2, bob: true },
   // Pet cấp sẵn khi khởi tạo. Level là mức tối thiểu, không làm giảm tiến độ save cũ.
   INITIAL_PETS: [
     { monId: 'fish', level: 10 },
   ],
+  SANDBOX_QA: {
+    enabled: true,
+    capturedKanji: 80,
+    tierCounts: { N5: 40, N4: 40 },
+    levelBands: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    badges: ['N5'],
+  },
   LEVEL: {
     expPerLevel: 20,      // EXP cần mỗi cấp = level * expPerLevel
     hpPerLevel: 5,        // lên cấp: +maxHp (áp cho PLAYER khi pet lên cấp)
@@ -153,6 +167,9 @@ window.CONFIG = {
     dmgPerLevel: 2,
     petSizePerLevel: 3,
     petSizeMax: 60,
+    battleScaleBase: 0.82,
+    battleScalePerLevel: 0.05,
+    battleScaleMax: 1.3,
     hpAppliesTo: 'player',
   },
 
@@ -177,10 +194,10 @@ window.CONFIG = {
     relaxFromAttempt: 3,
   },
   QUESTION_MODES: {
-    // Mỗi level giữ lại dạng cũ và mở thêm dạng mới. m11 hỏi cách đọc cả
-    // từ ghép trong câu; m12 đổi phần kana trong câu về đúng từ ghép Kanji.
-    weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2, m8: 2, m9: 2, m10: 2, m11: 2, m12: 2 },
-    unlockAt: { m1: 1, m6: 1, m2: 2, m3: 2, m4: 3, m5: 3, m7: 4, m8: 5, m11: 6, m9: 7, m12: 8, m10: 9 },
+    // Mỗi level giữ lại dạng cũ và mở thêm dạng mới. m13 điền từ vào câu
+    // khuyết; m14/m15 hỏi đảo chiều từ cách đọc/nghĩa về mặt chữ Kanji.
+    weights: { m1: 3, m2: 2, m3: 2, m4: 2, m5: 1, m6: 2, m7: 2, m8: 2, m9: 2, m10: 2, m11: 2, m12: 2, m13: 2, m14: 2, m15: 2 },
+    unlockAt: { m1: 1, m6: 1, m2: 2, m3: 2, m4: 3, m5: 3, m7: 4, m14: 4, m8: 5, m15: 5, m11: 6, m9: 7, m13: 7, m12: 8, m10: 9 },
     workbookReadingLevel: 6,
   },
   PVE: {
@@ -237,7 +254,31 @@ window.CONFIG = {
     // Chỉ áp dụng cho profile SANDBOX mặc định; nhân vật mới vẫn theo N5 -> Gym -> N4.
     testUnlockedTiers: ['N4'],
     gym: {
-      N5: { questions: 10, passRatio: 0.8, badge: 'N5', unlocks: 'N4' },
+      N5: {
+        questionRange: [20, 25],
+        passRatio: 0.7,
+        badge: 'N5',
+        unlocks: 'N4',
+        requiredCaptured: 50,
+        requiredAtLevel: 20,
+        requiredLevel: 5,
+        correctTransitionMs: 750,
+        wrongTransitionMs: 1000,
+        examModes: ['m1', 'm6', 'm7', 'm8', 'm11', 'm9', 'm13', 'm12', 'm10', 'm14', 'm15'],
+      },
+      N4: {
+        questionRange: [20, 25],
+        passRatio: 0.8,
+        badge: 'N4',
+        requiredCaptured: 50,
+        requiredAtLevel: 20,
+        requiredLevel: 5,
+        requiresBadge: 'N5',
+        requiresTierComplete: 'N5',
+        correctTransitionMs: 750,
+        wrongTransitionMs: 1000,
+        examModes: ['m1', 'm6', 'm7', 'm8', 'm11', 'm9', 'm13', 'm12', 'm10', 'm14', 'm15'],
+      },
     },
   },
 

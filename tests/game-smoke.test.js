@@ -165,6 +165,19 @@ test('default sandbox account unlocks test content while a new journey starts cl
   assert.equal(sandbox.debug.getKanjiStat('魚').level, 10);
   assert.equal(sandbox.debug.availableSpawn('water').includes('fish'), true);
   assert.equal(sandbox.debug.isTierUnlocked('N4'), true);
+  assert.equal(sandbox.debug.hasBadge('N5'), true);
+  assert.ok(sandbox.debug.tierProgress('N5').captured >= 40);
+  assert.ok(sandbox.debug.tierProgress('N4').captured >= 40);
+  const sandboxLevels = new Set(Object.entries(sandbox.debug.mastery())
+    .filter(([, stat]) => stat.captured)
+    .map(([char]) => sandbox.debug.getKanjiStat(char).level));
+  assert.deepEqual([...sandboxLevels].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'SANDBOX needs captured Kanji at every level for question-mode QA');
+  const n4Levels = new Set(Object.entries(sandbox.debug.mastery())
+    .filter(([char, stat]) => stat.captured && sandbox.debug.tierOfKanji(char) === 'N4')
+    .map(([char]) => sandbox.debug.getKanjiStat(char).level));
+  assert.deepEqual([...n4Levels].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'SANDBOX N4 mascots must also cover every level');
   for (const definition of sandbox.debug.skillDefinitions().filter((item) => item.released !== false)) {
     assert.equal(sandbox.debug.hasSkill(definition.id), true, `${definition.id} should be active in the sandbox profile`);
   }
@@ -297,6 +310,8 @@ test('I opens a responsive character profile with live learning stats and badge 
         'test-mastered': { stage: 'mastered', seenAt: 1, masteredAt: 2 },
       },
       badges: { N5: true },
+      gymHistory: { N5: { attempts: 2, bestCorrect: 25, bestTotal: 25, bestRatio: 1, bestGrade: 'S', bestAt: 10,
+        bestDurationMs: 125000, lastCorrect: 18, lastTotal: 22, lastRatio: 18 / 22, lastGrade: 'A', lastAt: 20, lastDurationMs: 140000 } },
     },
   });
   await new Promise((resolve) => setImmediate(resolve));
@@ -316,6 +331,16 @@ test('I opens a responsive character profile with live learning stats and badge 
   assert.equal(stats.tiers.find((tier) => tier.id === 'N5').earned, true);
   assert.ok(game.textCalls.some((call) => call.text === 'HỒ SƠ NHÂN VẬT'));
   assert.ok(game.textCalls.some((call) => call.text === 'HUY HIỆU N5'));
+  assert.ok(game.textCalls.some((call) => call.text === 'ĐÃ NHẬN · PASS ✓'));
+  assert.ok(game.textCalls.some((call) => call.text.startsWith('S · 25/25')),
+    'best score remains visible even when the responsive card shortens the percentage');
+  assert.ok(game.textCalls.some((call) => call.text.startsWith('THỜI LƯỢNG')));
+  assert.ok(game.textCalls.some((call) => call.text === '2:05'));
+  assert.ok(game.textCalls.filter((call) => call.text.startsWith('THÀNH TÍCH')).length >= 2,
+    'both N5 and N4 badge cards need useful result information');
+  assert.ok(game.textCalls.some((call) => call.text === 'THU PHỤC N4'));
+  assert.ok(game.drawCalls.some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(17,67,58,.9)'),
+    'earned badges should use the updated emerald crest card');
   const close = game.debug.getProfileUi().hitboxes.find((box) => box.action === 'close');
   assert.ok(close && close.x >= 0 && close.y >= 0 && close.x + close.w <= game.debug.getCanvasSize().width);
 
@@ -579,6 +604,12 @@ test('question formats unlock monotonically and workbook context modes use curat
   }
   assert.equal(levels[4].has('m11'), false);
   assert.equal(levels[5].has('m11'), true);
+  assert.equal(levels[2].has('m14'), false);
+  assert.equal(levels[3].has('m14'), true);
+  assert.equal(levels[3].has('m15'), false);
+  assert.equal(levels[4].has('m15'), true);
+  assert.equal(levels[5].has('m13'), false);
+  assert.equal(levels[6].has('m13'), true);
   assert.equal(levels[6].has('m12'), false);
   assert.equal(levels[7].has('m12'), true);
   assert.equal(levels[8].has('m10'), true);
@@ -587,11 +618,35 @@ test('question formats unlock monotonically and workbook context modes use curat
   const reading = debug.makeQuestion(source.target, '', 'm11', true, [source]);
   assert.equal(reading.mode, 'm11');
   assert.equal(reading.answer, source.wordReading);
-  assert.deepEqual(new Set(reading.options), new Set(source.options.m11));
+  assert.equal(reading.options.length, 4);
+  assert.ok(reading.options.includes(source.wordReading));
   const spelling = debug.makeQuestion(source.target, '', 'm12', true, [source]);
   assert.equal(spelling.mode, 'm12');
   assert.equal(spelling.answer, source.word);
-  assert.deepEqual(new Set(spelling.options), new Set(source.options.m12));
+  assert.equal(spelling.options.length, 4);
+  assert.ok(spelling.options.includes(source.word));
+
+  const cloze = debug.makeQuestion(source.target, '', 'm13', true, [source]);
+  assert.equal(cloze.mode, 'm13');
+  assert.equal(cloze.answer, source.word);
+  assert.ok(cloze.clozeSentence.includes('＿＿') && !cloze.clozeSentence.includes(source.word));
+  assert.equal(cloze.options.length, 4);
+  assert.ok(cloze.options.includes(source.word));
+
+  const vocabulary = context.KANJI_DB.QUESTIONS.find((question) => question.wordReading && question.mean);
+  const reverseReading = debug.makeQuestion(vocabulary.target, '', 'm14', true, [vocabulary]);
+  assert.equal(reverseReading.mode, 'm14');
+  assert.equal(reverseReading.answer, vocabulary.word);
+  assert.equal(reverseReading.options.length, 4);
+  const reverseMeaning = debug.makeQuestion(vocabulary.target, '', 'm15', true, [vocabulary]);
+  assert.equal(reverseMeaning.mode, 'm15');
+  assert.equal(reverseMeaning.answer, vocabulary.word);
+  assert.equal(reverseMeaning.options.length, 4);
+
+  const stat = debug.mastery()[source.target];
+  stat.mp = debug.mpFloorOfLevel(10);
+  const nonRepeating = debug.makeQuestion(source.target, 'm1|previous-question');
+  assert.notEqual(nonRepeating.mode, 'm1', 'the same question format must not repeat back-to-back when alternatives exist');
 });
 
 test('mobile Back presents the correct action and exits completed battle states', () => {
@@ -796,6 +851,24 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
   assert.ok(debug.getBattle().q.options.length >= 2);
 });
 
+test('battle scales and computes each side from its own Kanji level', () => {
+  const { context, debug } = createGame();
+  const enemyStat = debug.mastery()['年'];
+  enemyStat.captured = true; enemyStat.lectured = true; enemyStat.mp = debug.mpFloorOfLevel(10);
+  assert.equal(debug.startBattle('grass', 'nen'), true);
+  const battle = debug.getBattle();
+  assert.equal(battle.petLevel, 1);
+  assert.equal(battle.kanjiLevel, 10);
+  assert.equal(debug.getPlayer().maxHp, context.CONFIG.PLAYER.maxHp, 'enemy level must not inflate the active pet HP');
+  assert.ok(debug.battleLevelScale(battle.kanjiLevel) > debug.battleLevelScale(battle.petLevel),
+    'Lv.10 enemy must render larger than a Lv.1 actor before viewport scaling');
+
+  const hpBefore = battle.monHp;
+  debug.answer(battle.q.correctIndex);
+  assert.equal(hpBefore - battle.monHp, context.CONFIG.COMBAT.baseDamage + context.CONFIG.COMBAT.comboBonus,
+    'pet damage must use the Lv.1 pet rather than the Lv.10 enemy');
+});
+
 test('Trainer image icons stay crisp above the Arena tint and skip off-screen work', async () => {
   const { debug, drawCalls } = createGame();
   await new Promise((resolve) => setImmediate(resolve));
@@ -928,21 +1001,176 @@ test('themed Trainer unlocks at its collection threshold and uses at most five c
   assert.equal(JSON.parse(storage.get('KANJIGO_LEARNING_V1')).trainerWins.gardener, true);
 });
 
-test('N5 Boss requires full N5 study and the configured Trainer win count', () => {
-  const trainerWins = Object.fromEntries(['gardener', 'parent', 'student', 'timekeeper', 'traveler', 'chef', 'conductor', 'neighbor', 'explorer', 'weather_kid'].map((id) => [id, true]));
-  const withoutWins = createGame();
-  for (const stat of Object.values(withoutWins.debug.mastery())) if (stat && typeof stat === 'object') stat.captured = true;
-  assert.equal(withoutWins.debug.startGym('N5'), false);
+test('N5 Gym requires 50 captures and 20 Kanji at Lv5, without Trainer wins', () => {
+  const { debug } = createGame();
+  const n5 = Object.keys(debug.mastery()).filter((char) => debug.tierOfKanji(char) === 'N5');
+  assert.ok(n5.length >= 50);
+  for (const char of n5) { debug.mastery()[char].captured = false; debug.mastery()[char].level = 1; }
+  for (const char of n5.slice(0, 49)) debug.mastery()[char].captured = true;
+  assert.equal(debug.gymEligibility('N5').captured, 49);
+  assert.equal(debug.startGym('N5'), false);
 
-  const qualified = createGame({ learningSave: { trainerWins } });
-  for (const stat of Object.values(qualified.debug.mastery())) if (stat && typeof stat === 'object') stat.captured = true;
-  assert.equal(qualified.debug.trainerWinsCount(), 10);
-  assert.equal(qualified.debug.startGym('N5'), true);
-  assert.equal(qualified.debug.getPve().mode, 'gym');
+  debug.mastery()[n5[49]].captured = true;
+  for (const char of n5.slice(0, 19)) debug.mastery()[char].mp = debug.mpFloorOfLevel(5);
+  assert.equal(debug.gymEligibility('N5').atLevel, 19);
+  assert.equal(debug.startGym('N5'), false);
+
+  debug.mastery()[n5[19]].mp = debug.mpFloorOfLevel(5);
+  assert.equal(debug.trainerWinsCount(), 0);
+  assert.equal(debug.gymEligibility('N5').ready, true);
+  assert.equal(debug.startGym('N5'), true);
+  const gym = debug.getPve();
+  assert.equal(gym.mode, 'gym');
+  assert.equal(gym.pool.length, debug.tierProgress('N5').available);
+  assert.ok(gym.pool.includes(n5[50]), 'the exam must include uncaptured N5 Kanji');
+  assert.equal(gym.useQuestionQueue, true);
 });
 
-test('a wrong battle answer damages the player and keeps the same question', () => {
-  const { debug } = createGame();
+test('N5 Gym gives one attempt per question and animates the winning side', () => {
+  const { debug, textCalls, drawCalls } = createGame();
+  const n5 = Object.keys(debug.mastery()).filter((char) => debug.tierOfKanji(char) === 'N5');
+  for (const char of n5.slice(0, 50)) debug.mastery()[char].captured = true;
+  for (const char of n5.slice(0, 20)) debug.mastery()[char].mp = debug.mpFloorOfLevel(5);
+  assert.equal(debug.startGym('N5'), true);
+  assert.doesNotThrow(() => debug.renderOnce());
+  assert.ok(textCalls.some((call) => call.text === '70% PASS'), 'the pass threshold needs an explicit 70% marker');
+  assert.ok(textCalls.some((call) => call.text === 'N5'), 'the 70% marker needs the N5 badge medallion');
+  assert.ok(drawCalls.some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(6,18,42,.82)'),
+    'the bright battle background needs a high-contrast title panel');
+
+  let gym = debug.getPve(), firstTarget = gym.q.target;
+  assert.ok(gym.total >= 20 && gym.total <= 25, 'Gym question count must be randomized within 20–25');
+  assert.equal(gym.examMaxHp, gym.total - gym.requiredCorrect + 1,
+    'HP must reach zero on the first miss that makes PASS impossible');
+  const wrongIndex = (gym.q.correctIndex + 1) % gym.q.options.length;
+  debug.answerPve(wrongIndex);
+  assert.equal(gym.index, 1, 'a wrong answer must consume the question immediately');
+  assert.ok(gym.enemyAttackT > 0);
+  assert.ok(gym.playerHitT > 0);
+  assert.equal(gym.examHp, gym.examMaxHp - 1);
+  assert.ok(gym.rankShockT > 0);
+  assert.equal(gym.qCooldown, 1000);
+  debug.updatePve(1001);
+  gym = debug.getPve();
+  assert.notEqual(gym.q.target, firstTarget, 'the failed question must not be retried');
+  assert.equal(gym.selectedIndex, -1);
+  assert.ok(gym.entranceT > 0, 'the next Kanjimon should jump into the arena');
+
+  debug.answerPve(gym.q.correctIndex);
+  assert.ok(gym.petAttackT > 0);
+  assert.ok(gym.enemyHitT > 0);
+  assert.equal(gym.enemyHp, 0);
+  assert.equal(gym.rankTarget, gym.correct / gym.total, 'progress must remain correct / total questions');
+  while (gym.phase === 'fight') {
+    debug.updatePve(751);
+    if (gym.phase === 'fight' && gym.qCooldown <= 0) debug.answerPve(gym.q.correctIndex);
+  }
+  assert.equal(debug.getPveResult().passed, true);
+  assert.equal(debug.getPveResult().badgeAwarded, 'N5');
+  assert.equal(debug.hasBadge('N5'), true);
+  assert.doesNotThrow(() => debug.renderOnce());
+  assert.equal(debug.startGym('N5'), true, 'a passed N5 test must remain replayable for revision');
+  assert.equal(debug.getPve().tier, 'N5');
+});
+
+test('N5 Gym passes at the 70% marker in rank B, awards S at 100%, and KOs beyond 30% wrong', () => {
+  const gradeProbe = createGame().debug;
+  assert.equal(gradeProbe.gymGrade(.24), 'D');
+  assert.equal(gradeProbe.gymGrade(.25), 'C');
+  assert.equal(gradeProbe.gymGrade(.5), 'B');
+  assert.equal(gradeProbe.gymGrade(.7), 'B');
+  assert.equal(gradeProbe.gymGrade(.8), 'A');
+  assert.equal(gradeProbe.gymGrade(1), 'S');
+  const qualify = (debug) => {
+    const n5 = Object.keys(debug.mastery()).filter((char) => debug.tierOfKanji(char) === 'N5');
+    for (const char of n5.slice(0, 50)) debug.mastery()[char].captured = true;
+    for (const char of n5.slice(0, 20)) debug.mastery()[char].mp = debug.mpFloorOfLevel(5);
+  };
+
+  const passing = createGame(); qualify(passing.debug);
+  assert.equal(passing.debug.startGym('N5'), true);
+  let exam = passing.debug.getPve();
+  const allowedWrong = exam.total - exam.requiredCorrect;
+  for (let index = 0; index < exam.total; index++) {
+    const gym = passing.debug.getPve(), wrong = index < allowedWrong;
+    const answer = wrong ? (gym.q.correctIndex + 1) % gym.q.options.length : gym.q.correctIndex;
+    passing.debug.answerPve(answer);
+    passing.debug.updatePve(wrong ? 1001 : 751);
+  }
+  assert.equal(passing.debug.getPveResult().correct, exam.requiredCorrect);
+  assert.equal(passing.debug.getPveResult().grade, 'B');
+  assert.equal(passing.debug.getPveResult().passed, true);
+  assert.equal(passing.debug.getPveResult().ko, false);
+  assert.equal(passing.debug.getGymHistory('N5').attempts, 1);
+
+  assert.equal(passing.debug.startGym('N5'), true);
+  exam = passing.debug.getPve();
+  assert.ok(exam.total >= 20 && exam.total <= 25);
+  while (exam.phase === 'fight') {
+    passing.debug.answerPve(exam.q.correctIndex);
+    passing.debug.updatePve(751);
+  }
+  assert.equal(passing.debug.getPveResult().grade, 'S');
+  assert.equal(passing.debug.getPveResult().ratio, 1);
+  const best = passing.debug.getGymHistory('N5');
+  assert.equal(best.attempts, 2);
+  assert.equal(best.bestGrade, 'S');
+  assert.equal(best.bestCorrect, best.bestTotal);
+  assert.equal(best.bestRatio, 1);
+  assert.equal(JSON.parse(passing.storage.get('KANJIGO_LEARNING_V1')).gymHistory.N5.bestGrade, 'S',
+    'best Gym result must persist in the character learning save');
+  assert.ok(Number.isFinite(JSON.parse(passing.storage.get('KANJIGO_LEARNING_V1')).gymHistory.N5.lastDurationMs),
+    'Gym attempt duration must persist with the result history');
+
+  const failing = createGame(); qualify(failing.debug);
+  assert.equal(failing.debug.startGym('N5'), true);
+  const lethalWrong = failing.debug.getPve().examMaxHp;
+  for (let index = 0; index < lethalWrong; index++) {
+    const gym = failing.debug.getPve();
+    failing.debug.answerPve((gym.q.correctIndex + 1) % gym.q.options.length);
+    if (index < lethalWrong - 1) failing.debug.updatePve(1001);
+  }
+  assert.equal(failing.debug.getPve().examHp, 0);
+  assert.equal(failing.debug.getPve().ko, true);
+  assert.equal(failing.debug.getPve().pendingEnd, true);
+  failing.debug.updatePve(1001);
+  assert.equal(failing.debug.getPveResult().ko, true);
+  assert.equal(failing.debug.getPveResult().passed, false);
+  assert.equal(failing.debug.getPveResult().grade, 'D');
+  assert.equal(failing.debug.hasBadge('N5'), false);
+});
+
+test('PASS N5 reveals N4 Gym, which also needs full N5 plus 50 captures and 20 Lv5', () => {
+  const locked = createGame();
+  assert.equal(locked.debug.openGymMenu(), true);
+  assert.deepEqual([...locked.debug.getGymMenu().options], ['N5']);
+  assert.equal(locked.debug.startGym('N4'), false, 'N4 must require the N5 badge even when QA unlocks its content');
+
+  const { debug } = createGame({ learningSave: { badges: { N5: true } } });
+  assert.equal(debug.openGymMenu(), true);
+  assert.deepEqual([...debug.getGymMenu().options], ['N5', 'N4']);
+  assert.doesNotThrow(() => debug.renderOnce());
+  assert.equal(debug.startGym('N4'), false, 'N4 must stay locked until every N5 Kanji is captured');
+
+  const n5 = Object.keys(debug.mastery()).filter((char) => debug.tierOfKanji(char) === 'N5');
+  const n4 = Object.keys(debug.mastery()).filter((char) => debug.tierOfKanji(char) === 'N4');
+  for (const char of n5) debug.mastery()[char].captured = true;
+  for (const char of n4) { debug.mastery()[char].captured = false; debug.mastery()[char].mp = 0; }
+  for (const char of n4.slice(0, 50)) debug.mastery()[char].captured = true;
+  for (const char of n4.slice(0, 20)) debug.mastery()[char].mp = debug.mpFloorOfLevel(5);
+  const eligibility = debug.gymEligibility('N4');
+  assert.equal(eligibility.prerequisiteReady, true);
+  assert.equal(eligibility.captured, 50);
+  assert.equal(eligibility.atLevel, 20);
+  assert.equal(eligibility.ready, true);
+  assert.equal(debug.startGym('N4'), true);
+  assert.equal(debug.getPve().tier, 'N4');
+  assert.equal(debug.getPve().pool.length, debug.tierProgress('N4').available);
+  assert.ok(debug.getPve().pool.includes(n4[50]), 'N4 questions must include uncaptured N4 Kanji');
+});
+
+test('a selected answer lights up while wrong feedback holds, fades, and retries the same question', () => {
+  const { debug, drawCalls } = createGame();
   assert.equal(debug.startBattle('grass'), true);
   const battle = debug.getBattle();
   const originalKey = battle.q.key;
@@ -951,9 +1179,33 @@ test('a wrong battle answer damages the player and keeps the same question', () 
   debug.answer(wrongIndex);
   assert.ok(debug.getPlayer().hp < hpBefore);
   assert.equal(battle.retryQuestion, true);
-  debug.updateBattle(1100);
+  assert.equal(battle.selectedIndex, wrongIndex);
+  assert.equal(battle.revealAnswer, true);
+  assert.equal(battle.qCooldown, 1000, 'answers should unlock as soon as the stun ends');
+  assert.ok(battle.fbT >= 2000, 'wrong correction disappears too quickly');
+  drawCalls.length = 0; debug.renderOnce();
+  assert.ok(drawCalls.some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(194,52,62,.96)'), 'selected wrong answer must light red');
+  assert.equal(drawCalls.some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(31,132,79,.88)'), false,
+    'an unselected correct answer must not highlight itself');
+
+  debug.updateBattle(1050);
   assert.equal(battle.q.key, originalKey);
   assert.equal(battle.retryQuestion, false);
+  assert.equal(battle.selectedIndex, -1, 'selected highlight must clear when the stun ends');
+  assert.equal(battle.qCooldown <= 0, true, 'the retried question must be answerable after stun');
+  assert.ok(battle.feedback && battle.fbT > 0, 'correction should remain visible after answers unlock');
+
+  debug.updateBattle(800);
+  assert.ok(battle.feedback && battle.fbT > 0 && battle.fbT < battle.feedback.fadeMs, 'wrong correction did not enter its fade phase');
+  drawCalls.length = 0; debug.renderOnce();
+  const fadingText = drawCalls.find((call) => call.type === 'fillText' && call.text.startsWith('✗ Sai!'));
+  assert.ok(fadingText && fadingText.globalAlpha > 0 && fadingText.globalAlpha < 1, 'wrong correction must fade instead of disappearing abruptly');
+
+  debug.updateBattle(400);
+  assert.equal(battle.q.key, originalKey);
+  assert.equal(battle.retryQuestion, false);
+  assert.equal(battle.selectedIndex, -1);
+  assert.equal(battle.feedback, null);
 });
 
 test('legacy and malformed learning saves migrate without crashing', () => {

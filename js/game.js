@@ -130,7 +130,7 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   }
 
   // ---------- TRẠNG THÁI ----------
-  let state = 'overworld';   // overworld | battle | dex | skills | profile | lecture | capture | pve
+  let state = 'overworld';   // overworld | battle | dex | skills | profile | lecture | capture | gym_select | pve
   const player = {
     gx: C.PLAYER.startGx, gy: C.PLAYER.startGy,
     px: C.PLAYER.startGx * TILE, py: C.PLAYER.startGy * TILE,
@@ -186,7 +186,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   // ---------- 📚 TIẾN ĐỘ HỌC ----------
   const characterStorageKey = (baseKey) => window.KanjiGOCharacters?.storageKey?.(baseKey) || baseKey;
   const LEARNING_KEY = characterStorageKey('KANJIGO_LEARNING_V1');
-  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, vocabulary: {}, captureAttempts: {}, academyDraft: null, badges: {}, trainerWins: {}, progression: null };
+  const learning = { total: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastery: {}, vocabulary: {}, captureAttempts: {}, academyDraft: null, badges: {}, trainerWins: {}, gymHistory: {}, progression: null };
   const legacyMasteryKeys = new Set();
   const legacyPetProgress = {};
   const GAME_KEY = characterStorageKey('KANJIGO_GAME_V1');
@@ -659,6 +659,27 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       if (saved.academyDraft && typeof saved.academyDraft === 'object') learning.academyDraft = saved.academyDraft;
       if (saved.badges && typeof saved.badges === 'object') learning.badges = { ...saved.badges };
       if (saved.trainerWins && typeof saved.trainerWins === 'object') learning.trainerWins = { ...saved.trainerWins };
+      if (saved.gymHistory && typeof saved.gymHistory === 'object') {
+        for (const [tier, raw] of Object.entries(saved.gymHistory)) {
+          if (!raw || typeof raw !== 'object') continue;
+          const id = String(tier).toUpperCase(), attempts = Math.max(0, Math.floor(Number(raw.attempts) || 0));
+          learning.gymHistory[id] = {
+            attempts,
+            bestCorrect: Math.max(0, Math.floor(Number(raw.bestCorrect) || 0)),
+            bestTotal: Math.max(0, Math.floor(Number(raw.bestTotal) || 0)),
+            bestRatio: Math.max(0, Math.min(1, Number(raw.bestRatio) || 0)),
+            bestGrade: ['S', 'A', 'B', 'C', 'D'].includes(raw.bestGrade) ? raw.bestGrade : 'D',
+            bestAt: Math.max(0, Number(raw.bestAt) || 0),
+            bestDurationMs: Math.max(0, Number(raw.bestDurationMs) || 0),
+            lastCorrect: Math.max(0, Math.floor(Number(raw.lastCorrect) || 0)),
+            lastTotal: Math.max(0, Math.floor(Number(raw.lastTotal) || 0)),
+            lastRatio: Math.max(0, Math.min(1, Number(raw.lastRatio) || 0)),
+            lastGrade: ['S', 'A', 'B', 'C', 'D'].includes(raw.lastGrade) ? raw.lastGrade : 'D',
+            lastAt: Math.max(0, Number(raw.lastAt) || 0),
+            lastDurationMs: Math.max(0, Number(raw.lastDurationMs) || 0),
+          };
+        }
+      }
       learning.progression = sanitizeProgression(saved.progression);
       saveLearning();
     } catch (e) { console.warn('[KanjiGO] Không đọc được tiến độ học.', e); }
@@ -923,24 +944,43 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   // TEMP QA Skill Tree: dùng chính mastery và KP milestone thật thay vì bơm
   // currency giả, nhờ vậy toàn bộ luồng unlock vẫn được test đúng như gameplay.
   function applySkillTreeQaSeed() {
-    const seed = C.SKILL_TREE && C.SKILL_TREE.qaSeed;
-    if (!seed || seed.enabled !== true || (!isSandboxCharacter() && seed.allowStandardQa !== true)) return 0;
+    const sandbox = isSandboxCharacter();
+    const seed = sandbox ? C.SANDBOX_QA : (C.SKILL_TREE && C.SKILL_TREE.qaSeed);
+    if (!seed || seed.enabled !== true || (!sandbox && seed.allowStandardQa !== true)) return 0;
     const targetCount = Math.max(0, Math.floor(Number(seed.capturedKanji) || 0));
     const targetLevel = Math.max(1, Math.min(C.KLEVEL.maxLevel, Math.floor(Number(seed.level) || 1)));
+    const levelBands = Array.isArray(seed.levelBands) && seed.levelBands.length
+      ? seed.levelBands.map((level) => Math.max(1, Math.min(C.KLEVEL.maxLevel, Math.floor(Number(level) || 1)))) : [targetLevel];
     const ordered = [], seen = new Set();
     for (const tierId of (C.PROGRESSION && C.PROGRESSION.order) || []) {
       const tier = (CATALOG.tiers || {})[tierId];
       for (const char of (tier && tier.kanji) || []) if (kanjiInfo(char) && !seen.has(char)) { seen.add(char); ordered.push(char); }
     }
     for (const info of Object.values(KDB.KANJI)) if (!seen.has(info.char)) { seen.add(info.char); ordered.push(info.char); }
-    for (const char of ordered.slice(0, targetCount)) {
+    const tierCounts = sandbox && seed.tierCounts && typeof seed.tierCounts === 'object' ? seed.tierCounts : null;
+    const selected = [];
+    if (tierCounts) {
+      const selectedSet = new Set();
+      for (const [tierId, rawCount] of Object.entries(tierCounts)) {
+        const count = Math.max(0, Math.floor(Number(rawCount) || 0));
+        const tierChars = ordered.filter((char) => tierOfKanji(char) === String(tierId).toUpperCase()).slice(0, count);
+        for (const char of tierChars) if (!selectedSet.has(char)) { selectedSet.add(char); selected.push(char); }
+      }
+      for (const char of ordered) {
+        if (selected.length >= targetCount) break;
+        if (!selectedSet.has(char)) { selectedSet.add(char); selected.push(char); }
+      }
+    } else selected.push(...ordered.slice(0, targetCount));
+    for (const [index, char] of selected.slice(0, targetCount).entries()) {
       const mastery = ensureMastery(char);
-      mastery.mp = Math.max(mastery.mp, mpFloorOfLevel(targetLevel));
+      const seededLevel = levelBands[index % levelBands.length];
+      mastery.mp = Math.max(mastery.mp, mpFloorOfLevel(seededLevel));
       mastery.level = levelFromMp(mastery.mp);
       mastery.captured = true;
       mastery.lectured = true;
     }
-    return Math.min(targetCount, ordered.length);
+    if (sandbox) for (const badge of seed.badges || []) learning.badges[String(badge).toUpperCase()] = true;
+    return Math.min(targetCount, selected.length);
   }
   applySkillTreeQaSeed();
   // Save cũ có pet thì xem như chữ tương ứng đã thu phục.
@@ -985,6 +1025,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     else if (state === 'profile') { if (k === 'escape' || k === 'i') playSFX('UI_BUTTON_CLICK'); onProfileKey(k); }
     else if (state === 'lecture') { if (['escape', 'enter', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) playSFX('UI_BUTTON_CLICK'); onLectureKey(k); }
     else if (state === 'capture') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onCaptureKey(k); }
+    else if (state === 'gym_select') { if (['escape', ' ', 'enter', '1', '2', 'arrowup', 'arrowdown', 'w', 's'].includes(k)) playSFX('UI_BUTTON_CLICK'); onGymMenuKey(k); }
     else if (state === 'pve') { if (['escape', ' ', 'enter', '1', '2', '3', '4'].includes(k)) playSFX('UI_BUTTON_CLICK'); onPveKey(k); }
   });
   addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
@@ -998,6 +1039,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     else if (state === 'profile') onProfileKey('escape');
     else if (state === 'lecture') onLectureKey('escape');
     else if (state === 'capture') onCaptureKey(capture && capture.phase === 'end' ? 'enter' : 'escape');
+    else if (state === 'gym_select') closeGymMenu();
     else if (state === 'pve') onPveKey(pve && pve.phase === 'end' ? 'enter' : 'escape');
   }
   function clientToLogical(clientX, clientY, rect = cv.getBoundingClientRect()) {
@@ -1012,6 +1054,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     if (state === 'dex') { e.preventDefault(); onDexPointerDown(x, y, e.pointerId); return; }
     if (state === 'skills') { e.preventDefault(); onSkillPointerDown(x, y, e.pointerId); return; }
     if (state === 'profile') { e.preventDefault(); onProfilePointerDown(x, y); return; }
+    if (state === 'gym_select') { e.preventDefault(); onGymMenuPointerDown(x, y); return; }
     if (state === 'lecture') { onLecturePointerDown(x, y, e.pointerId); return; }
     if (state === 'overworld') {
       const hit = overworldHitboxes.find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
@@ -1336,7 +1379,7 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     if (npc && npc.type === 'lecture') { enterLecture(); return; }
     if (npc && npc.type === 'pve') { startPve(); return; }
     if (npc && npc.type === 'trainer') { interactTrainer(npc.trainerId, npc); return; }
-    if (npc && npc.type === 'gym') { startGym(npc.tier || 'N5'); return; }
+    if (npc && npc.type === 'gym') { openGymMenu(npc.tier || 'N5'); return; }
     if (npc) { dialog.active = true; dialog.idx = 0; dialog.npc = npc; return; }
     const f = frontTile();
     const academyEntrance = !player.onBoat && academyEntranceInReach();
@@ -1384,6 +1427,10 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
   function petSizeFor(level, base = C.PET.size) {
     const K = C.KLEVEL;
     return Math.min(K.petSizeMax, base + K.petSizePerLevel * (Math.max(1, level) - 1));
+  }
+  function battleLevelScale(level) {
+    const K = C.KLEVEL, lv = Math.max(1, Math.min(K.maxLevel, Math.floor(Number(level) || 1)));
+    return Math.min(Number(K.battleScaleMax) || 1.3, (Number(K.battleScaleBase) || .82) + (lv - 1) * (Number(K.battleScalePerLevel) || .05));
   }
   function playerMaxHpFor(level) {
     const base = C.PLAYER.maxHp + (C.KLEVEL.hpAppliesTo === 'player' ? C.KLEVEL.hpPerLevel * (Math.max(1, level) - 1) : 0);
@@ -1468,27 +1515,46 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
   }
   function optionSet(correct, values, count = 4) {
     const opts = new Set([correct]);
-    for (const value of values.sort(() => Math.random() - 0.5)) { if (value && value !== correct) opts.add(value); if (opts.size >= count) break; }
+    for (const value of shuffle([...values])) { if (value && value !== correct) opts.add(value); if (opts.size >= count) break; }
     return shuffle([...opts]);
+  }
+  function variedOptionSet(correct, curated, dynamicValues, count = 4) {
+    const opts = new Set([correct]);
+    const curatedDistractors = shuffle([...new Set(curated || [])].filter((value) => value && value !== correct));
+    const curatedLimit = Math.min(2, curatedDistractors.length, count - 1);
+    for (const value of curatedDistractors.slice(0, curatedLimit)) opts.add(value);
+    for (const value of shuffle([...dynamicValues])) { if (value && value !== correct) opts.add(value); if (opts.size >= count) break; }
+    for (const value of curatedDistractors) { if (opts.size >= count) break; opts.add(value); }
+    return shuffle([...opts]);
+  }
+  function questionValuesForTier(question, field) {
+    const tier = (kanjiInfo(question.target) || {}).jlpt;
+    let values = KDB.QUESTIONS.filter((item) => !tier || (kanjiInfo(item.target) || {}).jlpt === tier).map((item) => item[field]);
+    if (new Set(values.filter(Boolean)).size < 4) values = KDB.QUESTIONS.map((item) => item[field]);
+    return values;
   }
   // Sinh câu hỏi đa hướng; SRS vẫn chỉ ghi nhận theo q.target.
   function makeQuestion(monKanji, previousKey = '', modeOverride = '', fair = false, sourcePool = null) {
     if (typeof previousKey === 'number') { modeOverride = `m${previousKey}`; previousKey = ''; }
-    if (typeof previousKey === 'string' && /^m(?:[1-9]|1[0-2])$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
+    if (typeof previousKey === 'string' && /^m(?:[1-9]|1[0-5])$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
     const level = ensureMastery(monKanji).level;
     const targetChallenges = QUESTION_CHALLENGES.filter((q) => q.target === monKanji);
-    const availableModes = questionModesForLevel(level).filter((mode) => !['m11', 'm12'].includes(mode) || targetChallenges.length);
-    let mode = modeOverride || chooseMode(level, availableModes);
+    const contextualModes = ['m11', 'm12'];
+    const availableModes = questionModesForLevel(level).filter((mode) => !contextualModes.includes(mode) || targetChallenges.length);
+    const previousMode = String(previousKey || '').match(/(?:^|\|)(m(?:[1-9]|1[0-5]))(?:\||$)/)?.[1] || '';
+    const nonRepeatingModes = availableModes.length > 1 ? availableModes.filter((mode) => mode !== previousMode) : availableModes;
+    let mode = modeOverride || chooseMode(level, nonRepeatingModes);
     const explicitPool = Array.isArray(sourcePool) && sourcePool.length ? sourcePool : null;
     let candidates;
     if (explicitPool) candidates = explicitPool;
-    else if (mode === 'm11' || mode === 'm12') candidates = targetChallenges;
+    else if (contextualModes.includes(mode)) candidates = targetChallenges;
+    else if (mode === 'm13' && targetChallenges.length) candidates = targetChallenges;
     else if (mode === 'm6' && level >= (Number(C.QUESTION_MODES && C.QUESTION_MODES.workbookReadingLevel) || 6)) {
       candidates = [...KDB.QUESTIONS, ...targetChallenges];
     } else candidates = KDB.QUESTIONS;
     let pool = candidates.filter((q) => q.target === monKanji
-      && (!['m11', 'm12'].includes(mode) || (q.options && Array.isArray(q.options[mode]))));
-    if (!pool.length && (mode === 'm11' || mode === 'm12')) {
+      && (!contextualModes.includes(mode) || (q.options && Array.isArray(q.options[mode === 'm13' ? 'm12' : mode]))));
+    if (!pool.length && contextualModes.includes(mode)) {
       mode = 'm1'; candidates = explicitPool || KDB.QUESTIONS; pool = candidates.filter((q) => q.target === monKanji);
     }
     if (pool.length === 0) pool = candidates.length ? candidates : KDB.QUESTIONS;
@@ -1523,7 +1589,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     if (mode === 'm6') {
       const readings = KDB.QUESTIONS.filter((item) => item !== q && item.wordReading).map((item) => item.wordReading);
       if (!q.wordReading || new Set(readings).size < 3) mode = 'm1';
-      else { answer = q.wordReading; options = q.challengeOnly ? shuffle([...q.options.m6]) : optionSet(answer, readings); }
+      else { answer = q.wordReading; options = q.challengeOnly ? variedOptionSet(answer, q.options.m6, questionValuesForTier(q, 'wordReading')) : optionSet(answer, readings); }
     }
     if (mode === 'm7') {
       const meanings = KDB.QUESTIONS.filter((item) => item !== q && item.mean).map((item) => item.mean);
@@ -1546,17 +1612,47 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
       if (new Set(meanings).size < 3) meanings = KDB.QUESTIONS.filter((item) => item !== q).map((item) => item.mean);
       answer = q.mean; options = optionSet(answer, meanings);
     }
-    if (mode === 'm11') { answer = q.wordReading; options = shuffle([...q.options.m11]); }
-    if (mode === 'm12') { answer = q.word; options = shuffle([...q.options.m12]); }
+    if (mode === 'm11') {
+      answer = q.wordReading;
+      options = variedOptionSet(answer, q.options.m11, questionValuesForTier(q, 'wordReading'));
+    }
+    if (mode === 'm12') {
+      answer = q.word;
+      options = variedOptionSet(answer, q.options.m12, questionValuesForTier(q, 'word'));
+    }
+    if (mode === 'm13') {
+      const tier = (kanjiInfo(q.target) || {}).jlpt;
+      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
+      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      answer = q.word; options = q.challengeOnly ? variedOptionSet(answer, q.options.m12, words) : optionSet(answer, words);
+    }
+    if (mode === 'm14') {
+      const tier = (kanjiInfo(q.target) || {}).jlpt;
+      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
+      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      if (!q.wordReading || new Set(words).size < 3) { mode = 'm1'; answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
+      else { answer = q.word; options = optionSet(answer, words); }
+    }
+    if (mode === 'm15') {
+      const tier = (kanjiInfo(q.target) || {}).jlpt;
+      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
+      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      if (!q.mean || new Set(words).size < 3) { mode = 'm1'; answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
+      else { answer = q.word; options = optionSet(answer, words); }
+    }
     if (mode === 'm1') { answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
     const result = { word, mean, target: q.target, answer, romaji: q.romaji, type, mode, options, correctIndex: options.indexOf(answer), vocabId: q.id,
       targetReading, wordReading: q.wordReading || '', wordRomaji: q.wordRomaji || '',
-      sentence: q.sentence || '', sentenceReading: q.sentenceReading || '', sentenceMeaning: q.sentenceMeaning || '', challengeOnly: q.challengeOnly === true,
+      sentence: q.sentence || '', sentenceReading: q.sentenceReading || '', sentenceMeaning: q.sentenceMeaning || '',
+      clozeSentence: q.word && q.sentence ? q.sentence.replace(q.word, '＿＿') : '', challengeOnly: q.challengeOnly === true,
       parts: Array.isArray(q.parts) ? q.parts.map((part) => ({ ...part })) : [] };
     result.key = `${mode}|${q.id}`;
     return result;
   }
   function questionCorrection(q) {
+    if (q.mode === 'm13') return `Chỗ trống trong câu là「${q.answer}」`;
+    if (q.mode === 'm14') return `「${q.wordReading}」 được viết là「${q.answer}」`;
+    if (q.mode === 'm15') return `“${q.mean}” ứng với từ「${q.answer}」`;
     if (q.mode === 'm11') return `Trong câu này, 「${q.word}」 đọc là「${q.answer}」`;
     if (q.mode === 'm12') return `Trong câu này, 「${q.targetReading}」 được viết là「${q.answer}」`;
     if (q.mode === 'm6') return `「${q.word}」 đọc là「${q.answer}」${q.wordRomaji ? ` (${q.wordRomaji})` : ''}`;
@@ -1577,16 +1673,19 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     monsterImg(monId); // bắt đầu decode trước frame battle đầu tiên
     const m = C.MONSTERS[monId];
     const kanjiLevel = ensureMastery(m.kanji).level;
+    const activePet = C.MONSTERS[currentPetId];
+    const activePetKanji = activePet ? activePet.kanji : m.kanji;
+    const petLevel = ensureMastery(activePetKanji).level;
     const levelDamage = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (kanjiLevel - 1);
     const battleMaxHp = Math.max(m.maxHp, Math.ceil(levelDamage * (C.COMBAT.enemyHpPerDamage || 1)));
-    syncPlayerScale(m.kanji, true);
+    syncPlayerScale(activePetKanji, true);
 state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
     battle = {
       kind, monId, mon: m, monHp: battleMaxHp, monMaxHp: battleMaxHp,
       grassKanji: kind === 'grass' ? m.kanji : null,
-      kanjiLevel,
+      kanjiLevel, petLevel,
       q: makeQuestion(m.kanji),
-      feedback: null, fbT: 0, qCooldown: 0, retryQuestion: false, stun: 0, combo: 0, energy: 0,
+      feedback: null, fbT: 0, qCooldown: 0, retryQuestion: false, selectedIndex: -1, revealAnswer: false, stun: 0, combo: 0, energy: 0,
       comboGuardRemaining: effects.comboGuardCharges, meaningLensRemaining: effects.meaningHintCharges,
       botNextIn: attackCycleMs, botCycleMs: attackCycleMs, questionElapsed: 0,
       shake: 0, flash: 0, botFlash: 0, hitStop: 0,
@@ -1629,9 +1728,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     return true;
   }
 
+  function wrongFeedbackDuration() {
+    const feedback = C.QUESTION_FEEDBACK || {};
+    return Math.max(900, (Number(feedback.wrongHoldMs) || 1500) + (Number(feedback.wrongFadeMs) || 700));
+  }
+  function quizFeedback(good, text, fadeMs = 0) {
+    const fallback = good ? (Number(C.QUESTION_FEEDBACK && C.QUESTION_FEEDBACK.correctFadeMs) || 180)
+      : (Number(C.QUESTION_FEEDBACK && C.QUESTION_FEEDBACK.wrongFadeMs) || 700);
+    return { good, text, fadeMs: Math.max(0, Number(fadeMs) || fallback) };
+  }
+
   function answer(idx) {
     if (battle.phase !== 'fight' || battle.stun > 0 || battle.qCooldown > 0) return;
     const q = battle.q;
+    battle.selectedIndex = idx;
+    battle.revealAnswer = true;
     if (idx === q.correctIndex) {
       recordAnswer(q, true, battle.learningSession, 'battle');
       playSFX('KANJI_CORRECT'); playSFX('BATTLE_ATTACK');
@@ -1640,14 +1751,14 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       battle.energy = Math.min(C.COMBAT.energyMax || 3, battle.energy + 1);
       const perfect = battle.questionElapsed <= (C.COMBAT.perfectMs || 2000);
       const special = battle.energy >= (C.COMBAT.energyMax || 3);
-      const baseDmg = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (battle.kanjiLevel - 1) + battle.combo * C.COMBAT.comboBonus;
+      const baseDmg = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (battle.petLevel - 1) + battle.combo * C.COMBAT.comboBonus;
       const dmg = special ? Math.round(baseDmg * (C.COMBAT.specialMultiplier || 1.5)) : baseDmg;
       battle.monHp = Math.max(0, battle.monHp - dmg);
       playSFX('BATTLE_CUT');
       if (perfect) playSFX('PROGRESSION_BONUS');
       const push = perfect ? (C.COMBAT.perfectGaugePush || .35) : (C.COMBAT.gaugePush || .2);
       battle.botNextIn = Math.min(battle.botCycleMs, battle.botNextIn + battle.botCycleMs * push);
-      battle.feedback = { good: true, text: `${perfect ? '⚡ PERFECT! ' : '✓ Đúng! '}${q.target} — ${q.answer}  (-${dmg} HP)` };
+      battle.feedback = quizFeedback(true, `${perfect ? '⚡ PERFECT! ' : '✓ Đúng! '}${q.target} — ${q.answer}  (-${dmg} HP)`);
       battle.fbT = 900; battle.qCooldown = special ? 1050 : 700;
       battle.shake = 220; battle.enemyHitT = 300; battle.petAttackT = special ? 650 : 460;
       battle.petAttackTotal = battle.petAttackT;
@@ -1670,8 +1781,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       battle.stun = C.COMBAT.wrongStun;
       battle.qCooldown = C.COMBAT.wrongStun;
       battle.retryQuestion = true;
-      battle.fbT = C.COMBAT.wrongStun;
-      battle.feedback = { good: false, text: `✗ Sai! ${questionCorrection(q)}${guarded ? ` • 🛡 Combo Guard giữ x${battle.combo}` : ''}` };
+      battle.fbT = wrongFeedbackDuration();
+      battle.feedback = quizFeedback(false, `✗ Sai! ${questionCorrection(q)}${guarded ? ` • 🛡 Combo Guard giữ x${battle.combo}` : ''}`);
       enemyAttack(battle, 'Sai đáp án');
     }
   }
@@ -1701,8 +1812,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     b.stun = C.COMBAT.wrongStun;
     b.qCooldown = C.COMBAT.wrongStun;
     b.retryQuestion = true;
-    b.fbT = C.COMBAT.wrongStun;
-    b.feedback = { good: false, text: `⌛ Hết giờ! ${questionCorrection(b.q)} — quái phản công!${guarded ? ` • 🛡 giữ x${b.combo}` : ''}` };
+    b.selectedIndex = -1; b.revealAnswer = true;
+    b.fbT = wrongFeedbackDuration();
+    b.feedback = quizFeedback(false, `⌛ Hết giờ! ${questionCorrection(b.q)} — quái phản công!${guarded ? ` • 🛡 giữ x${b.combo}` : ''}`);
     enemyAttack(b);
   }
   function makeBattleParticles(kind, count) {
@@ -2107,7 +2219,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     capture = { char: target, info, attempt, needed: attempt >= C.CAPTURE.relaxFromAttempt ? 3 : 4,
       vocabIds: learnedQuestions.map((question) => question.id), q: captureQuestion(target, 0, '', learnedQuestions),
       index: 0, correct: 0, phase: 'fight', qCooldown: 0,
-      feedback: null, fbT: 0, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1,
+      feedback: null, fbT: 0, selectedIndex: -1, revealAnswer: false, burstT: 0, hint: attempt >= C.CAPTURE.relaxFromAttempt + 1,
       learningSession: createLearningSession('capture') };
     state = 'capture';
     playSFX('CAPTURE_START');
@@ -2148,11 +2260,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function answerCapture(idx) {
     if (!capture || capture.phase !== 'fight' || capture.qCooldown > 0) return;
     const q = capture.q, correct = idx === q.correctIndex;
+    capture.selectedIndex = idx; capture.revealAnswer = true;
     recordAnswer(q, correct, capture.learningSession, 'capture');
     playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (correct) capture.correct++;
-    capture.feedback = correct ? { good: true, text: '✓ Đúng!' } : { good: false, text: `✗ ${q.answer}` };
-    capture.fbT = 650; capture.burstT = correct ? 520 : 0; capture.qCooldown = 650; capture.index++;
+    capture.feedback = correct ? quizFeedback(true, '✓ Đúng!') : quizFeedback(false, `✗ ${questionCorrection(q)}`);
+    capture.fbT = correct ? 650 : wrongFeedbackDuration(); capture.burstT = correct ? 520 : 0; capture.qCooldown = capture.fbT; capture.index++;
     if (capture.index >= 5) capture.pendingEnd = true;
   }
   function onCaptureKey(k) {
@@ -2174,6 +2287,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
 
   // ---------- ⛩ PVE MINI TEST ----------
   let pve = null;
+  let gymMenu = { options: [], selected: 0, hitboxes: [] };
   const TRAINER_DEFINITIONS = ((C.TRAINER_ARENA && C.TRAINER_ARENA.trainers) || []);
   const TRAINER_BY_ID = new Map(TRAINER_DEFINITIONS.map((trainer) => [trainer.id, trainer]));
   // 4x4 atlas order mirrors the semantic Trainer list. A single atlas keeps
@@ -2225,21 +2339,135 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const pool = capturedKanji(tier);
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
+  function tierKanjiPool(tier = '') {
+    const definition = (CATALOG.tiers || {})[String(tier).toUpperCase()];
+    return [...new Set((definition && definition.kanji) || [])].filter((char) => {
+      const info = kanjiInfo(char);
+      return info && C.MONSTERS[info.monId];
+    });
+  }
+  function gymEligibility(tier = 'N5') {
+    const id = String(tier).toUpperCase(), gym = C.PROGRESSION && C.PROGRESSION.gym && C.PROGRESSION.gym[id];
+    const pool = tierKanjiPool(id), captured = pool.filter((char) => ensureMastery(char).captured).length;
+    const requiredLevel = Math.max(1, Number(gym && gym.requiredLevel) || 5);
+    const atLevel = pool.filter((char) => ensureMastery(char).captured && ensureMastery(char).level >= requiredLevel).length;
+    const requiredCaptured = Math.min(pool.length, Math.max(1, Number(gym && gym.requiredCaptured) || pool.length));
+    const requiredAtLevel = Math.min(requiredCaptured, Math.max(0, Number(gym && gym.requiredAtLevel) || 0));
+    const requiredBadge = String((gym && gym.requiresBadge) || '').toUpperCase();
+    const prerequisiteTier = String((gym && gym.requiresTierComplete) || '').toUpperCase();
+    const prerequisite = prerequisiteTier ? tierProgress(prerequisiteTier) : null;
+    const badgeReady = !requiredBadge || hasBadge(requiredBadge);
+    const prerequisiteReady = !prerequisiteTier || isTierStudyComplete(prerequisiteTier);
+    return { tier: id, pool, captured, atLevel, requiredCaptured, requiredAtLevel, requiredLevel,
+      requiredBadge, badgeReady, prerequisiteTier, prerequisite, prerequisiteReady,
+      ready: !!gym && badgeReady && prerequisiteReady && captured >= requiredCaptured && atLevel >= requiredAtLevel,
+      earned: !!gym && hasBadge(gym.badge || id) };
+  }
+  function gymMenuOptions() {
+    const gyms = (C.PROGRESSION && C.PROGRESSION.gym) || {};
+    return ((C.PROGRESSION && C.PROGRESSION.order) || Object.keys(gyms)).map((tier) => String(tier).toUpperCase())
+      .filter((tier) => gyms[tier] && (tier === 'N5' || !gyms[tier].requiresBadge || hasBadge(gyms[tier].requiresBadge)));
+  }
+  function openGymMenu(preferredTier = 'N5') {
+    const options = gymMenuOptions(); if (!options.length) return false;
+    const preferred = String(preferredTier).toUpperCase();
+    const nextTier = options.find((tier) => !hasBadge(tier)) || preferred;
+    gymMenu = { options, selected: Math.max(0, options.indexOf(nextTier)), hitboxes: [] };
+    state = 'gym_select'; return true;
+  }
+  function closeGymMenu() { state = 'overworld'; gymMenu.hitboxes = []; return true; }
+  function selectGymTier(tier = gymMenu.options[gymMenu.selected]) {
+    if (!tier) return false;
+    return startGym(tier);
+  }
+  function onGymMenuKey(k) {
+    if (k === 'escape') { closeGymMenu(); return; }
+    const count = gymMenu.options.length; if (!count) return;
+    if (k === 'arrowup' || k === 'w') gymMenu.selected = (gymMenu.selected - 1 + count) % count;
+    else if (k === 'arrowdown' || k === 's') gymMenu.selected = (gymMenu.selected + 1) % count;
+    else if (k === '1' || k === '2') {
+      const index = Number(k) - 1; if (index < count) { gymMenu.selected = index; selectGymTier(gymMenu.options[index]); }
+    } else if (k === 'enter' || k === ' ') selectGymTier();
+  }
+  function onGymMenuPointerDown(x, y) {
+    const hit = gymMenu.hitboxes.find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
+    if (!hit) return;
+    if (hit.action === 'close') closeGymMenu();
+    else if (hit.action === 'tier') { gymMenu.selected = hit.index; selectGymTier(hit.tier); }
+  }
+  function refillPveQueue(previous = '') {
+    if (!pve) return [];
+    const pool = Array.isArray(pve.pool) ? pve.pool : [];
+    pve.questionQueue = shuffle(pool.filter((char) => char !== previous));
+    if (!pve.questionQueue.length && pool.length) pve.questionQueue = shuffle([...pool]);
+    return pve.questionQueue;
+  }
   function randomPveKanji(previous = '') {
     const pool = pve && Array.isArray(pve.pool) && pve.pool.length ? pve.pool : capturedKanji(pve ? pve.tier : '');
+    if (pve && pve.useQuestionQueue) {
+      if (!Array.isArray(pve.questionQueue) || !pve.questionQueue.length) refillPveQueue(previous);
+      return pve.questionQueue.shift() || null;
+    }
     const alternatives = pool.filter((char) => char !== previous);
     const source = alternatives.length ? alternatives : pool;
     return source.length ? source[Math.floor(Math.random() * source.length)] : null;
   }
+  function makePveQuestion(target, previousKey = '') {
+    if (!target) return null;
+    const modes = pve && Array.isArray(pve.examModes) ? pve.examModes : [];
+    const mode = modes.length ? modes[pve.index % modes.length] : '';
+    return makeQuestion(target, previousKey, mode, true);
+  }
+  function gymGrade(ratio, passRatio = .8) {
+    if (ratio >= 1) return 'S';
+    if (ratio >= .8) return 'A';
+    if (ratio >= .5) return 'B';
+    if (ratio >= .25) return 'C';
+    return 'D';
+  }
+  function gymQuestionCount(gym) {
+    const range = Array.isArray(gym && gym.questionRange) ? gym.questionRange : [];
+    const min = Math.max(1, Math.floor(Number(range[0]) || Number(gym && gym.questions) || C.PVE.questions));
+    const max = Math.max(min, Math.floor(Number(range[1]) || min));
+    return rnd([min, max]);
+  }
+  function recordGymAttempt(tier, result) {
+    const id = String(tier).toUpperCase(), now = Date.now();
+    const previous = learning.gymHistory[id] || { attempts: 0, bestRatio: -1, bestTotal: 0 };
+    const ratio = Math.max(0, Math.min(1, Number(result.ratio) || 0));
+    const correct = Math.max(0, Math.floor(Number(result.correct) || 0)), total = Math.max(1, Math.floor(Number(result.total) || 1));
+    const grade = gymGrade(ratio, Number(result.passRatio) || .8), durationMs = Math.max(0, Number(result.durationMs) || 0);
+    const history = { ...previous, attempts: Math.max(0, Number(previous.attempts) || 0) + 1,
+      lastCorrect: correct, lastTotal: total, lastRatio: ratio, lastGrade: grade, lastAt: now, lastDurationMs: durationMs };
+    const sameScore = ratio === Number(previous.bestRatio) && total === Number(previous.bestTotal);
+    if (ratio > Number(previous.bestRatio) || (ratio === Number(previous.bestRatio) && total > Number(previous.bestTotal))
+      || (sameScore && durationMs > 0 && (!Number(previous.bestDurationMs) || durationMs < Number(previous.bestDurationMs)))) {
+      history.bestCorrect = correct; history.bestTotal = total; history.bestRatio = ratio; history.bestGrade = grade; history.bestAt = now;
+      history.bestDurationMs = durationMs;
+    }
+    learning.gymHistory[id] = history; saveLearning(); return history;
+  }
   function startPve(options = {}) {
     if (typeof options === 'string') options = { tier: options };
-    const tier = String(options.tier || '').toUpperCase(), pool = Array.isArray(options.pool) ? options.pool.filter((char) => ensureMastery(char).captured) : [];
-    const target = pool.length ? pool[Math.floor(Math.random() * pool.length)] : randomCapturedKanji(tier);
+    const tier = String(options.tier || '').toUpperCase();
+    const configuredPool = Array.isArray(options.pool) ? [...new Set(options.pool)].filter((char) => kanjiInfo(char)) : [];
+    const pool = options.allowUncaptured ? configuredPool : configuredPool.filter((char) => ensureMastery(char).captured);
+    const questionQueue = options.useQuestionQueue ? shuffle([...pool]) : [];
+    const target = questionQueue.length ? questionQueue.shift() : pool.length ? pool[Math.floor(Math.random() * pool.length)] : randomCapturedKanji(tier);
     if (!target) { showToast('Chưa có chữ nào được thu phục.'); return false; }
-    pve = { index: 0, total: options.questions || C.PVE.questions, correct: 0, combo: 0, bestCombo: 0, phase: 'fight', qCooldown: 0,
+    const total = options.questions || C.PVE.questions, passRatio = Number(options.passRatio) || 0;
+    const requiredCorrect = Math.ceil(total * passRatio), examMaxHp = Math.max(1, total - requiredCorrect + 1);
+    pve = { index: 0, total, correct: 0, combo: 0, bestCombo: 0, phase: 'fight', qCooldown: 0,
       mode: options.mode || 'practice', tier, trainerId: options.trainerId || '', pool, passRatio: Number(options.passRatio) || 0,
-      q: makeQuestion(target, '', '', true), seen: {}, feedback: null, pendingEnd: false,
+      questionQueue, useQuestionQueue: options.useQuestionQueue === true, examModes: shuffle([...(options.examModes || [])]),
+      correctTransitionMs: Math.max(300, Number(options.correctTransitionMs) || 550), wrongTransitionMs: Math.max(500, Number(options.wrongTransitionMs) || wrongFeedbackDuration()),
+      q: null, seen: {}, feedback: null, fbT: 0, selectedIndex: -1, revealAnswer: false, pendingEnd: false,
+      entranceT: 520, entranceTotal: 520, petAttackT: 0, petAttackTotal: 0, enemyAttackT: 0, enemyAttackTotal: 0, enemyHitT: 0, playerHitT: 0,
+      requiredCorrect, examHp: examMaxHp, examMaxHp, ko: false, enemyHp: 1,
+      rankDisplay: 0, rankTarget: 0, rankShockT: 0, rankGainT: 0,
       learningSession: createLearningSession(options.mode || 'pve') };
+    pve.q = makePveQuestion(target);
+    const info = kanjiInfo(target); if (info) monsterImg(info.monId);
     playSFX('WORLD_OPEN_ARENA');
     state = 'pve'; pveResult = null;
     return true;
@@ -2247,23 +2475,29 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function startGym(tier = 'N5') {
     const id = String(tier).toUpperCase(), gym = C.PROGRESSION && C.PROGRESSION.gym && C.PROGRESSION.gym[id];
     if (!gym) { showToast(`Chưa cấu hình Gym ${id}.`); return false; }
-    if (hasBadge(gym.badge || id)) { showToast(`🏅 Bạn đã có huy hiệu ${gym.badge || id}.`); return false; }
-    const progress = tierProgress(id);
-    if (!isTierStudyComplete(id)) {
-      showToast(`🔒 Gym ${id}: cần đủ ${progress.total} chữ (${progress.captured}/${progress.total}, thiếu content ${progress.missing}).`);
+    const eligibility = gymEligibility(id);
+    if (!eligibility.ready) {
+      if (!eligibility.badgeReady) { showToast(`🔒 Gym ${id}: cần PASS ${eligibility.requiredBadge} trước.`); return false; }
+      if (!eligibility.prerequisiteReady) {
+        const progress = eligibility.prerequisite;
+        showToast(`🔒 Gym ${id}: cần thu phục đủ ${eligibility.prerequisiteTier} (${progress.captured}/${progress.total}).`); return false;
+      }
+      showToast(`🔒 Gym ${id}: bắt ${eligibility.captured}/${eligibility.requiredCaptured} · Lv.${eligibility.requiredLevel}+ ${eligibility.atLevel}/${eligibility.requiredAtLevel}.`);
       return false;
     }
-    if (id === String((C.TRAINER_ARENA && C.TRAINER_ARENA.tier) || '').toUpperCase()) {
-      const requiredWins = Math.min(TRAINER_DEFINITIONS.length, Math.max(0, Number(C.TRAINER_ARENA.requiredTrainerWins) || 0));
-      const wins = trainerWinsCount();
-      if (wins < requiredWins) { showToast(`🔒 Boss ${id}: cần thắng ${requiredWins} Trainer (${wins}/${requiredWins}).`); return false; }
-    }
-    return startPve({ mode: 'gym', tier: id, questions: gym.questions, passRatio: gym.passRatio });
+    return startPve({ mode: 'gym', tier: id, pool: eligibility.pool, allowUncaptured: true, useQuestionQueue: true,
+      questions: gymQuestionCount(gym), passRatio: gym.passRatio, examModes: gym.examModes,
+      correctTransitionMs: gym.correctTransitionMs, wrongTransitionMs: gym.wrongTransitionMs });
   }
   function finishPve() {
-    finalizeLearningSession(pve.learningSession);
+    const sessionResult = finalizeLearningSession(pve.learningSession);
+    const durationMs = sessionResult ? Math.max(0, sessionResult.finishedAt - sessionResult.startedAt) : 0;
     const ratio = pve.correct / pve.total;
-    const rank = C.PVE.ranks.find((item) => ratio >= item.min) || C.PVE.ranks[C.PVE.ranks.length - 1];
+    const configuredRank = C.PVE.ranks.find((item) => ratio >= item.min) || C.PVE.ranks[C.PVE.ranks.length - 1];
+    const grade = pve.mode === 'gym' ? gymGrade(ratio, pve.passRatio) : configuredRank.grade;
+    const gymHistory = pve.mode === 'gym' ? recordGymAttempt(pve.tier, {
+      ratio, correct: pve.correct, total: pve.total, passRatio: pve.passRatio, durationMs,
+    }) : null;
     const rewards = [];
     for (const char of Object.keys(pve.seen)) {
       const info = kanjiInfo(char);
@@ -2274,26 +2508,49 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (pve.mode === 'trainer' && ratio >= pve.passRatio && TRAINER_BY_ID.has(pve.trainerId)) {
       learning.trainerWins[pve.trainerId] = true; trainerDefeated = pve.trainerId; saveLearning();
     }
-    if (pve.mode === 'gym' && ratio >= pve.passRatio) {
+    if (pve.mode === 'gym' && ratio >= pve.passRatio && !hasBadge(pve.tier)) {
       const gym = C.PROGRESSION.gym[pve.tier], badge = gym.badge || pve.tier;
       learning.badges[badge] = true; badgeAwarded = badge; saveLearning();
     }
-    pveResult = { grade: rank.grade, ratio, correct: pve.correct, total: pve.total, bestCombo: pve.bestCombo, rewards, badgeAwarded, trainerDefeated };
-    const badgeText = badgeAwarded ? ` • 🏅 Huy hiệu ${badgeAwarded} — đã mở N4!` : (pve.mode === 'gym' ? ' • Chưa đạt Gym' : '');
+    pveResult = { grade, ratio, correct: pve.correct, total: pve.total, bestCombo: pve.bestCombo, rewards, badgeAwarded, trainerDefeated,
+      ko: pve.ko === true, gymHistory, passed: pve.mode === 'gym' ? ratio >= pve.passRatio : ratio >= .6 };
+    const gymPassed = pve.mode === 'gym' && ratio >= pve.passRatio;
+    const unlockTier = badgeAwarded && C.PROGRESSION.gym[pve.tier] && C.PROGRESSION.gym[pve.tier].unlocks;
+    const badgeText = badgeAwarded ? ` • 🏅 Huy hiệu ${badgeAwarded}${unlockTier ? ` — đã mở ${unlockTier}!` : ''}`
+      : gymPassed ? ' • PASS — hoàn thành lượt ôn' : (pve.mode === 'gym' ? ' • Chưa đạt Gym' : '');
     const trainerText = trainerDefeated ? ` • ✅ Đã thắng ${TRAINER_BY_ID.get(trainerDefeated).name}` : (pve.mode === 'trainer' ? ' • Chưa vượt Trainer' : '');
-    pve.endMsg = `KẾT QUẢ: Hạng ${rank.grade} • ${pve.correct}/${pve.total} (${Math.round(ratio * 100)}%) • Combo cao nhất x${pve.bestCombo}${trainerText}${badgeText}`;
+    pve.endMsg = `KẾT QUẢ: Hạng ${grade} • ${pve.correct}/${pve.total} (${Math.round(ratio * 100)}%)${pve.ko ? ' • PET ĐÃ KIỆT SỨC' : ''} • Combo cao nhất x${pve.bestCombo}${trainerText}${badgeText}`;
     pve.phase = 'end';
   }
   function answerPve(idx) {
     if (!pve || pve.phase !== 'fight' || pve.qCooldown > 0) return;
     const q = pve.q, correct = idx === q.correctIndex;
+    pve.selectedIndex = idx; pve.revealAnswer = true;
     recordAnswer(q, correct, pve.learningSession, pve.mode || 'pve'); pve.seen[q.target] = (pve.seen[q.target] || 0) + 1;
     playSFX(correct ? 'KANJI_CORRECT' : 'KANJI_INCORRECT');
     if (correct) { pve.correct++; pve.combo++; pve.bestCombo = Math.max(pve.bestCombo, pve.combo); }
-    else pve.combo = 0;
-    pve.feedback = { good: correct, text: correct ? '✓ Đúng!' : `✗ Đáp án: ${q.answer}` };
-    pve.qCooldown = 550; pve.index++;
-    if (pve.index >= pve.total) pve.pendingEnd = true;
+    else {
+      pve.combo = 0;
+      if (pve.mode === 'gym') {
+        pve.examHp = Math.max(0, pve.examHp - 1);
+        pve.ko = pve.examHp <= 0;
+      }
+    }
+    if (pve.mode === 'gym') {
+      pve.rankTarget = pve.correct / pve.total;
+      if (correct) { pve.rankGainT = 420; pve.enemyHp = 0; }
+      else { pve.rankShockT = 520; pve.rankDisplay = Math.max(0, pve.rankDisplay - 1 / pve.total); }
+    }
+    pve.feedback = correct ? quizFeedback(true, '✓ Đúng! Pet của bạn phản công!') : quizFeedback(false, `✗ ${questionCorrection(q)}`);
+    pve.fbT = correct ? pve.correctTransitionMs : pve.wrongTransitionMs; pve.qCooldown = pve.fbT; pve.index++;
+    if (correct) {
+      pve.petAttackT = 520; pve.petAttackTotal = pve.petAttackT; pve.enemyHitT = 330;
+      playSFX('BATTLE_ATTACK'); playSFX('BATTLE_CUT');
+    } else {
+      pve.enemyAttackT = 600; pve.enemyAttackTotal = pve.enemyAttackT; pve.playerHitT = 380;
+      playSFX('BATTLE_STUN');
+    }
+    if (pve.index >= pve.total || pve.ko) pve.pendingEnd = true;
   }
   function onPveKey(k) {
     if (!pve) return;
@@ -2456,7 +2713,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const tiers = ((C.PROGRESSION && C.PROGRESSION.order) || []).map((tier) => {
       const id = String(tier).toUpperCase(), gym = C.PROGRESSION && C.PROGRESSION.gym && C.PROGRESSION.gym[id];
       const badgeId = String((gym && gym.badge) || id).toUpperCase();
-      return { ...tierProgress(id), id, badgeId, earned: hasBadge(badgeId), unlocked: isTierUnlocked(id), hasExam: !!gym };
+      return { ...tierProgress(id), id, badgeId, earned: hasBadge(badgeId), unlocked: isTierUnlocked(id), hasExam: !!gym,
+        exam: gym ? gymEligibility(id) : null, gymHistory: learning.gymHistory[id] ? { ...learning.gymHistory[id] } : null };
     });
     return {
       captured: captured.length, total: infos.length, totalLevels, levelsGained, maxedKanji, averageRecall,
@@ -2477,13 +2735,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function profileNextGoal(stats) {
     const n5 = stats.tiers.find((tier) => tier.id === 'N5');
     if (n5 && !n5.earned) {
-      if (n5.captured < n5.total) return `Mục tiêu tiếp theo: thu phục thêm ${n5.total - n5.captured} Kanji N5 để tiến gần Boss Gym.`;
-      const required = Math.min(stats.trainerTotal, Math.max(0, Number(C.TRAINER_ARENA && C.TRAINER_ARENA.requiredTrainerWins) || 0));
-      if (stats.trainerWins < required) return `Mục tiêu tiếp theo: thắng thêm ${required - stats.trainerWins} Trainer để mở Boss Gym N5.`;
+      const exam = n5.exam;
+      if (exam && exam.captured < exam.requiredCaptured) return `Mục tiêu tiếp theo: thu phục thêm ${exam.requiredCaptured - exam.captured} Kanji N5 để mở Gym.`;
+      if (exam && exam.atLevel < exam.requiredAtLevel) return `Mục tiêu tiếp theo: nâng thêm ${exam.requiredAtLevel - exam.atLevel} Kanji lên Lv.${exam.requiredLevel}+ để mở Gym.`;
       return 'Boss Gym N5 đã sẵn sàng — vượt bài kiểm tra để nhận huy hiệu và mở N4!';
     }
     const n4 = stats.tiers.find((tier) => tier.id === 'N4');
-    if (n4 && n4.captured < n4.total) return `Huy hiệu N5 đã mở N4 — còn ${n4.total - n4.captured} Kanji trong hành trình hiện tại.`;
+    if (n4 && !n4.earned && n4.exam) {
+      if (!n4.exam.prerequisiteReady) return `Để thi N4, hãy thu phục đủ N5 — còn ${n4.exam.prerequisite.total - n4.exam.prerequisite.captured} Kanji.`;
+      if (n4.exam.captured < n4.exam.requiredCaptured) return `Mục tiêu N4: thu phục thêm ${n4.exam.requiredCaptured - n4.exam.captured} Kanji để mở bài test.`;
+      if (n4.exam.atLevel < n4.exam.requiredAtLevel) return `Mục tiêu N4: nâng thêm ${n4.exam.requiredAtLevel - n4.exam.atLevel} Kanji lên Lv.${n4.exam.requiredLevel}+.`;
+      return 'Gym N4 đã sẵn sàng — làm mini-test để nhận huy hiệu N4!';
+    }
     if (stats.dueReviews > 0) return `Có ${stats.dueReviews} Kanji tới hạn ôn — quay lại luyện để giữ Recall ổn định.`;
     return 'Tiến độ rất tốt! Hãy tiếp tục nâng Kanji lên Lv.10 và làm chủ thêm từ vựng.';
   }
@@ -2853,24 +3116,118 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const rowY = y + index * (rowH + gap), ratio = tier.total ? Math.max(0, Math.min(1, tier.captured / tier.total)) : 0;
       cx.fillStyle = '#dce8ff'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.fillText(`JLPT ${tier.id}`, x, rowY + 12);
       cx.fillStyle = tier.earned ? '#6effa1' : tier.unlocked ? '#9fd8f5' : '#71809b'; cx.textAlign = 'right';
-      cx.fillText(tier.earned ? 'HUY HIỆU ✓' : `${tier.captured}/${tier.total}`, x + w, rowY + 12); cx.textAlign = 'left';
+      const examStatus = tier.gymHistory ? gymBestLabel(tier.gymHistory, true)
+        : tier.exam && !tier.earned ? gymProgressLabel(tier.exam, true) : `${tier.captured}/${tier.total}`;
+      cx.fillText(examStatus, x + w, rowY + 12); cx.textAlign = 'left';
       const barY = rowY + 19;
       cx.fillStyle = '#26344f'; cx.fillRect(x, barY, w, 7);
       cx.fillStyle = tier.earned ? '#ffd54a' : tier.id === 'N4' ? '#b782eb' : '#4fd595'; cx.fillRect(x, barY, w * ratio, 7);
     });
   }
+  function gymProgressLabel(exam, compact = false) {
+    if (!exam) return '';
+    if (exam.earned) return 'PASS ✓';
+    if (!exam.badgeReady) return `CẦN PASS ${exam.requiredBadge}`;
+    if (!exam.prerequisiteReady) return `${exam.prerequisiteTier} ${exam.prerequisite.captured}/${exam.prerequisite.total}`;
+    if (exam.ready) return compact ? 'READY' : 'READY · VÀO GYM';
+    return `${exam.captured}/${exam.requiredCaptured} · Lv${exam.requiredLevel} ${exam.atLevel}/${exam.requiredAtLevel}`;
+  }
+  function gymBestLabel(history, compact = false) {
+    if (!history || !history.attempts) return '';
+    const score = `BEST ${history.bestGrade} · ${history.bestCorrect}/${history.bestTotal} · ${Math.round(history.bestRatio * 100)}%`;
+    return compact ? score : `${score} · ${history.attempts} lượt`;
+  }
+  function formatGymDuration(ms) {
+    const value = Math.max(0, Number(ms) || 0); if (!value) return 'Chưa ghi nhận';
+    const seconds = Math.max(1, Math.round(value / 1000)), minutes = Math.floor(seconds / 60), remainder = seconds % 60;
+    return minutes ? `${minutes}:${String(remainder).padStart(2, '0')}` : `${seconds} giây`;
+  }
+  function formatGymDate(timestamp) {
+    const date = new Date(Number(timestamp) || 0); if (!Number(timestamp) || Number.isNaN(date.getTime())) return 'Chưa thi';
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} · ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+  function gymBadgeStatus(badge) {
+    const exam = badge.exam;
+    if (badge.earned) return 'ĐÃ NHẬN · PASS ✓';
+    if (!exam) return 'SẮP RA MẮT';
+    if (!exam.badgeReady) return `KHÓA · CẦN PASS ${exam.requiredBadge}`;
+    if (!exam.prerequisiteReady) return `KHÓA · CẦN ĐỦ ${exam.prerequisiteTier}`;
+    if (exam.ready) return 'SẴN SÀNG THI';
+    return 'CHƯA ĐỦ ĐIỀU KIỆN';
+  }
+  function gymBadgeInfoRows(badge) {
+    const exam = badge.exam, history = badge.gymHistory, rows = [];
+    if (history && history.attempts) {
+      rows.push({ label: 'THÀNH TÍCH TỐT NHẤT', value: `${history.bestGrade} · ${history.bestCorrect}/${history.bestTotal} · ${Math.round(history.bestRatio * 100)}%`, color: history.bestGrade === 'S' ? '#fff09a' : '#79f2b3' });
+      rows.push({ label: 'LƯỢT GẦN NHẤT', value: `${history.lastGrade} · ${history.lastCorrect}/${history.lastTotal} · ${Math.round(history.lastRatio * 100)}%` });
+      rows.push({ label: 'THỜI LƯỢNG TỐT NHẤT', value: formatGymDuration(history.bestDurationMs) });
+      rows.push({ label: 'THỰC HIỆN GẦN NHẤT', value: formatGymDate(history.lastAt) });
+      rows.push({ label: 'TỔNG SỐ LƯỢT THI', value: String(history.attempts) });
+    } else {
+      rows.push({ label: 'THÀNH TÍCH TỐT NHẤT', value: 'Chưa có kết quả' });
+      rows.push({ label: 'LƯỢT GẦN NHẤT', value: 'Chưa thi' });
+      rows.push({ label: 'THỜI LƯỢNG', value: 'Chưa ghi nhận' });
+      rows.push({ label: 'TỔNG SỐ LƯỢT THI', value: '0' });
+    }
+    if (exam) {
+      rows.push({ label: `THU PHỤC ${badge.id}`, value: `${exam.captured}/${exam.requiredCaptured}` });
+      rows.push({ label: `KANJI LV.${exam.requiredLevel}+`, value: `${exam.atLevel}/${exam.requiredAtLevel}` });
+      if (exam.prerequisiteTier && exam.prerequisite) rows.push({ label: `HOÀN TẤT ${exam.prerequisiteTier}`, value: `${exam.prerequisite.captured}/${exam.prerequisite.total}` });
+    }
+    return rows;
+  }
+  function drawBadgeMedallion(id, centerX, centerY, size, earned = false, ready = false) {
+    const radius = size / 2;
+    cx.save();
+    cx.globalAlpha = earned ? 1 : ready ? .9 : .42;
+    const shield = (scale) => {
+      const r = radius * scale;
+      cx.beginPath(); cx.moveTo(centerX, centerY - r); cx.lineTo(centerX + r * .78, centerY - r * .55);
+      cx.lineTo(centerX + r * .72, centerY + r * .35); cx.lineTo(centerX, centerY + r);
+      cx.lineTo(centerX - r * .72, centerY + r * .35); cx.lineTo(centerX - r * .78, centerY - r * .55); cx.closePath();
+    };
+    shield(1); cx.fillStyle = earned || ready ? '#e8b936' : '#53627a'; cx.fill();
+    cx.strokeStyle = earned ? '#fff0a0' : ready ? '#ffe080' : '#71809a'; cx.lineWidth = Math.max(1.5, size * .045); cx.stroke();
+    shield(.82); cx.fillStyle = earned || ready ? '#073f42' : '#16263e'; cx.fill();
+    cx.strokeStyle = earned || ready ? '#36b99a' : '#41516c'; cx.lineWidth = Math.max(1, size * .025); cx.stroke();
+    cx.fillStyle = earned || ready ? '#087454' : '#263752'; cx.beginPath(); cx.arc(centerX, centerY - radius * .03, radius * .55, 0, Math.PI * 2); cx.fill();
+    cx.strokeStyle = earned || ready ? '#ffd45f' : '#5c6d88'; cx.lineWidth = Math.max(1.5, size * .035); cx.stroke();
+    cx.fillStyle = earned ? '#fff2ba' : ready ? '#fff0b0' : '#a6b2c6'; cx.textAlign = 'center';
+    cx.font = `bold ${Math.max(8, Math.round(size * .27))}px ${JPFONT}`; cx.fillText(id, centerX, centerY + size * .075);
+    if (earned) {
+      cx.fillStyle = '#176331'; cx.beginPath(); cx.arc(centerX + radius * .62, centerY - radius * .58, radius * .32, 0, Math.PI * 2); cx.fill();
+      cx.fillStyle = '#fff'; cx.font = `bold ${Math.max(10, Math.round(size * .22))}px ${JPFONT}`; cx.fillText('✓', centerX + radius * .62, centerY - radius * .50);
+    }
+    cx.restore(); cx.textAlign = 'left';
+  }
   function drawProfileBadgeSlots(stats, x, y, w, h) {
     const badges = stats.tiers.slice(0, 2), gap = 8, slotW = (w - gap * Math.max(0, badges.length - 1)) / Math.max(1, badges.length);
     badges.forEach((badge, index) => {
       const bx = x + index * (slotW + gap);
-      cx.fillStyle = badge.earned ? 'rgba(103,79,16,.72)' : 'rgba(22,34,57,.9)'; cx.fillRect(bx, y, slotW, h);
-      cx.strokeStyle = badge.earned ? '#ffd54a' : '#42516a'; cx.lineWidth = badge.earned ? 2 : 1; cx.strokeRect(bx, y, slotW, h);
-      const iconSize = Math.max(28, Math.min(56, h - 47, slotW * .42));
-      drawThemeAtlasIcon('gym', bx + (slotW - iconSize) / 2, y + 8, iconSize, badge.earned ? 1 : .24);
-      cx.fillStyle = badge.earned ? '#fff1a8' : '#7f8da5'; cx.textAlign = 'center';
-      fitText(`HUY HIỆU ${badge.badgeId}`, bx + slotW / 2, y + h - 24, slotW - 10, 11, true);
-      cx.fillStyle = badge.earned ? '#6effa1' : badge.hasExam ? '#9aa8bf' : '#65738c';
-      fitText(badge.earned ? 'ĐÃ NHẬN' : badge.hasExam ? 'CHƯA NHẬN' : 'SẮP RA MẮT', bx + slotW / 2, y + h - 8, slotW - 10, 9, true);
+      const ready = badge.exam && badge.exam.ready;
+      cx.fillStyle = badge.earned ? 'rgba(17,67,58,.9)' : ready ? 'rgba(20,58,62,.9)' : 'rgba(22,34,57,.92)'; cx.fillRect(bx, y, slotW, h);
+      cx.strokeStyle = badge.earned ? '#ffd54a' : ready ? '#5fe0b4' : '#42516a'; cx.lineWidth = badge.earned || ready ? 2 : 1; cx.strokeRect(bx, y, slotW, h);
+      const rich = h >= 150 && slotW >= 145;
+      const iconSize = rich ? Math.max(58, Math.min(104, h * .24, slotW * .3)) : Math.max(28, Math.min(56, h - 47, slotW * .42));
+      const iconY = y + (rich ? 14 : 8);
+      drawBadgeMedallion(badge.badgeId, bx + slotW / 2, iconY + iconSize / 2, iconSize, badge.earned, ready);
+      cx.fillStyle = badge.earned ? '#fff1a8' : ready ? '#d7fff0' : '#9aa8bf'; cx.textAlign = 'center';
+      const titleY = iconY + iconSize + (rich ? 22 : h - iconSize - 32);
+      fitText(`HUY HIỆU ${badge.badgeId}`, bx + slotW / 2, titleY, slotW - 18, rich ? 15 : 11, true);
+      cx.fillStyle = badge.earned ? '#6effa1' : ready ? '#72f0c4' : '#8d9bb2';
+      fitText(gymBadgeStatus(badge), bx + slotW / 2, titleY + (rich ? 21 : 16), slotW - 18, rich ? 11 : 9, true);
+      if (rich) {
+        const rows = gymBadgeInfoRows(badge), infoX = bx + 12, infoY = titleY + 34, infoW = slotW - 24;
+        const infoH = Math.max(0, y + h - infoY - 12), rowH = Math.max(20, infoH / Math.max(1, rows.length));
+        rows.forEach((row, rowIndex) => {
+          const rowY = infoY + rowIndex * rowH;
+          cx.fillStyle = rowIndex % 2 ? 'rgba(255,255,255,.025)' : 'rgba(4,14,31,.26)'; cx.fillRect(infoX, rowY, infoW, rowH - 2);
+          cx.fillStyle = '#8193af'; cx.textAlign = 'left'; fitText(row.label, infoX + 8, rowY + Math.min(13, rowH * .42), infoW * .46, 9, true);
+          cx.fillStyle = row.color || (badge.earned ? '#e4f8ee' : '#bdc9dc'); cx.textAlign = 'right';
+          fitText(row.value, infoX + infoW - 8, rowY + Math.min(14, rowH * .56), infoW * .5, 10, true);
+        });
+      }
       cx.textAlign = 'left';
     });
   }
@@ -2942,7 +3299,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   let last = 0;
   function targetFrameMs() {
     const render = C.RENDER || {};
-    const active = state === 'battle' || state === 'capture' || (state === 'overworld' && (player.moving || fishing));
+    const active = state === 'battle' || state === 'capture' || (state === 'pve' && pve && pve.phase === 'fight')
+      || (state === 'overworld' && (player.moving || fishing));
     const fps = active ? (render.activeFps || 60) : state === 'overworld' ? (render.idleFps || 30) : (render.uiFps || 30);
     return 1000 / Math.max(1, fps);
   }
@@ -3022,7 +3380,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       return;
     }
     if (b.stun > 0) b.stun -= dt;
-    if (b.fbT > 0) b.fbT -= dt;
+    if (b.fbT > 0) {
+      b.fbT -= dt;
+      if (b.fbT <= 0) b.feedback = null;
+    }
     if (b.qCooldown > 0) {
       b.qCooldown -= dt;
       if (b.qCooldown <= 0 && b.monHp > 0 && !b.pendingLose) {
@@ -3031,7 +3392,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         if (!b.retryQuestion) b.q = makeQuestion(b.mon.kanji, b.q.key);
         b.retryQuestion = false;
         b.questionElapsed = 0;
-        b.feedback = null;
+        b.selectedIndex = -1; b.revealAnswer = false;
+        if (b.fbT <= 0) b.feedback = null;
       }
     } else if (!b.pendingWin && !b.pendingLose) {
       b.questionElapsed += dt;
@@ -3050,17 +3412,38 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         else {
           const sourcePool = capture.vocabIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean);
           capture.q = captureQuestion(capture.char, capture.index, capture.q.key, sourcePool);
+          capture.selectedIndex = -1; capture.revealAnswer = false; capture.feedback = null;
         }
       }
     }
   }
   function updatePve(dt) {
     if (!pve || pve.phase !== 'fight') return;
+    if (pve.fbT > 0) pve.fbT -= dt;
+    if (pve.entranceT > 0) pve.entranceT -= dt;
+    if (pve.petAttackT > 0) pve.petAttackT -= dt;
+    if (pve.enemyAttackT > 0) pve.enemyAttackT -= dt;
+    if (pve.enemyHitT > 0) pve.enemyHitT -= dt;
+    if (pve.playerHitT > 0) pve.playerHitT -= dt;
+    if (pve.rankGainT > 0) pve.rankGainT -= dt;
+    if (pve.rankShockT > 0) pve.rankShockT -= dt;
+    else if (pve.rankDisplay !== pve.rankTarget) {
+      const step = Math.min(1, dt / 180);
+      pve.rankDisplay += (pve.rankTarget - pve.rankDisplay) * step;
+      if (Math.abs(pve.rankDisplay - pve.rankTarget) < .001) pve.rankDisplay = pve.rankTarget;
+    }
     if (pve.qCooldown > 0) {
       pve.qCooldown -= dt;
       if (pve.qCooldown <= 0) {
         if (pve.pendingEnd) finishPve();
-        else { const target = randomPveKanji(pve.q && pve.q.target); pve.q = makeQuestion(target, pve.q.key, '', true); }
+        else {
+          const target = randomPveKanji(pve.q && pve.q.target); pve.q = makePveQuestion(target, pve.q.key);
+          pve.selectedIndex = -1; pve.revealAnswer = false; pve.feedback = null;
+          pve.entranceT = 520; pve.entranceTotal = pve.entranceT;
+          pve.petAttackT = 0; pve.enemyAttackT = 0; pve.enemyHitT = 0; pve.playerHitT = 0;
+          pve.enemyHp = 1;
+          const info = kanjiInfo(target); if (info) monsterImg(info.monId);
+        }
       }
     }
   }
@@ -3173,6 +3556,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (capture && capture.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau kết quả thu phục', continues: true };
       return { label: 'HỦY', title: 'Hủy lượt thu phục và quay lại bản đồ' };
     }
+    if (state === 'gym_select') return { label: 'ĐÓNG', title: 'Đóng danh sách bài test Gym' };
     if (state === 'pve') {
       if (pve && pve.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau kết quả thử thách', continues: true };
       return { label: 'RỜI', title: 'Rời thử thách và quay lại bản đồ' };
@@ -3236,6 +3620,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (state === 'profile') { renderProfile(); return; }
     if (state === 'lecture') { renderLecture(); return; }
     if (state === 'capture') { renderCapture(); return; }
+    if (state === 'gym_select') { renderGymMenu(); if (toast.t > 0) drawToast(); return; }
     if (state === 'pve') { renderPve(); return; }
     setScreenTransform(worldZoom); renderOverworld(); setScreenTransform();
     drawHudHint();
@@ -3838,8 +4223,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     }
 
     // Mini PvE chỉ hiển thị pet chiến đấu; player không xuất hiện trong sân đấu.
-    const petW = 150 * actorScale;
-    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, plBaseY + 3, 78 * actorScale, 19 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    const petW = 150 * actorScale * battleLevelScale(b.petLevel);
+    cx.fillStyle = 'rgba(0,0,0,.24)'; cx.beginPath(); cx.ellipse(plCX, plBaseY + 3, petW * .48, petW * .12, 0, 0, Math.PI * 2); cx.fill();
     const petImg = monsterImg(currentPetId);
     if (petImg) {
       const ph = petW * petImg.height / petImg.width, petX = plCX + petLunge + petRecoil;
@@ -3849,10 +4234,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
 
     // Wild Kanjimon are 1.25x normal size and sit low enough to clear the HUD.
     const m = b.mon, img = monsterImg(b.monId);
-    const enemyW = Math.min(240, m.drawW * 1.12) * actorScale * 1;
+    const enemyW = Math.min(240, m.drawW * 1.12) * actorScale * battleLevelScale(b.kanjiLevel);
     const enemyH = enemyW * (m.drawH / m.drawW);
     const enemyX = monCX - enemyLunge + enemyRecoil;
-    cx.fillStyle = 'rgba(0,0,0,.2)'; cx.beginPath(); cx.ellipse(monCX, monBaseY + 3, enemyW * .46, 15 * actorScale, 0, 0, Math.PI * 2); cx.fill();
+    cx.fillStyle = 'rgba(0,0,0,.2)'; cx.beginPath(); cx.ellipse(monCX, monBaseY + 3, enemyW * .46, enemyW * .09, 0, 0, Math.PI * 2); cx.fill();
     if (img) {
       cx.save();
       if (b.enemyHitT > 0) cx.filter = `brightness(${1.5 + 1.5 * Math.abs(Math.sin(b.enemyHitT / 25))}) saturate(.35)`;
@@ -3878,7 +4263,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const hudY = stageY + 18, petHudX = stageX + 18, enemyHudX = stageX + stageW - hpW - 18;
     const pet = C.MONSTERS[currentPetId], petKanji = pet ? pet.kanji : '?';
     const mobileHud = stageW < 520;
-    drawHpBar(petHudX, hudY, mobileHud ? `${pet ? monsterHanViet(pet) : 'Pet'}「${petKanji}」` : `Pet của bạn · ${pet ? pet.name : ''} 「${petKanji}」`, player.hp, player.maxHp, '#43d17a', hpW, pet);
+    drawHpBar(petHudX, hudY, mobileHud ? `${pet ? monsterHanViet(pet) : 'Pet'}「${petKanji}」 Lv.${b.petLevel}` : `Pet của bạn · ${pet ? pet.name : ''} 「${petKanji}」 · Lv.${b.petLevel}`, player.hp, player.maxHp, '#43d17a', hpW, pet);
     drawHpBar(enemyHudX, hudY, mobileHud ? `${m.name}「${m.kanji}」 Lv.${b.kanjiLevel}` : `${m.name} 「${m.kanji}」 · Lv.${b.kanjiLevel}`, b.monHp, b.monMaxHp, '#e04a4a', hpW, m);
     drawEnergyGauge(b, petHudX, hudY + 53, hpW);
     drawAttackGauge(b, enemyHudX, hudY + 53, hpW);
@@ -4422,17 +4807,171 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     drawBattleBackground('grass', W, fieldH);
     const trainer = pve.mode === 'trainer' ? TRAINER_BY_ID.get(pve.trainerId) : null;
     const examTitle = pve.mode === 'gym' ? `👑 BOSS GYM ${pve.tier}` : trainer ? `${trainer.icon} ${trainer.name} · ${trainer.theme}` : '⛩ KỲ THI JLPT MINI';
-    cx.fillStyle = '#fff'; cx.font = `bold 20px ${JPFONT}`; fitText(examTitle, 24, 34, W - 48, 20, true);
-    if (pve.phase === 'fight') cx.fillStyle = '#ffd54a';
-    cx.font = '15px "KanjiGo UI",sans-serif'; cx.fillText(`Câu ${Math.min(pve.index + 1, pve.total)}/${pve.total} • Đúng ${pve.correct}`, 24, 60);
-    if (pve.phase === 'fight' && trainer) drawPveTrainerTeam(pve.pool, W, fieldH);
+    const headerW = Math.min(W - 28, 350);
+    cx.fillStyle = 'rgba(6,18,42,.82)'; cx.fillRect(14, 9, headerW, 56);
+    cx.strokeStyle = 'rgba(118,204,255,.72)'; cx.lineWidth = 1; cx.strokeRect(14, 9, headerW, 56);
+    cx.save(); cx.shadowColor = 'rgba(0,0,0,.95)'; cx.shadowBlur = 6;
+    cx.fillStyle = '#f7fbff'; cx.strokeStyle = 'rgba(5,17,38,.96)'; cx.lineWidth = 4; cx.font = `bold 20px ${JPFONT}`;
+    if (pve.mode === 'gym') cx.strokeText(examTitle, 24, 34);
+    fitText(examTitle, 24, 34, headerW - 20, 20, true);
+    cx.fillStyle = pve.phase === 'fight' ? '#ffe879' : '#e5eefc'; cx.strokeStyle = 'rgba(5,17,38,.96)'; cx.lineWidth = 3;
+    cx.font = 'bold 15px "KanjiGo UI",sans-serif';
+    const questionStatus = `Câu ${Math.min(pve.index + 1, pve.total)}/${pve.total} • Đúng ${pve.correct}`;
+    cx.strokeText(questionStatus, 24, 58); cx.fillText(questionStatus, 24, 58); cx.restore();
+    if (pve.phase === 'fight' && pve.mode === 'gym') {
+      drawPveExamHud(W);
+      drawPveDuel(W, fieldH);
+    } else if (pve.phase === 'fight' && trainer) drawPveTrainerTeam(pve.pool, W, fieldH);
     if (pve.phase === 'end' && pveResult) {
-      cx.fillStyle = '#ffd54a'; cx.font = `bold 46px ${JPFONT}`; cx.fillText(pveResult.grade, 50, 150);
-      cx.fillStyle = '#fff'; cx.font = `16px ${JPFONT}`; cx.fillText('Kanji đã xuất hiện trong bài:', 130, 118);
-      pveResult.rewards.slice(0, 6).forEach((reward, i) => cx.fillText(`「${reward.kanji}」 đã ôn`, 130, 146 + i * 23));
-      if (pveResult.badgeAwarded) { cx.fillStyle = '#6effa1'; cx.font = `bold 20px ${JPFONT}`; cx.fillText(`🏅 Nhận huy hiệu ${pveResult.badgeAwarded} — N4 đã mở!`, 50, fieldH - 36); }
+      const passColor = pveResult.passed ? '#6effa1' : '#ff8a8a';
+      cx.fillStyle = passColor; cx.font = `bold ${Math.min(54, Math.max(34, W * .065))}px ${JPFONT}`;
+      cx.fillText(pveResult.passed ? 'PASS ✓' : pveResult.ko ? 'KO · CHƯA ĐẠT' : 'CHƯA ĐẠT', 34, 132);
+      cx.fillStyle = '#fff'; cx.font = `bold 18px ${JPFONT}`; cx.fillText(`${pveResult.correct}/${pveResult.total} · ${Math.round(pveResult.ratio * 100)}% · Hạng ${pveResult.grade}`, 36, 164);
+      if (pveResult.badgeAwarded) {
+        const badgeSize = Math.max(58, Math.min(100, fieldH * .28));
+        drawBadgeMedallion(pveResult.badgeAwarded, W - badgeSize, 125, badgeSize, true, true);
+        cx.fillStyle = '#fff1a8'; cx.font = `bold 15px ${JPFONT}`; cx.textAlign = 'right';
+        const unlockTier = C.PROGRESSION.gym[pve.tier] && C.PROGRESSION.gym[pve.tier].unlocks;
+        cx.fillText(`HUY HIỆU ${pveResult.badgeAwarded}${unlockTier ? ` · ${unlockTier} ĐÃ MỞ` : ''}`, W - 30, 196); cx.textAlign = 'left';
+      } else if (pve.mode === 'gym') {
+        cx.fillStyle = '#cbd8ed'; cx.font = `14px ${JPFONT}`; cx.fillText(`Cần ${Math.ceil(pve.passRatio * 100)}% để nhận huy hiệu.`, 36, 194);
+      }
     }
+    if (pve.phase === 'fight' && pve.feedback && pve.fbT > 0) drawFeedbackBanner(pve, W, fieldH);
     drawQuizPanel(pve, W, H);
+  }
+  function drawPveExamHud(W) {
+    const compact = W < 600, pad = 24, meterY = compact ? 72 : 70;
+    const meterW = compact ? W - pad * 2 : Math.min(520, W * .58), hpW = compact ? meterW : Math.min(250, W - meterW - pad * 3);
+    const hpX = compact ? pad : W - pad - hpW, hpY = compact ? meterY + 76 : meterY;
+    const shake = pve.rankShockT > 0 ? Math.sin(pve.rankShockT / 24) * Math.min(10, pve.rankShockT / 45) : 0;
+    const meterX = pad + shake, barY = meterY + 16, barH = 18;
+    cx.fillStyle = 'rgba(6,18,42,.86)'; cx.fillRect(meterX - 8, meterY - 7, meterW + 16, 70);
+    cx.strokeStyle = 'rgba(118,204,255,.68)'; cx.lineWidth = 1; cx.strokeRect(meterX - 8, meterY - 7, meterW + 16, 70);
+    const bands = [
+      { grade: 'D', start: 0, end: .25, color: '#8a94a7' },
+      { grade: 'C', start: .25, end: .5, color: '#63b8ef' },
+      { grade: 'B', start: .5, end: .8, color: '#a986ed' },
+      { grade: 'A', start: .8, end: 1, color: '#ffd54a' },
+    ];
+    cx.fillStyle = '#f4f8ff'; cx.font = 'bold 10px "KanjiGo UI",sans-serif';
+    cx.fillText(`TIẾN ĐỘ ${gymGrade(pve.rankTarget, pve.passRatio)} · ${pve.correct}/${pve.total} · PASS ${Math.round(pve.passRatio * 100)}%`, meterX, meterY + 9);
+    for (const band of bands) {
+      const x = meterX + meterW * band.start, width = meterW * (band.end - band.start);
+      cx.fillStyle = 'rgba(13,23,43,.92)'; cx.fillRect(x, barY, width, barH);
+      const filled = Math.max(0, Math.min(1, (pve.rankDisplay - band.start) / Math.max(.001, band.end - band.start)));
+      if (filled > 0) { cx.fillStyle = band.color; cx.fillRect(x, barY, width * filled, barH); }
+      cx.strokeStyle = '#63738d'; cx.lineWidth = 1; cx.strokeRect(x, barY, width, barH);
+      cx.fillStyle = filled >= .58 && band.grade !== 'D' ? '#172039' : '#fff'; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+      cx.fillText(band.grade, x + width / 2, barY + 13); cx.textAlign = 'left';
+    }
+    const passX = meterX + meterW * pve.passRatio, passedLine = pve.rankDisplay >= pve.passRatio;
+    cx.save(); cx.shadowColor = passedLine ? '#67ffad' : 'rgba(201,255,223,.7)'; cx.shadowBlur = passedLine ? 10 : 5;
+    cx.strokeStyle = passedLine ? '#67ffad' : '#d8ffe8'; cx.lineWidth = 3;
+    cx.beginPath(); cx.moveTo(passX, barY - 5); cx.lineTo(passX, barY + barH + 28); cx.stroke();
+    cx.fillStyle = passedLine ? '#8affbd' : '#e2ffed'; cx.font = 'bold 9px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+    cx.fillText(`${Math.round(pve.passRatio * 100)}% PASS`, passX, barY - 7); cx.restore();
+    drawBadgeMedallion(pve.tier, passX, barY + barH + 18, 27, passedLine, true);
+    cx.fillStyle = pve.rankDisplay >= 1 ? '#fff3a3' : '#8290a8'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.textAlign = 'right';
+    cx.fillText('S', meterX + meterW, barY - 3); cx.textAlign = 'left';
+    cx.strokeStyle = pve.rankDisplay >= 1 ? '#fff3a3' : '#8290a8'; cx.lineWidth = 2;
+    cx.beginPath(); cx.moveTo(meterX + meterW, barY - 1); cx.lineTo(meterX + meterW, barY + barH + 2); cx.stroke();
+    if (pve.rankGainT > 0) {
+      cx.save(); cx.globalAlpha = Math.min(1, pve.rankGainT / 220); cx.strokeStyle = '#fff5a8'; cx.lineWidth = 3; cx.strokeRect(meterX - 2, barY - 2, meterW + 4, barH + 4); cx.restore();
+    }
+    const hpRatio = pve.examHp / Math.max(1, pve.examMaxHp), hpColor = hpRatio > .66 ? '#56df8b' : hpRatio > .33 ? '#ffd54a' : '#ff6969';
+    cx.fillStyle = 'rgba(6,18,42,.86)'; cx.fillRect(hpX - 8, hpY - 7, hpW + 16, 48);
+    cx.strokeStyle = 'rgba(118,204,255,.68)'; cx.lineWidth = 1; cx.strokeRect(hpX - 8, hpY - 7, hpW + 16, 48);
+    cx.fillStyle = '#dce8ff'; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.fillText(`HP PET · ${pve.examHp}/${pve.examMaxHp}`, hpX, hpY + 9);
+    cx.fillStyle = 'rgba(13,23,43,.92)'; cx.fillRect(hpX, hpY + 16, hpW, barH);
+    cx.fillStyle = hpColor; cx.fillRect(hpX, hpY + 16, hpW * hpRatio, barH);
+    cx.strokeStyle = pve.playerHitT > 0 ? '#fff' : '#63738d'; cx.lineWidth = pve.playerHitT > 0 ? 3 : 1; cx.strokeRect(hpX, hpY + 16, hpW, barH);
+    for (let i = 1; i < pve.examMaxHp; i++) { const x = hpX + hpW * i / pve.examMaxHp; cx.strokeStyle = 'rgba(255,255,255,.5)'; cx.beginPath(); cx.moveTo(x, hpY + 16); cx.lineTo(x, hpY + 16 + barH); cx.stroke(); }
+  }
+  function renderGymMenu() {
+    const W = SCREEN_W, H = SCREEN_H, compact = W < 620, pad = compact ? 18 : 34;
+    drawBattleBackground('grass', W, H);
+    cx.fillStyle = 'rgba(7,14,35,.78)'; cx.fillRect(0, 0, W, H);
+    cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 25 : 34}px ${JPFONT}`; cx.textAlign = 'center';
+    cx.fillText('JLPT GYM', W / 2, compact ? 52 : 66);
+    cx.fillStyle = '#bcd0ec'; cx.font = `${compact ? 12 : 15}px "KanjiGo UI",sans-serif`;
+    cx.fillText('Chọn bài test hoặc vào lại bài đã PASS để tự ôn', W / 2, compact ? 76 : 94);
+    const options = gymMenu.options, gap = compact ? 12 : 18;
+    const cardW = compact ? W - pad * 2 : Math.min(360, (W - pad * 2 - gap * Math.max(0, options.length - 1)) / Math.max(1, options.length));
+    const cardH = compact ? Math.min(150, (H - 150 - gap * Math.max(0, options.length - 1)) / Math.max(1, options.length)) : Math.min(250, H - 190);
+    const totalW = compact ? cardW : cardW * options.length + gap * Math.max(0, options.length - 1);
+    const startX = compact ? pad : (W - totalW) / 2, startY = compact ? 100 : 126;
+    gymMenu.hitboxes = [];
+    options.forEach((tier, index) => {
+      const exam = gymEligibility(tier), x = compact ? startX : startX + index * (cardW + gap), y = compact ? startY + index * (cardH + gap) : startY;
+      const selected = index === gymMenu.selected;
+      cx.fillStyle = selected ? 'rgba(27,64,91,.96)' : 'rgba(14,27,52,.94)'; cx.fillRect(x, y, cardW, cardH);
+      cx.strokeStyle = exam.earned ? '#ffd54a' : exam.ready ? '#65efb9' : selected ? '#6cc0ff' : '#435674'; cx.lineWidth = selected ? 3 : 2; cx.strokeRect(x, y, cardW, cardH);
+      const badgeSize = Math.max(48, Math.min(compact ? 66 : 90, cardH * .43));
+      drawBadgeMedallion(tier, x + cardW / 2, y + 18 + badgeSize / 2, badgeSize, exam.earned, exam.ready);
+      cx.textAlign = 'center'; cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 17 : 22}px ${JPFONT}`; cx.fillText(`TEST ${tier}`, x + cardW / 2, y + badgeSize + 39);
+      let status;
+      if (exam.earned) status = 'PASS ✓ · ÔN LẠI';
+      else if (!exam.badgeReady) status = `CẦN PASS ${exam.requiredBadge}`;
+      else if (!exam.prerequisiteReady) status = `N5 ${exam.prerequisite.captured}/${exam.prerequisite.total} · CẦN ĐỦ`;
+      else if (exam.ready) status = 'SẴN SÀNG THI';
+      else status = `Bắt ${exam.captured}/${exam.requiredCaptured} · Lv${exam.requiredLevel}+ ${exam.atLevel}/${exam.requiredAtLevel}`;
+      cx.fillStyle = exam.earned ? '#ffe58a' : exam.ready ? '#7ff0c5' : '#aebbd0'; cx.font = `bold ${compact ? 11 : 13}px "KanjiGo UI",sans-serif`;
+      fitText(`${index + 1}. ${status}`, x + cardW / 2, y + cardH - 10, cardW - 20, compact ? 11 : 13, true);
+      const history = learning.gymHistory[tier];
+      if (history && history.attempts) {
+        cx.fillStyle = '#d9e6fa';
+        fitText(gymBestLabel(history), x + cardW / 2, y + cardH - 29, cardW - 20, compact ? 9 : 11, true);
+      }
+      cx.textAlign = 'left'; gymMenu.hitboxes.push({ action: 'tier', tier, index, x, y, w: cardW, h: cardH });
+    });
+    cx.fillStyle = '#aabbd4'; cx.font = '12px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+    cx.fillText('↑↓ để chọn · Enter để bắt đầu · Esc để đóng', W / 2, H - 28); cx.textAlign = 'left';
+  }
+  function drawPveDuel(W, fieldH) {
+    const target = pve.q && pve.q.target, info = kanjiInfo(target), enemy = info && C.MONSTERS[info.monId];
+    const pet = C.MONSTERS[currentPetId]; if (!target || !enemy || !pet) return;
+    const stageW = Math.min(W, 980), stageX = (W - stageW) / 2, baseY = fieldH - Math.max(24, fieldH * .08);
+    const actorScale = Math.max(.45, Math.min(1, stageW / 900, fieldH / 410));
+    const petLevel = ensureMastery(pet.kanji).level, enemyLevel = ensureMastery(target).level;
+    const petW = 142 * actorScale * battleLevelScale(petLevel);
+    const enemyW = Math.min(205, enemy.drawW * 1.05) * actorScale * battleLevelScale(enemyLevel);
+    const petCenter = stageX + stageW * .24, enemyCenter = stageX + stageW * .76;
+    const petP = pve.petAttackT > 0 ? 1 - pve.petAttackT / (pve.petAttackTotal || 520) : 0;
+    const enemyP = pve.enemyAttackT > 0 ? 1 - pve.enemyAttackT / (pve.enemyAttackTotal || 600) : 0;
+    const entranceP = 1 - Math.max(0, pve.entranceT) / (pve.entranceTotal || 520);
+    const petLunge = Math.sin(Math.max(0, Math.min(1, petP)) * Math.PI) * Math.min(115, stageW * .14);
+    const enemyLunge = Math.sin(Math.max(0, Math.min(1, enemyP)) * Math.PI) * Math.min(115, stageW * .14);
+    const petRecoil = pve.playerHitT > 0 ? -Math.abs(Math.sin(pve.playerHitT / 22)) * 16 : 0;
+    const enemyRecoil = pve.enemyHitT > 0 ? Math.sin(pve.enemyHitT / 17) * 9 : 0;
+    const enemyX = enemyCenter + (1 - entranceP) * Math.min(180, stageW * .2) - enemyLunge + enemyRecoil;
+    const jumpY = Math.sin(Math.max(0, Math.min(1, entranceP)) * Math.PI) * Math.min(58, fieldH * .18);
+    const idle = Math.sin(performance.now() / 260) * 3;
+    cx.fillStyle = 'rgba(0,0,0,.22)'; cx.beginPath(); cx.ellipse(petCenter, baseY + 3, petW * .45, petW * .1, 0, 0, Math.PI * 2); cx.fill();
+    cx.beginPath(); cx.ellipse(enemyCenter, baseY + 3, enemyW * .45, enemyW * .1, 0, 0, Math.PI * 2); cx.fill();
+    const petImage = monsterImg(currentPetId), petX = petCenter + petLunge + petRecoil;
+    if (petImage) {
+      const petH = petW * petImage.height / petImage.width;
+      cx.save(); if (pve.playerHitT > 0) cx.filter = 'brightness(2) saturate(.25)';
+      cx.drawImage(petImage, petX - petW / 2, baseY - petH + idle, petW, petH); cx.restore();
+    } else drawPveMascotPlaceholder(pet.kanji, petX, baseY, petW);
+    const enemyImage = monsterImg(info.monId), enemyH = enemyW * enemy.drawH / enemy.drawW;
+    if (enemyImage) {
+      cx.save(); if (pve.enemyHitT > 0) cx.filter = 'brightness(2) saturate(.25)';
+      cx.drawImage(enemyImage, enemyX - enemyW / 2, baseY - enemyH - jumpY - idle, enemyW, enemyH); cx.restore();
+    } else drawPveMascotPlaceholder(target, enemyX, baseY - jumpY, enemyW);
+    cx.textAlign = 'center'; cx.font = 'bold 12px "KanjiGo UI",sans-serif';
+    cx.fillStyle = '#bafbd0'; cx.fillText(`PET「${pet.kanji}」Lv.${petLevel}`, petCenter, baseY + 20);
+    cx.fillStyle = '#ffd98a'; cx.fillText(`CÂU HỎI「${target}」Lv.${enemyLevel}`, enemyCenter, baseY + 20); cx.textAlign = 'left';
+    const enemyBarW = Math.min(120, stageW * .18), enemyBarX = enemyCenter - enemyBarW / 2, enemyBarY = baseY + 27;
+    cx.fillStyle = '#301d27'; cx.fillRect(enemyBarX, enemyBarY, enemyBarW, 5);
+    cx.fillStyle = '#ef5b67'; cx.fillRect(enemyBarX, enemyBarY, enemyBarW * pve.enemyHp, 5);
+  }
+  function drawPveMascotPlaceholder(char, centerX, baseY, size) {
+    const radius = Math.max(28, size * .32);
+    cx.fillStyle = 'rgba(11,16,48,.82)'; cx.beginPath(); cx.arc(centerX, baseY - radius, radius, 0, Math.PI * 2); cx.fill();
+    cx.strokeStyle = '#6cc0ff'; cx.lineWidth = 2; cx.stroke();
+    cx.fillStyle = '#ffd54a'; cx.font = `bold ${Math.round(radius)}px ${JPFONT}`; cx.textAlign = 'center'; cx.fillText(char, centerX, baseY - radius * .68); cx.textAlign = 'left';
   }
   function drawPveTrainerTeam(team, W, fieldH) {
     const members = Array.isArray(team) ? team : [];
@@ -4456,6 +4995,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   // Banner feedback: hộp nền, canh giữa, nằm sát mép trên panel -> không chồng chữ.
   function drawFeedbackBanner(b, W, fieldH) {
     const txt = b.feedback.text;
+    const fadeMs = Math.max(1, Number(b.feedback.fadeMs) || 1);
+    const alpha = Math.max(0, Math.min(1, Number(b.fbT) / fadeMs));
+    cx.save(); cx.globalAlpha = alpha;
     cx.font = `15px ${JPFONT}`;
     const tw = Math.min(W - 40, cx.measureText(txt).width + 32);
     const bx = (W - tw) / 2, by = fieldH - 40, bh = 30;
@@ -4464,6 +5006,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.strokeStyle = b.feedback.good ? '#6effa1' : '#ff8a8a'; cx.lineWidth = 2; cx.strokeRect(bx, by, tw, bh);
     cx.fillStyle = b.feedback.good ? '#b6ffcf' : '#ffc9c9';
     cx.textAlign = 'center'; cx.fillText(txt, W / 2, by + 20); cx.textAlign = 'left';
+    cx.restore();
   }
 
   // Overlay choáng: dấu 😵 + đồng hồ đếm ngược ở giữa sân đấu.
@@ -4511,6 +5054,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     fitText(`Recall ${s.recall}% · 🔥${s.winStreak}`, bx, isNarrow ? statsY2 : statsY1, Math.min(140, w), 10);
   }
   function quizPresentation(q, compact = false) {
+    if (q.mode === 'm13') return {
+      instruction: compact ? 'Điền TỪ GHÉP vào câu:' : 'Chọn từ ghép Kanji phù hợp với chỗ trống:',
+      prompt: q.clozeSentence || q.sentence || q.word,
+      support: `(${q.sentenceMeaning || q.mean})`,
+    };
+    if (q.mode === 'm14') return {
+      instruction: compact ? 'Chọn mặt chữ Kanji:' : 'Cách đọc này thuộc từ Kanji nào?',
+      prompt: `「${q.wordReading || q.answer}」`,
+      support: 'Nhớ lại mặt chữ thay vì vị trí của đáp án.',
+    };
+    if (q.mode === 'm15') return {
+      instruction: compact ? 'Chọn từ Kanji theo nghĩa:' : 'Chọn từ Kanji tương ứng với nghĩa:',
+      prompt: `“${q.mean}”`,
+      support: q.wordReading ? `Gợi ý sau khi chọn: cách đọc ${q.wordReading}` : 'Nhớ lại mặt chữ của từ.',
+    };
     if (q.mode === 'm11') return {
       instruction: compact ? 'Đọc TỪ GHÉP trong câu:' : 'Chọn cách đọc của TOÀN BỘ từ ghép trong câu:',
       prompt: q.sentence || q.word,
@@ -4589,11 +5147,16 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     for (let i = 0; i < ans.length; i++) {
       const col = i % cols, row = (i / cols) | 0;
       const ox = bx + col * (bw + layout.answerGapX), oy = startY + row * (bh + gY);
-      cx.globalAlpha = disabled ? 0.4 : 1;
+      const selected = b.selectedIndex === i;
+      const correct = i === q.correctIndex;
+      cx.globalAlpha = selected ? 1 : disabled ? 0.4 : 1;
       const hinted = b.hint && i !== q.correctIndex && i === 0;
-      cx.fillStyle = hinted ? 'rgba(90,100,120,.38)' : 'rgba(22,85,143,.55)'; cx.fillRect(ox, oy, bw, bh);
-      cx.strokeStyle = disabled ? '#3a4a6a' : '#2f7fc0'; cx.lineWidth = 1; cx.strokeRect(ox, oy, bw, bh);
-      cx.fillStyle = '#9fd8f5'; cx.font = `bold ${narrow ? 14 : 16}px "KanjiGo UI",sans-serif`; cx.fillText(`${i + 1})`, ox + (narrow ? 8 : 12), oy + bh / 2 + 6);
+      cx.fillStyle = selected ? (correct ? 'rgba(31,164,91,.96)' : 'rgba(194,52,62,.96)')
+        : hinted ? 'rgba(90,100,120,.38)' : 'rgba(22,85,143,.55)';
+      cx.fillRect(ox, oy, bw, bh);
+      cx.strokeStyle = selected ? (correct ? '#a6ffc8' : '#ffd0d3') : disabled ? '#3a4a6a' : '#2f7fc0';
+      cx.lineWidth = selected ? 3 : 1; cx.strokeRect(ox, oy, bw, bh);
+      cx.fillStyle = selected ? '#fff' : '#9fd8f5'; cx.font = `bold ${narrow ? 14 : 16}px "KanjiGo UI",sans-serif`; cx.fillText(`${i + 1})`, ox + (narrow ? 8 : 12), oy + bh / 2 + 6);
       cx.fillStyle = '#fff'; fitText(ans[i] || '', ox + (narrow ? 34 : 42), oy + bh / 2 + 7, bw - (narrow ? 42 : 54), narrow ? 18 : 20);
       cx.globalAlpha = 1;
     }
@@ -4605,7 +5168,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       cx.fillText(`😵 Choáng ${(b.stun / 1000).toFixed(1)}s — đã khoá phím trả lời`, x + P, statusY);
     } else if (b.qCooldown > 0) {
       cx.fillStyle = '#9ab'; cx.font = '12px "KanjiGo UI",sans-serif';
-      cx.fillText('… đang ra câu tiếp theo', x + P, statusY);
+      cx.fillText(b.feedback && !b.feedback.good ? '… xem lại đáp án trước khi tiếp tục' : '… đang ra câu tiếp theo', x + P, statusY);
     } else {
       cx.fillStyle = '#8aa'; cx.font = '12px "KanjiGo UI",sans-serif';
       const lens = state === 'battle' && Number.isFinite(b.meaningLensRemaining) ? `  •  H: Lens (${b.meaningLensRemaining})` : '';
@@ -4933,14 +5496,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     petData: () => petData, mastery: () => learning.mastery, makeQuestion, questionModesForLevel, updateBattle,
     pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: equipPet,
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
-    levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight,
+    levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight, battleLevelScale,
     getKanjiStat: (kanji) => ({ ...ensureMastery(kanji) }), getStreak: (kanji) => { const s = ensureMastery(kanji); return { winStreak: s.winStreak, lossStreak: s.lossStreak, bestWinStreak: s.bestWinStreak }; },
     recordAnswer, createLearningSession, finalizeLearningSession,
     vocabularyId, getVocabularyProgress: (value) => { const progress = vocabularyProgress(value); return progress ? { ...progress } : null; }, vocabularyQuestionsForKanji,
     enterLecture, startAcademyLesson, onLectureKey, answerLecture, getLecture: () => lecture,
     nextLectureKanji, academyLockedList, academyFilteredList, startCapture, answerCapture, onCaptureKey, updateCapture, getCapture: () => capture,
-    getStamina: () => stamina, startPve, startTrainer, interactTrainer, trainerStatus, trainerTeam, trainerWinsCount, startGym, answerPve, updatePve, getPve: () => pve,
-    tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, hasBadge,
+    getStamina: () => stamina, startPve, startTrainer, interactTrainer, trainerStatus, trainerTeam, trainerWinsCount,
+    openGymMenu, closeGymMenu, selectGymTier, onGymMenuKey, startGym, answerPve, updatePve, getPve: () => pve,
+    getGymMenu: () => ({ ...gymMenu, options: [...gymMenu.options], hitboxes: [...gymMenu.hitboxes] }),
+    getGymHistory: (tier = '') => tier ? (learning.gymHistory[String(tier).toUpperCase()] ? { ...learning.gymHistory[String(tier).toUpperCase()] } : null)
+      : Object.fromEntries(Object.entries(learning.gymHistory).map(([id, value]) => [id, { ...value }])),
+    tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, gymEligibility, gymGrade, hasBadge,
     getLearningStats: () => ({ total: learning.total, correct: learning.correct, wrong: learning.wrong, streak: learning.streak, best: learning.best }),
     getProgression: () => ({
       version: learning.progression.version,

@@ -148,7 +148,7 @@
         ],
       },
       ...trainerNpcs,
-      { gx: arena.centerGx, gy: arena.centerGy, type: 'gym', tier: 'N5', icon: '👑', lines: ['👑 Boss N5', 'Thu phục đủ Kanji N5 và chứng minh năng lực trước các Trainer để nhận huy hiệu N5.'] },
+      { gx: arena.centerGx, gy: arena.centerGy, type: 'gym', tier: 'N5', icon: '👑', lines: ['👑 JLPT Gym', 'Thi hoặc ôn lại N5; sau khi PASS N5 sẽ mở thêm bài test N4.'] },
     ],
   };
 })();
