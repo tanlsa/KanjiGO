@@ -279,6 +279,7 @@
     };
     document.getElementById('character-list-view')?.classList.add('settings-page-hidden');
     document.getElementById('character-creator-view')?.classList.remove('settings-page-hidden');
+    document.getElementById('settings-panel')?.classList.add('character-creator-open');
     syncCreatorUi();
     document.getElementById('character-creator-name')?.focus();
   }
@@ -286,6 +287,7 @@
     creatorDraft = null;
     document.getElementById('character-creator-view')?.classList.add('settings-page-hidden');
     document.getElementById('character-list-view')?.classList.remove('settings-page-hidden');
+    document.getElementById('settings-panel')?.classList.remove('character-creator-open');
     refreshSettings();
   }
   function bindCreator() {

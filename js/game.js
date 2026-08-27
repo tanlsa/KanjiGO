@@ -3066,7 +3066,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const minCardW = W < 620 ? 142 : 184;
     const widthCols = Math.floor((W - ox * 2 + gapX) / (minCardW + gapX));
     const cols = Math.max(1, Math.min(5, widthCols));
-    const panelH = Math.max(108, Math.min(142, Math.round(H * 0.18)));
+    // Màn hình hẹp cần năm dòng thông tin (tên, Hán Việt, ON, KUN, Recall).
+    // Dành đủ chiều cao cho panel thay vì để dòng cuối rơi khỏi viewport 360x640.
+    const narrow = W < 620;
+    const panelH = narrow
+      ? Math.max(128, Math.min(142, Math.round(H * 0.2)))
+      : Math.max(108, Math.min(142, Math.round(H * 0.18)));
     const oy = W < 620 ? 126 : 112, gridBottom = H - panelH - 10;
     const availableH = Math.max(80, gridBottom - oy);
     const cardW = (W - ox * 2 - gapX * (cols - 1)) / cols;
@@ -3237,24 +3242,37 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     return true;
   }
   function skillTreeLayout() {
-    const W = SCREEN_W, H = SCREEN_H, compact = W < 620, pad = compact ? 12 : 22;
-    const preferredDetailH = compact ? 190 : 150;
-    const detailH = Math.min(preferredDetailH, Math.max(112, Math.round(H * .44))), top = compact ? 108 : 96, detailY = H - detailH;
+    const W = SCREEN_W, H = SCREEN_H, short = H < 520, compact = W < 620 || short, pad = compact ? 12 : 22;
+    const preferredDetailH = short ? 126 : compact ? 178 : 150;
+    const detailH = Math.min(preferredDetailH, Math.max(short ? 112 : 124, Math.round(H * (short ? .33 : .42))));
+    const top = short ? 74 : compact ? 108 : 96, detailY = H - detailH;
     const bottom = Math.max(top + 20, detailY - 8), viewportH = Math.max(20, bottom - top);
     const graph = (C.SKILL_TREE && C.SKILL_TREE.layout) || {};
-    const worldW = Math.max(640, Number(graph.width) || 1100), worldH = Math.max(420, Number(graph.height) || 500);
+    // Một vài node authored nằm ngoài 0..layout.width. Tính bounds thật có
+    // gutter cho icon/label để camera không coi chúng là nội dung ngoài map.
+    const points = [graph.root, ...Object.values(graph.hubs || {}), ...SKILL_DEFINITIONS.map((definition) => definition.position)].filter(Boolean);
+    const authoredW = Math.max(640, Number(graph.width) || 1100), authoredH = Math.max(420, Number(graph.height) || 500);
+    const worldMinX = Math.min(0, ...points.map((point) => Number(point.x) - 70));
+    const worldMaxX = Math.max(authoredW, ...points.map((point) => Number(point.x) + 70));
+    const worldMinY = Math.min(0, ...points.map((point) => Number(point.y) - 62));
+    const worldMaxY = Math.max(authoredH, ...points.map((point) => Number(point.y) + 62));
+    const worldW = worldMaxX - worldMinX, worldH = worldMaxY - worldMinY;
     const fitZoom = Math.min((W - pad * 2) / worldW, viewportH / worldH, 1);
-    const zoom = Math.max(compact ? .62 : .68, fitZoom);
-    return { W, H, compact, pad, top, bottom, detailY, detailH, viewportH, worldW, worldH, zoom, graph };
+    // Portrait có thể fit toàn bộ chiều ngang; landscape thấp cần zoom nhỏ hơn
+    // thay vì giữ mức desktop rồi cắt gần hết graph.
+    const minimumZoom = short ? .32 : compact ? .2 : .52;
+    const zoom = Math.max(minimumZoom, fitZoom);
+    return { W, H, short, compact, pad, top, bottom, detailY, detailH, viewportH, worldMinX, worldMaxX, worldMinY, worldMaxY, worldW, worldH, zoom, graph };
   }
   function skillPanBounds(layout = skillTreeLayout()) {
     const visibleW = (layout.W - layout.pad * 2) / layout.zoom, visibleH = layout.viewportH / layout.zoom;
-    const centerX = (layout.worldW - visibleW) / 2, centerY = (layout.worldH - visibleH) / 2;
+    const centerX = (layout.worldMinX + layout.worldMaxX - visibleW) / 2;
+    const centerY = (layout.worldMinY + layout.worldMaxY - visibleH) / 2;
     return {
-      minX: layout.worldW > visibleW ? 0 : centerX,
-      maxX: layout.worldW > visibleW ? layout.worldW - visibleW : centerX,
-      minY: layout.worldH > visibleH ? 0 : centerY,
-      maxY: layout.worldH > visibleH ? layout.worldH - visibleH : centerY,
+      minX: layout.worldW > visibleW ? layout.worldMinX : centerX,
+      maxX: layout.worldW > visibleW ? layout.worldMaxX - visibleW : centerX,
+      minY: layout.worldH > visibleH ? layout.worldMinY : centerY,
+      maxY: layout.worldH > visibleH ? layout.worldMaxY - visibleH : centerY,
       visibleW, visibleH,
     };
   }
@@ -3264,7 +3282,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     skillUi.panY = Math.max(bounds.minY, Math.min(bounds.maxY, Number(skillUi.panY) || 0));
   }
   function centerSkillGraph(point) {
-    const layout = skillTreeLayout(), bounds = skillPanBounds(layout), target = point || { x: layout.worldW / 2, y: layout.worldH / 2 };
+    const layout = skillTreeLayout(), bounds = skillPanBounds(layout), target = point || { x: (layout.worldMinX + layout.worldMaxX) / 2, y: (layout.worldMinY + layout.worldMaxY) / 2 };
     skillUi.panX = Number(target.x) - bounds.visibleW / 2;
     skillUi.panY = Number(target.y) - bounds.visibleH / 2;
     clampSkillPan();
@@ -3377,7 +3395,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function drawSkillNode(definition, index, layout) {
     const status = skillStatus(definition.id), point = skillWorldToScreen(definition.position, layout);
     const branchColor = SKILL_BRANCH_COLORS[definition.branch] || '#9fd8f5';
-    const selected = index === skillUi.sel, radius = Math.max(26, 37 * layout.zoom);
+    const selected = index === skillUi.sel, radius = Math.max(layout.short || layout.zoom < .4 ? 20 : 24, 37 * layout.zoom);
     const ring = status.state === 'owned' ? branchColor : status.state === 'ready' ? '#ffd54a' : status.state === 'preview' ? '#68728a' : '#4a5368';
     cx.save();
     if (selected) {
@@ -3393,9 +3411,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = '#fff'; cx.font = `${Math.max(17, radius * .78)}px ${JPFONT}`; cx.textAlign = 'center'; cx.textBaseline = 'middle';
     cx.fillText(definition.icon || '✦', point.x, point.y + 1);
     cx.globalAlpha = 1; cx.textBaseline = 'alphabetic';
-    cx.fillStyle = selected ? '#fff' : '#c8d7ef'; cx.font = `bold ${layout.compact ? 10 : 12}px ${JPFONT}`;
-    fitText(definition.name, point.x, point.y + radius + 18, 132, layout.compact ? 10 : 12, true);
-    cx.fillStyle = status.state === 'ready' ? '#ffe56e' : '#aebbd2'; cx.font = 'bold 9px "KanjiGo UI",sans-serif'; cx.fillText(`${definition.costKP} KP`, point.x, point.y - radius - 9);
+    // Ở landscape thấp chỉ giữ label/cost của node đang chọn; các node còn lại
+    // vẫn nhận diện bằng icon và trạng thái mà không đè chữ lên nhau.
+    if ((!layout.short && layout.zoom >= .42) || selected) {
+      cx.fillStyle = selected ? '#fff' : '#c8d7ef'; cx.font = `bold ${layout.compact ? 10 : 12}px ${JPFONT}`;
+      fitText(definition.name, point.x, point.y + radius + 18, layout.short ? 104 : 132, layout.compact ? 10 : 12, true);
+      cx.fillStyle = status.state === 'ready' ? '#ffe56e' : '#aebbd2'; cx.font = 'bold 9px "KanjiGo UI",sans-serif'; cx.fillText(`${definition.costKP} KP`, point.x, point.y - radius - 9);
+    }
     const badgeX = point.x + radius * .7, badgeY = point.y - radius * .7;
     cx.globalAlpha = 1; cx.fillStyle = status.state === 'owned' ? '#42d786' : status.state === 'ready' ? '#ffd54a' : '#303b55';
     cx.beginPath(); cx.arc(badgeX, badgeY, 10, 0, Math.PI * 2); cx.fill();
@@ -3435,7 +3457,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const requirements = status.requirements.map((requirement) => ({ met: requirement.met, label: requirement.label }));
     if (status.missingPrerequisites && status.missingPrerequisites.length) requirements.unshift({ met: false, label: `Cần ${status.missingPrerequisites.join(', ')}` });
     if (!requirements.length) requirements.push({ met: true, label: 'Không có yêu cầu tiến độ' });
-    let chipX = pad, chipY = y + (layout.compact ? 91 : 94);
+    let chipX = pad, chipY = y + (layout.short ? 82 : layout.compact ? 91 : 94);
     for (const requirement of requirements) {
       const chipW = Math.min(layout.W - pad * 2, Math.max(130, requirement.label.length * 6.2 + 29));
       if (chipX + chipW > layout.W - pad) { chipX = pad; chipY += 29; }
@@ -3455,14 +3477,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const gradient = cx.createLinearGradient ? cx.createLinearGradient(0, 0, W, H) : null;
     if (gradient && gradient.addColorStop) { gradient.addColorStop(0, '#08172d'); gradient.addColorStop(1, '#10264a'); }
     cx.fillStyle = gradient || '#0e1930'; cx.fillRect(0, 0, W, H);
-    cx.fillStyle = '#fff'; cx.font = `bold ${W < 620 ? 23 : 30}px ${JPFONT}`; cx.fillText('🌳 SKILL TREE', layout.pad, 38);
-    cx.fillStyle = '#9fd8f5'; cx.font = `${W < 620 ? 11 : 13}px ${JPFONT}`;
-    fitText('Đầu tư tiến độ học vào tính năng mới. Permanent không mất khi reset.', layout.pad, 62, W - layout.pad * 2, W < 620 ? 11 : 13);
-    const resetW = W < 620 ? 98 : 150, resetX = W - layout.pad - resetW, resetY = 68, resetH = 30;
-    cx.fillStyle = '#ffd54a'; cx.font = `bold ${W < 620 ? 18 : 22}px "KanjiGo UI",sans-serif`; cx.fillText(`⭐ ${availableKP()} KP`, layout.pad, 91);
+    const titleY = layout.short ? 28 : 38;
+    cx.fillStyle = '#fff'; cx.font = `bold ${layout.short ? 20 : W < 620 ? 23 : 30}px ${JPFONT}`; cx.fillText('🌳 SKILL TREE', layout.pad, titleY);
+    if (!layout.short) {
+      cx.fillStyle = '#9fd8f5'; cx.font = `${W < 620 ? 11 : 13}px ${JPFONT}`;
+      fitText('Đầu tư tiến độ học vào tính năng mới. Permanent không mất khi reset.', layout.pad, 62, W - layout.pad * 2, W < 620 ? 11 : 13);
+    }
+    const touchBackReserve = usesTouchUi() ? (layout.short ? 150 : 110) : 0;
+    const resetW = layout.short ? 118 : W < 620 ? 98 : 150, resetX = W - layout.pad - resetW - touchBackReserve, resetY = layout.short ? 38 : 68, resetH = 30;
+    cx.fillStyle = '#ffd54a'; cx.font = `bold ${layout.short ? 16 : W < 620 ? 18 : 22}px "KanjiGo UI",sans-serif`; cx.fillText(`⭐ ${availableKP()} KP`, layout.pad, layout.short ? 61 : 91);
     cx.fillStyle = '#8094ba'; cx.font = '11px "KanjiGo UI",sans-serif';
-    const statsX = layout.pad + (W < 620 ? 100 : 130);
-    fitText(`Đã kiếm ${learning.progression.earnedKP} • Đã dùng ${spentKP()}`, statsX, 90, Math.max(50, resetX - statsX - 8), 11);
+    const statsX = layout.pad + (layout.short ? 112 : W < 620 ? 100 : 130);
+    fitText(`Đã kiếm ${learning.progression.earnedKP} • Đã dùng ${spentKP()}`, statsX, layout.short ? 60 : 90, Math.max(50, resetX - statsX - 8), layout.short ? 10 : 11);
     cx.fillStyle = skillUi.resetConfirm ? '#8d3546' : '#253659'; cx.fillRect(resetX, resetY, resetW, resetH);
     cx.strokeStyle = skillUi.resetConfirm ? '#ff8c9e' : '#5571a4'; cx.strokeRect(resetX, resetY, resetW, resetH);
     cx.fillStyle = '#fff'; cx.font = `bold ${W < 620 ? 10 : 11}px "KanjiGo UI",sans-serif`; cx.textAlign = 'center';
@@ -3496,9 +3522,11 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const point = skillWorldToScreen(hub, layout), color = SKILL_BRANCH_COLORS[branch] || '#64799f';
       cx.fillStyle = '#13213c'; cx.strokeStyle = color; cx.lineWidth = 3; cx.beginPath(); cx.arc(point.x, point.y, 16, 0, Math.PI * 2); cx.fill(); cx.stroke();
       const hubLabel = (C.SKILL_TREE.branches || {})[branch] || branch.toUpperCase(), labelW = Math.max(82, hubLabel.length * 7 + 18);
-      cx.fillStyle = 'rgba(9,20,40,.9)'; cx.fillRect(point.x - labelW / 2, point.y + 22, labelW, 21);
-      cx.strokeStyle = `${color}99`; cx.strokeRect(point.x - labelW / 2, point.y + 22, labelW, 21);
-      cx.fillStyle = color; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText(hubLabel, point.x, point.y + 36);
+      if (!layout.short && layout.zoom >= .42) {
+        cx.fillStyle = 'rgba(9,20,40,.9)'; cx.fillRect(point.x - labelW / 2, point.y + 22, labelW, 21);
+        cx.strokeStyle = `${color}99`; cx.strokeRect(point.x - labelW / 2, point.y + 22, labelW, 21);
+        cx.fillStyle = color; cx.font = 'bold 10px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText(hubLabel, point.x, point.y + 36);
+      }
     }
     cx.textAlign = 'left'; SKILL_DEFINITIONS.forEach((definition, index) => drawSkillNode(definition, index, layout));
     if (!layout.compact) {
@@ -5356,7 +5384,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = '#fff'; fitText(compact ? 'Chọn cách học Kanji mới' : 'Bạn muốn khám phá Kanji mới theo cách nào?', area.x, titleY, area.w, compact ? 23 : 28, true);
     cx.fillStyle = '#9fd8f5'; cx.font = `${compact ? 12 : 14}px ${JPFONT}`; fitText('Giảng đường chỉ hiển thị những chữ chưa unlock.', area.x, titleY + 26, area.w, compact ? 12 : 14);
     if (lecture.message) { cx.fillStyle = lecture.message.startsWith('⚠') ? '#ffadad' : '#6effa1'; fitText(lecture.message, area.x, titleY + 53, area.w, 15, true); }
-    const cardH = Math.max(62, Math.min(82, (H - 210) / Math.max(3, items.length))), startY = titleY + 76;
+    const cardH = Math.max(62, Math.min(compact && H > 700 ? 96 : 82, (H - 210) / Math.max(3, items.length)));
+    const cardsH = items.length * cardH + Math.max(0, items.length - 1) * 12;
+    // Cân bằng khoảng trống ở portrait dài nhưng vẫn giữ tiêu đề và footer riêng.
+    const startY = Math.max(titleY + 76, Math.min(titleY + 150, (H - cardsH) / 2));
     items.forEach((item, i) => {
       const y = startY + i * (cardH + 12), selected = i === (lecture.menuSel || 0);
       drawAcademyCard(area.x, y, area.w, cardH, selected);
@@ -5461,16 +5492,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       drawLessonMascot(info, area.x + split, bodyY + 20, area.w - split - 18, bodyH - 35);
     } else if (lecture.phase === 'readings') {
       cx.fillStyle = '#fff'; cx.font = `bold ${compact ? 23 : 27}px ${JPFONT}`; fitText(`Cách đọc của 「${info.char}」`, area.x + 28, bodyY + 42, area.w - 56, compact ? 23 : 27, true);
-      const gap = narrow ? 10 : 18, cardY = bodyY + 72;
+      const gap = narrow ? 10 : 18;
       const cardW = narrow ? area.w - 56 : (area.w - 74) / 2;
       const cardH = narrow ? Math.min(104, (bodyH - 102) / 2) : Math.min(150, bodyH - 92);
+      const readingGroupH = narrow ? cardH * 2 + gap : cardH;
+      const cardY = Math.max(bodyY + 72, bodyY + Math.min(150, (bodyH - readingGroupH) / 2));
       const onX = area.x + 28, onY = cardY, kunX = narrow ? onX : area.x + 46 + cardW, kunY = narrow ? cardY + cardH + gap : cardY;
       drawAcademyCard(onX, onY, cardW, cardH, true); drawAcademyCard(kunX, kunY, cardW, cardH, true);
       const drawReadingAudio = (label, labelX, labelY, char, type, active) => {
-        const iconW = 28, iconH = 28, iconX = labelX + cx.measureText(label).width + 7, iconY = labelY - 22;
+        const iconW = 28, iconH = 28, hitSize = 44, iconX = labelX + cx.measureText(label).width + 7, iconY = labelY - 22;
         cx.fillStyle = active ? '#dff8ff' : '#667087'; cx.font = `${narrow ? 15 : 17}px "KanjiGo UI",sans-serif`; cx.textAlign = 'center';
         cx.fillText(active ? '🔊' : '🔇', iconX + iconW / 2, iconY + 20); cx.textAlign = 'left';
-        if (active) lecture.hitboxes.push({ x: iconX, y: iconY, w: iconW, h: iconH, action: 'reading_audio', value: { char, type } });
+        if (active) lecture.hitboxes.push({ x: iconX - (hitSize - iconW) / 2, y: iconY - (hitSize - iconH) / 2, w: hitSize, h: hitSize, action: 'reading_audio', value: { char, type } });
       };
       const onLabelX = onX + 20, onLabelY = onY + 30, onAudio = Array.isArray(info.on) && info.on.length > 0;
       cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 14 : 17}px "KanjiGo UI",sans-serif`; cx.fillText('ÂM ON', onLabelX, onLabelY);
@@ -6473,9 +6506,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
       cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
       drawMonsterName(C.MONSTERS[selected.monId], 20, panelY + 52, W - 40, 13, { label: true });
-      const btnW = 24, btnH = 22, onX = 20, kunX = narrow ? 20 : 320;
-      const onMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : 250;
-      const kunMaxW = narrow ? Math.max(60, W - 40 - btnW - 8) : Math.max(80, W - 40 - kunX - btnW - 8);
+      const btnW = 24, btnH = 22, hitSize = 44, onX = 20, kunX = narrow ? 20 : 320;
+      const onMaxW = narrow ? Math.max(60, W - 40 - hitSize - 8) : 250;
+      const kunMaxW = narrow ? Math.max(60, W - 40 - hitSize - 8) : Math.max(80, W - 40 - kunX - hitSize - 8);
       const onY = panelY + 76, kunY = panelY + (narrow ? 97 : 76);
       const onText = `Âm ON: ${selected.on.join(', ')}`, kunText = `Âm KUN: ${selected.kun.join(', ') || '—'}`;
       cx.fillStyle = '#ffd54a'; const onTextW = fitText(onText, onX, onY, onMaxW, 14);
@@ -6490,9 +6523,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       };
       const onAudio = true, kunAudio = Array.isArray(selected.kun) && selected.kun.length > 0;
       drawAudioBtn(onBtnX, onBtnY, onAudio);
-      dex.hitboxes.push({ x: onBtnX, y: onBtnY, w: btnW, h: btnH, action: 'kanji-audio', value: { char: selected.char, type: 'on' } });
+      dex.hitboxes.push({ x: onBtnX - (hitSize - btnW) / 2, y: onBtnY - (hitSize - btnH) / 2, w: hitSize, h: hitSize, action: 'kanji-audio', value: { char: selected.char, type: 'on' } });
       drawAudioBtn(kunBtnX, kunBtnY, kunAudio);
-      if (kunAudio) dex.hitboxes.push({ x: kunBtnX, y: kunBtnY, w: btnW, h: btnH, action: 'kanji-audio', value: { char: selected.char, type: 'kun' } });
+      if (kunAudio) dex.hitboxes.push({ x: kunBtnX - (hitSize - btnW) / 2, y: kunBtnY - (hitSize - btnH) / 2, w: hitSize, h: hitSize, action: 'kanji-audio', value: { char: selected.char, type: 'kun' } });
       cx.fillStyle = recallColor; cx.font = '12px "KanjiGo UI",sans-serif'; fitText(`Recall ${stat.recall}% · 🔥 ${stat.winStreak} (best ${stat.bestWinStreak})`, 20, narrow ? panelY + 119 : panelY + 100, W - 40, 12);
     } else {
       cx.fillStyle = '#9ab'; cx.font = `18px ${JPFONT}`; cx.fillText('？？？', 20, panelY + 34); cx.font = '14px "KanjiGo UI",sans-serif'; cx.fillText('Tới 🏛️ Giảng đường để thu phục chữ này.', 20, panelY + 65);
@@ -6607,7 +6640,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     },
     hasFollower: followerUnlocked,
     petData: () => petData, mastery: () => learning.mastery, makeQuestion, questionModesForLevel, updateBattle,
-    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), setPet: equipPet,
+    pickGrassKanji, availableSpawn, getSilhouette, openDex, onDexKey, getDex: () => ({ ...dex, list: [...dex.list] }), getDexLayout: () => ({ ...dexLayout(dex.list.length) }), setPet: equipPet,
     collect, isCollected, expNeed, isDue, rustMultiplier, srsPromote, srsDemote,
     levelFromMp, mpFloorOfLevel, levelLabel, expInLevel, expToNext, awardWin, awardLoss, reappearWeight, battleLevelScale,
     getKanjiStat: (kanji) => ({ ...ensureMastery(kanji) }), getStreak: (kanji) => { const s = ensureMastery(kanji); return { winStreak: s.winStreak, lossStreak: s.lossStreak, bestWinStreak: s.bestWinStreak }; },
@@ -6632,7 +6665,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     getProgressionNotice: () => progressionNotice ? { ...progressionNotice } : null,
     validateSkillDefinitions, skillDefinitions: () => SKILL_DEFINITIONS.map((definition) => ({ ...definition })),
     skillStatus, purchaseSkill, resetPerks, hasSkill, capturedKanjiCount, kanjiAtLevelCount, resolveSkillEffects,
-    openSkillTree, onSkillKey, getSkillUi: () => ({ ...skillUi, hitboxes: [...skillUi.hitboxes] }),
+    openSkillTree, onSkillKey, getSkillUi: () => ({ ...skillUi, hitboxes: [...skillUi.hitboxes] }), getSkillTreeLayout: () => ({ ...skillTreeLayout() }),
     openProfile, onProfileKey, getProfileStats: profileStats, getProfileUi: () => ({ ...profileUi, hitboxes: [...profileUi.hitboxes] }),
     useMeaningLens, radarSummary, cycleRadarTarget, radarEncounterMultiplier, getRadarTarget: () => radarTarget,
     getOverworldHudLayout: () => ({ ...overworldHudLayout() }),

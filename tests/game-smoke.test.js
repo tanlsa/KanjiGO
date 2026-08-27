@@ -595,6 +595,7 @@ test('Academy reading step plays the selected Kanji ON and KUN audio from inline
   game.debug.renderOnce();
   const speakers = game.debug.getLecture().hitboxes.filter((box) => box.action === 'reading_audio');
   assert.equal(Array.from(speakers, (box) => box.value.type).sort().join(','), 'kun,on');
+  assert.ok(speakers.every((box) => box.w >= 44 && box.h >= 44), 'Academy speakers need mobile-sized touch targets');
   for (const speaker of speakers) {
     game.dispatchCanvasEvent('pointerdown', { clientX: speaker.x + speaker.w / 2, clientY: speaker.y + speaker.h / 2 });
   }
@@ -635,8 +636,19 @@ test('KanjiDex pronunciation speakers sit directly beside their ON and KUN readi
   const onText = game.textCalls.findLast((call) => call.text.startsWith('Âm ON:'));
   const kunText = game.textCalls.findLast((call) => call.text.startsWith('Âm KUN:'));
   assert.ok(onBox && kunBox && onText && kunText, 'both readable pronunciations need a speaker action');
-  assert.equal(onBox.x, onText.x + onText.text.length * 8 + 5, 'ON speaker drifted away from its rendered reading');
-  assert.equal(kunBox.x, kunText.x + kunText.text.length * 8 + 5, 'KUN speaker drifted away from its rendered reading');
+  assert.equal(onBox.x + onBox.w / 2, onText.x + onText.text.length * 8 + 17, 'ON speaker drifted away from its rendered reading');
+  assert.equal(kunBox.x + kunBox.w / 2, kunText.x + kunText.text.length * 8 + 17, 'KUN speaker drifted away from its rendered reading');
+  assert.ok(onBox.w >= 44 && onBox.h >= 44 && kunBox.w >= 44 && kunBox.h >= 44,
+    'pronunciation actions need a reliable mobile touch target');
+});
+
+test('small mobile KanjiDex reserves enough room for every selected detail row', () => {
+  const game = createGame({ sandboxCharacter: true, viewportWidth: 360, viewportHeight: 640 });
+  game.debug.openDex(); game.debug.renderOnce();
+  const layout = game.debug.getDexLayout();
+  const recall = game.textCalls.findLast((call) => call.text.startsWith('Recall '));
+  assert.ok(layout.panelH >= 128, 'the narrow detail panel must not collapse below its five rows');
+  assert.ok(recall && recall.y <= 640 - 8, 'Recall must stay visibly inside the small viewport');
 });
 
 test('every vocabulary row supports sentence reading, kana-to-Kanji, and furigana meaning questions', () => {
@@ -1790,10 +1802,27 @@ test('skill tree controls stay inside a compact mobile viewport', () => {
   assert.equal(debug.openSkillTree(), true);
   assert.doesNotThrow(() => debug.renderOnce());
   const { width, height } = debug.getCanvasSize();
+  const layout = debug.getSkillTreeLayout();
+  assert.ok(layout.worldW * layout.zoom <= width - layout.pad * 2 + 1,
+    'portrait should initially fit the complete skill graph width');
   for (const box of debug.getSkillUi().hitboxes.filter((item) => item.action === 'buy' || item.action === 'reset')) {
     assert.ok(box.x >= 0 && box.y >= 0);
     assert.ok(box.x + box.w <= width);
     assert.ok(box.y + box.h <= height);
+  }
+});
+
+test('skill tree graph adapts to short mobile landscape instead of using desktop zoom', () => {
+  const { debug } = createGame({ viewportWidth: 844, viewportHeight: 390 });
+  assert.equal(debug.openSkillTree(), true);
+  assert.doesNotThrow(() => debug.renderOnce());
+  const layout = debug.getSkillTreeLayout();
+  assert.equal(layout.short, true);
+  assert.ok(layout.zoom < 0.5, `short landscape zoom should fit the graph, received ${layout.zoom}`);
+  assert.ok(layout.viewportH >= layout.worldH * layout.zoom - 1,
+    'the authored graph height should fit in the short landscape viewport');
+  for (const box of debug.getSkillUi().hitboxes.filter((item) => item.action === 'buy' || item.action === 'reset')) {
+    assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.w <= 844 && box.y + box.h <= 390);
   }
 });
 

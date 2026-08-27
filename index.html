@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>KanjiGO — Học Kanji kiểu Pokémon</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%230b1732%22/><text x=%2232%22 y=%2245%22 text-anchor=%22middle%22 font-size=%2242%22>漢</text></svg>" />
 <link rel="stylesheet" href="css/fonts.css" />
 <!--
   ============================================================
@@ -65,7 +66,8 @@
     background:rgba(5,9,24,.78);overflow:auto}
   #settings-overlay.is-open{display:flex}
   #settings-panel{width:min(620px,100%);box-sizing:border-box;padding:24px;background:#141c3c;color:#e9eef7;border:2px solid #2f7fc0;
-    max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--kanjigo-font)}
+    max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;scrollbar-gutter:stable;
+    overscroll-behavior:contain;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--kanjigo-font)}
   #settings-panel h2{margin:0 0 6px;color:#fff;font-size:24px}
   #settings-panel>p{margin:0 0 20px;color:#9fd8f5;font-size:13px}
   .settings-page-hidden{display:none!important}
@@ -137,7 +139,9 @@
   .settings-switch span::after{content:'';display:block;width:22px;height:22px;margin:4px;border-radius:50%;background:#dce7f5;box-shadow:0 2px 5px rgba(0,0,0,.35);transition:.18s ease}
   .settings-switch input:checked+span{background:#167e6c;box-shadow:0 0 0 2px rgba(91,240,190,.15)}
   .settings-switch input:checked+span::after{transform:translateX(24px);background:#7fffc4}
-  .settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+  .settings-actions{position:sticky;z-index:4;bottom:-24px;display:flex;justify-content:flex-end;gap:10px;margin:20px -24px -24px;padding:14px 24px;
+    border-top:1px solid rgba(82,126,170,.55);background:linear-gradient(180deg,rgba(20,28,60,.96),#141c3c 35%);box-shadow:0 -10px 18px rgba(5,9,24,.22)}
+  #settings-panel.character-creator-open>.settings-actions{display:none}
   .settings-actions button{min-height:42px;padding:8px 16px;border:1px solid #2f7fc0;border-radius:8px;background:#16558f;color:#fff;font-weight:700;cursor:pointer}
   .settings-actions button.secondary{background:transparent;color:#c8d5ee;border-color:#52617b}
   #onboarding-overlay{display:none;position:fixed;z-index:60;inset:0;align-items:center;justify-content:center;padding:22px;background:radial-gradient(circle at 50% 35%,rgba(27,78,121,.94),rgba(3,8,23,.98));font-family:var(--kanjigo-font)}
@@ -163,11 +167,13 @@
     #touch-actions{right:max(12px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom))}
   }
   @media (max-width:430px){
+    #settings-open{top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));bottom:auto}
     #touch-controls{width:132px;height:132px}
     #touch-controls button{width:44px;height:44px;border-radius:13px;font-size:21px}
     #touch-up{left:44px}.touch-left{top:44px}.touch-right{top:44px}.touch-down{left:44px}
-    #touch-actions{width:124px;height:144px;gap:6px;flex-wrap:wrap;align-content:flex-end;justify-content:flex-end}
+    #touch-actions{width:124px;height:144px;gap:6px;flex-wrap:wrap;align-content:flex-end;justify-content:flex-end;opacity:.86}
     #touch-actions button{width:59px;height:44px;font-size:11px}
+    #touch-controls{opacity:.86}
   }
   @media (max-width:520px){
     #settings-overlay{padding:12px}#settings-panel{padding:16px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
@@ -175,9 +181,31 @@
     .settings-menu{grid-template-columns:1fr;gap:9px}.settings-menu-card{min-height:92px;padding:14px}.settings-menu-icon{margin-bottom:7px;font-size:29px}
     .character-slot{grid-template-columns:56px 1fr;padding:10px}.character-avatar{width:56px;height:56px;background-size:224px 224px}
     .character-slot-actions{justify-content:flex-start}
-    .character-creator-heading{padding:14px}.character-creator-heading small{display:none}.character-creator-body{grid-template-columns:1fr;padding:14px}.character-creator-preview{min-height:174px}.character-creator-avatar{width:112px;height:112px;background-size:448px 448px}.character-creator-footer{align-items:stretch;flex-direction:column;padding:13px 14px}.character-creator-note{max-width:none}.character-creator-actions button{flex:1}.onboarding-card{padding:22px 16px}#onboarding-title{font-size:21px}#onboarding-copy{font-size:13px}#onboarding-kanji-options{gap:7px}.onboarding-kanji-choice{min-height:104px;padding:8px 5px}.onboarding-kanji-choice strong{font-size:31px}
+    .settings-actions{bottom:-16px;margin:16px -16px -16px;padding:12px 16px}
+    .character-creator{display:flex;max-height:calc(100dvh - 158px);min-height:0;flex-direction:column}
+    .character-creator-heading,.character-creator-footer{flex:0 0 auto}.character-creator-heading{padding:14px}.character-creator-heading small{display:none}
+    .character-creator-body{min-height:0;grid-template-columns:1fr;padding:14px;overflow-y:auto;overscroll-behavior:contain}
+    .character-creator-preview{min-height:152px}.character-creator-avatar{width:104px;height:104px;background-size:416px 416px}
+    .character-creator-footer{align-items:stretch;flex-direction:column;padding:11px 14px}.character-creator-note{max-width:none}.character-creator-actions button{flex:1}
+    .onboarding-card{padding:22px 16px}#onboarding-title{font-size:21px}#onboarding-copy{font-size:13px}#onboarding-kanji-options{gap:7px}.onboarding-kanji-choice{min-height:104px;padding:8px 5px}.onboarding-kanji-choice strong{font-size:31px}
   }
   @media (max-height:520px){
+    #settings-open{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));bottom:auto}
+    #touch-controls{width:132px;height:132px;opacity:.84}#touch-controls button{width:44px;height:44px;border-radius:13px;font-size:21px}
+    #touch-up{left:44px}.touch-left{top:44px}.touch-right{top:44px}.touch-down{left:44px}
+    #touch-actions{width:390px;height:46px;gap:6px;opacity:.84}#touch-actions button{width:59px;height:44px;font-size:10px}
+    #settings-overlay{padding:10px}#settings-panel{padding:14px;max-height:calc(100dvh - 20px)}
+    #settings-panel h2{font-size:20px}#settings-panel>p{margin-bottom:10px;font-size:11px}.settings-menu{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+    .settings-menu-card{min-height:104px;padding:11px}.settings-menu-icon{margin-bottom:5px;font-size:25px}.settings-menu-card strong{font-size:14px}.settings-menu-card small{margin-top:4px;font-size:9px;line-height:1.35}
+    .settings-actions{bottom:-14px;margin:12px -14px -14px;padding:9px 14px}.settings-actions button{min-height:40px}
+    .settings-page-heading{margin-bottom:9px}.settings-section{padding:11px}.settings-section+.settings-section{margin-top:9px}
+    .audio-setting-row{margin:8px 0}.audio-setting-check{margin:10px 0}.animation-setting-card{padding:12px}
+    #character-creator-view{min-height:0}.character-creator{display:flex;max-height:calc(100dvh - 124px);min-height:0;flex-direction:column}
+    .character-creator-heading{flex:0 0 auto;padding:10px 14px}.character-creator-heading h4{font-size:17px}.character-creator-heading small{display:none}
+    .character-creator-body{min-height:0;grid-template-columns:128px minmax(0,1fr);gap:12px;padding:12px;overflow-y:auto;overscroll-behavior:contain}
+    .character-creator-preview{min-height:170px;padding:8px}.character-creator-avatar{width:92px;height:92px;background-size:368px 368px}
+    .character-creator-fields{gap:8px}.character-form-step{padding:8px}.character-picker button{min-height:44px;padding:6px 8px}
+    .character-creator-footer{flex:0 0 auto;padding:8px 12px}.character-creator-note{display:none}.character-creator-actions button{min-height:40px}
     #onboarding-overlay{padding:10px}.onboarding-card{padding:14px 18px}.onboarding-avatar{width:54px;height:54px;margin-bottom:7px;background-size:216px 216px}#onboarding-title{margin:4px 0 7px;font-size:18px}#onboarding-copy{min-height:0;font-size:12px;line-height:1.4}#onboarding-hint{margin-top:7px;padding:6px 9px}#onboarding-kanji-options{margin-top:8px}.onboarding-kanji-choice{min-height:78px}.onboarding-kanji-choice strong{font-size:26px}.onboarding-kanji-choice b{margin-top:3px}#onboarding-progress{margin:9px 0}.onboarding-actions button{min-height:40px}
   }
 </style>
