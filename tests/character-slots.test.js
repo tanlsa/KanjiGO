@@ -35,7 +35,8 @@ function createManager(seed = {}) {
   };
   const elements = new Map();
   ['character-slots', 'character-slot-status', 'character-list-view', 'character-creator-view',
-    'character-creator-title', 'character-creator-name', 'character-creator-avatar',
+    'character-creator-title', 'character-creator-eyebrow', 'character-creator-copy', 'character-creator-name', 'character-name-count',
+    'character-creator-avatar', 'character-preview-name', 'character-preview-meta',
     'character-creator-save', 'character-creator-cancel'].forEach((id) => elements.set(id, createElement(id)));
   const slotsElement = elements.get('character-slots');
   const genderButtons = ['male', 'female'].map((gender) => createElement(`gender-${gender}`, { characterGender: gender }));
@@ -171,12 +172,16 @@ test('creator preserves the typed name while gender and uniform previews change'
   const name = manager.elements.get('character-creator-name');
   name.value = 'Mai Anh';
   name.dispatch('input');
+  assert.equal(manager.elements.get('character-preview-name').textContent, 'Mai Anh');
+  assert.equal(manager.elements.get('character-name-count').textContent, '7/24');
 
   manager.appearanceButtons.find((button) => button.dataset.characterAppearance === 'blue').dispatch('click');
   assert.equal(name.value, 'Mai Anh');
   manager.genderButtons.find((button) => button.dataset.characterGender === 'female').dispatch('click');
   assert.equal(name.value, 'Mai Anh');
   assert.match(manager.elements.get('character-creator-avatar').className, /gender-female appearance-blue/);
+  assert.equal(manager.elements.get('character-preview-meta').textContent, 'NỮ · POLO XANH FSOFT');
+  assert.match(manager.elements.get('character-creator-eyebrow').textContent, /HỒ SƠ MỚI · SLOT 2/);
 
   manager.elements.get('character-creator-save').dispatch('click');
   assert.equal(manager.api.active().name, 'Mai Anh');

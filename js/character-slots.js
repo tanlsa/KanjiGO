@@ -243,18 +243,32 @@
   function syncCreatorUi() {
     if (!creatorDraft) return;
     const title = document.getElementById('character-creator-title');
+    const eyebrow = document.getElementById('character-creator-eyebrow');
+    const copy = document.getElementById('character-creator-copy');
     const name = document.getElementById('character-creator-name');
+    const nameCount = document.getElementById('character-name-count');
     const preview = document.getElementById('character-creator-avatar');
+    const previewName = document.getElementById('character-preview-name');
+    const previewMeta = document.getElementById('character-preview-meta');
     const save = document.getElementById('character-creator-save');
     if (title) title.textContent = creatorDraft.edit ? 'Chỉnh sửa nhân vật' : 'Tạo nhân vật mới';
-    if (name) name.value = creatorDraft.name;
+    if (eyebrow) eyebrow.textContent = `${creatorDraft.edit ? 'CHỈNH SỬA HỒ SƠ' : 'HỒ SƠ MỚI'} · SLOT ${creatorDraft.id}`;
+    if (copy) copy.textContent = creatorDraft.edit
+      ? 'Thay đổi ngoại hình không làm mất tiến độ học của nhân vật.'
+      : 'Thiết kế học giả sẽ đồng hành cùng bạn trong thế giới KanjiGO.';
+    if (name && name.value !== creatorDraft.name) name.value = creatorDraft.name;
+    if (nameCount) nameCount.textContent = `${String(creatorDraft.name || '').length}/24`;
     if (preview) preview.className = `character-creator-avatar gender-${creatorDraft.gender} appearance-${creatorDraft.appearance}`;
-    if (save) save.textContent = creatorDraft.edit ? 'Lưu thay đổi' : 'Tạo & bắt đầu';
+    if (previewName) previewName.textContent = cleanName(creatorDraft.name, `Nhân vật ${creatorDraft.id}`);
+    if (previewMeta) previewMeta.textContent = `${GENDER_LABELS[creatorDraft.gender].toUpperCase()} · ${APPEARANCE_LABELS[creatorDraft.appearance].toUpperCase()}`;
+    if (save) { save.textContent = creatorDraft.edit ? 'Lưu thay đổi' : 'Tạo & bắt đầu'; save.disabled = !String(creatorDraft.name || '').trim(); }
     document.querySelectorAll?.('[data-character-gender]').forEach((button) => {
-      button.classList.toggle('selected', button.dataset.characterGender === creatorDraft.gender);
+      const selected = button.dataset.characterGender === creatorDraft.gender;
+      button.classList.toggle('selected', selected); button.setAttribute?.('aria-pressed', String(selected));
     });
     document.querySelectorAll?.('[data-character-appearance]').forEach((button) => {
-      button.classList.toggle('selected', button.dataset.characterAppearance === creatorDraft.appearance);
+      const selected = button.dataset.characterAppearance === creatorDraft.appearance;
+      button.classList.toggle('selected', selected); button.setAttribute?.('aria-pressed', String(selected));
     });
   }
   function openCreator(id) {
@@ -279,7 +293,7 @@
     const preserveTypedName = () => {
       if (creatorDraft && nameInput) creatorDraft.name = nameInput.value;
     };
-    nameInput?.addEventListener('input', preserveTypedName);
+    nameInput?.addEventListener('input', () => { preserveTypedName(); syncCreatorUi(); });
     document.querySelectorAll?.('[data-character-gender]').forEach((button) => {
       button.addEventListener('click', () => { if (creatorDraft) { preserveTypedName(); creatorDraft.gender = cleanGender(button.dataset.characterGender); syncCreatorUi(); } });
     });

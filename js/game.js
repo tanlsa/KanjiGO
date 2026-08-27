@@ -1536,8 +1536,9 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     else if (hit.action === 'picker_sort') cycleAcademySort();
     else if (hit.action === 'answer') answerLecture(hit.value);
     else if (hit.action === 'continue') academyNextStep();
+    else if (hit.action === 'lesson_back') academyPreviousStep();
     else if (hit.action === 'card_prev') {
-      if (lecture.phase === 'cards') showAcademyCard(lecture.cardIndex - 1, true);
+      if (lecture.phase === 'cards') academyPreviousStep();
       else { lecture.recapIndex = Math.max(0, lecture.recapIndex - 1); saveAcademyDraft(); }
     }
     else if (hit.action === 'card_next') {
@@ -2471,6 +2472,21 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       : `Đã ôn thích ứng ${lecture.recapIds.length} thẻ • xác nhận ${lecture.confirmScore}/${lecture.confirmTotal}.`;
     saveAcademyDraft(); saveLearning();
   }
+  function academyPreviousStep() {
+    if (!lecture) return false;
+    if (lecture.phase === 'cards') {
+      if (lecture.cardIndex > 0) showAcademyCard(lecture.cardIndex - 1, true);
+      else { lecture.phase = 'readings'; lecture.cardRevealed = false; saveAcademyDraft(); }
+      return true;
+    }
+    if (lecture.phase === 'readings') {
+      lecture.phase = 'intro'; saveAcademyDraft(); return true;
+    }
+    if (lecture.phase === 'recap' && lecture.recapIndex > 0) {
+      lecture.recapIndex--; saveAcademyDraft(); return true;
+    }
+    return false;
+  }
   function academyNextStep() {
     if (!lecture) return;
     if (lecture.phase === 'intro') lecture.phase = 'readings';
@@ -2582,9 +2598,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (k.startsWith('arrow')) ensureAcademySelectionVisible();
       return;
     }
-    if (['cards', 'recap'].includes(lecture.phase) && k === 'arrowleft') {
-      if (lecture.phase === 'cards') showAcademyCard(lecture.cardIndex - 1, true);
-      else { lecture.recapIndex = Math.max(0, lecture.recapIndex - 1); saveAcademyDraft(); }
+    if (['readings', 'cards', 'recap'].includes(lecture.phase) && k === 'arrowleft') {
+      academyPreviousStep();
       return;
     }
     if (['cards', 'recap'].includes(lecture.phase) && k === 'arrowright') {
@@ -5380,7 +5395,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       else if (lecture.phase === 'recap') label = lecture.recapIndex < lecture.recapIds.length - 1 ? 'THẺ ÔN TIẾP' : 'XÁC NHẬN LẠI';
       else if (['check', 'confirm'].includes(lecture.phase)) label = 'CÂU TIẾP THEO';
       else if (lecture.phase === 'ready') label = 'BẮT ĐẦU NGHI THỨC';
-      drawAcademyContinue(W, H, label);
+      const backLabel = lecture.phase === 'readings' ? 'BƯỚC 1'
+        : lecture.phase === 'cards' ? (lecture.cardIndex > 0 ? 'THẺ TRƯỚC' : 'BƯỚC 2') : '';
+      if (backLabel) drawAcademyLessonActions(W, H, label, backLabel);
+      else drawAcademyContinue(W, H, label);
     }
     if (!compact || !canContinue) {
       cx.fillStyle = '#8395b5'; cx.font = '11px "KanjiGo UI",sans-serif';
@@ -5608,6 +5626,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = '#1d72aa'; cx.fillRect(x, y, w, h); cx.strokeStyle = '#72ddff'; cx.lineWidth = 2; cx.strokeRect(x, y, w, h);
     cx.fillStyle = '#fff'; cx.font = 'bold 14px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText(`${label}  ▶`, W / 2, y + h / 2 + 5); cx.textAlign = 'left';
     lecture.hitboxes.push({ x, y, w, h, action: 'continue' });
+  }
+  function drawAcademyLessonActions(W, H, nextLabel, backLabel) {
+    const h = (lecture.uiScale || 1) < 1 ? 64 : 44, gap = 10, available = W - 48;
+    const backW = Math.min(156, Math.max(104, available * .3));
+    const nextW = Math.min(310, Math.max(150, available - backW - gap));
+    const totalW = backW + gap + nextW, x = (W - totalW) / 2, y = H - h - 22;
+    cx.fillStyle = '#213555'; cx.fillRect(x, y, backW, h); cx.strokeStyle = '#58739a'; cx.lineWidth = 2; cx.strokeRect(x, y, backW, h);
+    cx.fillStyle = '#d3e1f4'; cx.font = 'bold 12px "KanjiGo UI",sans-serif'; cx.textAlign = 'center'; cx.fillText(`◀ ${backLabel}`, x + backW / 2, y + h / 2 + 5);
+    const nextX = x + backW + gap; cx.fillStyle = '#1d72aa'; cx.fillRect(nextX, y, nextW, h); cx.strokeStyle = '#72ddff'; cx.strokeRect(nextX, y, nextW, h);
+    cx.fillStyle = '#fff'; cx.font = 'bold 13px "KanjiGo UI",sans-serif'; cx.fillText(`${nextLabel}  ▶`, nextX + nextW / 2, y + h / 2 + 5); cx.textAlign = 'left';
+    lecture.hitboxes.push({ x, y, w: backW, h, action: 'lesson_back' });
+    lecture.hitboxes.push({ x: nextX, y, w: nextW, h, action: 'continue' });
   }
   function renderAcademySummary(W, H) {
     const area = academyContent(W), info = lecture.info, narrow = W < 460;

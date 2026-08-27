@@ -546,6 +546,30 @@ test('Academy cards require reveal and always open the next vocabulary on its fr
   assert.equal(debug.getVocabularyProgress(second.id), null, 'an unrevealed next card must not be counted as seen');
 });
 
+test('Academy flashcards can navigate back through previous cards, readings, and intro', () => {
+  const { debug } = createGame();
+  enterAcademyCards(debug, '日');
+  debug.renderOnce();
+  assert.ok(debug.getLecture().hitboxes.some((box) => box.action === 'lesson_back'), 'the first flashcard needs a visible Back action');
+
+  debug.onLectureKey('arrowleft');
+  assert.equal(debug.getLecture().phase, 'readings', 'Back on the first card should return to step 2');
+  debug.renderOnce();
+  assert.ok(debug.getLecture().hitboxes.some((box) => box.action === 'lesson_back'), 'step 2 needs a visible Back action');
+  debug.onLectureKey('arrowleft');
+  assert.equal(debug.getLecture().phase, 'intro', 'Back on readings should return to step 1');
+
+  debug.onLectureKey('enter');
+  debug.onLectureKey('enter');
+  debug.onLectureKey('enter');
+  debug.onLectureKey('arrowright');
+  assert.equal(debug.getLecture().cardIndex, 1);
+  debug.onLectureKey('arrowleft');
+  assert.equal(debug.getLecture().phase, 'cards');
+  assert.equal(debug.getLecture().cardIndex, 0, 'Back should revisit the previous card');
+  assert.equal(debug.getLecture().cardRevealed, true, 'a previously learned card should reopen on its revealed face');
+});
+
 test('Academy action keys ignore browser repeat and mobile Back remains usable', () => {
   const { debug, dispatchWindowEvent, dispatchTouchBack } = createGame();
   assert.equal(debug.startAcademyLesson('日'), true);
