@@ -510,6 +510,8 @@ test('Admin ships offline Excel import/export and the workbook engine round-trip
   const admin = read('admin.html');
   assert.match(admin, /id="btnImportExcel"/);
   assert.match(admin, /id="btnExportExcel"/);
+  assert.match(admin, /id="btnLoadImported"/);
+  assert.match(admin, /function fillImported\(\)/);
   assert.match(admin, /js\/vendor\/xlsx\.full\.min\.js/);
   assert.ok(fs.existsSync(path.join(ROOT, 'js/vendor/SHEETJS-LICENSE.txt')));
   const XLSX = require(path.join(ROOT, 'js/vendor/xlsx.full.min.js'));

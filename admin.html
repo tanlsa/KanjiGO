@@ -6,87 +6,72 @@
 <title>KanjiGO — Admin: Nhập Kanji & Câu hỏi</title>
 <link rel="stylesheet" href="css/fonts.css" />
 <style>
-  :root{--bg:#0e1430;--pnl:#141c3c;--line:#243258;--cy:#6cc0ff;--ok:#6effa1;--warn:#ffd54a;--err:#ff8a8a}
+  :root{--bg:#081126;--pnl:#101c38;--pnl2:#142443;--line:#294267;--line2:#365d88;--cy:#62d8ff;--blue:#2688cf;--ok:#67efa0;--warn:#ffd666;--err:#ff8f9d;--muted:#9db0cd;--shadow:0 16px 44px rgba(0,0,0,.24)}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:#e9eef7;font-family:var(--kanjigo-font);line-height:1.5}
-  header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  header h1{font-size:20px;margin:0}.go{color:var(--cy)}
-  header .src{margin-left:auto;font-size:13px;background:#0b1330;border:1px solid var(--line);padding:6px 12px;border-radius:20px}
-  main{max-width:1080px;margin:0 auto;padding:20px 24px 60px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  @media(max-width:860px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--pnl);border:1px solid var(--line);border-radius:12px;padding:16px}
-  .card h2{margin:0 0 6px;font-size:16px}
-  .card p.hint{margin:0 0 10px;font-size:12.5px;color:#9fb0cf}
-  code.cols{display:block;background:#0b1330;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px;color:#9fd8f5;margin-bottom:8px;white-space:pre-wrap}
-  textarea{width:100%;height:210px;background:#0b1330;color:#dfe8f7;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:13px;resize:vertical;tab-size:4}
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
-  button{background:#16558f;color:#fff;border:1px solid #2f7fc0;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:600}
-  button:hover{filter:brightness(1.12)}
-  button.ghost{background:transparent;border-color:var(--line);color:#c8d5ee;font-weight:500}
-  button.ok{background:#1f7d47;border-color:#2fae63}
-  button.danger{background:#7a2530;border-color:#a83b48}
-  input[type=file]{display:none}
-  #log{margin-top:14px;font-size:13px}
-  .msg{padding:8px 12px;border-radius:8px;margin:6px 0;border:1px solid}
-  .msg.ok{background:rgba(30,110,60,.25);border-color:#2fae63;color:var(--ok)}
-  .msg.warn{background:rgba(120,90,20,.25);border-color:#b7902f;color:var(--warn)}
-  .msg.err{background:rgba(110,30,36,.3);border-color:#a83b48;color:var(--err)}
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
-  #preview{overflow-x:auto}
-  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
-  th{background:#0b1330;color:#9fd8f5}
-  .jp{font-family:var(--kanjigo-font);font-size:15px}
-  details{margin-top:8px}summary{cursor:pointer;color:var(--cy);font-size:13px}
-  pre.out{background:#0b1330;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;overflow:auto;max-height:260px}
-  a.back{color:var(--cy)}
+  html{background:var(--bg)}
+  body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% -10%,rgba(38,136,207,.2),transparent 34%),linear-gradient(180deg,#0b1630 0,var(--bg) 480px);color:#edf5ff;font-family:var(--kanjigo-font);line-height:1.5}
+  button,textarea{font:inherit}
+  header{position:sticky;top:0;z-index:20;padding:12px max(20px,calc((100vw - 1320px)/2));border-bottom:1px solid rgba(98,216,255,.18);background:rgba(8,17,38,.9);backdrop-filter:blur(14px);display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:11px;min-width:0}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border:1px solid #3b91c4;border-radius:11px;background:linear-gradient(145deg,#15365a,#0d203e);font-size:19px;box-shadow:0 0 24px rgba(98,216,255,.12)}
+  header h1{font-size:18px;line-height:1.15;margin:0;letter-spacing:.01em}.go{color:var(--cy)}
+  .brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+  header .src{margin-left:auto;font-size:12px;background:#0c1931;border:1px solid var(--line);padding:7px 11px;border-radius:999px;white-space:nowrap}.src.imported{color:var(--ok);border-color:#267651}.src.default{color:#c3d3e9}
+  a.back{color:#dff7ff;text-decoration:none;border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700}a.back:hover{border-color:var(--cy);color:var(--cy)}
+  main{max-width:1320px;margin:0 auto;padding:28px 24px 80px}
+  .hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(420px,.9fr);gap:24px;align-items:end;margin-bottom:24px}.eyebrow{margin:0 0 6px;color:var(--cy);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.hero h2{font-size:clamp(25px,3vw,38px);line-height:1.16;margin:0 0 10px;letter-spacing:-.02em}.hero-copy{max-width:720px;color:#b8c9df;margin:0;font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{min-height:86px;padding:13px 15px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,rgba(20,36,67,.95),rgba(12,25,49,.95));box-shadow:var(--shadow)}.stat strong{display:block;font-size:25px;line-height:1.2;color:#fff}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:5px}.stat.quality strong{color:var(--ok)}.stat.quality.warn strong{color:var(--warn)}.stat.quality.err strong{color:var(--err)}
+  .workflow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 22px}.step{display:flex;gap:11px;align-items:center;padding:11px 14px;border:1px solid rgba(54,93,136,.7);border-radius:11px;background:rgba(13,28,54,.72);color:#c8d7eb;font-size:12px}.step b{display:grid;place-items:center;flex:0 0 27px;height:27px;border-radius:50%;background:#1d5f93;color:#fff}.step strong{color:#fff;display:block;font-size:12px}
+  .source-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;margin-bottom:16px;border:1px solid var(--line);border-radius:13px;background:rgba(16,28,56,.8)}.source-tools-label{margin-right:auto}.source-tools-label strong{display:block;font-size:13px}.source-tools-label span{font-size:11px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:minmax(360px,.72fr) minmax(520px,1.28fr);gap:16px;align-items:start}
+  .card{background:linear-gradient(150deg,rgba(20,36,67,.98),rgba(13,27,53,.98));border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:var(--shadow);min-width:0}.card-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}.card-index{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:9px;background:#1c5e91;color:#fff;font-size:13px;font-weight:700}.card-title{min-width:0}.card h3{margin:0;font-size:15px}.card p.hint{margin:3px 0 0;font-size:11.5px;color:var(--muted)}.row-count{margin-left:auto;color:var(--cy);border:1px solid var(--line2);border-radius:999px;padding:4px 8px;font-size:10px;white-space:nowrap}
+  code.cols{display:block;background:#09162d;border:1px solid #203b60;border-radius:8px;padding:8px 10px;font-size:10.5px;color:#8edcff;margin-bottom:9px;white-space:pre-wrap;overflow-wrap:anywhere}
+  textarea{width:100%;height:410px;background:#071329;color:#e3edf9;border:1px solid #294b73;border-radius:10px;padding:13px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.62;resize:vertical;tab-size:4;outline:none;caret-color:var(--cy)}textarea:focus{border-color:var(--cy);box-shadow:0 0 0 3px rgba(98,216,255,.11)}
+  .action-panel{position:sticky;bottom:12px;z-index:10;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0;padding:12px;border:1px solid #355b82;border-radius:14px;background:rgba(9,20,41,.94);backdrop-filter:blur(14px);box-shadow:0 18px 55px rgba(0,0,0,.4)}.action-group{display:flex;gap:8px;flex-wrap:wrap}.action-group.primary{margin-left:auto}.action-note{font-size:11px;color:var(--muted);padding:0 4px}
+  button{min-height:40px;background:#175e98;color:#fff;border:1px solid #388cc7;border-radius:9px;padding:9px 13px;font-size:12px;cursor:pointer;font-weight:700;transition:transform .15s ease,filter .15s ease,border-color .15s ease}button:hover{filter:brightness(1.14);transform:translateY(-1px)}button:focus-visible{outline:3px solid rgba(98,216,255,.35);outline-offset:2px}button:disabled{opacity:.42;cursor:not-allowed;filter:none;transform:none}button.ghost{background:#101e38;border-color:var(--line);color:#c8d5ee;font-weight:600}button.ok{background:#197345;border-color:#38b86c}button.danger{background:transparent;border-color:#713544;color:#ffabb5}input[type=file]{display:none}
+  .results{margin-top:18px}.section-title{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:15px}.section-title span{color:var(--muted);font-size:11px;font-weight:400}
+  #log{font-size:12px}.msg{padding:9px 12px;border-radius:9px;margin:6px 0;border:1px solid}.msg.ok{background:rgba(30,110,60,.22);border-color:#2fae63;color:var(--ok)}.msg.warn{background:rgba(120,90,20,.22);border-color:#9a7828;color:var(--warn)}.msg.err{background:rgba(110,30,36,.27);border-color:#913c49;color:var(--err)}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}#preview{overflow:auto;max-height:660px;border-radius:10px}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 9px;text-align:left;white-space:nowrap}th:first-child,td:first-child{border-left:1px solid var(--line)}th{position:sticky;top:0;z-index:1;background:#0b1a34;color:#9fd8f5}tr:first-child th{border-top:1px solid var(--line)}.jp{font-family:var(--kanjigo-font);font-size:14px}
+  details{margin-top:12px;border:1px solid var(--line);border-radius:11px;background:#0c1931;padding:11px 13px}summary{cursor:pointer;color:var(--cy);font-size:12px;font-weight:700}pre.out{background:#071329;border:1px solid #213c60;border-radius:8px;padding:12px;font-size:11px;overflow:auto;max-height:300px}
+  @media(max-width:980px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.stats{max-width:620px}.action-panel{position:static}.action-group.primary{margin-left:0}}
+  @media(max-width:640px){header{padding:10px 12px;gap:8px}.brand small{display:none}header h1{font-size:15px}.src{order:3!important;width:100%;margin:0!important;text-align:center}main{padding:20px 12px 54px}.hero{gap:16px}.hero h2{font-size:25px}.stats{gap:7px}.stat{min-height:74px;padding:10px}.stat strong{font-size:20px}.workflow{grid-template-columns:1fr}.source-tools{align-items:stretch}.source-tools-label{width:100%}.source-tools button{flex:1}.card{padding:13px}.grid{display:block}.card+.card{margin-top:14px}textarea{height:330px;font-size:11px}.action-panel,.action-group{display:grid;grid-template-columns:1fr 1fr;width:100%}.action-note{grid-column:1/-1}.action-group.primary{grid-column:1/-1}.action-group.primary .ok{grid-column:1/-1}.results{padding:13px}button{width:100%;padding:9px 8px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>🛠️ Kanji<span class="go">GO</span> · Admin nhập liệu</h1>
+  <div class="brand"><span class="brand-mark">字</span><div><h1>Kanji<span class="go">GO</span> Content Studio</h1><small>Curriculum administration</small></div></div>
   <span class="src" id="srcStatus">Đang kiểm tra nguồn dữ liệu…</span>
+  <a class="back" href="index.html">← Về game</a>
 </header>
 <main>
-  <p style="font-size:13.5px;color:#c8d5ee">
-    Nhập/xuất trực tiếp file <b>Excel (.xlsx)</b>, dán từ <b>Excel / Google Sheets</b> (mỗi cột cách nhau bằng <b>Tab</b>) hoặc dùng <b>dấu phẩy</b> (CSV).
-    Dòng đầu có thể là tiêu đề (tự bỏ qua). Dòng bắt đầu bằng <code># là ghi chú.
-    Nhiều cách đọc On/Kun ngăn nhau bằng <code>,</code> hoặc <code>;</code>. &nbsp; ◀ <a class="back" href="index.html">Về game</a>
-  </p>
+  <section class="hero">
+    <div><p class="eyebrow">Quản trị nội dung học</p><h2>Chuẩn bị Kanji và câu hỏi<br>trước khi đưa vào game.</h2><p class="hero-copy">Nhập workbook hoặc dán bảng từ Excel/Google Sheets. Hệ thống sẽ kiểm tra cấu trúc, mascot, cách đọc và dữ liệu ngữ cảnh trước khi áp dụng.</p></div>
+    <div class="stats" aria-label="Thống kê nội dung"><div class="stat"><strong id="statKanji">0</strong><span>Kanji hợp lệ</span></div><div class="stat"><strong id="statQuestions">0</strong><span>Mục từ & câu hỏi</span></div><div class="stat quality" id="statQualityCard"><strong id="statQuality">—</strong><span>Chất lượng dữ liệu</span></div></div>
+  </section>
+
+  <div class="workflow" aria-label="Quy trình sử dụng"><div class="step"><b>1</b><div><strong>Nhập nội dung</strong>Dán bảng hoặc chọn Excel</div></div><div class="step"><b>2</b><div><strong>Kiểm tra</strong>Sửa lỗi và xem trước</div></div><div class="step"><b>3</b><div><strong>Áp dụng</strong>Lưu để chạy thử trong game</div></div></div>
+
+  <section class="source-tools"><div class="source-tools-label"><strong>Chọn dữ liệu để bắt đầu</strong><span>Bản import được lưu riêng trong trình duyệt hiện tại.</span></div><button class="ghost" id="btnLoadDefault">↺ Nạp bản mặc định</button><button class="ghost" id="btnLoadImported">↳ Nạp bản import đang dùng</button><button id="btnImportExcel">📥 Nhập Excel</button><input id="fileExcel" type="file" accept=".xlsx,.xls,.xlsb,.ods,.csv,.tsv" /></section>
 
   <div class="grid">
     <div class="card">
-      <h2>① Bảng KANJI (cho Kanji Dex)</h2>
-      <p class="hint">Thông tin từng chữ: nghĩa, âm On/Kun, và gắn với 1 monster (sprite).</p>
+      <div class="card-head"><span class="card-index">01</span><div class="card-title"><h3>Kanji Dex</h3><p class="hint">Thông tin chữ, âm đọc, JLPT và mascot.</p></div><span class="row-count" id="kanjiRowCount">0 dòng</span></div>
       <code class="cols">key    char    meaning    on    kun    monId    jlpt</code>
-      <textarea id="taKanji" spellcheck="false"></textarea>
+      <textarea id="taKanji" spellcheck="false" aria-label="Bảng dữ liệu Kanji"></textarea>
     </div>
     <div class="card">
-      <h2>② Bảng CÂU HỎI (ngân hàng quiz)</h2>
-      <p class="hint">Mỗi dòng = 1 mục từ. Ba cột <b>sentence*</b> dùng cho đề theo ngữ cảnh; bỏ trống thì game tự sinh fallback.</p>
+      <div class="card-head"><span class="card-index">02</span><div class="card-title"><h3>Ngân hàng câu hỏi</h3><p class="hint">Mỗi dòng là một mục từ; <b>sentence*</b> phục vụ câu hỏi ngữ cảnh.</p></div><span class="row-count" id="questionRowCount">0 dòng</span></div>
       <code class="cols">word    mean    target    answer    romaji    type    wordReading    wordRomaji    parts    sentence    sentenceReading    sentenceMeaning    id</code>
-      <textarea id="taQ" spellcheck="false"></textarea>
+      <textarea id="taQ" spellcheck="false" aria-label="Bảng ngân hàng câu hỏi"></textarea>
     </div>
   </div>
 
-  <div class="toolbar">
-    <button class="ghost" id="btnLoadDefault">↺ Nạp dữ liệu mẫu (mặc định)</button>
-    <button id="btnImportExcel">📥 Nhập Excel</button>
-    <input id="fileExcel" type="file" accept=".xlsx,.xls,.xlsb,.ods,.csv,.tsv" />
-    <button id="btnExportExcel">📊 Xuất Excel</button>
-    <button id="btnPreview">🔍 Xem trước &amp; Kiểm tra</button>
-    <button class="ok" id="btnApply">✅ Áp dụng vào game (lưu trình duyệt)</button>
-    <button id="btnDownload">⬇️ Tải xuống kanji.js</button>
-    <button class="danger" id="btnClear">🗑️ Xoá dữ liệu import</button>
+  <div class="action-panel">
+    <span class="action-note" id="editStatus">Sẵn sàng kiểm tra nội dung.</span>
+    <div class="action-group"><button class="ghost" id="btnExportExcel">📊 Xuất Excel</button><button class="ghost" id="btnDownload">⬇️ Tải kanji.js</button><button class="danger" id="btnClear">Xoá bản import</button></div>
+    <div class="action-group primary"><button id="btnPreview">🔍 Kiểm tra &amp; xem trước</button><button class="ok" id="btnApply">✓ Áp dụng vào game</button></div>
   </div>
 
-  <div id="log"></div>
-  <div id="preview"></div>
-
-  <details>
-    <summary>Xem nội dung kanji.js sẽ được sinh ra</summary>
-    <pre class="out" id="genOut">(bấm "Xem trước" để tạo)</pre>
-  </details>
+  <section class="card results"><h3 class="section-title">Kết quả kiểm tra <span>Lỗi cần được xử lý trước khi áp dụng</span></h3><div id="log"><div class="msg ok">Chưa phát hiện lỗi. Hãy chỉnh dữ liệu hoặc bấm “Kiểm tra”.</div></div><div id="preview"></div><details><summary>Xem mã kanji.js được sinh ra</summary><pre class="out" id="genOut">(bấm "Kiểm tra & xem trước" để tạo)</pre></details></section>
 </main>
 
 <!-- Nạp config + dữ liệu mặc định để có sẵn danh sách monster & mẫu -->
@@ -113,23 +98,40 @@ const withContextDefaults = (q) => ({
 // ---------- nguồn dữ liệu hiện tại ----------
 function refreshSrc(){
   const has = !!localStorage.getItem(KEY);
-  $('srcStatus').innerHTML = has
-    ? '🟢 Game đang dùng: <b>DỮ LIỆU IMPORT</b>'
-    : '⚪ Game đang dùng: <b>dữ liệu mặc định</b>';
+  $('srcStatus').textContent = has ? '● Game đang dùng bản import' : '○ Game đang dùng bản mặc định';
+  $('srcStatus').className = `src ${has ? 'imported' : 'default'}`;
+  $('btnLoadImported').disabled = !has;
 }
 
-// ---------- điền mẫu từ dữ liệu mặc định ----------
-function fillDefault(){
-  const kRows = Object.entries(DEF.KANJI).map(([key,v]) =>
-    [key, v.char, v.meaning, v.on.join(', '), v.kun.join(', '), v.monId, v.jlpt||''].join('\t'));
+// ---------- đưa một data bundle vào editor ----------
+function fillEditor(data){
+  const kRows = Object.entries(data.KANJI || {}).map(([key,v]) =>
+    [key, v.char, v.meaning, (v.on || []).join(', '), (v.kun || []).join(', '), v.monId, v.jlpt||''].join('\t'));
   $('taKanji').value = 'key\tchar\tmeaning\ton\tkun\tmonId\tjlpt\n' + kRows.join('\n');
-  const qRows = DEF.QUESTIONS.map(raw => {
+  const qRows = (data.QUESTIONS || []).map(raw => {
     const q = withContextDefaults(raw);
     return [q.word, q.mean, q.target, q.answer, q.romaji, q.type, q.wordReading||'', q.wordRomaji||'', encodeParts(q.parts),
       q.sentence, q.sentenceReading, q.sentenceMeaning, q.id].join('\t');
   });
   $('taQ').value = QUESTION_HEADERS.join('\t') + '\n' + qRows.join('\n');
-  log('', []); $('preview').innerHTML=''; $('genOut').textContent='(bấm "Xem trước" để tạo)';
+  $('preview').innerHTML=''; $('genOut').textContent='(bấm "Kiểm tra & xem trước" để tạo)';
+  updateDashboard();
+}
+function fillDefault(){
+  fillEditor(DEF);
+  $('editStatus').textContent = 'Đang chỉnh bản dữ liệu mặc định.';
+  log('ĐÃ NẠP BẢN MẶC ĐỊNH', [['ok','Bạn có thể chỉnh sửa an toàn; chỉ khi bấm “Áp dụng” game mới thay đổi.']]);
+}
+function fillImported(){
+  try {
+    const data = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (!data || !data.KANJI || !Array.isArray(data.QUESTIONS)) throw new Error('Bản import không đúng cấu trúc.');
+    fillEditor(data);
+    $('editStatus').textContent = 'Đang chỉnh bản import hiện được game sử dụng.';
+    const { msgs } = build(); log('ĐÃ NẠP BẢN IMPORT', [['ok','Các thay đổi tiếp theo chưa được lưu cho tới khi bấm “Áp dụng”.'], ...msgs]);
+  } catch (error) {
+    log('KHÔNG THỂ NẠP BẢN IMPORT', [['err', error.message || String(error)]]);
+  }
 }
 
 // ---------- parser: tab hoặc phẩy, bỏ tiêu đề/ghi chú ----------
@@ -212,6 +214,23 @@ function build(){
   if (!Object.keys(KANJI).length) msgs.push(['err', 'Chưa có Kanji nào hợp lệ.']);
   if (!QUESTIONS.length) msgs.push(['err', 'Chưa có Câu hỏi nào hợp lệ.']);
   return { data: { KANJI, QUESTIONS, DISTRACTORS }, msgs };
+}
+
+function updateDashboard(){
+  const { data, msgs } = build();
+  const errors = msgs.filter(([level]) => level === 'err').length;
+  const warnings = msgs.filter(([level]) => level === 'warn').length;
+  $('statKanji').textContent = Object.keys(data.KANJI).length.toLocaleString('vi-VN');
+  $('statQuestions').textContent = data.QUESTIONS.length.toLocaleString('vi-VN');
+  $('kanjiRowCount').textContent = `${Object.keys(data.KANJI).length} dòng`;
+  $('questionRowCount').textContent = `${data.QUESTIONS.length} dòng`;
+  $('statQuality').textContent = errors ? `${errors} lỗi` : warnings ? `${warnings} lưu ý` : 'Sẵn sàng';
+  $('statQualityCard').className = `stat quality ${errors ? 'err' : warnings ? 'warn' : ''}`;
+}
+let dashboardTimer = null;
+function editorChanged(){
+  $('editStatus').textContent = 'Có thay đổi chưa áp dụng.';
+  clearTimeout(dashboardTimer); dashboardTimer = setTimeout(updateDashboard, 160);
 }
 
 // ---------- log & preview ----------
@@ -318,11 +337,14 @@ async function importExcel(file){
   const { data, msgs } = build();
   const notices = [['ok', `Đã nhập ${file.name}: ${Object.keys(data.KANJI).length} Kanji, ${data.QUESTIONS.length} mục từ.`], ...msgs];
   const errs = log('📥 NHẬP EXCEL', notices);
+  $('editStatus').textContent = `Đã nhập ${file.name} — chưa áp dụng vào game.`;
+  updateDashboard();
   if (!errs) preview(data), genFile(data);
 }
 
 // ---------- actions ----------
 $('btnLoadDefault').onclick = () => { fillDefault(); refreshSrc(); };
+$('btnLoadImported').onclick = fillImported;
 $('btnImportExcel').onclick = () => $('fileExcel').click();
 $('fileExcel').onchange = async (event) => {
   const file = event.target.files && event.target.files[0];
@@ -348,6 +370,8 @@ $('btnApply').onclick = () => {
   if (errs) return;
   localStorage.setItem(KEY, JSON.stringify(data));
   preview(data); genFile(data); refreshSrc();
+  $('editStatus').textContent = 'Đã áp dụng — tải lại game để dùng nội dung mới.';
+  updateDashboard();
   log('✅ ĐÃ ÁP DỤNG', [['ok', `Đã lưu ${Object.keys(data.KANJI).length} kanji & ${data.QUESTIONS.length} câu hỏi vào trình duyệt. Mở lại index.html để chơi với dữ liệu mới.`], ...msgs]);
 };
 $('btnDownload').onclick = () => {
@@ -360,8 +384,11 @@ $('btnDownload').onclick = () => {
 };
 $('btnClear').onclick = () => {
   localStorage.removeItem(KEY); refreshSrc();
+  $('editStatus').textContent = 'Đã xoá bản import; editor chưa bị thay đổi.';
   log('🗑️ Đã xoá', [['ok','Đã xoá dữ liệu import. Game quay lại dùng js/kanji.js mặc định.']]);
 };
+$('taKanji').addEventListener('input', editorChanged);
+$('taQ').addEventListener('input', editorChanged);
 
 // init
 fillDefault(); refreshSrc();
