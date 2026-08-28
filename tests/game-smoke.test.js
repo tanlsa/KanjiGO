@@ -14,6 +14,8 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const windowListeners = new Map();
   const canvasListeners = new Map();
   const touchBackListeners = new Map();
+  const dexSearchListeners = new Map();
+  let activeElement = null;
   let paintCalls = 0;
   const drawCalls = [];
   const effectiveCharacterSlots = characterSlotsSave || {
@@ -83,6 +85,15 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
       touchBackListeners.get(type).push(listener);
     },
   };
+  const dexSearch = {
+    value: '', hidden: true,
+    addEventListener: (type, listener) => {
+      if (!dexSearchListeners.has(type)) dexSearchListeners.set(type, []);
+      dexSearchListeners.get(type).push(listener);
+    },
+    focus() { activeElement = dexSearch; },
+    blur() { if (activeElement === dexSearch) activeElement = null; },
+  };
   const settingsOpenClasses = new Set();
   const settingsOpenAttributes = new Map();
   const settingsOpen = {
@@ -112,9 +123,11 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
       windowListeners.get(type).push(listener);
     },
     document: {
+      get activeElement() { return activeElement; },
       getElementById: (id) => id === 'game' ? canvas
         : id === 'touch-back' ? touchBack
-          : id === 'settings-open' ? settingsOpen : null,
+          : id === 'settings-open' ? settingsOpen
+            : id === 'dex-search' ? dexSearch : null,
       querySelectorAll: () => [],
       createElement: (tag) => tag === 'canvas' ? createCanvas() : {},
       ...(mockFonts ? { fonts: { load: () => Promise.resolve([]), check: () => true } } : {}),
@@ -152,8 +165,17 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   const dispatchCanvasEvent = (type, event) => {
     for (const listener of canvasListeners.get(type) || []) listener({ preventDefault: noop, pointerId: 1, ...event });
   };
+  const dispatchDexSearch = (value) => {
+    dexSearch.value = value;
+    for (const listener of dexSearchListeners.get('input') || []) listener({ target: dexSearch });
+  };
+  const dispatchDexSearchKey = (key, extra = {}) => {
+    const event = { key, keyCode: 0, isComposing: false, preventDefault: noop, stopPropagation: noop, ...extra };
+    for (const listener of dexSearchListeners.get('keydown') || []) listener(event);
+  };
   return { context, debug: context.__KANJIGO_DEBUG, storage, imageRequests, dispatchWindowEvent, dispatchTouchBack,
-    dispatchCanvasEvent, textCalls, drawCalls, audioCalls, getPaintCalls: () => paintCalls,
+    dispatchCanvasEvent, dispatchDexSearch, dispatchDexSearchKey, textCalls, drawCalls, audioCalls, getPaintCalls: () => paintCalls,
+    getDexSearch: () => ({ value: dexSearch.value, hidden: dexSearch.hidden, focused: activeElement === dexSearch }),
     getTouchBack: () => ({ text: touchBack.textContent, title: touchBack.title,
       ariaLabel: touchBack.getAttribute('aria-label'), classes: [...touchBackClasses] }),
     getSettingsOpen: () => ({ tabIndex: settingsOpen.tabIndex,
@@ -642,6 +664,62 @@ test('KanjiDex pronunciation speakers sit directly beside their ON and KUN readi
     'pronunciation actions need a reliable mobile touch target');
 });
 
+test('mobile KanjiDex exposes a touch action to change the active follower', () => {
+  const game = createGame({ sandboxCharacter: true, viewportWidth: 390, viewportHeight: 844 });
+  game.debug.openDex();
+  game.debug.onDexKey('arrowright');
+  game.debug.renderOnce();
+  const equip = game.debug.getDex().hitboxes.find((box) => box.action === 'equip-pet');
+  assert.ok(equip, 'a captured non-active Kanji needs a visible mobile equip action');
+  assert.ok(equip.h >= 44, 'the follower action needs a reliable touch target');
+  const canvas = game.debug.getCanvasSize();
+  game.dispatchCanvasEvent('pointerdown', {
+    clientX: (equip.x + equip.w / 2) * 390 / canvas.width,
+    clientY: (equip.y + equip.h / 2) * 844 / canvas.height,
+  });
+  assert.equal(game.context.CONFIG.MONSTERS[game.debug.getPet().id].kanji, equip.value);
+  assert.equal(game.debug.state(), 'overworld', 'equipping from mobile should return to the map like Enter does');
+});
+
+test('mobile KanjiDex search opens a native input and filters by Kanji, reading, or accentless meaning', () => {
+  const game = createGame({ sandboxCharacter: true, viewportWidth: 390, viewportHeight: 844 });
+  game.debug.openDex(); game.debug.renderOnce();
+  assert.equal(game.getDexSearch().hidden, false, 'the native search input must be available to the mobile keyboard');
+
+  game.dispatchDexSearch('水');
+  assert.deepEqual(Array.from(game.debug.getDex().list), ['水']);
+  game.dispatchDexSearch('みず');
+  assert.ok(Array.from(game.debug.getDex().list).includes('水'), 'KUN reading should find 水 even when another reading shares the prefix');
+  game.dispatchDexSearch('nuoc');
+  assert.deepEqual(Array.from(game.debug.getDex().list), ['水'], 'Vietnamese search should work without accents');
+
+  game.dispatchDexSearchKey('Enter');
+  assert.equal(game.context.CONFIG.MONSTERS[game.debug.getPet().id].kanji, '水', 'Enter in search should equip the filtered Kanji');
+  assert.equal(game.debug.state(), 'overworld');
+
+  assert.equal(game.getDexSearch().hidden, true, 'leaving KanjiDex must hide the search input');
+});
+
+test('touching KanjiDex content dismisses mobile search focus without clearing its query', () => {
+  const game = createGame({ sandboxCharacter: true, viewportWidth: 390, viewportHeight: 844 });
+  game.debug.openDex(); game.debug.renderOnce();
+  game.debug.onDexKey('/');
+  game.dispatchDexSearch('nuoc'); game.debug.renderOnce();
+  assert.equal(game.getDexSearch().focused, true);
+
+  const card = game.debug.getDex().hitboxes.find((box) => box.action === 'card');
+  assert.ok(card, 'the filtered result needs a tappable card');
+  const canvas = game.debug.getCanvasSize();
+  game.dispatchCanvasEvent('pointerdown', {
+    clientX: (card.x + card.w / 2) * 390 / canvas.width,
+    clientY: (card.y + Math.min(20, card.h / 2)) * 844 / canvas.height,
+  });
+
+  assert.equal(game.getDexSearch().focused, false, 'tapping below search should dismiss the mobile keyboard');
+  assert.equal(game.debug.getDex().query, 'nuoc');
+  assert.deepEqual(Array.from(game.debug.getDex().list), ['水']);
+});
+
 test('small mobile KanjiDex reserves enough room for every selected detail row', () => {
   const game = createGame({ sandboxCharacter: true, viewportWidth: 360, viewportHeight: 640 });
   game.debug.openDex(); game.debug.renderOnce();
@@ -994,13 +1072,19 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
 });
 
 test('wild grass encounters use the Kanji semantic attack during the locked cutscene', () => {
-  const { debug, textCalls } = createGame();
+  const { debug, textCalls, drawCalls } = createGame();
   assert.equal(debug.startBattle('grass'), true);
   const battle = debug.getBattle(), initialGauge = battle.botNextIn;
   assert.equal(battle.entranceT, 1450);
   debug.updateBattle(220);
   debug.renderOnce();
   assert.ok(textCalls.some((call) => call.text === 'BỤI CỎ BỖNG RUNG LÊN…'));
+  const quizLayout = debug.getQuizLayout();
+  assert.ok(drawCalls.some((call) => call.type === 'fillRect' && call.x === 0 && call.y === quizLayout.y
+    && call.width === quizLayout.W && call.height === quizLayout.panelH && call.fillStyle === 'rgba(11,16,48,.96)'),
+  'the question panel must remain rendered below the encounter cutscene instead of becoming a black block');
+  assert.ok(textCalls.some((call) => battle.q.options.includes(call.text)),
+    'cutscene should stop at the battlefield boundary and leave question answers visible');
   assert.equal(battle.questionElapsed, 0);
   assert.equal(battle.botNextIn, initialGauge, 'the attack gauge must pause during the encounter cutscene');
   debug.updateBattle(760);

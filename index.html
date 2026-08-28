@@ -27,6 +27,18 @@
   #hint{font-size:13px;color:#9aa;margin-bottom:10px;text-align:center;line-height:1.7}
   canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;
     border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;background:#000;touch-action:none}
+  #dex-toolbar{display:flex;position:fixed;z-index:11;top:44px;left:max(18px,2.4vw);width:min(880px,calc(100vw - 36px));height:36px;
+    align-items:stretch;gap:8px}
+  #dex-toolbar[hidden]{display:none}
+  #dex-search{display:block;position:static;min-width:230px;flex:1 1 360px;height:36px;
+    box-sizing:border-box;padding:5px 38px 5px 11px;border:2px solid #397fb4;border-radius:6px;background:rgba(11,24,53,.98);
+    color:#fff;font:700 13px var(--kanjigo-font);box-shadow:0 4px 12px rgba(0,0,0,.28);outline:none;touch-action:manipulation}
+  #dex-search::placeholder{color:#8296b6;font-weight:500}
+  #dex-search:focus{border-color:#69d8ff;box-shadow:0 0 0 3px rgba(105,216,255,.16),0 5px 16px rgba(0,0,0,.3)}
+  .dex-toolbar-button{height:36px;box-sizing:border-box;padding:0 14px;border:2px solid #65d9ff;border-radius:6px;
+    background:#216996;color:#fff;font:800 12px var(--kanjigo-font);white-space:nowrap;cursor:pointer;touch-action:manipulation}
+  .dex-toolbar-button:hover,.dex-toolbar-button:focus-visible{background:#287cae;border-color:#a2ebff;outline:none}
+  .dex-toolbar-sort{flex:0 1 210px}.dex-toolbar-group{flex:0 1 170px}
   #touch-controls,#touch-actions,#touch-back{display:none;position:fixed;z-index:2;touch-action:none;
     -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
   #touch-controls{left:18px;bottom:18px;width:150px;height:150px}
@@ -166,6 +178,12 @@
     #touch-controls{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom))}
     #touch-actions{right:max(12px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom))}
   }
+  @media (max-width:619px){
+    #dex-toolbar{top:64px;left:18px;width:calc(100vw - 36px);height:auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:8px}
+    #dex-toolbar[hidden]{display:none}
+    #dex-search{grid-column:1/-1;width:100%;min-width:0;height:40px;padding:7px 42px 7px 13px;border-radius:8px;font-size:16px}
+    .dex-toolbar-button{width:100%;height:40px;padding:0 8px;font-size:12px}.dex-toolbar-sort,.dex-toolbar-group{min-width:0}
+  }
   @media (max-width:430px){
     #settings-open{top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));bottom:auto}
     #touch-controls{width:132px;height:132px}
@@ -218,6 +236,12 @@
   ⚔️ Trong trận: bấm <kbd>1</kbd>–<kbd>4</kbd> để ra đòn • Trả lời nhanh nhận PERFECT • <kbd>Esc</kbd> bỏ chạy
 </div>
 <canvas id="game" width="640" height="480"></canvas>
+<div id="dex-toolbar" role="search" aria-label="Tìm và sắp xếp Kanji Dex" hidden>
+  <input id="dex-search" type="search" inputmode="search" autocomplete="off" autocapitalize="none" spellcheck="false"
+    enterkeyhint="search" maxlength="40" placeholder="Tìm Kanji, nghĩa, âm ON/KUN…" aria-label="Tìm trong Kanji Dex" />
+  <button id="dex-sort" class="dex-toolbar-button dex-toolbar-sort" type="button">SẮP XẾP: LỘ TRÌNH ↻</button>
+  <button id="dex-group" class="dex-toolbar-button dex-toolbar-group" type="button">NHÓM: JLPT ✓</button>
+</div>
 <div id="touch-controls" aria-label="Điều khiển di chuyển">
   <button id="touch-up" data-key="arrowup" aria-label="Đi lên" draggable="false">▲</button>
   <button class="touch-left" data-key="arrowleft" aria-label="Đi sang trái" draggable="false">◀</button>

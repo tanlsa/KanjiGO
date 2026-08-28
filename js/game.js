@@ -1447,7 +1447,13 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
   }
   cv.addEventListener('pointerdown', (e) => {
     const { x, y } = clientToLogical(e.clientX, e.clientY);
-    if (state === 'dex') { e.preventDefault(); onDexPointerDown(x, y, e.pointerId); return; }
+    if (state === 'dex') {
+      e.preventDefault();
+      // Sau khi tìm kiếm trên mobile, chạm vào danh sách phải đóng bàn phím
+      // nhưng vẫn giữ nguyên query và kết quả đang lọc.
+      if (dexSearchInput && document.activeElement === dexSearchInput) dexSearchInput.blur();
+      onDexPointerDown(x, y, e.pointerId); return;
+    }
     if (state === 'skills') { e.preventDefault(); onSkillPointerDown(x, y, e.pointerId); return; }
     if (state === 'profile') { e.preventDefault(); onProfilePointerDown(x, y); return; }
     if (state === 'gym_select') { e.preventDefault(); onGymMenuPointerDown(x, y); return; }
@@ -3033,14 +3039,28 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     { id: 'level', label: 'LEVEL CAO' },
     { id: 'recall', label: 'RECALL CAO' },
   ];
-  let dex = { sel: 0, list: [], source: [], sort: 'catalog', group: true, scrollY: 0, maxScroll: 0, hitboxes: [], drag: null,
+  let dex = { sel: 0, list: [], source: [], query: '', sort: 'catalog', group: true, scrollY: 0, maxScroll: 0, hitboxes: [], drag: null,
     indexByChar: new Map(), contentCache: null };
   // Dex dùng cùng catalog với Giảng đường: đúng thứ tự JLPT và không lộ tier chưa mở.
   function collectedList() { return academyDexList().map((info) => info.char); }
+  function normalizeDexSearch(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .toLocaleLowerCase('vi').trim();
+  }
+  function dexMatchesSearch(char, query) {
+    if (!query) return true;
+    const info = kanjiInfo(char), monster = info && C.MONSTERS[info.monId];
+    if (!info) return false;
+    return normalizeDexSearch([
+      info.char, info.meaning, ...(info.on || []), ...(info.kun || []),
+      monster && monster.name, monster && monster.hanViet,
+    ].filter(Boolean).join(' ')).includes(query);
+  }
   function refreshDexList(preserveChar = '') {
     const previous = preserveChar || dex.list[dex.sel] || '';
     const catalogIndex = new Map(dex.source.map((char, index) => [char, index]));
-    dex.list = [...dex.source].sort((a, b) => {
+    const query = normalizeDexSearch(dex.query);
+    dex.list = dex.source.filter((char) => dexMatchesSearch(char, query)).sort((a, b) => {
       if (dex.sort === 'kanji') return a.localeCompare(b, 'ja');
       if (dex.sort === 'level') return ensureMastery(b).level - ensureMastery(a).level || catalogIndex.get(a) - catalogIndex.get(b);
       if (dex.sort === 'recall') return ensureMastery(b).recall - ensureMastery(a).recall || catalogIndex.get(a) - catalogIndex.get(b);
@@ -3051,9 +3071,71 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     dex.sel = Math.max(0, previous ? dex.list.indexOf(previous) : 0);
     if (dex.sel < 0) dex.sel = 0;
   }
+  function setDexSearch(value) {
+    dex.query = String(value || '').slice(0, 40);
+    refreshDexList();
+    dex.scrollY = 0; dex.drag = null;
+    ensureDexSelectionVisible();
+  }
+  function equipDexKanji(char) {
+    const info = kanjiInfo(char);
+    if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) {
+      showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return false;
+    }
+    if (!equipPet(info.monId)) {
+      showToast('Không thể chọn mascot này. Hãy thử thu phục lại trong Giảng đường.'); return false;
+    }
+    showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
+    state = 'overworld'; syncDexSearchInput(); return true;
+  }
+  const dexSearchInput = document.getElementById('dex-search');
+  const dexToolbar = document.getElementById('dex-toolbar');
+  const dexSortButton = document.getElementById('dex-sort');
+  const dexGroupButton = document.getElementById('dex-group');
+  if (dexSearchInput) {
+    dexSearchInput.addEventListener('input', () => setDexSearch(dexSearchInput.value));
+    dexSearchInput.addEventListener('search', () => setDexSearch(dexSearchInput.value));
+    dexSearchInput.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      if (event.isComposing || event.keyCode === 229) return;
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (dex.list.length) equipDexKanji(dex.list[dex.sel]);
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault(); onDexKey(event.key.toLowerCase());
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        if (dex.query) { dexSearchInput.value = ''; setDexSearch(''); }
+        else dexSearchInput.blur();
+      }
+    });
+  }
+  dexSortButton?.addEventListener('click', () => { if (state === 'dex') cycleDexSort(); });
+  dexGroupButton?.addEventListener('click', () => {
+    if (state !== 'dex') return;
+    dex.group = !dex.group; dex.contentCache = null; dex.scrollY = 0; ensureDexSelectionVisible();
+  });
+  function syncDexSearchInput() {
+    if (!dexSearchInput) return;
+    const visible = state === 'dex';
+    if (dexToolbar) dexToolbar.hidden = !visible;
+    else dexSearchInput.hidden = !visible;
+    if (dexToolbar && visible) {
+      // Header nằm trên canvas và được phóng theo presentationScale, trong khi
+      // toolbar là DOM CSS. Neo toolbar theo cùng tỉ lệ để desktop ultrawide
+      // không đè lên tiêu đề.
+      dexToolbar.style.top = VIEWPORT_W < 620 ? '' : `${Math.ceil(44 * presentationScale)}px`;
+    }
+    if (visible && dexSearchInput.value !== dex.query) dexSearchInput.value = dex.query;
+    const currentSort = DEX_SORTS.find((item) => item.id === dex.sort) || DEX_SORTS[0];
+    if (dexSortButton) dexSortButton.textContent = `SẮP XẾP: ${currentSort.label} ↻`;
+    if (dexGroupButton) dexGroupButton.textContent = `NHÓM: ${dex.group ? 'JLPT ✓' : 'TẮT'}`;
+    if (!visible && document.activeElement === dexSearchInput) dexSearchInput.blur();
+  }
   function openDex() {
     if (dialog.active || player.moving || fishing) return;
     dex.source = collectedList();
+    dex.query = '';
     const currentChar = C.MONSTERS[currentPetId] && C.MONSTERS[currentPetId].kanji;
     refreshDexList(currentChar);
     dex.scrollY = 0; dex.drag = null;
@@ -3072,7 +3154,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const panelH = narrow
       ? Math.max(128, Math.min(142, Math.round(H * 0.2)))
       : Math.max(108, Math.min(142, Math.round(H * 0.18)));
-    const oy = W < 620 ? 126 : 112, gridBottom = H - panelH - 10;
+    let oy = W < 620 ? 136 : 96;
+    if (dexToolbar && state === 'dex' && !dexToolbar.hidden && dexToolbar.getBoundingClientRect) {
+      const toolbarRect = dexToolbar.getBoundingClientRect(), canvasRect = cv.getBoundingClientRect();
+      const scaleY = Math.max(.01, canvasRect.height / H);
+      if (toolbarRect.height > 0) oy = Math.ceil((toolbarRect.bottom - canvasRect.top + 8) / scaleY);
+    }
+    const gridBottom = H - panelH - 10;
     const availableH = Math.max(80, gridBottom - oy);
     const cardW = (W - ox * 2 - gapX * (cols - 1)) / cols;
     const cardH = H < 620 ? 124 : 146;
@@ -3135,12 +3223,17 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       }
       return;
     }
+    if (hit && hit.action === 'equip-pet') {
+      equipDexKanji(hit.value);
+      return;
+    }
     if (hit && hit.action === 'card') { dex.sel = hit.value; ensureDexSelectionVisible(); }
     const layout = dexLayout(dex.list.length);
     if (y >= layout.oy && y <= layout.gridBottom) dex.drag = { pointerId, startY: y, lastY: y, moved: false };
   }
   function onDexKey(k) {
-    if (k === 'escape' || k === 'd') { state = 'overworld'; return; }
+    if (k === 'escape' || k === 'd') { state = 'overworld'; syncDexSearchInput(); return; }
+    if (k === '/' && dexSearchInput) { dexSearchInput.hidden = false; dexSearchInput.focus(); return; }
     const n = dex.list.length; if (!n) return;
     const cols = dexLayout(n).cols;
     if (k === 'arrowleft' || k === 'a') dex.sel = (dex.sel - 1 + n) % n;
@@ -3154,11 +3247,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     else if (k === 'r') cycleDexSort();
     else if (k === 'g') { dex.group = !dex.group; dex.contentCache = null; dex.scrollY = 0; ensureDexSelectionVisible(); }
     else if (k === 'enter' || k === ' ') {
-      const info = kanjiInfo(dex.list[dex.sel]);
-      if (!info || !C.MONSTERS[info.monId] || !ensureMastery(info.char).captured) { showToast('Chưa thu phục — tới 🏛️ Giảng đường trước nhé!'); return; }
-      if (!equipPet(info.monId)) { showToast('Không thể chọn mascot này. Hãy thử thu phục lại trong Giảng đường.'); return; }
-      showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
-      state = 'overworld';
+      equipDexKanji(dex.list[dex.sel]);
     }
     ensureDexSelectionVisible();
   }
@@ -4151,6 +4240,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
   function syncTouchUi() {
     const hidden = state !== 'overworld';
+    syncDexSearchInput();
     const nextState = hidden ? 'hidden' : 'visible';
     const settingsButton = document.getElementById('settings-open');
     if (settingsButton) {
@@ -5204,6 +5294,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     drawBattleEffects(b, { stageX, stageY, stageW, stageH, plCX, monCX, plBaseY, monBaseY, actorScale });
     if (entranceActive) {
       drawWildEncounterCutscene(b, { stageX, stageY, stageW, stageH, plCX, monCX, plBaseY, monBaseY, actorScale, enemyX, enemyW, enemyH, progress: entranceProgress });
+      // Cutscene chỉ phủ battlefield. Panel câu hỏi vẫn được vẽ ở phần dưới
+      // để mobile không xuất hiện một mảng đen lớn; input vẫn bị khóa bởi entranceT.
+      drawQuizPanel(b, W, H);
       return;
     }
 
@@ -6445,22 +6538,14 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     dex.maxScroll = Math.max(0, content.height - layout.availableH); clampDexScroll(); dex.hitboxes = [];
     cx.fillStyle = '#0e1430'; cx.fillRect(0, 0, W, H);
     cx.fillStyle = '#fff'; fitText('📖 KANJI DEX', layout.ox, 32, W < 620 ? 160 : 205, Math.max(20, Math.min(28, W * .03)), true);
-    cx.fillStyle = '#6effa1'; cx.font = '14px "KanjiGo UI",sans-serif'; fitText(`Đã thu phục: ${captured}/${total}`, W < 620 ? layout.ox : layout.ox + 220, W < 620 ? 53 : 31, 150, 14);
+    cx.fillStyle = '#6effa1'; cx.font = '14px "KanjiGo UI",sans-serif';
+    const resultLabel = dex.query ? `Kết quả: ${total}/${dex.source.length}` : `Đã thu phục: ${captured}/${total}`;
+    fitText(resultLabel, W < 620 ? layout.ox : layout.ox + 220, W < 620 ? 53 : 31, 170, 14);
 
-    const currentSort = DEX_SORTS.find((item) => item.id === dex.sort) || DEX_SORTS[0];
-    const controlY = W < 620 ? 64 : 44, controlH = 32, sortW = Math.min(210, Math.max(150, W * .45));
-    const groupW = Math.max(86, Math.min(170, W - layout.ox * 2 - sortW - 8)), groupX = layout.ox + sortW + 8;
-    const control = (x, w, active, text) => {
-      cx.fillStyle = active ? 'rgba(24,102,151,.9)' : 'rgba(18,31,61,.94)'; cx.fillRect(x, controlY, w, controlH);
-      cx.strokeStyle = active ? '#72ddff' : '#275b8f'; cx.lineWidth = active ? 2 : 1; cx.strokeRect(x, controlY, w, controlH);
-      cx.fillStyle = '#dce8ff'; cx.textAlign = 'left'; fitText(text, x + 7, controlY + 21, w - 14, 11, true);
-    };
-    control(layout.ox, sortW, true, `SORT: ${currentSort.label} ↻`);
-    control(groupX, groupW, dex.group, `NHÓM: ${dex.group ? 'JLPT ✓' : 'TẮT'}`);
-    dex.hitboxes.push({ x: layout.ox, y: controlY, w: sortW, h: controlH, action: 'sort', value: 'cycle' });
-    dex.hitboxes.push({ x: groupX, y: controlY, w: groupW, h: controlH, action: 'group' });
-    cx.fillStyle = '#8395b5'; cx.font = '11px "KanjiGo UI",sans-serif';
-    fitText(W < 620 ? 'Vuốt để cuộn · chạm chọn · Enter: đi cùng' : 'Cuộn/kéo · ↑↓←→ chọn · R sort · G nhóm · Enter đi cùng · Esc đóng', layout.ox, controlY + 48, W - layout.ox * 2, 11);
+    if (!list.length) {
+      cx.fillStyle = '#9fb0cc'; cx.font = `bold 16px ${JPFONT}`; cx.textAlign = 'center';
+      cx.fillText('Không tìm thấy Kanji phù hợp', W / 2, layout.oy + 58); cx.textAlign = 'left';
+    }
 
     cx.save(); cx.beginPath(); cx.rect(0, layout.oy, W, layout.availableH); cx.clip();
     for (const row of content.rows) {
@@ -6504,7 +6589,14 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     cx.fillStyle = 'rgba(11,16,48,.97)'; cx.fillRect(0, panelY, W, layout.panelH); cx.strokeStyle = '#16558f'; cx.lineWidth = 2; cx.strokeRect(2, panelY + 2, W - 4, layout.panelH - 4);
     if (selected && selectedUnlocked) {
       const stat = ensureMastery(selected.char), narrow = W < 620, recallColor = stat.recall > 70 ? '#6effa1' : stat.recall >= 30 ? '#ffd54a' : '#ff7777';
-      cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, W - 40, 20, true);
+      const following = selected.monId === currentPetId && followerUnlocked();
+      const petButtonW = narrow ? 104 : 128, petButtonH = 34, petButtonX = W - 20 - petButtonW, petButtonY = panelY + 10, petHitH = 44;
+      cx.fillStyle = following ? 'rgba(24,101,71,.9)' : 'rgba(22,103,165,.94)'; cx.fillRect(petButtonX, petButtonY, petButtonW, petButtonH);
+      cx.strokeStyle = following ? '#6effa1' : '#69d8ff'; cx.lineWidth = 2; cx.strokeRect(petButtonX, petButtonY, petButtonW, petButtonH);
+      cx.fillStyle = following ? '#9affc2' : '#fff'; cx.font = `bold ${narrow ? 10 : 11}px "KanjiGo UI",sans-serif`; cx.textAlign = 'center';
+      cx.fillText(following ? 'ĐANG THEO ✓' : 'ĐI CÙNG', petButtonX + petButtonW / 2, petButtonY + 22); cx.textAlign = 'left';
+      if (!following) dex.hitboxes.push({ x: petButtonX, y: petButtonY - (petHitH - petButtonH) / 2, w: petButtonW, h: petHitH, action: 'equip-pet', value: selected.char });
+      cx.fillStyle = '#fff'; fitText(`${selected.char}  ${selected.meaning}`, 20, panelY + 31, Math.max(90, petButtonX - 30), 20, true);
       drawMonsterName(C.MONSTERS[selected.monId], 20, panelY + 52, W - 40, 13, { label: true });
       const btnW = 24, btnH = 22, hitSize = 44, onX = 20, kunX = narrow ? 20 : 320;
       const onMaxW = narrow ? Math.max(60, W - 40 - hitSize - 8) : 250;
@@ -6691,7 +6783,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     resolveKanjiAnimation: (id) => { const animation = kanjiAnimation(C.MONSTERS[id]); return animation ? { ...animation } : null; },
     renderMeaningAttackFrame: (id, progress, reverse = false) => drawMeaningAttackAnimation(
       C.MONSTERS[id], progress, reverse ? 520 : 120, reverse ? 120 : 520, 360, 180),
-    renderOnce: render, targetFrameMs, ensureWorldGroundCache, updateOverworld,
+    setDexSearch, renderOnce: render, targetFrameMs, ensureWorldGroundCache, updateOverworld,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;
   if (typeof module !== 'undefined') module.exports = { _debug: debugApi };
