@@ -4165,6 +4165,13 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     if (atAcademyEntrance || atFtownEntrance || atHeritageEntrance) return K.CAMPUS_PLAZA;
     return ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
   }
+  function wornPathOrientation(gx, gy) {
+    const isWornPath = (x, y) => x >= 0 && y >= 0 && x < MAP_W && y < MAP_H
+      && TILES[y][x] === K.WORN_PATH;
+    const vertical = Number(isWornPath(gx, gy - 1)) + Number(isWornPath(gx, gy + 1));
+    const horizontal = Number(isWornPath(gx - 1, gy)) + Number(isWornPath(gx + 1, gy));
+    return vertical > horizontal ? 'vertical' : 'horizontal';
+  }
   function drawTileOn(context, idx, sx, sy, gx = 0, gy = 0) {
     const campusAsset = campusTileAssets.get(idx);
     if (campusAsset && imgs[campusAsset]) {
@@ -4179,6 +4186,12 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     const isTerrain = idx >= K.PLAZA && idx <= K.WORN_PATH && imgs.terrain_tiles;
     const atlas = isTerrain ? imgs.terrain_tiles : imgs.tileset;
     const atlasIndex = isTerrain ? idx - K.PLAZA : idx;
+    if (idx === K.WORN_PATH && wornPathOrientation(gx, gy) === 'vertical') {
+      context.save(); context.translate(sx + TILE, sy); context.rotate(Math.PI / 2);
+      context.drawImage(atlas, atlasIndex * TILE, 0, TILE, TILE, 0, 0, TILE, TILE);
+      context.restore();
+      return;
+    }
     if (idx === K.FLOWER && ((gx * 7 + gy * 11) & 1)) {
       // Mirror có seed giúp các flower patch dùng cùng atlas nhưng không lặp
       // đúng một silhouette theo ma trận.
@@ -4287,17 +4300,23 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     cx.fillStyle = `rgba(235,225,190,${0.42 * (1 - pulse)})`;
     cx.beginPath(); cx.arc(x - 5, y, 2 + pulse * 3, 0, Math.PI * 2); cx.arc(x + 4, y + 1, 1.5 + pulse * 2, 0, Math.PI * 2); cx.fill();
   }
+  function fishingRodGeometry(facing = player.facing, camX = 0, camY = 0) {
+    const handOffsets = (C.FISHING && C.FISHING.handOffsets) || {
+      down: [21, 21], left: [17, 22], right: [15, 22], up: [21, 21],
+    };
+    const handOffset = handOffsets[facing] || [16, 21];
+    const tipOffset = {
+      down: [7, 13], left: [-13, -7], right: [13, -7], up: [7, -14],
+    }[facing] || [0, -12];
+    const startX = player.px - camX + handOffset[0], startY = player.py - camY + handOffset[1];
+    const rodX = startX + tipOffset[0], rodY = startY + tipOffset[1];
+    return { startX, startY, rodX, rodY };
+  }
+
   function drawFishing(camX, camY) {
     if (!fishing) return;
     const F = C.FISHING || { castMs: 320, waitMs: 900, reelMs: 420 };
-    const handOffset = {
-      down: [22, 17], left: [14, 16], right: [17, 16], up: [20, 16],
-    }[player.facing] || [16, 16];
-    const tipOffset = {
-      down: [7, 13], left: [-13, -7], right: [13, -7], up: [7, -14],
-    }[player.facing] || [0, -12];
-    const startX = player.px - camX + handOffset[0], startY = player.py - camY + handOffset[1];
-    const rodX = startX + tipOffset[0], rodY = startY + tipOffset[1];
+    const { startX, startY, rodX, rodY } = fishingRodGeometry(player.facing, camX, camY);
     const targetX = fishing.gx * TILE - camX + TILE / 2, targetY = fishing.gy * TILE - camY + TILE / 2;
     let progress = Math.min(1, fishing.t / F.castMs);
     if (fishing.phase === 'reel') progress = 1 - Math.min(1, (fishing.t - F.castMs - F.waitMs) / F.reelMs);
@@ -6924,7 +6943,8 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     renderMeaningAttackFrame: (id, progress, reverse = false) => drawMeaningAttackAnimation(
       C.MONSTERS[id], progress, reverse ? 520 : 120, reverse ? 120 : 520, 360, 180),
     setDexSearch, renderOnce: render, targetFrameMs, ensureWorldGroundCache,
-    worldGroundTileAt, treeRenderJitter, landmarkCastsShadow, updateOverworld,
+    worldGroundTileAt, wornPathOrientation, fishingRodGeometry,
+    treeRenderJitter, landmarkCastsShadow, updateOverworld,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;
   if (typeof module !== 'undefined') module.exports = { _debug: debugApi };

@@ -289,9 +289,14 @@ test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid col
   for (let y = 12; y <= 13; y++) {
     for (let x = 49; x <= 58; x++) assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
       `FTown central approach must remain open at ${x},${y}`);
-    for (const x of [46,47,48,59,60,61]) assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_LAWN,
+    const planterXs = y === 13 ? [46,47,60,61] : [46,47,48,59,60,61];
+    for (const x of planterXs) assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_LAWN,
       `FTown side planter must break up the empty plaza at ${x},${y}`);
   }
+  assert.equal(MAP_DATA.TILES[13][48], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+    'FTown left planter should open into the lower plaza at 48,13');
+  assert.equal(MAP_DATA.TILES[13][59], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+    'FTown right planter should open into the lower plaza at 59,13');
   for (let y = 21; y <= 22; y++) {
     for (let x = 47; x <= 54; x++) {
       const expected = x === 50 || x === 51 ? CONFIG.TILE_KEYS.CAMPUS_PLAZA : CONFIG.TILE_KEYS.TECH_PROMENADE;
@@ -610,6 +615,13 @@ test('HTML loads game scripts in dependency order', () => {
     'js/game-academy.js', 'js/game-battle.js', 'js/game-dex.js', 'js/game-progression.js', 'js/game-renderer.js', 'js/game.js']);
   assert.doesNotMatch(html, /<script\s+src="data\/packs\/question-supplement\.pack\.js"/, 'large question pack must be lazy-loaded');
   assert.match(html, /<canvas\s+id="game"/);
+  assert.match(html, /<link rel="icon" type="image\/png" href="assets\/icons\/kanjigo-icon-circle\.png"/);
+  assert.match(html, /<link rel="apple-touch-icon" href="assets\/icons\/kanjigo-icon-circle\.png"/);
+  const gameIcon = pngInfo('assets/icons/kanjigo-icon-circle.png');
+  assert.equal(gameIcon.width, gameIcon.height, 'game icon must remain square');
+  assert.ok(gameIcon.width >= 512, 'game icon source should be large enough for app-icon scaling');
+  assert.ok(gameIcon.colorType === 4 || gameIcon.colorType === 6,
+    'circular game icon must preserve a transparent background');
   assert.match(html, /data-action="profile"[^>]*aria-label="Mở Hồ sơ nhân vật"/);
   assert.match(html, /Hồ sơ <kbd>I<\/kbd>/);
 });
