@@ -222,6 +222,10 @@ test('default sandbox account unlocks test content while a new journey starts cl
 });
 
 test('selected character gender and appearance choose the matching overworld animation sheet', () => {
+  const maleOrange = createGame();
+  assert.equal(maleOrange.imageRequests.includes('assets/characters/player-bicycle-orange-v1.png'), true,
+    'male orange profile should preload its unified bicycle animation');
+
   const blue = createGame({ characterSlotsSave: {
     version: 2, activeSlot: 1,
     slots: [{ id: 1, name: 'Aoi', gender: 'female', appearance: 'blue', sandbox: false, onboardingComplete: true }],
@@ -1045,7 +1049,8 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
   assert.equal(imageRequests.length, 14);
-  assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
+  assert.ok(imageRequests.includes('assets/characters/player-bicycle-orange-v1.png'));
+  assert.ok(!imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
@@ -2136,22 +2141,62 @@ test('Bicycle toggles only after unlock and reuses normal collision movement', (
   assert.equal(player.moveDuration, debug.bicycleMoveDuration());
 });
 
-test('Bicycle swaps its left/right artwork to match travel direction', async () => {
+test('Bicycle uses the unified male-orange sheet with direct direction rows', async () => {
   const { debug, drawCalls } = createGame({ enableSkillQaSeed: true });
   assert.equal(debug.purchaseSkill('bicycle').ok, true);
   assert.equal(debug.toggleBicycle(), true);
   await new Promise((resolve) => setImmediate(resolve));
 
   const player = debug.getPlayer();
-  for (const [facing, expectedSourceY] of [['left', 256], ['right', 128]]) {
+  for (const [facing, expectedSourceY] of [['left', 128], ['right', 256]]) {
     player.facing = facing; player.moving = false; player.frame = 0;
     drawCalls.length = 0; debug.renderOnce();
-    const bicycle = drawCalls.find((call) => call.type === 'drawImage'
-      && call.src === 'assets/characters/bicycle-overlay-v4.png');
-    assert.ok(bicycle, `missing bicycle draw for ${facing}`);
-    assert.equal(bicycle.args[1], expectedSourceY,
-      `${facing} should use the opposite source row from the current sheet`);
+    const rider = drawCalls.find((call) => call.type === 'drawImage'
+      && call.src === 'assets/characters/player-bicycle-orange-v1.png');
+    assert.ok(rider, `missing unified bicycle rider for ${facing}`);
+    assert.equal(rider.args[1], expectedSourceY, `${facing} should use its authored direction row`);
+    assert.equal(rider.args[6], 48,
+      'side composite must scale enough for its seated human to match the regular player');
+    assert.equal(drawCalls.some((call) => call.type === 'drawImage'
+      && call.src === 'assets/characters/bicycle-overlay-v4.png'), false,
+    'unified rider must not be combined with the legacy bicycle overlay');
   }
+  player.facing = 'up'; player.frame = 0;
+  drawCalls.length = 0; debug.renderOnce();
+  const verticalRider = drawCalls.find((call) => call.type === 'drawImage'
+    && call.src === 'assets/characters/player-bicycle-orange-v1.png');
+  assert.equal(verticalRider.args[6], 42, 'front/back bicycle scale should remain unchanged');
+});
+
+test('Bicycle side view keeps the layered fallback for skins without a unified sheet', async () => {
+  const { debug, drawCalls } = createGame({ enableSkillQaSeed: true, characterSlotsSave: {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false, onboardingComplete: true }],
+  } });
+  assert.equal(debug.purchaseSkill('bicycle').ok, true);
+  assert.equal(debug.toggleBicycle(), true);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  const player = debug.getPlayer();
+  player.facing = 'left'; player.moving = true; player.frame = 2;
+  drawCalls.length = 0; debug.renderOnce();
+
+  const bikeIndexes = [], bikeCalls = [];
+  let riderIndex = -1, riderCall = null;
+  drawCalls.forEach((call, index) => {
+    if (call.type !== 'drawImage') return;
+    if (call.src === 'assets/characters/bicycle-overlay-v4.png') {
+      bikeIndexes.push(index); bikeCalls.push(call);
+    } else if (call.src === 'assets/characters/player-female-orange-v4.png') {
+      riderIndex = index; riderCall = call;
+    }
+  });
+  assert.equal(bikeCalls.length, 2, 'side riding needs a rear bike layer and a lower foreground slice');
+  assert.ok(bikeIndexes[0] < riderIndex && riderIndex < bikeIndexes[1],
+    'rider must render between the two bicycle layers');
+  assert.equal(riderCall.args[0], 0, 'second contact phase should reuse the stable seated rider frame');
+  assert.ok(bikeCalls[1].args[3] < bikeCalls[0].args[3],
+    'foreground bicycle layer must only redraw the lower source slice');
 });
 
 test('Auto Ride paths to tall grass, pauses for battle, resumes, and persists', () => {

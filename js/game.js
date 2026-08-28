@@ -3983,7 +3983,28 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       // Preserve the animation phase at tile boundaries. Holding a direction
       // therefore continues the same four-frame cycle instead of snapping to
       // frame zero after every 32 px step. The idle branch resets it naturally.
-      if (k >= 1) { player.moving = false; player.running = false; onStepComplete(); }
+      if (k >= 1) {
+        const carryMs = Math.max(0, player.moveT - player.moveDuration);
+        const cycling = isBicycleActive();
+        player.moving = false; player.running = false; onStepComplete();
+        // A bicycle crosses a tile in only a few render frames. Start the next
+        // held/auto-ridden step immediately and carry fractional elapsed time
+        // forward so tile boundaries do not introduce a visible stop-start.
+        if (cycling && state === 'overworld' && !dialog.active && !fishing) {
+          const nextDirection = nextAutoRideDirection()
+            || (pressed('left') ? 'left' : pressedRight() ? 'right'
+              : pressed('up') ? 'up' : pressed('down') ? 'down' : null);
+          if (nextDirection) {
+            tryMove(nextDirection);
+            if (player.moving && carryMs > 0) {
+              player.moveT = Math.min(carryMs, player.moveDuration);
+              const carriedK = player.moveT / player.moveDuration;
+              player.px = player.fromX + (player.toX - player.fromX) * carriedK;
+              player.py = player.fromY + (player.toY - player.fromY) * carriedK;
+            }
+          }
+        }
+      }
     } else {
       const autoDirection = nextAutoRideDirection();
       if (autoDirection) tryMove(autoDirection);
@@ -4434,7 +4455,22 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     if (player.onBoat) drawTile(K.BOAT, Math.round(player.px - camX), Math.round(player.py - camY));
     const playerX = Math.round(player.px - camX), playerY = Math.round(player.py - camY);
     const riding = isBicycleActive();
-    if (!player.onBoat) drawCharacterShadow(playerX, playerY, riding ? 27 : 18);
+    const unifiedBicycleRider = riding && activePlayerBicycleAsset && imgs.player_bicycle;
+    if (!player.onBoat && !unifiedBicycleRider) drawCharacterShadow(playerX, playerY, riding ? 27 : 18);
+    if (unifiedBicycleRider) {
+      // A seated side silhouette is wider and visually shorter than its
+      // front/back counterpart, so it needs its own scale and ground offset.
+      const unifiedSideFacing = player.facing === 'left' || player.facing === 'right';
+      const unifiedDrawSize = unifiedSideFacing
+        ? Number(C.CHARACTER && C.CHARACTER.bicycleRiderSideDrawSize) || 48
+        : Number(C.CHARACTER && C.CHARACTER.bicycleRiderDrawSize) || 42;
+      drawSprite(imgs.player_bicycle, player.facing, player.frame, playerX, playerY,
+        unifiedDrawSize,
+        Number(C.CHARACTER && C.CHARACTER.bicycleRiderFrameSize) || 128);
+      drawFishing(camX, camY);
+      drawOnboardingWaypoint(camX, camY, frameNow);
+      return;
+    }
     // Lift the canonical player into a riding pose without swapping face,
     // uniform or animation source. Layering is direction-aware below.
     const sideFacing = player.facing === 'left' || player.facing === 'right';
@@ -4446,21 +4482,39 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       ? C.BICYCLE.verticalOverlayDrop : C.BICYCLE.sideOverlayDrop;
     const bicycleY = playerY + (riding
       ? Math.round(Math.max(0, Number(bicycleOverlayDrop) || 0) * activePlayerDrawScale) : 0);
-    const drawBicycle = () => {
+    const drawBicycle = (lowerSliceOnly = false) => {
       const bicycleDrawSize = Math.max(TILE, Math.round(
         (Number(C.CHARACTER && C.CHARACTER.bicycleDrawSize) || TILE) * activePlayerDrawScale));
       const bicycleFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.bicycleFrameSize) || TILE);
       const bicycleFacing = player.facing === 'left' ? 'right'
         : player.facing === 'right' ? 'left' : player.facing;
+      if (lowerSliceOnly && sideFacing) {
+        const split = Math.max(0, Math.min(bicycleFrameSize,
+          Number(C.BICYCLE && C.BICYCLE.sideForegroundSplit) || bicycleFrameSize / 2));
+        const sourceHeight = bicycleFrameSize - split;
+        const drawHeight = sourceHeight / bicycleFrameSize * bicycleDrawSize;
+        const offsetX = (bicycleDrawSize - TILE) / 2, offsetY = bicycleDrawSize - TILE;
+        cx.drawImage(imgs.bicycle_overlay,
+          player.frame * bicycleFrameSize, C.DIR_ROW[bicycleFacing] * bicycleFrameSize + split,
+          bicycleFrameSize, sourceHeight,
+          Math.round(playerX - offsetX), Math.round(bicycleY - offsetY + split / bicycleFrameSize * bicycleDrawSize),
+          bicycleDrawSize, drawHeight);
+        return;
+      }
       drawSprite(imgs.bicycle_overlay, bicycleFacing, player.frame, playerX, bicycleY,
         bicycleDrawSize, bicycleFrameSize);
     };
-    // Rear-view steering geometry belongs behind the rider. The other three
-    // directions keep the bicycle in front so wheels/frame cover the legs.
-    if (riding && player.facing === 'up') drawBicycle();
-    drawSprite(imgs.player, player.facing, player.frame, playerX, riderY,
+    const configuredRiderFrames = C.BICYCLE && C.BICYCLE.sideRiderFrames;
+    const riderFrame = riding && sideFacing && Array.isArray(configuredRiderFrames)
+      ? Number(configuredRiderFrames[player.frame]) || 0 : player.frame;
+    // Side views use a three-layer riding rig: bicycle base, synchronized
+    // rider, then only the wheels/lower frame. This gives the body natural
+    // depth without letting the handlebar/frame cut across the torso.
+    if (riding && player.facing !== 'down') drawBicycle();
+    drawSprite(imgs.player, player.facing, riderFrame, playerX, riderY,
       activePlayerDrawSize, activePlayerFrameSize);
-    if (riding && player.facing !== 'up') drawBicycle();
+    if (riding && sideFacing) drawBicycle(true);
+    else if (riding && player.facing === 'down') drawBicycle();
     drawFishing(camX, camY);
     drawOnboardingWaypoint(camX, camY, frameNow);
   }
@@ -6772,6 +6826,8 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     ? (activeAppearance === 'blue' && C.ASSETS.playerFemaleBlue
       ? C.ASSETS.playerFemaleBlue : (C.ASSETS.playerFemale || C.ASSETS.player))
     : (activeAppearance === 'blue' && C.ASSETS.playerBlue ? C.ASSETS.playerBlue : C.ASSETS.player);
+  const activePlayerBicycleAsset = activeProfile?.gender !== 'female' && activeAppearance !== 'blue'
+    ? C.ASSETS.playerBicycleOrange : null;
   const activePlayerUsesV4 = [C.ASSETS.player, C.ASSETS.playerBlue,
     C.ASSETS.playerFemale, C.ASSETS.playerFemaleBlue].includes(activePlayerAsset);
   const activePlayerFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER[
@@ -6780,7 +6836,9 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     activePlayerUsesV4 ? 'playerV4DrawSize' : 'drawSize']) || TILE);
   const defaultCharacterDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE);
   const activePlayerDrawScale = activePlayerDrawSize / defaultCharacterDrawSize;
-  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile)];
+  const toLoad = [loadImg('player', activePlayerAsset), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile)];
+  if (activePlayerBicycleAsset) toLoad.push(loadImg('player_bicycle', activePlayerBicycleAsset));
+  else toLoad.push(loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay));
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (petData[currentPetId] && C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));

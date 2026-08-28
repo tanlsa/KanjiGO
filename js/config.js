@@ -14,6 +14,7 @@ window.CONFIG = {
     playerBlue: 'assets/characters/player-blue-v4.png',
     playerFemale: 'assets/characters/player-female-orange-v4.png',
     playerFemaleBlue: 'assets/characters/player-female-blue-v4.png',
+    playerBicycleOrange: 'assets/characters/player-bicycle-orange-v1.png',
     bicycleOverlay: 'assets/characters/bicycle-overlay-v4.png',
     npc:     'assets/characters/npc-v4.png',
     tileset: 'assets/world/tileset.png',
@@ -65,6 +66,9 @@ window.CONFIG = {
     npcV4DrawSize: 32,
     bicycleFrameSize: 128,
     bicycleDrawSize: 48,
+    bicycleRiderFrameSize: 128,
+    bicycleRiderDrawSize: 42,
+    bicycleRiderSideDrawSize: 48,
   },
 
   TILE_KEYS: {
@@ -99,11 +103,17 @@ window.CONFIG = {
   // --- 🚲 / 📡 EXPLORATION SKILLS ---
   BICYCLE: {
     moveMultiplier: 0.42,
-    animMultiplier: 0.55,
+    animMultiplier: 0.72,
     riderLift: 12,
     sideRiderLift: 8,
     sideOverlayDrop: 10,
     verticalOverlayDrop: 12,
+    // Side riding reuses the two authored stride poses as pedal extremes while
+    // both contact phases share the same stable seated frame.
+    sideRiderFrames: [0, 1, 0, 3],
+    // The bike is sandwiched around the rider: upper frame behind the body,
+    // wheels/lower frame in front of the feet.
+    sideForegroundSplit: 64,
   },
   RADAR: {
     targetMultiplier: 4,

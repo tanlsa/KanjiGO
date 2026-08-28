@@ -171,6 +171,44 @@ test('V4 bicycle keeps left/right geometry mirrored and one-wheel front/back sil
   }
 });
 
+test('unified orange rider sheet keeps a transparent 128px grid and mirrored side animation', () => {
+  const sheet = decodeRgba('assets/characters/player-bicycle-orange-v1.png'), cell = 128;
+  assert.equal(sheet.width, cell * 4); assert.equal(sheet.height, cell * 4);
+  assert.equal(pixel(sheet, 0, 0)[3], 0, 'spritesheet background must use real transparency');
+  for (let frame = 0; frame < 4; frame += 1) {
+    let occupied = 0;
+    for (let localY = 0; localY < cell; localY += 1) for (let localX = 0; localX < cell; localX += 1) {
+      if (pixel(sheet, frame * cell + localX, cell + localY)[3] > 20) occupied += 1;
+      assert.ok(equalPixel(sheet, frame * cell + localX, cell + localY,
+        frame * cell + (cell - 1 - localX), cell * 2 + localY),
+      `unified rider left/right mismatch in frame ${frame}, ${localX},${localY}`);
+    }
+    assert.ok(occupied > 300, `unified rider frame ${frame} is unexpectedly empty`);
+    for (let row = 0; row < 4; row += 1) {
+      const visited = new Uint8Array(cell * cell), queue = [];
+      let componentCount = 0;
+      const opaque = (x, y) => pixel(sheet, frame * cell + x, row * cell + y)[3] > 20;
+      for (let startY = 0; startY < cell; startY += 1) for (let startX = 0; startX < cell; startX += 1) {
+        const start = startY * cell + startX;
+        if (visited[start] || !opaque(startX, startY)) continue;
+        componentCount += 1; visited[start] = 1; queue.length = 0; queue.push(start);
+        for (let cursor = 0; cursor < queue.length; cursor += 1) {
+          const point = queue[cursor], x = point % cell, y = Math.floor(point / cell);
+          for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nextX = x + dx, nextY = y + dy;
+            if (nextX < 0 || nextY < 0 || nextX >= cell || nextY >= cell) continue;
+            const next = nextY * cell + nextX;
+            if (!visited[next] && opaque(nextX, nextY)) { visited[next] = 1; queue.push(next); }
+          }
+        }
+      }
+      assert.equal(componentCount, 1,
+        `unified rider ${row}:${frame} contains a detached sprite fragment`);
+    }
+  }
+});
+
 test('V4 bicycle locks its center and tire baseline between animation frames', () => {
   const sheet = decodeRgba('assets/characters/bicycle-overlay-v4.png'), cell = 128;
   for (let row = 0; row < 4; row += 1) {

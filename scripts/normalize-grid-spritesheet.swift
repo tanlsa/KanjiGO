@@ -5,11 +5,12 @@ import UniformTypeIdentifiers
 
 guard CommandLine.arguments.count >= 4,
       let frameSize = Int(CommandLine.arguments[3]), frameSize >= 32 else {
-  fputs("Usage: normalize-grid-spritesheet.swift INPUT.png OUTPUT.png FRAME_SIZE [--center-frames] [--mirror-right]\n", stderr)
+  fputs("Usage: normalize-grid-spritesheet.swift INPUT.png OUTPUT.png FRAME_SIZE [--center-frames] [--mirror-right] [--remove-stray-components]\n", stderr)
   exit(2)
 }
 let mirrorRight = CommandLine.arguments.dropFirst(4).contains("--mirror-right")
 let centerFrames = CommandLine.arguments.dropFirst(4).contains("--center-frames")
+let removeStrayComponents = CommandLine.arguments.dropFirst(4).contains("--remove-stray-components")
 
 let inputURL = URL(fileURLWithPath: CommandLine.arguments[1])
 let outputURL = URL(fileURLWithPath: CommandLine.arguments[2])
@@ -78,6 +79,47 @@ for row in 0..<4 { for column in 0..<4 {
                               width: frameSize, height: frameSize))
 }}
 
+if removeStrayComponents {
+  // Keep the largest 8-connected alpha component in every frame. Generated
+  // sheets occasionally leak a duplicate hair tuft across a cell boundary;
+  // the rider and bicycle are authored as one connected silhouette.
+  for row in 0..<4 { for frame in 0..<4 {
+    var visited = [Bool](repeating: false, count: frameSize * frameSize)
+    var components: [[Int]] = []
+    func isOpaque(_ localX: Int, _ localY: Int) -> Bool {
+      let x = frame * frameSize + localX, y = row * frameSize + localY
+      return output[(y * outputSize + x) * bpp + 3] > 20
+    }
+    for startY in 0..<frameSize { for startX in 0..<frameSize {
+      let start = startY * frameSize + startX
+      if visited[start] || !isOpaque(startX, startY) { continue }
+      visited[start] = true
+      var component = [start], cursor = 0
+      while cursor < component.count {
+        let point = component[cursor]; cursor += 1
+        let x = point % frameSize, y = point / frameSize
+        for dy in -1...1 { for dx in -1...1 where dx != 0 || dy != 0 {
+          let nextX = x + dx, nextY = y + dy
+          guard nextX >= 0, nextY >= 0, nextX < frameSize, nextY < frameSize else { continue }
+          let next = nextY * frameSize + nextX
+          if !visited[next] && isOpaque(nextX, nextY) {
+            visited[next] = true; component.append(next)
+          }
+        }}
+      }
+      components.append(component)
+    }}
+    guard let largest = components.indices.max(by: { components[$0].count < components[$1].count }) else { continue }
+    for index in components.indices where index != largest {
+      for point in components[index] {
+        let localX = point % frameSize, localY = point / frameSize
+        let offset = ((row * frameSize + localY) * outputSize + frame * frameSize + localX) * bpp
+        for channel in 0..<bpp { output[offset + channel] = 0 }
+      }
+    }
+  }}
+}
+
 if centerFrames {
   // Generated cells often place a coherent object a few source pixels left or
   // right between animation phases. Lock the silhouette center and tire
@@ -98,10 +140,13 @@ if centerFrames {
   }
 
   let snapshot = output
+  let allBounds = (0..<4).flatMap { row in
+    (0..<4).map { bounds(row: row, frame: $0, pixels: snapshot) }
+  }
+  let targetBaseline = allBounds.filter { !$0.isEmpty }.map(\.maxY).max() ?? (frameSize - 1)
   let targetCenter = Double(frameSize - 1) / 2.0
   for row in 0..<4 {
     let rowBounds = (0..<4).map { bounds(row: row, frame: $0, pixels: snapshot) }
-    let targetBaseline = rowBounds.filter { !$0.isEmpty }.map(\.maxY).max() ?? (frameSize - 1)
     for frame in 0..<4 {
       let frameBounds = rowBounds[frame]
       guard !frameBounds.isEmpty else { continue }
@@ -138,6 +183,21 @@ if mirrorRight {
     let destinationOffset = (destinationY * outputSize + destinationX) * bpp
     for channel in 0..<bpp { output[destinationOffset + channel] = snapshot[sourceOffset + channel] }
   }}}
+}
+
+// CGContext stores the generated row bands bottom-up when the source is
+// cropped into a newly allocated bitmap. Reverse only the four 128px bands
+// before encoding so the PNG retains the input's visual direction order;
+// unlike flipping the whole canvas, this keeps every rider upright.
+let bandSnapshot = output
+for destinationRow in 0..<4 {
+  let sourceRow = 3 - destinationRow
+  for localY in 0..<frameSize {
+    let sourceStart = ((sourceRow * frameSize + localY) * outputSize) * bpp
+    let destinationStart = ((destinationRow * frameSize + localY) * outputSize) * bpp
+    output.replaceSubrange(destinationStart..<(destinationStart + outputRowBytes),
+                           with: bandSnapshot[sourceStart..<(sourceStart + outputRowBytes)])
+  }
 }
 
 guard let finalContext = CGContext(data: &output, width: outputSize, height: outputSize,
