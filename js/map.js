@@ -54,7 +54,7 @@
   };
   const landmarks = [
     { id: 'ftown', label: 'FTOWN', subtitle: 'TECH CAMPUS', gx: 47, gy: 2, width: 14, height: 8, style: 'ftown', asset: 'landmark_ftown' },
-    { id: 'innovation_hub', label: 'INNOVATION HUB', subtitle: 'GREEN TECH LAB', gx: 47, gy: 17, width: 8, height: 4, style: 'innovation', asset: 'landmark_innovation_hub', collision: { gx: 47, gy: 17, width: 8, height: 4, entrances: [[51, 20]] } },
+    { id: 'innovation_hub', label: 'INNOVATION HUB', subtitle: 'GREEN TECH LAB', gx: 47, gy: 17, width: 8, height: 4, style: 'innovation', asset: 'landmark_innovation_hub', collision: { gx: 47, gy: 17, width: 8, height: 4, entrances: [[50, 20], [51, 20]] } },
     { id: 'heritage_pavilion', label: 'HERITAGE GARDEN', subtitle: 'PAVILION', gx: 2.5, gy: 31.5, width: 5, height: 2.5, style: 'heritage', asset: 'landmark_heritage_pavilion', collision: { gx: 3, gy: 32, width: 4, height: 2, entrances: [[5, 33]] } },
     { id: 'hoa_lac', label: 'F-VILLE', subtitle: 'HÒA LẠC', gx: 38, gy: 33, width: 16, height: 8, style: 'hoa_lac', asset: 'landmark_hoa_lac' },
   ];
@@ -131,6 +131,7 @@
   // Trục campus phía đông dùng gravel nhất quán; sân gạch cam F-Ville không
   // còn bị một dải đất cắt ngang ngay dưới bậc thềm.
   lineH(41, 56, 23, T.GRAVEL); lineV(56, 23, 41, T.GRAVEL); lineH(46, 55, 41, T.CAMPUS_COURTYARD);
+  rect(45, 41, 2, 2, T.CAMPUS_COURTYARD);
 
   // Quảng trường nhận diện ở phía bắc Hub dành cho monument FPT SOFTWARE.
   // Hai lối cobble giữ monument nhìn rõ nhưng vẫn kết nối thẳng xuống Hub.
@@ -140,8 +141,8 @@
 
   // Innovation Hub có PNG landmark riêng phủ kín footprint; sân trước giữ một
   // bề mặt tech liền mạch và trục gạch sáng dẫn thẳng vào cửa chính.
-  rect(47, 17, 8, 2, T.ROOF); rect(47, 19, 8, 2, T.WALL); put(51, 20, T.DOOR);
-  rect(47, 21, 8, 2, T.TECH_PROMENADE); lineV(51, 20, 23, T.CAMPUS_PLAZA);
+  rect(47, 17, 8, 2, T.ROOF); rect(47, 19, 8, 2, T.WALL);
+  rect(47, 21, 8, 2, T.TECH_PROMENADE); rect(50, 20, 2, 4, T.CAMPUS_PLAZA);
   [[45,17],[56,17],[45,20],[56,20],[48,24],[54,24],[57,29]].forEach(([x,y]) => put(x,y,T.FLOWER));
   rect(45, 25, 3, 3, T.TALL); rect(52, 25, 3, 4, T.TALL);
   lineH(45, 55, 30, T.GRAVEL); lineV(49, 23, 30, T.GRAVEL);
@@ -158,9 +159,9 @@
   // cây và một lối xuyên rừng nối lại tuyến 404 Garden.
   lineV(5, 23, 38, T.WORN_PATH); rect(2, 31, 6, 7, T.CAMPUS_LAWN);
   rect(3, 32, 4, 1, T.ROOF); rect(3, 33, 4, 1, T.WALL); put(5, 33, T.DOOR);
-  rect(2, 34, 6, 4, T.GARDEN); lineV(5, 33, 38, T.COBBLE);
-  rect(2, 38, 3, 3, T.TALL); lineH(5, 8, 39, T.WORN_PATH);
-  [[2,31],[7,31],[2,35],[7,35],[6,38],[7,40]].forEach(([x,y]) => put(x,y,T.FLOWER));
+  rect(2, 34, 6, 4, T.GARDEN);
+  rect(2, 38, 3, 3, T.TALL); rect(4, 34, 2, 5, T.CAMPUS_PLAZA); lineV(6, 34, 38, T.CAMPUS_LAWN); lineH(4, 8, 39, T.WORN_PATH);
+  [[2,31],[7,31],[2,35],[7,35],[7,38],[7,40]].forEach(([x,y]) => put(x,y,T.FLOWER));
 
   // Campus Park mở rộng vùng nam Arena thành một quảng trường xanh hoàn chỉnh.
   // Trục giữa nối cổng Arena với Hòa Lạc; các cụm cỏ hai bên là encounter mới.

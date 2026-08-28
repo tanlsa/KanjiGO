@@ -17,6 +17,9 @@ const stabilize = flags.includes('--stabilize');
 const runtimeGrid = flags.includes('--runtime-grid');
 const lockHeads = flags.includes('--lock-heads');
 const femaleFrontAlign = flags.includes('--female-front-align');
+const preserveAllComponents = flags.includes('--preserve-all-components');
+const longHairSafePadding = flags.includes('--long-hair-safe-padding');
+const roundRearCrown = flags.includes('--round-rear-crown');
 const frameSizeFlag = flags.indexOf('--frame-size');
 const frameSize = frameSizeFlag >= 0 ? Number(flags[frameSizeFlag + 1]) : 64;
 const runtimeSizeFlag = flags.indexOf('--runtime-size');
@@ -33,7 +36,7 @@ if (!Number.isInteger(targetHeight) || targetHeight < Math.round(frameSize * 0.6
   throw new Error(`--target-height must be an integer from ${Math.round(frameSize * 0.625)} to ${frameSize - 4}.`);
 }
 if (!inputPath || !outputPath) {
-  console.error('Usage: node scripts/normalize-character-v3.js GENERATED.png OUTPUT.png [--frame-size 64|96|128] [--runtime-size 32|48] [--uniform-height] [--target-height 56|84|112] [--stabilize] [--runtime-grid] [--lock-heads] [--female-front-align]');
+  console.error('Usage: node scripts/normalize-character-v3.js GENERATED.png OUTPUT.png [--frame-size 64|96|128] [--runtime-size 32|48] [--uniform-height] [--target-height 56|84|112] [--stabilize] [--runtime-grid] [--lock-heads] [--female-front-align] [--preserve-all-components] [--long-hair-safe-padding] [--round-rear-crown]');
   process.exit(2);
 }
 
@@ -104,6 +107,9 @@ const runtimeFrame = requestedRuntimeSize;
 const output = Buffer.alloc(FRAME * 4 * FRAME * 4 * 4);
 const geometryScale = FRAME / 64;
 const baseline = FRAME - Math.round(2 * geometryScale);
+const baselineForRow = (row) => longHairSafePadding && row === 3
+  ? FRAME - Math.round(2.5 * geometryScale)
+  : baseline;
 
 function cellBounds(column, row) {
   return {
@@ -148,19 +154,23 @@ function analyzeCell(column, row) {
 
   // Generated sheets occasionally let a few pixels from the neighbouring
   // frame cross an imprecise quarter boundary. Retain the largest connected
-  // foreground component only; the character itself is one outlined shape,
-  // while those edge fragments are small detached components.
+  // foreground component by default. The opt-in mode also retains substantial
+  // nearby pieces (for example separated hair tips or a lifted shoe), while
+  // still rejecting checkerboard seams and distant frame fragments.
   const visited = new Uint8Array(cellWidth * cellHeight);
-  let largestComponent = [];
+  const components = [];
   for (let seedY = 0; seedY < cellHeight; seedY += 1) for (let seedX = 0; seedX < cellWidth; seedX += 1) {
     const seedIndex = seedY * cellWidth + seedX;
     if (background[seedIndex] || visited[seedIndex]) continue;
-    const component = [], componentQueue = [seedIndex];
+    const pixels = [], componentQueue = [seedIndex];
+    let left = seedX, right = seedX, top = seedY, bottom = seedY;
     visited[seedIndex] = 1;
     while (componentQueue.length) {
       const cellIndex = componentQueue.pop();
-      component.push(cellIndex);
+      pixels.push(cellIndex);
       const x = cellIndex % cellWidth, y = Math.floor(cellIndex / cellWidth);
+      left = Math.min(left, x); right = Math.max(right, x);
+      top = Math.min(top, y); bottom = Math.max(bottom, y);
       for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
         if (!dx && !dy) continue;
         const nextX = x + dx, nextY = y + dy;
@@ -170,10 +180,23 @@ function analyzeCell(column, row) {
         visited[nextIndex] = 1; componentQueue.push(nextIndex);
       }
     }
-    if (component.length > largestComponent.length) largestComponent = component;
+    components.push({ pixels, left, right, top, bottom });
   }
+  components.sort((a, b) => b.pixels.length - a.pixels.length);
+  const largest = components[0];
   const retained = new Uint8Array(cellWidth * cellHeight);
-  for (const cellIndex of largestComponent) retained[cellIndex] = 1;
+  if (largest) {
+    const proximity = Math.max(4, Math.round(Math.min(cellWidth, cellHeight) * 0.08));
+    const minimumArea = Math.max(12, Math.round(largest.pixels.length * 0.02));
+    for (const component of components) {
+      const horizontalGap = Math.max(0, largest.left - component.right, component.left - largest.right);
+      const verticalGap = Math.max(0, largest.top - component.bottom, component.top - largest.bottom);
+      const keep = component === largest || (preserveAllComponents
+        && component.pixels.length >= minimumArea
+        && horizontalGap <= proximity && verticalGap <= proximity);
+      if (keep) for (const cellIndex of component.pixels) retained[cellIndex] = 1;
+    }
+  }
   for (let cellIndex = 0; cellIndex < background.length; cellIndex += 1) {
     if (!retained[cellIndex]) background[cellIndex] = 1;
   }
@@ -204,11 +227,19 @@ function renderCell(cell, column, row) {
   // Some generators change camera distance slightly between directions. This
   // optional whole-frame scale keeps a fixed character height without
   // changing anatomy or splicing body regions.
-  const frameScale = uniformHeight ? Math.min(targetWidth / cell.spriteWidth, targetHeight / cell.spriteHeight) : scale;
+  // Long rear hair needs extra room for a crown curve that survives 128→32
+  // sampling. Reduce only the up-facing row by three source pixels at V4.
+  const rowTargetHeight = longHairSafePadding && row === 3
+    ? targetHeight - Math.round(1.5 * geometryScale)
+    : targetHeight;
+  const rowTargetWidth = Math.min(targetWidth, Math.round(rowTargetHeight * 0.97));
+  const frameScale = uniformHeight
+    ? Math.min(rowTargetWidth / cell.spriteWidth, rowTargetHeight / cell.spriteHeight)
+    : scale;
   const destinationWidth = Math.max(1, Math.round(cell.spriteWidth * frameScale));
   const destinationHeight = Math.max(1, Math.round(cell.spriteHeight * frameScale));
   const destinationX = column * FRAME + Math.floor((FRAME - destinationWidth) / 2);
-  const destinationY = row * FRAME + baseline - destinationHeight;
+  const destinationY = row * FRAME + baselineForRow(row) - destinationHeight;
   for (let y = 0; y < destinationHeight; y += 1) for (let x = 0; x < destinationWidth; x += 1) {
     const localX = cell.minX + Math.min(cell.spriteWidth - 1, Math.floor((x + 0.5) * cell.spriteWidth / destinationWidth));
     const localY = cell.minY + Math.min(cell.spriteHeight - 1, Math.floor((y + 0.5) * cell.spriteHeight / destinationHeight));
@@ -260,7 +291,7 @@ if (stabilize) {
     for (let frame = 0; frame < 4; frame += 1) {
       shifts.push({ row, frame,
         dx: Math.max(-3, Math.min(3, Math.round(targetTorsoX - metrics[frame].torsoX))),
-      dy: Math.max(0, baseline - 1 - metrics[frame].maxY) });
+      dy: Math.max(0, baselineForRow(row) - 1 - metrics[frame].maxY) });
     }
   }
   const snapshot = Buffer.from(output);
@@ -398,6 +429,56 @@ if (runtimeGrid || femaleFrontAlign) {
   }
 }
 
+// Long straight hair can arrive with a wide, perfectly horizontal first row,
+// which reads as a crown clipped by the cell boundary after 128→32 sampling.
+// Rebuild twelve rear-hair rows as a narrow-to-wide arc so the curve remains
+// visible across three complete four-source-pixel runtime sampling bands.
+if (roundRearCrown) {
+  const outputWidth = FRAME * 4;
+  const snapshot = Buffer.from(output);
+  const crownScales = [
+    0.55, 0.68, 0.75, 0.80,
+    0.84, 0.88, 0.91, 0.94,
+    0.96, 0.98, 0.99, 1.00,
+  ];
+  for (let frame = 0; frame < 4; frame += 1) {
+    const frameX = frame * FRAME, rowY = 3 * FRAME;
+    let minY = FRAME, minX = FRAME, maxX = -1;
+    for (let localY = 0; localY < FRAME; localY += 1) for (let localX = 0; localX < FRAME; localX += 1) {
+      const offset = (((rowY + localY) * outputWidth) + frameX + localX) * 4;
+      if (snapshot[offset + 3] <= 20) continue;
+      if (localY < minY) { minY = localY; minX = localX; maxX = localX; }
+      else if (localY === minY) { minX = Math.min(minX, localX); maxX = Math.max(maxX, localX); }
+    }
+    if (maxX < minX || minY < 2) continue;
+    const sourceY = Math.min(FRAME - 1, minY + crownScales.length - 1);
+    let sourceMinX = FRAME, sourceMaxX = -1;
+    for (let localX = 0; localX < FRAME; localX += 1) {
+      const offset = (((rowY + sourceY) * outputWidth) + frameX + localX) * 4;
+      if (snapshot[offset + 3] > 20) { sourceMinX = Math.min(sourceMinX, localX); sourceMaxX = Math.max(sourceMaxX, localX); }
+    }
+    if (sourceMaxX < sourceMinX) continue;
+    const sourceWidth = sourceMaxX - sourceMinX + 1;
+    const center = (sourceMinX + sourceMaxX) / 2;
+    for (let crownRow = 0; crownRow < crownScales.length; crownRow += 1) {
+      const crownLift = longHairSafePadding ? 2 : 0;
+      const destinationY = minY - crownLift + crownRow;
+      for (let localX = 0; localX < FRAME; localX += 1) {
+        const destinationOffset = (((rowY + destinationY) * outputWidth) + frameX + localX) * 4;
+        output.fill(0, destinationOffset, destinationOffset + 4);
+      }
+      const destinationWidth = Math.max(2, Math.round(sourceWidth * crownScales[crownRow]));
+      const destinationMinX = Math.round(center - (destinationWidth - 1) / 2);
+      for (let x = 0; x < destinationWidth; x += 1) {
+        const sourceX = sourceMinX + Math.min(sourceWidth - 1, Math.floor((x + 0.5) * sourceWidth / destinationWidth));
+        const sourceOffset = (((rowY + sourceY) * outputWidth) + frameX + sourceX) * 4;
+        const destinationOffset = (((rowY + destinationY) * outputWidth) + frameX + destinationMinX + x) * 4;
+        snapshot.copy(output, destinationOffset, sourceOffset, sourceOffset + 4);
+      }
+    }
+  }
+}
+
 const crcTable = Array.from({ length: 256 }, (_, value) => {
   let crc = value;
   for (let bit = 0; bit < 8; bit += 1) crc = (crc & 1) ? (0xedb88320 ^ (crc >>> 1)) : (crc >>> 1);
@@ -434,4 +515,4 @@ fs.writeFileSync(outputPath, Buffer.concat([
   pngChunk('IEND', Buffer.alloc(0)),
 ]));
 
-console.log(`${outputPath}: ${outputSize}x${outputSize} RGBA, ${FRAME}px frames → ${runtimeFrame}px runtime, ${uniformHeight ? `uniform ${targetHeight}px frame height` : `scale ${scale.toFixed(4)}`}, shared baseline ${baseline}px${stabilize ? ', stabilized torso axis' : ''}${runtimeGrid ? ', runtime-grid aligned' : ''}${lockHeads ? ', direction heads locked' : ''}${femaleFrontAlign ? ', female front aligned' : ''}`);
+console.log(`${outputPath}: ${outputSize}x${outputSize} RGBA, ${FRAME}px frames → ${runtimeFrame}px runtime, ${uniformHeight ? `uniform ${targetHeight}px frame height` : `scale ${scale.toFixed(4)}`}, shared baseline ${baseline}px${longHairSafePadding ? `, up-row baseline ${baselineForRow(3)}px` : ''}${roundRearCrown ? ', rounded rear crown' : ''}${stabilize ? ', stabilized torso axis' : ''}${runtimeGrid ? ', runtime-grid aligned' : ''}${lockHeads ? ', direction heads locked' : ''}${femaleFrontAlign ? ', female front aligned' : ''}`);
