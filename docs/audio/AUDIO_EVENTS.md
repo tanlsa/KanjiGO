@@ -18,7 +18,7 @@
 | Academy check / confirmation answer | `KANJI_CORRECT`, `KANJI_INCORRECT` | IMPLEMENTED | Added for the current Academy learning flow. |
 | Capture start / answer / success / failure | `CAPTURE_START`, `KANJI_CORRECT`/`KANJI_INCORRECT`, `PROGRESSION_ACHIEVEMENT`, `CAPTURE_FAILURE` | IMPLEMENTED | Achievement is a deliberate capture-success reuse. |
 | PvE entry / answer | `WORLD_OPEN_ARENA`, `KANJI_CORRECT`/`KANJI_INCORRECT` | IMPLEMENTED | Correctness is calculated once before feedback. |
-| Level-up, new collection, grass-win reward | `PROGRESSION_LEVELUP`, `PROGRESSION_ACHIEVEMENT`, `PROGRESSION_BONUS` | IMPLEMENTED | Reward sounds are event-bound. |
+| Level-up, new collection, perfect-answer reward | `PROGRESSION_LEVELUP`, `PROGRESSION_ACHIEVEMENT`, `PROGRESSION_BONUS` | IMPLEMENTED | Reward sounds are event-bound. |
 | Overworld, battle, lecture, Dex, capture, PvE music | `BGM_*` | SILENT | IDs are reserved; no music asset is present. |
 
 ## Intentional non-coverage

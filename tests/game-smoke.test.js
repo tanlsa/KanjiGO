@@ -405,7 +405,7 @@ test('active character slot scopes both saves and supplies the Profile display n
   const game = createGame({
     characterSlotsSave,
     learningSave: { mastery: { 日: { captured: true, lectured: true, mp: 30 } } },
-    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'kuni', stamina: 2 },
+    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'kuni' },
   });
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(game.debug.getKanjiStat('日').captured, true);
@@ -976,6 +976,25 @@ test('Capture tests taught vocabulary and changes the SRS box at most once per s
   assert.equal(stat.box, 1, 'session finalization must be idempotent');
 });
 
+test('Capture allows unlimited failed attempts and no longer persists stamina', () => {
+  const game = createGame({ gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'kuni', stamina: 0 } });
+  game.debug.mastery()['日'].lectured = true;
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    assert.equal(game.debug.startCapture('日'), true, `capture attempt ${attempt} was blocked`);
+    for (let index = 0; index < 5; index++) {
+      const capture = game.debug.getCapture();
+      game.debug.answerCapture((capture.q.correctIndex + 1) % capture.q.options.length);
+      game.debug.updateCapture(2500);
+    }
+    assert.equal(game.debug.getCapture().passed, false);
+    game.debug.onCaptureKey('enter');
+  }
+
+  const saved = JSON.parse(game.storage.get('KANJIGO_GAME_V1'));
+  assert.equal(Object.hasOwn(saved, 'stamina'), false, 'new saves must drop the retired stamina field');
+});
+
 test('mobile Academy renders the card, recap, and confirmation flow without overflow crashes', () => {
   const { debug } = createGame({ viewportWidth: 390, viewportHeight: 844 });
   enterAcademyCards(debug);
@@ -1286,7 +1305,7 @@ test('KanjiDex repairs a captured mascot missing from petData before equipping i
 test('legacy save restores a selected captured mascot even when its petData entry is missing', () => {
   const game = createGame({
     learningSave: { mastery: { 水: { captured: true, lectured: true, mp: 30 } } },
-    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'mizu', stamina: 3 },
+    gameSave: { petData: { kuni: { evolveStage: 0 } }, currentPetId: 'mizu' },
   });
   assert.equal(game.debug.isCollected('mizu'), true);
   assert.equal(game.debug.getPet().id, 'mizu');

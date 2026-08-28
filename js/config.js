@@ -2,8 +2,6 @@
 //  CONFIG.JS — CẤU HÌNH GAME "KanjiGO". Chỉnh ở đây, không đụng engine.
 // ============================================================
 window.CONFIG = {
-  GAME_NAME: 'KanjiGO',
-
   // --- 🖥️ UI / LAYOUT khu học (chống đè chữ) ---
   UI: {
     panelH: 200,      // chiều cao khung câu hỏi (px). Tăng nếu chữ vẫn chật.
@@ -85,7 +83,6 @@ window.CONFIG = {
   // Ba chữ nhập môn đều thuộc N5, có đầy đủ Learning Card, câu hỏi và mascot.
   // `char` là khoá ổn định được lưu theo từng character slot.
   ONBOARDING: {
-    guideName: 'Aoi',
     starterKanji: [
       { char: '一', hanViet: 'NHẤT', meaning: 'một', reading: 'いち' },
       { char: '日', hanViet: 'NHẬT', meaning: 'ngày / mặt trời', reading: 'にち' },
@@ -120,7 +117,6 @@ window.CONFIG = {
   // --- ⚔️ COMBAT REALTIME (quiz kanji) ---
   COMBAT: {
     baseDamage: 8,        // damage khi trả lời ĐÚNG (cộng theo level pet)
-    dmgPerPetLevel: 2,    // mỗi cấp pet +damage
     comboBonus: 2,        // đúng liên tiếp: mỗi combo +damage
     wrongStun: 1000,      // sai: hiện đáp án + animation phản công ngắn
     botMinMs: 4000,       // Attack Gauge: khoảng chuẩn bị tối thiểu (ms)
@@ -134,7 +130,6 @@ window.CONFIG = {
     enemyHpPerDamage: 3.5,// bảo đảm mini quái sống đủ lâu để tích được tuyệt kỹ
     hitStopMs: 70,
     runChance: 0.6,       // xác suất chạy thoát (Esc)
-    loseExpPenalty: 10,   // THUA: trừ EXP của pet đang theo
   },
 
   QUESTION_FEEDBACK: {
@@ -156,11 +151,10 @@ window.CONFIG = {
     levelBands: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     badges: ['N5'],
   },
-  LEVEL: {
+  // Chỉ dùng để đọc save EXP/level từ trước khi hệ MP/KLEVEL ra đời.
+  LEGACY_LEVEL: {
     expPerLevel: 20,      // EXP cần mỗi cấp = level * expPerLevel
-    hpPerLevel: 5,        // lên cấp: +maxHp (áp cho PLAYER khi pet lên cấp)
     maxLevel: 20,
-    expPerCorrect: 2,     // mỗi câu đúng +EXP nhỏ
   },
   // --- 🧠 MASTERY / LEVEL / RECALL theo từng Kanji ---
   KLEVEL: {
@@ -198,11 +192,8 @@ window.CONFIG = {
     boxIntervals: [0, 10 * 60e3, 24 * 3600e3, 3 * 24 * 3600e3, 7 * 24 * 3600e3, 21 * 24 * 3600e3],
     sessionPassRatio: 0.8,
     rustBonusMax: 2.5,
-    newlyCapturedDueMs: 0,
   },
   CAPTURE: {
-    stamina: 3,
-    staminaRegenPerGrassWin: 1,
     relaxFromAttempt: 3,
   },
   QUESTION_MODES: {
@@ -214,7 +205,6 @@ window.CONFIG = {
   },
   PVE: {
     questions: 10,
-    baseExpPerKanji: 6,
     ranks: [
       { grade: 'A', min: 0.90, expMult: 2.0 },
       { grade: 'B', min: 0.70, expMult: 1.5 },
@@ -228,7 +218,6 @@ window.CONFIG = {
     passRatio: 0.70,
     teamSize: 5,
     minCollected: 3,
-    requiredTrainerWins: 10,
     // Các roster dưới đây chỉ dùng Kanji N5 để không tạo khóa cứng trước Gym N5.
     // Những chữ N4 trong bản brainstorm (森, 兄, 駅...) dành cho Trainer N4 sau này.
     trainers: [

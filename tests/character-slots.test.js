@@ -132,7 +132,7 @@ test('switch and delete flush safely without leaking data between slots', () => 
   const manager = createManager({
     KANJIGO_CHARACTER_SLOTS_V1: metadata,
     KANJIGO_LEARNING_V1__CHARACTER_2: { total: 8 },
-    KANJIGO_GAME_V1__CHARACTER_2: { stamina: 2 },
+    KANJIGO_GAME_V1__CHARACTER_2: { radarTarget: 'weak' },
   });
   let flushes = 0;
   manager.api.setBeforeSwitch(() => { flushes++; });

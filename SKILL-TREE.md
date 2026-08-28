@@ -74,7 +74,7 @@ Grass/water review battles
     ↓
 MP, Level, Recall and SRS progress
     ↓
-79/79 N5 captured
+50 N5 captured + 20 at Lv.5
     ↓
 N5 Gym
     ↓
@@ -84,7 +84,7 @@ N5 badge unlocks N4
 ### Existing persistence
 
 - `KANJIGO_LEARNING_V1`: learning, mastery, Academy draft, capture attempts, badges.
-- `KANJIGO_GAME_V1`: pet collection, current pet, stamina.
+- `KANJIGO_GAME_V1`: pet collection, current pet, bicycle, auto-ride, and radar state.
 
 Do not introduce a third save key. Knowledge progression belongs under the existing learning save.
 

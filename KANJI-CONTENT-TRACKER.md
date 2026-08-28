@@ -15,8 +15,8 @@ Một Kanji chỉ được đánh dấu `READY` khi có đủ:
 ## Progression gate
 
 1. N5 mở mặc định và đi đúng thứ tự trong catalog.
-2. Gym N5 chỉ mở khi đã thu phục đủ **79/79 Kanji N5**.
-3. Vượt Gym N5 với ít nhất **80%** câu đúng sẽ nhận huy hiệu N5.
+2. Gym N5 mở khi đã thu phục **50 Kanji N5** và có **20 Kanji đạt Lv.5+**.
+3. Vượt Gym N5 với ít nhất **70%** câu đúng sẽ nhận huy hiệu N5; đúng 100% nhận hạng S.
 4. N4 chỉ xuất hiện trong Giảng đường và encounter sau khi có huy hiệu N5. Hiện có `PROGRESSION.testUnlockedTiers: ['N4']` để QA tạm thời.
 5. `魚` là content bonus, không tính vào điều kiện hoàn thành N5/N4.
 
@@ -24,7 +24,7 @@ Một Kanji chỉ được đánh dấu `READY` khi có đủ:
 
 | Tier | Canonical | Ready | Partial | Missing | Runtime gate |
 |---|---:|---:|---:|---:|---|
-| N5 | 79 | 79 | 0 | 0 | Open; Gym after 79 captured |
+| N5 | 79 | 79 | 0 | 0 | Open; Gym after 50 captured + 20 at Lv.5 |
 | N4 | 140 | 140 | 0 | 0 | Requires N5 badge; temporary QA override active |
 | Bonus | 1 | 1 | 0 | 0 | Not tier-gated |
 

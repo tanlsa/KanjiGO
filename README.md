@@ -24,12 +24,12 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 - Dex: cuộn chuột hoặc kéo để xem danh sách • `← → ↑ ↓`, `Page Up/Down`, `Home/End` để chọn • `R` đổi cách sort • `G` bật/tắt nhóm JLPT N5/N4 • `Enter` cho pet đi cùng • `Esc/D` đóng.
 - Skill Tree: kéo/scroll để pan cây node • dùng phím mũi tên để chọn theo hướng • `Enter` mở node • `R` reset Perk • `Esc/K` đóng. Trên mobile dùng nút `SKILL`.
 - Giảng đường: đến cửa tòa 🏛️, nhấn `Space` • chọn học theo thứ tự KanjiDex hoặc tự chọn một Kanji chưa unlock.
-- Nghi thức: gauntlet 5 câu, cần 4/5; thể lực hồi khi thắng bụi cỏ.
+- Nghi thức: gauntlet 5 câu, ban đầu cần 4/5; được thử lại không giới hạn và tự giảm còn 3/5 từ lần thứ ba.
 - Trainer Arena: gặp Trainer chủ đề và nhấn `Space`; thu phục tối thiểu 3 chữ đúng nhóm để mở trận. Mỗi Trainer dùng tối đa 5 mascot đã unlock trong nhóm đó.
-- Boss N5: thu phục đủ 79 chữ N5 và thắng tối thiểu 10/15 Trainer; vượt bài thi 80% để nhận huy hiệu N5.
+- Boss N5: thu phục 50 chữ N5 và có 20 chữ đạt Lv.5+; vượt bài thi ngẫu nhiên 20–25 câu với ít nhất 70% để nhận huy hiệu N5.
 
 ## ✨ Cập nhật bản này
-1. **World 32×24 có nhiều phân khu:** học viện, quảng trường, hồ/bến thuyền, đồng cỏ, rừng và đấu trường được nối bằng các trục đường rõ ràng.
+1. **World 64×44 có nhiều phân khu:** học viện, quảng trường, hồ/bến thuyền, đồng cỏ, rừng, đấu trường và campus FPT được nối bằng các trục đường rõ ràng.
 2. **Chạy và câu cá có animation:** giữ `Shift` để chạy nhanh; đứng sát hồ, quay mặt về nước và nhấn `Space` để thả cần.
 3. **Player/NPC FPT mới:** player áo cam, NPC áo xanh và thẻ nhân viên rõ ở kích thước tile `32×32`; bốn hướng dùng chung tỷ lệ, baseline và canonical head để animation không rung hình.
 4. **Khung học được thiết kế lại — hết đè/chèn chữ.** Câu hỏi, nghĩa, 4 đáp án và dòng
@@ -47,7 +47,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
 9. **Pokédex-style Dex**: hiển thị toàn bộ chữ; chữ chưa thu phục là silhouette và không thể chọn làm pet.
 10. **Mastery 10 level**: MP theo từng Kanji, level không tụt; Recall và win-streak biến động để điều hướng ôn tập.
 11. **KP & Skill Tree:** capture/Level milestone cấp KP một lần, save cũ được nhận bù an toàn. Hiện có 15 node hoạt động trên ba nhánh, gồm Radar I/II, Bicycle/Gear II/Auto Ride, Meaning Lens I/II, Review Focus I/II, Focus I/II, Combo Guard I/II và Vitality I/II.
-12. **N5 Trainer Arena:** kiến trúc thi đấu ở quảng trường giữa có 15 Trainer theo chủ đề. Đội hình tự lấy tối đa 5 Kanji đã thu phục, ưu tiên chữ Recall yếu; chiến thắng được lưu và 10 huy hiệu Trainer là điều kiện thách đấu Boss N5.
+12. **N5 Trainer Arena:** kiến trúc thi đấu ở quảng trường giữa có 15 Trainer theo chủ đề. Đội hình tự lấy tối đa 5 Kanji đã thu phục, ưu tiên chữ Recall yếu; chiến thắng được lưu như thành tích luyện tập và không khóa Boss N5.
 
 ## 🛠️ Admin thêm Kanji & câu hỏi (2 cách)
 
@@ -63,7 +63,7 @@ Double-click **index.html** (Chrome/Edge/Firefox). Giữ nguyên thư mục `ass
    - `monId` phải khớp một id trong `CONFIG.MONSTERS`; xem danh sách hiện hành tại `assets/README.md`.
    - `jlpt` nhận `N5`, `N4` hoặc `BONUS`. Nếu bỏ trống, game tự đối chiếu `js/content-catalog.js`.
 
-Danh sách chuẩn và tiến độ sản xuất content nằm tại [KANJI-CONTENT-TRACKER.md](KANJI-CONTENT-TRACKER.md). N4 chỉ mở sau khi người chơi thu phục đủ 79 chữ N5 và vượt Gym N5 với tối thiểu 80% câu đúng.
+Danh sách chuẩn và tiến độ sản xuất content nằm tại [KANJI-CONTENT-TRACKER.md](KANJI-CONTENT-TRACKER.md). N4 mở sau khi nhận huy hiệu N5; Gym N4 yêu cầu hoàn thành toàn bộ N5, thu phục 50 chữ N4 và có 20 chữ đạt Lv.5+.
 3. Bấm **🔍 Xem trước & Kiểm tra** để soát lỗi/cảnh báo.
 4. Bấm **✅ Áp dụng vào game** → lưu vào trình duyệt, mở lại `index.html` là chơi ngay.
    Có thể bấm **📊 Xuất Excel** để tải workbook gồm `KANJI`, `QUESTIONS`, `HUONG_DAN`; hoặc **⬇️ Tải xuống kanji.js** để thay file vĩnh viễn.
