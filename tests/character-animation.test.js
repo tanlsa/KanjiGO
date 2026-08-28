@@ -171,8 +171,12 @@ test('V4 bicycle keeps left/right geometry mirrored and one-wheel front/back sil
   }
 });
 
-test('unified orange rider sheet keeps a transparent 128px grid and mirrored side animation', () => {
-  const sheet = decodeRgba('assets/characters/player-bicycle-orange-v1.png'), cell = 128;
+for (const riderAsset of [
+  'assets/characters/player-bicycle-orange-v1.png',
+  'assets/characters/player-bicycle-female-orange-v1.png',
+  'assets/characters/player-bicycle-female-blue-v1.png',
+]) test(`${riderAsset} keeps a transparent 128px grid and mirrored side animation`, () => {
+  const sheet = decodeRgba(riderAsset), cell = 128;
   assert.equal(sheet.width, cell * 4); assert.equal(sheet.height, cell * 4);
   assert.equal(pixel(sheet, 0, 0)[3], 0, 'spritesheet background must use real transparency');
   for (let frame = 0; frame < 4; frame += 1) {
@@ -204,7 +208,7 @@ test('unified orange rider sheet keeps a transparent 128px grid and mirrored sid
         }
       }
       assert.equal(componentCount, 1,
-        `unified rider ${row}:${frame} contains a detached sprite fragment`);
+        `${riderAsset} ${row}:${frame} contains a detached sprite fragment`);
     }
   }
 });

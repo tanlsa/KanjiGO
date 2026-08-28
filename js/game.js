@@ -6845,8 +6845,9 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     ? (activeAppearance === 'blue' && C.ASSETS.playerFemaleBlue
       ? C.ASSETS.playerFemaleBlue : (C.ASSETS.playerFemale || C.ASSETS.player))
     : (activeAppearance === 'blue' && C.ASSETS.playerBlue ? C.ASSETS.playerBlue : C.ASSETS.player);
-  const activePlayerBicycleAsset = activeProfile?.gender !== 'female' && activeAppearance !== 'blue'
-    ? C.ASSETS.playerBicycleOrange : null;
+  const activePlayerBicycleAsset = activeProfile?.gender === 'female'
+    ? (activeAppearance === 'blue' ? C.ASSETS.playerBicycleFemaleBlue : C.ASSETS.playerBicycleFemale)
+    : (activeAppearance !== 'blue' ? C.ASSETS.playerBicycleOrange : null);
   const activePlayerUsesV4 = [C.ASSETS.player, C.ASSETS.playerBlue,
     C.ASSETS.playerFemale, C.ASSETS.playerFemaleBlue].includes(activePlayerAsset);
   const activePlayerFrameSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER[

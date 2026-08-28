@@ -232,6 +232,8 @@ test('selected character gender and appearance choose the matching overworld ani
   } });
   assert.equal(blue.imageRequests.includes('assets/characters/player-v4.png'), false);
   assert.equal(blue.imageRequests.includes('assets/characters/player-female-blue-v4.png'), true);
+  assert.equal(blue.imageRequests.includes('assets/characters/player-bicycle-female-blue-v1.png'), true);
+  assert.equal(blue.imageRequests.includes('assets/characters/bicycle-overlay-v4.png'), false);
   assert.equal(blue.imageRequests.filter((asset) => asset === 'assets/characters/npc-v4.png').length, 1,
     'the NPC sheet should no longer double as the female player sheet');
 
@@ -240,6 +242,8 @@ test('selected character gender and appearance choose the matching overworld ani
     slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false, onboardingComplete: true }],
   } });
   assert.equal(orange.imageRequests.includes('assets/characters/player-female-orange-v4.png'), true);
+  assert.equal(orange.imageRequests.includes('assets/characters/player-bicycle-female-orange-v1.png'), true);
+  assert.equal(orange.imageRequests.includes('assets/characters/bicycle-overlay-v4.png'), false);
 });
 
 test('successful bootstrap paints synchronously and resize repaints the cleared canvas', async () => {
@@ -2195,10 +2199,34 @@ test('Bicycle uses the unified male-orange sheet with direct direction rows', as
   assert.equal(verticalRider.args[6], 42, 'front/back bicycle scale should remain unchanged');
 });
 
+test('Bicycle uses each female profile unified riding sheet instead of the layered fallback', async () => {
+  const profiles = [
+    { appearance: 'orange', asset: 'assets/characters/player-bicycle-female-orange-v1.png' },
+    { appearance: 'blue', asset: 'assets/characters/player-bicycle-female-blue-v1.png' },
+  ];
+  for (const profile of profiles) {
+    const { debug, drawCalls } = createGame({ enableSkillQaSeed: true, characterSlotsSave: {
+      version: 2, activeSlot: 1,
+      slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: profile.appearance,
+        sandbox: false, onboardingComplete: true }],
+    } });
+    assert.equal(debug.purchaseSkill('bicycle').ok, true);
+    assert.equal(debug.toggleBicycle(), true);
+    await new Promise((resolve) => setImmediate(resolve));
+    const player = debug.getPlayer(); player.facing = 'right'; player.frame = 1;
+    drawCalls.length = 0; debug.renderOnce();
+    assert.ok(drawCalls.some((call) => call.type === 'drawImage' && call.src === profile.asset),
+      `missing unified bicycle rider ${profile.asset}`);
+    assert.equal(drawCalls.some((call) => call.type === 'drawImage'
+      && call.src === 'assets/characters/bicycle-overlay-v4.png'), false,
+    `${profile.asset} must not render the layered bicycle fallback`);
+  }
+});
+
 test('Bicycle side view keeps the layered fallback for skins without a unified sheet', async () => {
   const { debug, drawCalls } = createGame({ enableSkillQaSeed: true, characterSlotsSave: {
     version: 2, activeSlot: 1,
-    slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false, onboardingComplete: true }],
+    slots: [{ id: 1, name: 'Sora', gender: 'neutral', appearance: 'blue', sandbox: false, onboardingComplete: true }],
   } });
   assert.equal(debug.purchaseSkill('bicycle').ok, true);
   assert.equal(debug.toggleBicycle(), true);
@@ -2214,7 +2242,7 @@ test('Bicycle side view keeps the layered fallback for skins without a unified s
     if (call.type !== 'drawImage') return;
     if (call.src === 'assets/characters/bicycle-overlay-v4.png') {
       bikeIndexes.push(index); bikeCalls.push(call);
-    } else if (call.src === 'assets/characters/player-female-orange-v4.png') {
+    } else if (call.src === 'assets/characters/player-blue-v4.png') {
       riderIndex = index; riderCall = call;
     }
   });

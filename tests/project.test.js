@@ -450,6 +450,14 @@ test('character animation sheets use the configured high-detail transparent 4x4 
   assert.equal(bicycle.height, CONFIG.CHARACTER.bicycleFrameSize * 4);
   assert.ok(bicycle.colorType === 4 || bicycle.colorType === 6,
     `${CONFIG.ASSETS.bicycleOverlay} must contain an alpha channel`);
+  for (const asset of [CONFIG.ASSETS.playerBicycleOrange, CONFIG.ASSETS.playerBicycleFemale,
+    CONFIG.ASSETS.playerBicycleFemaleBlue]) {
+    const rider = pngInfo(asset);
+    assert.equal(rider.width, CONFIG.CHARACTER.bicycleRiderFrameSize * 4);
+    assert.equal(rider.height, CONFIG.CHARACTER.bicycleRiderFrameSize * 4);
+    assert.ok(rider.colorType === 4 || rider.colorType === 6,
+      `${asset} must contain an alpha channel`);
+  }
 });
 
 test('extended terrain atlas contains sixteen 32px tiles', () => {

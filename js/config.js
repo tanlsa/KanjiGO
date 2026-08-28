@@ -15,6 +15,8 @@ window.CONFIG = {
     playerFemale: 'assets/characters/player-female-orange-v4.png',
     playerFemaleBlue: 'assets/characters/player-female-blue-v4.png',
     playerBicycleOrange: 'assets/characters/player-bicycle-orange-v1.png',
+    playerBicycleFemale: 'assets/characters/player-bicycle-female-orange-v1.png',
+    playerBicycleFemaleBlue: 'assets/characters/player-bicycle-female-blue-v1.png',
     bicycleOverlay: 'assets/characters/bicycle-overlay-v4.png',
     npc:     'assets/characters/npc-v4.png',
     tileset: 'assets/world/tileset.png',
