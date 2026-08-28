@@ -17,7 +17,20 @@
   const TULIP_GARDENS = (((window.MAP_DATA || {}).DECORATIONS || {}).tulipGardens || []);
   const TECH_PARK = (((window.MAP_DATA || {}).DECORATIONS || {}).techPark || null);
   const KDB = window.KANJI_DB;
-  const QUESTION_CHALLENGES = Array.isArray(KDB.CHALLENGES) ? KDB.CHALLENGES : [];
+  const AcademyCore = window.KanjiGOAcademy, BattleCore = window.KanjiGOBattle, DexCore = window.KanjiGODex;
+  const ProgressionCore = window.KanjiGOProgression, RendererCore = window.KanjiGORenderer;
+  let challengeSource = null, challengesByKanji = new Map();
+  function challengesForKanji(char) {
+    const current = Array.isArray(KDB.CHALLENGES) ? KDB.CHALLENGES : [];
+    if (current !== challengeSource) {
+      challengeSource = current; challengesByKanji = new Map();
+      for (const question of current) {
+        const list = challengesByKanji.get(question.target) || [];
+        list.push(question); challengesByKanji.set(question.target, list);
+      }
+    }
+    return challengesByKanji.get(char) || [];
+  }
 const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false; } catch (error) { return false; } };
   const playKanjiOnYomi = (char) => { try { return window.AudioManager?.playKanjiOnYomi(char) || false; } catch (error) { return false; } };
   const playKanjiKunYomi = (char) => { try { return window.AudioManager?.playKanjiKunYomi(char) || false; } catch (error) { return false; } };
@@ -36,20 +49,10 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   }
   const CATALOG = window.KANJI_CATALOG || { tiers: {}, bonus: [] };
   const KANJI_BY_CHAR = new Map(Object.values(KDB.KANJI).map((info) => [info.char, info]));
-  const vocabularyId = (question) => {
-    if (question && typeof question.id === 'string' && question.id.trim()) return question.id.trim();
-    const parts = [question && question.target, question && question.word, question && question.type, question && question.answer]
-      .map((value) => encodeURIComponent(String(value || '').trim()));
-    return `v1:${parts.join(':')}`;
-  };
-  for (const question of KDB.QUESTIONS) question.id = vocabularyId(question);
-  const VOCABULARY_BY_ID = new Map(KDB.QUESTIONS.map((question) => [question.id, question]));
-  const QUESTIONS_BY_KANJI = new Map();
-  for (const question of KDB.QUESTIONS) {
-    const questions = QUESTIONS_BY_KANJI.get(question.target) || [];
-    questions.push(question);
-    QUESTIONS_BY_KANJI.set(question.target, questions);
-  }
+  const vocabularyId = AcademyCore.vocabularyId;
+  const questionIndex = AcademyCore.createQuestionIndex(KDB.QUESTIONS);
+  const VOCABULARY_BY_ID = questionIndex.byId, QUESTIONS_BY_KANJI = questionIndex.byKanji;
+  const DISTRACTOR_POOLS = BattleCore.createDistractorPools(KDB.QUESTIONS, [...KANJI_BY_CHAR.values()]);
   const TILE = C.TILE, ZOOM = C.ZOOM || 1;
   const MAP_H = TILES.length, MAP_W = TILES[0].length;
   const K = C.TILE_KEYS;
@@ -75,21 +78,11 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   let worldZoom = ZOOM;
   let VIEW_PX_W = SCREEN_W / worldZoom, VIEW_PX_H = SCREEN_H / worldZoom;
   function resolveWorldZoom(canvasWidth) {
-    if (canvasWidth >= 620) return ZOOM;
-    const academyViewWidth = C.ACADEMY.width * TILE + 16;
-    return Math.max(1, Math.min(ZOOM, canvasWidth / academyViewWidth));
+    return RendererCore.resolveWorldZoom(canvasWidth, ZOOM, C.ACADEMY.width, TILE);
   }
   function resolveRenderPixelRatio(width, height, cssScale) {
-    const render = C.RENDER || {};
-    const deviceRatio = Math.max(1, Number(window.devicePixelRatio) || 1);
-    const deviceSamples = Math.min(deviceRatio, Math.max(1, Number(render.maxDevicePixelRatio || render.maxPixelRatio) || 2));
-    const wantedRatio = cssScale * deviceSamples;
-    // presentationScale rasterizes one backing pixel per CSS pixel first;
-    // the remaining budget is used for HiDPI samples. At extreme resolutions
-    // the hard pixel budget wins so the game cannot allocate an 8K canvas.
-    const basePixels = Math.max(1, width * height);
-    const maxPixels = Math.max(basePixels, Number(render.maxRenderPixels) || basePixels * wantedRatio * wantedRatio);
-    return Math.max(1, Math.min(wantedRatio, Math.sqrt(maxPixels / basePixels)));
+    return RendererCore.resolveRenderPixelRatio({ width, height, cssScale,
+      devicePixelRatio: window.devicePixelRatio, render: C.RENDER || {} });
   }
   function resizeCanvas() {
     const render = C.RENDER || {};
@@ -141,6 +134,18 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
 
   // ---------- LOAD ẢNH ----------
   const imgs = {}, imageLoads = {}, failedImages = new Set(); let loadError = null;
+  const deferredAssets = {
+    landmark_ftown: C.ASSETS.ftownCampus,
+    landmark_innovation_hub: C.ASSETS.innovationHub,
+    landmark_heritage_pavilion: C.ASSETS.heritageGardenPavilion,
+    landmark_hoa_lac: C.ASSETS.hoaLacCampus,
+    prop_cuder: C.ASSETS.cuderStatue,
+    prop_fpt_sign: C.ASSETS.fptSoftwareSign,
+    prop_campus_shrub: C.ASSETS.campusShrubCluster,
+    prop_campus_garden: C.ASSETS.fptCampusGarden,
+    battle_forest: C.ASSETS.battleForest,
+    battle_stand: C.ASSETS.battleStand,
+  };
   function loadImg(name, src, required = true) {
     if (imgs[name]) return Promise.resolve(imgs[name]);
     if (failedImages.has(name)) return Promise.resolve(null);
@@ -158,6 +163,10 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
       im.src = src;
     });
     return imageLoads[name];
+  }
+  function deferredImg(name) {
+    if (!imgs[name] && deferredAssets[name]) loadImg(name, deferredAssets[name], false);
+    return imgs[name] || null;
   }
   function monsterImg(id) {
     const name = 'mon_' + id, monster = C.MONSTERS[id];
@@ -247,6 +256,13 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   const legacyMasteryKeys = new Set();
   const legacyPetProgress = {};
   const GAME_KEY = characterStorageKey('KANJIGO_GAME_V1');
+  const learningSaveQueue = ProgressionCore.createSaveQueue({
+    snapshot: () => learning,
+    write: (payload) => localStorage.setItem(LEARNING_KEY, payload),
+    setTimer: window.setTimeout ? window.setTimeout.bind(window) : setTimeout,
+    clearTimer: window.clearTimeout ? window.clearTimeout.bind(window) : clearTimeout,
+    delayMs: 120,
+  });
   let pveResult = null;
   let loadedLearningSave = false;
   let progressionNotice = null;
@@ -301,14 +317,10 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     return progress.total > 0 && progress.available === progress.total && progress.captured === progress.total;
   }
   function levelFromMp(mp) {
-    const K = C.KLEVEL, thresholds = K.thresholds || [null, 0], value = Math.max(0, Number(mp) || 0);
-    let level = 1;
-    for (let i = 1; i <= K.maxLevel; i++) if (value >= Number(thresholds[i] || 0)) level = i;
-    return Math.max(1, Math.min(K.maxLevel, level));
+    return ProgressionCore.levelFromMp(C.KLEVEL.thresholds, C.KLEVEL.maxLevel, mp);
   }
   function mpFloorOfLevel(level) {
-    const lv = Math.max(1, Math.min(C.KLEVEL.maxLevel, Number(level) || 1));
-    return Number(C.KLEVEL.thresholds[lv] || 0);
+    return ProgressionCore.mpFloorOfLevel(C.KLEVEL.thresholds, C.KLEVEL.maxLevel, level);
   }
   function levelLabel(level) {
     const labels = C.KLEVEL.labels || {}, lv = Math.max(1, Math.min(C.KLEVEL.maxLevel, Number(level) || 1));
@@ -501,7 +513,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       purchasedAt: Math.max(0, Math.floor(Number(options.now) || Date.now())),
     };
     refreshSkillDerivedState();
-    saveLearning();
+    saveLearning({ immediate: true });
     if (options.toast !== false) {
       const guide = definition.id === 'bicycle' ? ' • Nhấn B để lên xe'
         : definition.id === 'auto_ride' ? ' • Nhấn P để tự tìm bụi cỏ'
@@ -520,7 +532,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     }
     if (!removed.length) return { ok: false, reason: 'no_perks', refundedKP: 0, removed };
     refreshSkillDerivedState();
-    saveLearning();
+    saveLearning({ immediate: true });
     if (options.toast !== false) showToast(`↩ Đã hoàn ${refundedKP} KP từ ${removed.length} perk`);
     return { ok: true, reason: 'reset', refundedKP, removed, availableKP: availableKP() };
   }
@@ -744,13 +756,17 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
         }
       }
       learning.progression = sanitizeProgression(saved.progression);
-      saveLearning();
+      saveLearning({ immediate: true });
     } catch (e) { console.warn('[KanjiGO] Không đọc được tiến độ học.', e); }
   }
-  function saveLearning() {
+  function saveLearning(options = {}) {
     if (!C.LEARNING || C.LEARNING.persist === false) return;
-    try { localStorage.setItem(LEARNING_KEY, JSON.stringify(learning)); } catch (e) { /* storage có thể bị chặn khi chạy file:// */ }
+    try {
+      learningSaveQueue.schedule();
+      if (options.immediate === true) learningSaveQueue.flush();
+    } catch (e) { /* storage có thể bị chặn khi chạy file:// */ }
   }
+  function flushLearningSave() { try { return learningSaveQueue.flush(); } catch (e) { return false; } }
   function questionKey(q) { return `${q.word}|${q.target}|${q.answer}|${q.type}`; }
   function questionScore(q) {
     const progress = learning.vocabulary[vocabularyId(q)];
@@ -815,7 +831,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     }
     session.graded = true;
     session.result = { kind: session.kind, startedAt: session.startedAt, finishedAt, changes };
-    saveLearning();
+    saveLearning({ immediate: true });
     return session.result;
   }
   function recordAnswer(q, isCorrect, session = null, context = '') {
@@ -843,7 +859,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     s.bestWinStreak = Math.max(s.bestWinStreak, s.winStreak);
     s.lossStreak = 0;
     const kpResult = evaluateKanjiMilestones(kanji, { save: false, toast: true });
-    saveLearning();
+    saveLearning({ immediate: true });
     return { kanji: resolveKanji(kanji), mpGain, beforeLevel, level: s.level, leveledUp: s.level > beforeLevel,
       streakMult, rustMult, winStreak: s.winStreak, kpGain: kpResult.kp, encounter: encounterCtx };
   }
@@ -861,7 +877,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
       s.lossStreak = 0; // reset sau mỗi lần phạt chuỗi, tránh phạt dồn từng trận
       showToast('Chuỗi thua — hạ đánh giá tạm thời, chữ này sẽ xuất hiện nhiều hơn để ôn lại.');
     }
-    saveLearning();
+    saveLearning({ immediate: true });
     return { kanji: resolveKanji(kanji), chained, recall: s.recall, mp: s.mp, level: s.level, lossStreak: s.lossStreak };
   }
   function reappearWeight(kanji, now = Date.now()) {
@@ -878,7 +894,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   function learningAccuracy() { return learning.total ? Math.round(learning.correct / learning.total * 100) : 0; }
   loadLearning();
   for (const info of Object.values(KDB.KANJI)) ensureMastery(info.char);
-  saveLearning();
+  saveLearning({ immediate: true });
 
   // 🐾 PET + tiến trình
   // Registry animation chính thức. Kanji có choreography riêng được khai báo
@@ -1331,8 +1347,9 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
   }
   window.KanjiGOCharacters?.setBeforeSwitch?.(() => {
     if (state === 'battle' || state === 'capture' || state === 'pve') return false;
-    saveLearning(); saveGame(); return true;
+    flushLearningSave(); saveGame(); return true;
   });
+  addEventListener('pagehide', flushLearningSave);
   // Save cũ và SANDBOX giữ mascot mặc định. Một nhân vật mới phải tự học và
   // thu phục Kanji đầu tiên; tuyệt đối không seed pet trước onboarding.
   if (shouldSeedLegacyStarter()) petData[currentPetId] = { evolveStage: 0 };
@@ -1429,7 +1446,7 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     }
   }
   evaluateAllKpMilestones({ migrated: loadedLearningSave, toast: loadedLearningSave, save: false });
-  saveLearning(); saveGame();
+  saveLearning({ immediate: true }); saveGame();
   const petLevel = () => ensureMastery(C.MONSTERS[currentPetId].kanji).level;
   const petMastery = () => ensureMastery(C.MONSTERS[currentPetId].kanji);
 
@@ -1960,11 +1977,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
   }
   function shuffle(options) { for (let i = options.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [options[i], options[j]] = [options[j], options[i]]; } return options; }
   function questionModesForLevel(level) {
-    const config = C.QUESTION_MODES || {};
-    const weights = config.weights || { m1: 1 };
-    const unlockAt = config.unlockAt || {};
-    const currentLevel = Math.max(1, Math.min(C.KLEVEL.maxLevel, Math.floor(Number(level) || 1)));
-    return Object.keys(weights).filter((mode) => Number(weights[mode]) > 0 && currentLevel >= (Number(unlockAt[mode]) || 1));
+    return BattleCore.questionModesForLevel(C.QUESTION_MODES, C.KLEVEL.maxLevel, level);
   }
   function chooseMode(level = 1, availableModes = null) {
     const weights = (C.QUESTION_MODES && C.QUESTION_MODES.weights) || { m1: 1 };
@@ -1990,18 +2003,16 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     for (const value of curatedDistractors) { if (opts.size >= count) break; opts.add(value); }
     return shuffle([...opts]);
   }
-  function questionValuesForTier(question, field) {
+  function questionValuesForTier(question, mode) {
     const tier = (kanjiInfo(question.target) || {}).jlpt;
-    let values = KDB.QUESTIONS.filter((item) => !tier || (kanjiInfo(item.target) || {}).jlpt === tier).map((item) => item[field]);
-    if (new Set(values.filter(Boolean)).size < 4) values = KDB.QUESTIONS.map((item) => item[field]);
-    return values;
+    return BattleCore.valuesForMode(DISTRACTOR_POOLS, mode, tier, question.target);
   }
   // Sinh câu hỏi đa hướng; SRS vẫn chỉ ghi nhận theo q.target.
   function makeQuestion(monKanji, previousKey = '', modeOverride = '', fair = false, sourcePool = null) {
     if (typeof previousKey === 'number') { modeOverride = `m${previousKey}`; previousKey = ''; }
     if (typeof previousKey === 'string' && /^m(?:[1-9]|1[0-5])$/.test(previousKey)) { modeOverride = previousKey; previousKey = ''; }
     const level = ensureMastery(monKanji).level;
-    const targetChallenges = QUESTION_CHALLENGES.filter((q) => q.target === monKanji);
+    const targetChallenges = challengesForKanji(monKanji);
     const contextualModes = ['m11', 'm12'];
     const capturedOtherCount = Object.values(KDB.KANJI)
       .filter((info) => info.char !== monKanji && ensureMastery(info.char).captured).length;
@@ -2053,17 +2064,17 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     }
     if (mode === 'm4') { answer = q.type.toUpperCase(); options = shuffle(['ON', 'KUN']); }
     if (mode === 'm5') {
-      const words = KDB.QUESTIONS.filter((item) => item.target !== q.target).map((item) => item.word);
+      const words = questionValuesForTier(q, 'm5');
       if (new Set(words).size < 3) mode = 'm1';
       else { answer = q.word; options = optionSet(answer, words); }
     }
     if (mode === 'm6') {
-      const readings = KDB.QUESTIONS.filter((item) => item !== q && item.wordReading).map((item) => item.wordReading);
+      const readings = questionValuesForTier(q, 'm6');
       if (!q.wordReading || new Set(readings).size < 3) mode = 'm1';
-      else { answer = q.wordReading; options = q.challengeOnly ? variedOptionSet(answer, q.options.m6, questionValuesForTier(q, 'wordReading')) : optionSet(answer, readings); }
+      else { answer = q.wordReading; options = q.challengeOnly ? variedOptionSet(answer, q.options.m6, readings) : optionSet(answer, readings); }
     }
     if (mode === 'm7') {
-      const meanings = KDB.QUESTIONS.filter((item) => item !== q && item.mean).map((item) => item.mean);
+      const meanings = questionValuesForTier(q, 'm7');
       if (!q.mean || new Set(meanings).size < 3) mode = 'm1';
       else { answer = q.mean; options = optionSet(answer, meanings); }
     }
@@ -2073,41 +2084,36 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     }
     if (mode === 'm9') {
       const tier = (kanjiInfo(q.target) || {}).jlpt;
-      let chars = infos.filter((info) => info.char !== q.target && (!tier || info.jlpt === tier)).map((info) => info.char);
-      if (new Set(chars).size < 3) chars = infos.filter((info) => info.char !== q.target).map((info) => info.char);
+      const chars = BattleCore.valuesForMode(DISTRACTOR_POOLS, 'm9', tier, q.target);
       answer = q.target; options = optionSet(answer, chars);
     }
     if (mode === 'm10') {
       const tier = (kanjiInfo(q.target) || {}).jlpt;
-      let meanings = KDB.QUESTIONS.filter((item) => item !== q && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.mean);
-      if (new Set(meanings).size < 3) meanings = KDB.QUESTIONS.filter((item) => item !== q).map((item) => item.mean);
+      const meanings = BattleCore.valuesForMode(DISTRACTOR_POOLS, 'm10', tier, q.target);
       answer = q.mean; options = optionSet(answer, meanings);
     }
     if (mode === 'm11') {
       answer = q.wordReading;
-      options = variedOptionSet(answer, q.options.m11, questionValuesForTier(q, 'wordReading'));
+      options = variedOptionSet(answer, q.options.m11, questionValuesForTier(q, 'm11'));
     }
     if (mode === 'm12') {
       answer = q.word;
-      options = variedOptionSet(answer, q.options.m12, questionValuesForTier(q, 'word'));
+      options = variedOptionSet(answer, q.options.m12, questionValuesForTier(q, 'm12'));
     }
     if (mode === 'm13') {
       const tier = (kanjiInfo(q.target) || {}).jlpt;
-      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
-      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      const words = BattleCore.valuesForMode(DISTRACTOR_POOLS, 'm13', tier, q.target);
       answer = q.word; options = q.challengeOnly ? variedOptionSet(answer, q.options.m12, words) : optionSet(answer, words);
     }
     if (mode === 'm14') {
       const tier = (kanjiInfo(q.target) || {}).jlpt;
-      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
-      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      const words = BattleCore.valuesForMode(DISTRACTOR_POOLS, 'm14', tier, q.target);
       if (!q.wordReading || new Set(words).size < 3) { mode = 'm1'; answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
       else { answer = q.word; options = optionSet(answer, words); }
     }
     if (mode === 'm15') {
       const tier = (kanjiInfo(q.target) || {}).jlpt;
-      let words = KDB.QUESTIONS.filter((item) => item.word !== q.word && (!tier || (kanjiInfo(item.target) || {}).jlpt === tier)).map((item) => item.word);
-      if (new Set(words).size < 3) words = KDB.QUESTIONS.filter((item) => item.word !== q.word).map((item) => item.word);
+      const words = BattleCore.valuesForMode(DISTRACTOR_POOLS, 'm15', tier, q.target);
       if (!q.mean || new Set(words).size < 3) { mode = 'm1'; answer = q.answer; options = optionSet(answer, KDB.DISTRACTORS.slice()); }
       else { answer = q.word; options = optionSet(answer, words); }
     }
@@ -2138,6 +2144,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
   }
 
   function startBattle(kind, forcedMonId = '') {
+    window.KanjiGOQuestionPack?.load?.();
     const eligible = availableSpawn(kind);
     const monId = forcedMonId && eligible.includes(forcedMonId) ? forcedMonId : pickMonster(kind);
     if (!monId) { showNoCapturedEncounter(); return false; }
@@ -2410,6 +2417,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     return true;
   }
   function enterLecture(char = '') {
+    window.KanjiGOQuestionPack?.load?.();
     const entered = char ? startAcademyLesson(resolveKanji(char), true) : openAcademyLobby();
     if (entered) playSFX('WORLD_KNOWLEDGE_HALL');
     return entered;
@@ -2496,7 +2504,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       selectedIndex: Number.isInteger(lecture.selectedIndex) ? lecture.selectedIndex : -1,
       feedback: lecture.feedback || '', q: lecture.q ? { ...lecture.q, options: [...lecture.q.options] } : null,
     };
-    saveLearning();
+    saveLearning({ immediate: true });
   }
   function markCurrentAcademyCardSeen() {
     if (!lecture || lecture.phase !== 'cards') return;
@@ -2552,7 +2560,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     lecture.feedback = lecture.lessonScore === 3
       ? 'Xuất sắc 3/3 — bạn có thể vào nghi thức ngay.'
       : `Đã ôn thích ứng ${lecture.recapIds.length} thẻ • xác nhận ${lecture.confirmScore}/${lecture.confirmTotal}.`;
-    saveAcademyDraft(); saveLearning();
+    saveAcademyDraft(); saveLearning({ immediate: true });
   }
   function academyPreviousStep() {
     if (!lecture) return false;
@@ -2736,7 +2744,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
         currentPetId = capture.info.monId; resetPetTrail();
         window.KanjiGOCharacters?.setOnboardingTourStep?.(tour.index + 1);
       }
-      saveLearning(); saveGame();
+      saveLearning({ immediate: true }); saveGame();
       capture.feedback = `🎉 Thu phục thành công ${capture.char}!${kpResult.kp ? `  +${kpResult.kp} KP` : ''}${starterCaptured ? '  •  Hoàn tất tour để mascot đi cùng!' : ''}`;
       // Nghi thức thành công phát lại chính tuyệt kỹ semantic của
       // Kanji vừa bắt, thay cho vòng sáng xanh dùng chung.
@@ -2751,7 +2759,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     capture.passed = passed;
     capture.endMsg = capture.feedback;
     capture.phase = 'end';
-    saveLearning();
+    saveLearning({ immediate: true });
   }
   function answerCapture(idx) {
     if (!capture || capture.phase !== 'fight' || capture.qCooldown > 0) return;
@@ -2914,13 +2922,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     const mode = modes.length ? modes[pve.index % modes.length] : '';
     return makeQuestion(target, previousKey, mode, true);
   }
-  function gymGrade(ratio, passRatio = .8) {
-    if (ratio >= 1) return 'S';
-    if (ratio >= .8) return 'A';
-    if (ratio >= .5) return 'B';
-    if (ratio >= .25) return 'C';
-    return 'D';
-  }
+  function gymGrade(ratio) { return ProgressionCore.gymGrade(ratio); }
   function gymQuestionCount(gym) {
     const range = Array.isArray(gym && gym.questionRange) ? gym.questionRange : [];
     const min = Math.max(1, Math.floor(Number(range[0]) || Number(gym && gym.questions) || C.PVE.questions));
@@ -2941,7 +2943,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       history.bestCorrect = correct; history.bestTotal = total; history.bestRatio = ratio; history.bestGrade = grade; history.bestAt = now;
       history.bestDurationMs = durationMs;
     }
-    learning.gymHistory[id] = history; saveLearning(); return history;
+    learning.gymHistory[id] = history; saveLearning({ immediate: true }); return history;
   }
   function startPve(options = {}) {
     if (typeof options === 'string') options = { tier: options };
@@ -3006,11 +3008,11 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     let badgeAwarded = '';
     let trainerDefeated = '';
     if (pve.mode === 'trainer' && ratio >= pve.passRatio && TRAINER_BY_ID.has(pve.trainerId)) {
-      learning.trainerWins[pve.trainerId] = true; trainerDefeated = pve.trainerId; saveLearning();
+      learning.trainerWins[pve.trainerId] = true; trainerDefeated = pve.trainerId; saveLearning({ immediate: true });
     }
     if (pve.mode === 'gym' && ratio >= pve.passRatio && !hasBadge(pve.tier)) {
       const gym = C.PROGRESSION.gym[pve.tier], badge = gym.badge || pve.tier;
-      learning.badges[badge] = true; badgeAwarded = badge; saveLearning();
+      learning.badges[badge] = true; badgeAwarded = badge; saveLearning({ immediate: true });
     }
     const passed = pve.mode === 'gym' || pve.mode === 'trainer' ? ratio >= pve.passRatio : ratio >= .6;
     pveResult = { grade, ratio, correct: pve.correct, total: pve.total, bestCombo: pve.bestCombo, rewards, badgeAwarded, trainerDefeated,
@@ -3087,17 +3089,16 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
   // Dex dùng cùng catalog với Giảng đường: đúng thứ tự JLPT và không lộ tier chưa mở.
   function collectedList() { return academyDexList().map((info) => info.char); }
   function normalizeDexSearch(value) {
-    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
-      .toLocaleLowerCase('vi').trim();
+    return DexCore.normalizeSearch(value);
   }
   function dexMatchesSearch(char, query) {
     if (!query) return true;
     const info = kanjiInfo(char), monster = info && C.MONSTERS[info.monId];
     if (!info) return false;
-    return normalizeDexSearch([
+    return DexCore.matchesSearch([
       info.char, info.meaning, ...(info.on || []), ...(info.kun || []),
       monster && monster.name, monster && monster.hanViet,
-    ].filter(Boolean).join(' ')).includes(query);
+    ], query);
   }
   function refreshDexList(preserveChar = '') {
     const previous = preserveChar || dex.list[dex.sel] || '';
@@ -4599,7 +4600,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
   function drawCampusLandmarks(camX, camY) {
     for (const landmark of MAP_LANDMARKS) {
       if (!landmarkVisible(landmark, camX, camY)) continue;
-      const image = imgs[landmark.asset];
+      const image = deferredImg(landmark.asset);
       if (!image) continue;
       const x = Math.round(landmark.gx * TILE - camX), y = Math.round(landmark.gy * TILE - camY);
       const w = landmark.width * TILE, h = landmark.height * TILE;
@@ -4612,7 +4613,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       const x = Math.round(prop.gx * TILE - camX), y = Math.round(prop.gy * TILE - camY);
       const w = prop.width * TILE, h = prop.height * TILE;
       if (x + w < -TILE || x > VIEW_PX_W + TILE || y + h < -TILE || y > VIEW_PX_H + TILE) continue;
-      const image = imgs[prop.asset];
+      const image = deferredImg(prop.asset);
       if (!image) continue;
       cx.save(); cx.imageSmoothingEnabled = false; cx.drawImage(image, x, y, w, h); cx.restore();
     }
@@ -4729,25 +4730,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
   }
 
   // ----- BATTLE render -----
-  const PANEL_H = (C.UI && C.UI.panelH) || 200;
-  function quizPanelLayout(W, H) {
-    const narrow = W < 520;
-    const shortLandscape = !narrow && H <= 520;
-    const preferredH = narrow ? Math.round(H * .4) : Math.round(H * .31);
-    const panelH = shortLandscape ? 180 : narrow
-      ? Math.max(258, Math.min(292, preferredH))
-      : Math.max(PANEL_H, Math.min(224, preferredH));
-    const h = shortLandscape ? panelH : Math.min(panelH, Math.max(184, H - (narrow ? 250 : 170)));
-    const y = H - h;
-    const pad = narrow ? 12 : shortLandscape ? 12 : 22;
-    const answerGapX = narrow ? 8 : shortLandscape ? 7 : 20;
-    const answerGapY = narrow ? 9 : Math.max(8, (C.UI && C.UI.answerGapY) || 8);
-    const answerH = narrow ? Math.max(42, Math.min(50, Math.floor((h - 166) / 2))) : shortLandscape ? 44 : Math.max(36, (C.UI && C.UI.answerH) || 36);
-    const answerStartY = y + (narrow ? 116 : shortLandscape ? 102 : 98);
-    const answerCols = shortLandscape ? 4 : 2;
-    const answerW = (W - pad * 2 - answerGapX * (answerCols - 1)) / answerCols;
-    return { W, H, narrow, shortLandscape, panelH: h, y, pad, answerCols, answerGapX, answerGapY, answerH, answerStartY, answerW };
-  }
+  function quizPanelLayout(W, H) { return RendererCore.quizPanelLayout(C, W, H); }
   function drawMonsterMeaningEffect(mon, centerX, baseY, width, alpha = 1) {
     if (!mon || !mon.effect || alpha <= 0) return;
     const now = performance.now(), t = now / 1000, unit = Math.max(.45, width / 210), effect = mon.effect;
@@ -6474,7 +6457,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     cx.fillStyle = '#8aa'; cx.font = `${narrow ? 10 : 12}px "KanjiGo UI",sans-serif`; cx.textAlign = 'right'; cx.fillText(narrow ? '← Chạy' : 'Esc: bỏ chạy', W - P, statusY); cx.textAlign = 'left';
   }
   function drawBattleStand(x, baseY, width, depth = 1) {
-    const stand = imgs.battle_stand;
+    const stand = deferredImg('battle_stand');
     if (!stand) return;
     const imageW = stand.naturalWidth || stand.width, imageH = stand.naturalHeight || stand.height;
     const sourceX = imageW * .07, sourceY = imageH * .3;
@@ -6494,7 +6477,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       cx.strokeStyle = 'rgba(160,220,240,.22)'; cx.lineWidth = 2;
       for (let yy = 46; yy < fieldH; yy += 40) { cx.beginPath(); for (let xx = 0; xx <= W; xx += 16) { const y = yy + Math.sin((xx + yy) / 24) * 4; xx === 0 ? cx.moveTo(xx, y) : cx.lineTo(xx, y); } cx.stroke(); }
     } else {
-      const bg = imgs.battle_forest;
+      const bg = deferredImg('battle_forest');
       if (!bg) { cx.fillStyle = '#55a83e'; cx.fillRect(0, 0, W, fieldH); return; }
       const imageW = bg.naturalWidth || bg.width, imageH = bg.naturalHeight || bg.height;
       // Preserve the source ratio, then bias the crop downward so ultrawide
@@ -6747,7 +6730,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     activePlayerUsesV4 ? 'playerV4DrawSize' : 'drawSize']) || TILE);
   const defaultCharacterDrawSize = Math.max(TILE, Number(C.CHARACTER && C.CHARACTER.drawSize) || TILE);
   const activePlayerDrawScale = activePlayerDrawSize / defaultCharacterDrawSize;
-  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('landmark_ftown', C.ASSETS.ftownCampus), loadImg('landmark_innovation_hub', C.ASSETS.innovationHub), loadImg('landmark_heritage_pavilion', C.ASSETS.heritageGardenPavilion), loadImg('landmark_hoa_lac', C.ASSETS.hoaLacCampus), loadImg('prop_cuder', C.ASSETS.cuderStatue), loadImg('prop_fpt_sign', C.ASSETS.fptSoftwareSign), loadImg('prop_campus_shrub', C.ASSETS.campusShrubCluster), loadImg('prop_campus_garden', C.ASSETS.fptCampusGarden), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile), loadImg('battle_forest', C.ASSETS.battleForest), loadImg('battle_stand', C.ASSETS.battleStand)];
+  const toLoad = [loadImg('player', activePlayerAsset), loadImg('bicycle_overlay', C.ASSETS.bicycleOverlay), loadImg('npc', C.ASSETS.npc), loadImg('tileset', C.ASSETS.tileset), loadImg('terrain_tiles', C.ASSETS.terrainTiles), loadImg('academy', C.ASSETS.academy), loadImg('tulip_tiles', C.ASSETS.tulipTiles), loadImg('arena_wall_tiles', C.ASSETS.arenaWallTiles), loadImg('trainer_theme_icons', C.ASSETS.trainerThemeIcons), loadImg('campus_lawn_tile', C.ASSETS.campusLawnTile), loadImg('campus_plaza_tile', C.ASSETS.campusPlazaTile), loadImg('campus_tech_tile', C.ASSETS.campusTechTile), loadImg('campus_courtyard_tile', C.ASSETS.campusCourtyardTile)];
   // Chỉ preload pet đang theo. 219+ sprite còn lại được tải khi thực sự xuất
   // hiện, tránh decode hàng chục MB ảnh trước khi người chơi vào được game.
   if (petData[currentPetId] && C.MONSTERS[currentPetId]) toLoad.push(loadImg('mon_' + currentPetId, C.MONSTERS[currentPetId].img));
@@ -6791,6 +6774,8 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       : Object.fromEntries(Object.entries(learning.gymHistory).map(([id, value]) => [id, { ...value }])),
     tierOfKanji, isTierUnlocked, tierProgress, isTierStudyComplete, gymEligibility, gymGrade, hasBadge,
     getLearningStats: () => ({ total: learning.total, correct: learning.correct, wrong: learning.wrong, streak: learning.streak, best: learning.best }),
+    getLearningSaveStatus: () => ({ pending: learningSaveQueue.pending(), writes: learningSaveQueue.writeCount() }),
+    flushLearningSave,
     getProgression: () => ({
       version: learning.progression.version,
       earnedKP: learning.progression.earnedKP,

@@ -8,7 +8,7 @@
 (function () {
   const KEY = 'KANJIGO_DATA_V1';
   const DEFAULT = window.KANJI_DB || { KANJI: {}, QUESTIONS: [], DISTRACTORS: [] };
-  const SUPPLEMENT = Array.isArray(window.KANJI_QUESTION_SUPPLEMENT) ? window.KANJI_QUESTION_SUPPLEMENT : [];
+  const supplementalChallenges = () => window.KanjiGOQuestionPack?.current?.() || [];
   // Vocabulary progress is persisted by this id, so edits to labels/meaning do
   // not erase a learner's history. Imported rows may provide their own id;
   // legacy rows receive a deterministic id from their content identity.
@@ -46,7 +46,7 @@
           KANJI: { ...(DEFAULT.KANJI || {}), ...data.KANJI },
           QUESTIONS: withVocabularyMetadata(Array.from(questions.values())),
           DISTRACTORS: Array.from(new Set([...(DEFAULT.DISTRACTORS || []), ...(data.DISTRACTORS || [])])),
-          CHALLENGES: SUPPLEMENT,
+          CHALLENGES: supplementalChallenges(),
         };
         window.KANJI_DB = merged;
         window.__KANJIGO_SOURCE = 'imported';
@@ -60,5 +60,5 @@
   // The default bundle also goes through normalization when no ADMIN import
   // exists. This keeps the runtime schema identical in both launch paths.
   window.KANJI_DB.QUESTIONS = withVocabularyMetadata(window.KANJI_DB.QUESTIONS);
-  window.KANJI_DB.CHALLENGES = SUPPLEMENT;
+  window.KANJI_DB.CHALLENGES = supplementalChallenges();
 })();

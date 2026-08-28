@@ -149,7 +149,9 @@ function createGame({ learningSave = null, gameSave = null, disableTestUnlocks =
   context.window = context;
   vm.createContext(context);
   vm.runInContext(read('js/character-slots.js'), context, { filename: 'js/character-slots.js' });
-  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js']) {
+  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-pack-loader.js', 'js/data-loader.js',
+    'data/packs/question-supplement.pack.js', 'js/map.js',
+    'js/game-academy.js', 'js/game-battle.js', 'js/game-dex.js', 'js/game-progression.js', 'js/game-renderer.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   context.CONFIG.SKILL_TREE.qaSeed.enabled = enableSkillQaSeed;
@@ -995,6 +997,18 @@ test('Capture allows unlimited failed attempts and no longer persists stamina', 
   assert.equal(Object.hasOwn(saved, 'stamina'), false, 'new saves must drop the retired stamina field');
 });
 
+test('learning save queue coalesces answer writes and flushes on pagehide', () => {
+  const game = createGame();
+  const question = game.debug.makeQuestion('日', '', 'm1');
+  const before = game.debug.getLearningSaveStatus().writes;
+  for (let index = 0; index < 5; index++) game.debug.recordAnswer(question, index % 2 === 0);
+  assert.equal(game.debug.getLearningSaveStatus().writes, before, 'answers should not serialize the full save immediately');
+  assert.equal(game.debug.getLearningSaveStatus().pending, true);
+  game.dispatchWindowEvent('pagehide', {});
+  assert.equal(game.debug.getLearningSaveStatus().writes, before + 1, 'pagehide must flush exactly one coalesced save');
+  assert.equal(JSON.parse(game.storage.get('KANJIGO_LEARNING_V1')).total, 5);
+});
+
 test('mobile Academy renders the card, recap, and confirmation flow without overflow crashes', () => {
   const { debug } = createGame({ viewportWidth: 390, viewportHeight: 844 });
   enterAcademyCards(debug);
@@ -1013,26 +1027,19 @@ test('mobile Academy renders the card, recap, and confirmation flow without over
 
 test('startup only preloads core assets and the active pet', () => {
   const { imageRequests } = createGame();
-  assert.equal(imageRequests.length, 24);
+  assert.equal(imageRequests.length, 14);
   assert.ok(imageRequests.includes('assets/characters/bicycle-overlay-v4.png'));
   assert.ok(imageRequests.includes('assets/world/terrain-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/tulip-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/arena-wall-tiles.png'));
   assert.ok(imageRequests.includes('assets/world/trainer-theme-icons.png'));
-  assert.ok(imageRequests.includes('assets/world/ftown-campus-v3.png'));
-  assert.ok(imageRequests.includes('assets/world/innovation-hub.png'));
-  assert.ok(imageRequests.includes('assets/world/heritage-garden-pavilion-v2.png'));
-  assert.ok(imageRequests.includes('assets/world/hoa-lac-campus-v2.png'));
-  assert.ok(imageRequests.includes('assets/world/cuder-statue.png'));
-  assert.ok(imageRequests.includes('assets/world/fpt-software-sign-v2.png'));
-  assert.ok(imageRequests.includes('assets/world/campus-shrub-cluster.png'));
-  assert.ok(imageRequests.includes('assets/world/fpt-campus-garden.png'));
   assert.ok(imageRequests.includes('assets/world/campus-lawn-tile.png'));
   assert.ok(imageRequests.includes('assets/world/campus-plaza-tile.png'));
   assert.ok(imageRequests.includes('assets/world/campus-tech-tile.png'));
   assert.ok(imageRequests.includes('assets/world/campus-courtyard-tile.png'));
-  assert.ok(imageRequests.includes('assets/backgrounds/battle-forest.png'));
-  assert.ok(imageRequests.includes('assets/backgrounds/battle-stand.png'));
+  assert.ok(!imageRequests.includes('assets/world/ftown-campus-v3.png'));
+  assert.ok(!imageRequests.includes('assets/backgrounds/battle-forest.png'));
+  assert.ok(!imageRequests.includes('assets/backgrounds/battle-stand.png'));
   assert.ok(imageRequests.includes('assets/monsters/kuni/sprite.png'));
 });
 
@@ -1050,27 +1057,29 @@ test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs'
   const { debug, textCalls, drawCalls } = createGame();
   await new Promise((resolve) => setImmediate(resolve));
   const player = debug.getPlayer();
-  const visit = (gx, gy) => {
+  const visit = async (gx, gy) => {
     player.gx = gx; player.gy = gy; player.px = gx * 32; player.py = gy * 32; player.moving = false;
     textCalls.length = 0; drawCalls.length = 0; debug.renderOnce();
+    await new Promise((resolve) => setImmediate(resolve));
+    debug.renderOnce();
     return { texts: textCalls.map((call) => call.text), draws: [...drawCalls] };
   };
-  const ftown = visit(53, 12);
+  const ftown = await visit(53, 12);
   assert.ok(ftown.texts.includes('FTOWN'));
   assert.ok(ftown.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/ftown-campus-v3.png'));
-  const innovation = visit(51, 22);
+  const innovation = await visit(51, 22);
   assert.ok(innovation.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/innovation-hub.png'));
-  const hoaLac = visit(46, 41);
+  const hoaLac = await visit(46, 41);
   assert.ok(hoaLac.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/hoa-lac-campus-v2.png'));
   assert.ok(hoaLac.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/cuder-statue.png'));
-  const campusPark = visit(22, 36);
+  const campusPark = await visit(22, 36);
   assert.ok(campusPark.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/fpt-campus-garden.png'));
-  const northMonument = visit(21, 4);
+  const northMonument = await visit(21, 4);
   assert.ok(northMonument.draws.some((call) => call.type === 'drawImage' && call.src === 'assets/world/fpt-software-sign-v2.png'));
-  const garden = visit(5, 21);
+  const garden = await visit(5, 21);
   assert.ok(garden.texts.includes('01'), 'the binary portal easter egg should render inside 404 Garden');
   assert.ok(garden.texts.some((text) => text.includes('404 GARDEN')));
-  const heritageGarden = visit(5, 34);
+  const heritageGarden = await visit(5, 34);
   assert.ok(heritageGarden.draws.some((call) => call.type === 'drawImage'
     && call.src === 'assets/world/heritage-garden-pavilion-v2.png'));
 });

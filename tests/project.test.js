@@ -19,7 +19,8 @@ function loadDataContext() {
   };
   context.window = context;
   vm.createContext(context);
-  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js']) {
+  for (const file of ['js/content-catalog.js', 'js/config.js', 'js/kanji.js', 'js/question-pack-loader.js', 'js/data-loader.js',
+    'data/packs/question-supplement.pack.js', 'js/map.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   return context;
@@ -42,6 +43,7 @@ function pngInfo(file) {
 test('all JavaScript and inline HTML scripts compile', () => {
   const jsFiles = fs.readdirSync(path.join(ROOT, 'js')).filter((name) => name.endsWith('.js'));
   for (const name of jsFiles) assert.doesNotThrow(() => new vm.Script(read(`js/${name}`), { filename: name }));
+  assert.doesNotThrow(() => new vm.Script(read('data/packs/question-supplement.pack.js'), { filename: 'question-supplement.pack.js' }));
   for (const htmlFile of ['index.html', 'admin.html']) {
     const html = read(htmlFile);
     const blocks = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map((match) => match[1]).filter((code) => code.trim());
@@ -540,6 +542,30 @@ test('lesson workbook supplement is generated as a valid sourced challenge bank'
   }
 });
 
+test('large question pack stays off the startup path and publishes after the idle loader runs', () => {
+  let idleCallback = null, appended = null;
+  const context = {
+    console,
+    setTimeout: () => 1,
+    document: {
+      createElement: () => ({}),
+      head: { appendChild: (node) => { appended = node; } },
+    },
+    requestIdleCallback: (callback) => { idleCallback = callback; },
+    KANJI_DB: { CHALLENGES: [] },
+  };
+  context.window = context;
+  vm.createContext(context);
+  vm.runInContext(read('js/question-pack-loader.js'), context, { filename: 'js/question-pack-loader.js' });
+  assert.equal(appended, null, 'question pack loaded synchronously during bootstrap');
+  assert.equal(typeof idleCallback, 'function');
+  idleCallback();
+  assert.equal(appended.src, 'data/packs/question-supplement.pack.js');
+  vm.runInContext(read('data/packs/question-supplement.pack.js'), context, { filename: 'question-supplement.pack.js' });
+  assert.equal(context.KANJI_DB.CHALLENGES.length, 189);
+  assert.equal(context.KanjiGOQuestionPack.ready(), true);
+});
+
 test('imported browser data merges safely without hiding packaged content', () => {
   const context = loadDataContext();
   const packagedCount = Object.keys(context.KANJI_DB.KANJI).length;
@@ -562,7 +588,9 @@ test('HTML loads game scripts in dependency order', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(scripts, ['js/content-catalog.js', 'js/config.js', 'js/audio-config.js', 'js/audio-manager.js',
-    'js/character-slots.js', 'js/audio-settings-ui.js', 'js/kanji.js', 'js/question-supplement.js', 'js/data-loader.js', 'js/map.js', 'js/game.js']);
+    'js/character-slots.js', 'js/audio-settings-ui.js', 'js/kanji.js', 'js/question-pack-loader.js', 'js/data-loader.js', 'js/map.js',
+    'js/game-academy.js', 'js/game-battle.js', 'js/game-dex.js', 'js/game-progression.js', 'js/game-renderer.js', 'js/game.js']);
+  assert.doesNotMatch(html, /<script\s+src="data\/packs\/question-supplement\.pack\.js"/, 'large question pack must be lazy-loaded');
   assert.match(html, /<canvas\s+id="game"/);
   assert.match(html, /data-action="profile"[^>]*aria-label="Mở Hồ sơ nhân vật"/);
   assert.match(html, /Hồ sơ <kbd>I<\/kbd>/);
