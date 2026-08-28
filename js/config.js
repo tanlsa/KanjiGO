@@ -97,7 +97,18 @@ window.CONFIG = {
     TALLGRASS: 0.22, SURF: 0.15, FISH: 0.55,
     noCapturedMessage: 'Chưa có Kanji nào để gặp ở đây — hãy tới 🏛️ Giảng đường thu phục chữ mới trước!',
   },
-  FISHING: { castMs: 320, waitMs: 900, reelMs: 420 },
+  FISHING: {
+    castMs: 320,
+    waitMs: 900,
+    reelMs: 420,
+    // Điểm đặt chuôi cần trên sprite V4 (tọa độ trong ô vẽ 32px).
+    handOffsets: {
+      down: [21, 21],
+      left: [17, 22],
+      right: [15, 22],
+      up: [21, 21],
+    },
+  },
 
   // --- 🚲 / 📡 EXPLORATION SKILLS ---
   BICYCLE: {

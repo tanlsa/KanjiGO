@@ -913,6 +913,33 @@ test('world render builds and reuses one static ground layer', async () => {
   assert.equal(debug.ensureWorldGroundCache(), first);
 });
 
+test('fishing rod starts at the V4 character hand in every direction', () => {
+  const { debug } = createGame();
+  const player = debug.getPlayer();
+  player.px = 160; player.py = 96;
+  const expected = {
+    down: [181, 117, 188, 130],
+    left: [177, 118, 164, 111],
+    right: [175, 118, 188, 111],
+    up: [181, 117, 188, 103],
+  };
+  for (const [facing, values] of Object.entries(expected)) {
+    const geometry = debug.fishingRodGeometry(facing, 0, 0);
+    assert.deepEqual(
+      [geometry.startX, geometry.startY, geometry.rodX, geometry.rodY],
+      values,
+      `${facing} fishing anchor should stay aligned with the standing sprite hand`,
+    );
+  }
+});
+
+test('worn path tiles rotate only on vertical runs', () => {
+  const { debug } = createGame();
+  assert.equal(debug.wornPathOrientation(5, 24), 'vertical');
+  assert.equal(debug.wornPathOrientation(6, 22), 'horizontal');
+  assert.equal(debug.wornPathOrientation(5, 23), 'horizontal', 'four-way junction should keep the atlas orientation');
+});
+
 test('Academy and FTown entrances render contiguous campus brick under their front steps', () => {
   const { context, debug } = createGame();
   const plaza = context.CONFIG.TILE_KEYS.CAMPUS_PLAZA;

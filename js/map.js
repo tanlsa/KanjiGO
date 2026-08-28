@@ -126,6 +126,7 @@
   rect(47, 2, 14, 8, T.ROOF); rect(46, 10, 16, 4, T.CAMPUS_PLAZA);
   // Hai đảo cỏ/planter phá khối sân trắng 16x4 nhưng giữ trục cửa rộng 10 ô.
   rect(46, 12, 3, 2, T.CAMPUS_LAWN); rect(59, 12, 3, 2, T.CAMPUS_LAWN);
+  put(48, 13, T.CAMPUS_PLAZA); put(59, 13, T.CAMPUS_PLAZA);
   lineH(41, 45, 11, T.TECH_PROMENADE); lineH(41, 45, 12, T.TECH_PROMENADE);
   rect(38, 33, 16, 8, T.ROOF); rect(37, 41, 18, 2, T.CAMPUS_COURTYARD);
   // Trục campus phía đông dùng gravel nhất quán; sân gạch cam F-Ville không
