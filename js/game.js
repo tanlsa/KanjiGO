@@ -156,6 +156,12 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
 
   // ---------- TRẠNG THÁI ----------
   let state = 'overworld';   // overworld | battle | dex | skills | profile | lecture | capture | gym_select | pve
+  // Single choke point for state changes so BGM can follow the game state.
+  // Audio hooks must never live inside render/draw/loop/update functions.
+  function setState(next) {
+    state = next;
+    window.AudioManager?.syncMusic?.(next);
+  }
   const player = {
     gx: C.PLAYER.startGx, gy: C.PLAYER.startGy,
     px: C.PLAYER.startGx * TILE, py: C.PLAYER.startGy * TILE,
@@ -2098,7 +2104,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
     const levelDamage = C.COMBAT.baseDamage + C.KLEVEL.dmgPerLevel * (kanjiLevel - 1);
     const battleMaxHp = Math.max(m.maxHp, Math.ceil(levelDamage * (C.COMBAT.enemyHpPerDamage || 1)));
     syncPlayerScale(activePetKanji, true);
-state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
+setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCycleMs = nextAttackCycleMs(), effects = resolveSkillEffects();
     const encounterEntranceMs = window.SettingsUI?.encounterAnimationEnabled?.() === false ? 0 : 1450;
     battle = {
       kind, monId, mon: m, monHp: battleMaxHp, monMaxHp: battleMaxHp,
@@ -2293,7 +2299,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (Math.random() < C.COMBAT.runChance) { playSFX('BATTLE_ESCAPE_SUCCESS'); battle.phase = 'end'; battle.result = 'run'; battle.endMsg = '💨 Chạy thoát thành công!'; }
     else { playSFX('BATTLE_ESCAPE_FAIL'); battle.feedback = { good: false, text: '💨 Không thoát được!' }; battle.fbT = 900; }
   }
-  function endBattle() { state = 'overworld'; battle = null; }
+  function endBattle() { setState('overworld'); battle = null; }
 
   function isCollected(id) { return !!petData[id]; }
   function collect(id) {
@@ -2361,7 +2367,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
   function openAcademyLobby(message = '') {
     lecture = { phase: 'lobby', menuSel: 0, message, hitboxes: [] };
-    state = 'lecture';
+    setState('lecture');
     return true;
   }
   function enterLecture(char = '') {
@@ -2372,7 +2378,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function openAcademyPicker() {
     lecture = { phase: 'picker', pickerSel: 0, pickerScrollY: 0, pickerMaxScroll: 0, pickerDrag: null,
       search: '', group: 'ALL', sort: 'curriculum', message: '', hitboxes: [] };
-    state = 'lecture';
+    setState('lecture');
   }
   const ACADEMY_SORTS = [
     { id: 'curriculum', label: 'LỘ TRÌNH' },
@@ -2607,13 +2613,13 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (['check', 'confirm'].includes(phase)) lecture.q = restoredQ || (phase === 'check' ? academyQuestion(lecture.checkIndex) : academyQuestion(lecture.checkIndex + lecture.confirmIndex + 1, '', lecture.recapIds.map((id) => VOCABULARY_BY_ID.get(id)).filter(Boolean)));
     playQuestionPronunciation(lecture.q);
     if (phase === 'cards' && lecture.cardRevealed) markCurrentAcademyCardSeen();
-    state = 'lecture'; saveAcademyDraft();
+    setState('lecture'); saveAcademyDraft();
     return true;
   }
   function onLectureKey(k) {
     if (!lecture) return;
     if (k === 'escape') {
-      if (lecture.phase === 'lobby') { state = 'overworld'; lecture = null; }
+      if (lecture.phase === 'lobby') { setState('overworld'); lecture = null; }
       else openAcademyLobby();
       return;
     }
@@ -2670,7 +2676,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       catchEffectT: 0, catchEffectTotal: 0,
       learningSession: createLearningSession('capture') };
     playQuestionPronunciation(capture.q);
-    state = 'capture';
+    setState('capture');
     playSFX('CAPTURE_START');
     saveGame(); saveLearning();
     return true;
@@ -2729,12 +2735,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
         capture = null;
         if (result.passed) {
           lecture = { phase: 'summary', char: result.char, info: result.info, score: result.correct, hitboxes: [] };
-          state = 'lecture';
+          setState('lecture');
         } else startAcademyLesson(result.char, true);
       }
       return;
     }
-    if (k === 'escape') { state = 'overworld'; capture = null; return; }
+    if (k === 'escape') { setState('overworld'); capture = null; return; }
     if (['1', '2', '3', '4'].includes(k)) answerCapture(parseInt(k, 10) - 1);
   }
 
@@ -2826,9 +2832,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const preferred = String(preferredTier).toUpperCase();
     const nextTier = options.find((tier) => !hasBadge(tier)) || preferred;
     gymMenu = { options, selected: Math.max(0, options.indexOf(nextTier)), hitboxes: [] };
-    state = 'gym_select'; return true;
+    setState('gym_select'); return true;
   }
-  function closeGymMenu() { state = 'overworld'; gymMenu.hitboxes = []; return true; }
+  function closeGymMenu() { setState('overworld'); gymMenu.hitboxes = []; return true; }
   function selectGymTier(tier = gymMenu.options[gymMenu.selected]) {
     if (!tier) return false;
     return startGym(tier);
@@ -2926,7 +2932,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     playQuestionPronunciation(pve.q);
     const info = kanjiInfo(target); if (info) monsterImg(info.monId);
     playSFX('WORLD_OPEN_ARENA');
-    state = 'pve'; pveResult = null;
+    setState('pve'); pveResult = null;
     return true;
   }
   function startGym(tier = 'N5') {
@@ -3027,8 +3033,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   }
   function onPveKey(k) {
     if (!pve) return;
-    if (pve.phase === 'end') { if (k === ' ' || k === 'enter') { state = 'overworld'; pve = null; } return; }
-    if (k === 'escape') { state = 'overworld'; pve = null; return; }
+    if (pve.phase === 'end') { if (k === ' ' || k === 'enter') { setState('overworld'); pve = null; } return; }
+    if (k === 'escape') { setState('overworld'); pve = null; return; }
     if (['1', '2', '3', '4'].includes(k)) answerPve(parseInt(k, 10) - 1);
   }
 
@@ -3086,7 +3092,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       showToast('Không thể chọn mascot này. Hãy thử thu phục lại trong Giảng đường.'); return false;
     }
     showToast(`🐾 ${C.MONSTERS[currentPetId].name} đang đi cùng bạn!`);
-    state = 'overworld'; syncDexSearchInput(); return true;
+    setState('overworld'); syncDexSearchInput(); return true;
   }
   const dexSearchInput = document.getElementById('dex-search');
   const dexToolbar = document.getElementById('dex-toolbar');
@@ -3139,7 +3145,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const currentChar = C.MONSTERS[currentPetId] && C.MONSTERS[currentPetId].kanji;
     refreshDexList(currentChar);
     dex.scrollY = 0; dex.drag = null;
-    state = 'dex';
+    setState('dex');
     ensureDexSelectionVisible();
   }
   function dexLayout(total) {
@@ -3232,8 +3238,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (y >= layout.oy && y <= layout.gridBottom) dex.drag = { pointerId, startY: y, lastY: y, moved: false };
   }
   function onDexKey(k) {
-    if (k === 'escape' || k === 'd') { state = 'overworld'; syncDexSearchInput(); return; }
-    if (k === '/' && dexSearchInput) { dexSearchInput.hidden = false; dexSearchInput.focus(); return; }
+    if (k === 'escape' || k === 'd') { setState('overworld'); syncDexSearchInput(); return; }
+    if (k === '/' && dexSearchInput) { dexSearchInput.focus(); return; }
     const n = dex.list.length; if (!n) return;
     const cols = dexLayout(n).cols;
     if (k === 'arrowleft' || k === 'a') dex.sel = (dex.sel - 1 + n) % n;
@@ -3257,10 +3263,10 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   function openProfile() {
     if (state !== 'overworld' || dialog.active || player.moving || fishing) return false;
     profileUi.stats = profileStats(); profileUi.hitboxes = [];
-    state = 'profile';
+    setState('profile');
     return true;
   }
-  function closeProfile() { state = 'overworld'; profileUi.hitboxes = []; return true; }
+  function closeProfile() { setState('overworld'); profileUi.hitboxes = []; return true; }
   function onProfileKey(k) { if (k === 'escape' || k === 'i') closeProfile(); }
   function onProfilePointerDown(x, y) {
     const hit = profileUi.hitboxes.find((box) => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
@@ -3324,7 +3330,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
   let skillUi = { sel: 0, panX: 0, panY: 0, hitboxes: [], drag: null, resetConfirm: false, purchaseConfirmId: null, initialized: false };
   function openSkillTree() {
     if (state !== 'overworld' || dialog.active || player.moving || fishing) return false;
-    state = 'skills'; skillUi.drag = null; skillUi.resetConfirm = false; skillUi.purchaseConfirmId = null;
+    setState('skills'); skillUi.drag = null; skillUi.resetConfirm = false; skillUi.purchaseConfirmId = null;
     skillUi.sel = Math.max(0, Math.min(SKILL_DEFINITIONS.length - 1, skillUi.sel));
     if (!skillUi.initialized) { centerSkillGraph((C.SKILL_TREE.layout || {}).root); skillUi.initialized = true; }
     else clampSkillPan();
@@ -3427,7 +3433,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     if (k === 'escape' || k === 'k') {
       if (skillUi.purchaseConfirmId) { skillUi.purchaseConfirmId = null; return; }
       if (skillUi.resetConfirm) { skillUi.resetConfirm = false; return; }
-      state = 'overworld'; return;
+      setState('overworld'); return;
     }
     const n = SKILL_DEFINITIONS.length; if (!n) return;
     if (k === 'arrowleft' || k === 'a') moveSkillSelection(-1, 0);
@@ -6719,6 +6725,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     gameReady = true;
     render();
     window.AudioManager?.preloadAll()?.catch(() => {});
+    window.AudioManager?.syncMusic?.('overworld');
     requestAnimationFrame(loop);
   });
 
