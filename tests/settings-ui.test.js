@@ -175,4 +175,7 @@ test('mobile movement controls suppress long-press selection and browser callout
   assert.match(movementStyle, /-webkit-tap-highlight-color:transparent/);
   assert.equal((html.match(/data-key="arrow(?:up|down|left|right)"[^>]*draggable="false"/g) || []).length, 4);
   assert.match(game, /\['contextmenu', 'selectstart', 'dragstart'\]\.forEach/);
+  assert.match(game, /addEventListener\('touchstart',[\s\S]*?\{ passive: false \}\)/);
+  assert.match(game, /addEventListener\('touchend',[\s\S]*?\{ passive: false \}\)/);
+  assert.match(html, /#touch-controls \*,#touch-actions \*,#touch-back\{[\s\S]*?-webkit-touch-callout:none!important/);
 });

@@ -625,6 +625,17 @@ test('Academy reading step plays the selected Kanji ON and KUN audio from inline
   assert.ok(game.audioCalls.some((call) => call.kind === 'kun' && call.char === '日'));
 });
 
+test('tall mobile Academy keeps lesson actions above embedded-browser toolbars', () => {
+  const game = createGame({ viewportWidth: 390, viewportHeight: 844 });
+  assert.equal(game.debug.startAcademyLesson('日'), true);
+  game.debug.renderOnce();
+  const { height } = game.debug.getCanvasSize();
+  const action = game.debug.getLecture().hitboxes.find((box) => box.action === 'continue');
+  assert.ok(action, 'the primary lesson action should remain visible');
+  assert.ok(action.y + action.h <= height - 70,
+    'a tall portrait viewport needs spare space below the action for browser chrome');
+});
+
 test('Academy action keys ignore browser repeat and mobile Back remains usable', () => {
   const { debug, dispatchWindowEvent, dispatchTouchBack } = createGame();
   assert.equal(debug.startAcademyLesson('日'), true);

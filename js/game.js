@@ -87,8 +87,9 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
   }
   function resizeCanvas() {
     const render = C.RENDER || {};
-    VIEWPORT_W = Math.max(320, Math.round(window.innerWidth));
-    VIEWPORT_H = Math.max(240, Math.round(window.innerHeight));
+    const visualViewport = window.visualViewport;
+    VIEWPORT_W = Math.max(320, Math.round(visualViewport?.width || window.innerWidth));
+    VIEWPORT_H = Math.max(240, Math.round(visualViewport?.height || window.innerHeight));
     const maxLogicalW = Math.max(320, Number(render.maxLogicalWidth) || VIEWPORT_W);
     const maxLogicalH = Math.max(240, Number(render.maxLogicalHeight) || VIEWPORT_H);
     const logicalScale = Math.min(1, maxLogicalW / VIEWPORT_W, maxLogicalH / VIEWPORT_H);
@@ -116,6 +117,9 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
     if (gameReady) render();
   }
   addEventListener('resize', handleResize);
+  // Safari và các in-app browser thay đổi visual viewport khi thanh địa chỉ/
+  // toolbar xuất hiện mà không phải lúc nào cũng phát window.resize.
+  window.visualViewport?.addEventListener?.('resize', handleResize);
   const JPFONT = '"KanjiGo UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif';
   const fontLoad = fontReady ? Promise.resolve(true) : Promise.all([
     document.fonts.load('400 16px "KanjiGo UI"', '漢字かなカナ Tiếng Việt'),
@@ -179,13 +183,20 @@ const playSFX = (id) => { try { return window.AudioManager?.playSFX(id) || false
       const key = button.dataset.key;
       const release = () => { keys[key] = false; button.classList.remove('pressed'); };
       const suppressNativeHold = (e) => e.preventDefault();
+      const press = () => { keys[key] = true; button.classList.add('pressed'); };
       button.addEventListener('pointerdown', (e) => {
-        e.preventDefault(); keys[key] = true; button.classList.add('pressed');
+        e.preventDefault(); press();
         if (button.setPointerCapture) button.setPointerCapture(e.pointerId);
       });
       button.addEventListener('pointerup', release);
       button.addEventListener('pointercancel', release);
       button.addEventListener('lostpointercapture', release);
+      // Messenger/iOS WebView vẫn có thể mở menu Copy/Translate khi giữ nút
+      // nếu chỉ chặn pointerdown. Chặn ngay touchstart (non-passive) và vẫn
+      // cập nhật phím để các WebView cũ không hỗ trợ Pointer Events hoạt động.
+      button.addEventListener('touchstart', (e) => { e.preventDefault(); press(); }, { passive: false });
+      button.addEventListener('touchend', (e) => { e.preventDefault(); release(); }, { passive: false });
+      button.addEventListener('touchcancel', release, { passive: false });
       // Mobile browsers may still open selection/copy UI after a long press,
       // even with touch-action:none. Suppress those native gestures explicitly.
       ['contextmenu', 'selectstart', 'dragstart'].forEach((eventName) => {
@@ -211,6 +222,14 @@ if (button.dataset.action === 'interact') { playSFX('UI_BUTTON_CLICK'); onSpace(
     // Vì vậy cần bind riêng thay vì trông chờ selector ở trên.
     const touchBack = document.getElementById('touch-back');
     if (touchBack) bindAction(touchBack);
+    document.querySelectorAll('#touch-actions button, #touch-back').forEach((button) => {
+      ['contextmenu', 'selectstart', 'dragstart'].forEach((eventName) => {
+        button.addEventListener(eventName, (e) => e.preventDefault());
+      });
+      if (button.id !== 'touch-back') {
+        button.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+      }
+    });
   }
   bindTouchControls();
 
@@ -5579,14 +5598,19 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
   function renderAcademyLesson(W, H) {
     const area = academyContent(W), info = lecture.info, compact = W < 620, narrow = W < 460;
     drawLessonProgress(W);
-    const bodyY = 126, bodyH = H - bodyY - 76;
+    // Giữ lesson card và CTA trong một khung gọn trên điện thoại dọc cao.
+    // Việc ghim CTA theo toàn bộ H làm card có khoảng trống lớn và nút dễ bị
+    // thanh công cụ của Chrome/Messenger che khuất.
+    const layoutH = compact ? Math.min(H, 640) : H;
+    const bodyY = 126, bodyH = layoutH - bodyY - 76;
     drawAcademyCard(area.x, bodyY, area.w, bodyH);
     if (lecture.phase === 'intro') {
       const split = compact ? area.w * .55 : area.w * .58;
       cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText('KANJI MỚI', area.x + 28, bodyY + 34);
       cx.fillStyle = '#ffd54a'; cx.font = `bold ${compact ? 82 : 126}px ${JPFONT}`; cx.fillText(info.char, area.x + 28, bodyY + (compact ? 118 : 162));
-      cx.fillStyle = '#fff'; fitText(info.meaning, area.x + 30, bodyY + (compact ? 153 : 205), split - 46, compact ? 21 : 28, true);
-      drawMonsterName(C.MONSTERS[info.monId], area.x + 30, bodyY + (compact ? 177 : 235), split - 46, compact ? 15 : 18, { label: true });
+      const headingW = compact ? area.w - 60 : split - 46;
+      cx.fillStyle = '#fff'; fitText(info.meaning, area.x + 30, bodyY + (compact ? 153 : 205), headingW, compact ? 21 : 28, true);
+      drawMonsterName(C.MONSTERS[info.monId], area.x + 30, bodyY + (compact ? 177 : 235), headingW, compact ? 15 : 18, { label: true });
       cx.fillStyle = '#a9bad8'; cx.font = `14px ${JPFONT}`; wrap('Quan sát hình dáng, đọc nghĩa và làm quen với mascot trước khi học cách đọc.', area.x + 30, bodyY + (compact ? 205 : 266), split - 48, 22);
       drawLessonMascot(info, area.x + split, bodyY + 20, area.w - split - 18, bodyH - 35);
     } else if (lecture.phase === 'readings') {
@@ -5635,12 +5659,12 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       else if (lecture.phase === 'ready') label = 'BẮT ĐẦU NGHI THỨC';
       const backLabel = lecture.phase === 'readings' ? 'BƯỚC 1'
         : lecture.phase === 'cards' ? (lecture.cardIndex > 0 ? 'THẺ TRƯỚC' : 'BƯỚC 2') : '';
-      if (backLabel) drawAcademyLessonActions(W, H, label, backLabel);
-      else drawAcademyContinue(W, H, label);
+      if (backLabel) drawAcademyLessonActions(W, layoutH, label, backLabel);
+      else drawAcademyContinue(W, layoutH, label);
     }
     if (!compact || !canContinue) {
       cx.fillStyle = '#8395b5'; cx.font = '11px "KanjiGo UI",sans-serif';
-      fitText(compact ? 'Chạm đáp án để tiếp tục · ← quay lại' : 'Esc: quay lại sảnh (tiến độ được lưu)', area.x, H - 14, area.w, 11);
+      fitText(compact ? 'Chạm đáp án để tiếp tục · ← quay lại' : 'Esc: quay lại sảnh (tiến độ được lưu)', area.x, layoutH - 14, area.w, 11);
     }
   }
   function drawVocabularyWordFace(question, target, x, y, maxW, size) {
@@ -5879,15 +5903,16 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
   }
   function renderAcademySummary(W, H) {
     const area = academyContent(W), info = lecture.info, narrow = W < 460;
-    drawAcademyCard(area.x, 104, area.w, H - 145, true);
+    const layoutH = W < 620 ? Math.min(H, 640) : H;
+    drawAcademyCard(area.x, 104, area.w, layoutH - 145, true);
     cx.fillStyle = '#6effa1'; fitText('🎉 UNLOCK THÀNH CÔNG!', area.x + 30, 148, area.w - 60, narrow ? 21 : 27, true);
     cx.fillStyle = '#ffd54a'; cx.font = `bold ${narrow ? 76 : 92}px ${JPFONT}`; cx.fillText(info.char, area.x + 34, narrow ? 242 : 248);
     const textX = narrow ? area.x + 28 : area.x + 142, textY = narrow ? 326 : 205, textW = narrow ? area.w - 56 : area.w * .42;
     drawMonsterName(C.MONSTERS[info.monId], textX, textY, textW, narrow ? 18 : 21, { label: true });
     cx.fillStyle = '#b9c8e8'; cx.font = `${narrow ? 14 : 15}px ${JPFONT}`; wrap(`${info.meaning} đã được thêm vào KanjiDex và từ giờ có thể xuất hiện ngoài thế giới.`, textX, textY + 31, narrow ? area.w - 56 : area.w * .48, narrow ? 22 : 25);
-    drawLessonMascot(info, narrow ? area.x + area.w * .52 : area.x + area.w * .62, narrow ? 160 : 126, narrow ? area.w * .42 : area.w * .34, narrow ? 130 : H - 210);
-    cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText(`Nghi thức: ${lecture.score}/5 câu đúng`, area.x + 34, H - 105);
-    drawAcademyContinue(W, H, 'VỀ SẢNH GIẢNG ĐƯỜNG');
+    drawLessonMascot(info, narrow ? area.x + area.w * .52 : area.x + area.w * .62, narrow ? 160 : 126, narrow ? area.w * .42 : area.w * .34, narrow ? 130 : layoutH - 210);
+    cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText(`Nghi thức: ${lecture.score}/5 câu đúng`, area.x + 34, layoutH - 105);
+    drawAcademyContinue(W, layoutH, 'VỀ SẢNH GIẢNG ĐƯỜNG');
   }
   function renderCapture() {
     const W = SCREEN_W, H = SCREEN_H, fieldH = H - quizPanelLayout(W, H).panelH;
