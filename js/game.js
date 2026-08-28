@@ -1451,7 +1451,8 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
   });
   addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
   function onBack() {
-    if (state === 'battle') {
+    if (state === 'overworld' && dialog.active) onSpace();
+    else if (state === 'battle') {
       if (battle && battle.phase === 'end') endBattle();
       else tryRun();
     }
@@ -1472,6 +1473,9 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
   }
   cv.addEventListener('pointerdown', (e) => {
     const { x, y } = clientToLogical(e.clientX, e.clientY);
+    if (state === 'overworld' && dialog.active) {
+      e.preventDefault(); playSFX('UI_BUTTON_CLICK'); onSpace(); return;
+    }
     if (state === 'dex') {
       e.preventDefault();
       // Sau khi tìm kiếm trên mobile, chạm vào danh sách phải đóng bàn phím
@@ -1628,6 +1632,17 @@ if (k === ' ' || k === 'enter') { playSFX('UI_BUTTON_CLICK'); onSpace(); }
     if (dy < 0) parts.push(`↑${Math.abs(dy)}`); else if (dy > 0) parts.push(`↓${dy}`);
     if (dx < 0) parts.push(`←${Math.abs(dx)}`); else if (dx > 0) parts.push(`→${dx}`);
     return parts.join(' ');
+  }
+  function onboardingWaypoint() {
+    const tour = onboardingTour();
+    if (!tour || dialog.active) return null;
+    const playerCenterX = player.px + TILE / 2, playerCenterY = player.py + TILE / 2;
+    const targetX = tour.stop.gx * TILE + TILE / 2, targetY = tour.stop.gy * TILE + TILE / 2;
+    const dx = targetX - playerCenterX, dy = targetY - playerCenterY;
+    return {
+      targetId: tour.stop.id, name: tour.name,
+      angle: Math.atan2(dy, dx), distanceTiles: Math.hypot(dx, dy) / TILE,
+    };
   }
   function finishOnboardingGuideStop(tour) {
     const latest = onboardingTour();
@@ -1880,6 +1895,7 @@ function board(f) { bicycleActive = false; stopAutoRide({ silent: true, save: fa
 
   // ---------- ⚔️ COMBAT REALTIME (quiz kanji) ----------
   let battle = null;
+  let lastBattleActorLayout = null;
   const rnd = (r) => Math.floor(Math.random() * (r[1] - r[0] + 1)) + r[0];
   function capturedKanji(tier = '') {
     return Object.values(KDB.KANJI).map((k) => k.char).filter((char) =>
@@ -4236,6 +4252,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     return Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   }
   function touchBackPresentation() {
+    if (state === 'overworld' && dialog.active) return { label: 'TIẾP', title: 'Tiếp tục hội thoại', continues: true };
     if (state === 'battle') {
       if (battle && battle.phase === 'end') return { label: 'TIẾP', title: 'Tiếp tục sau trận đấu', continues: true };
       const chance = Math.round(Math.max(0, Math.min(1, Number(C.COMBAT.runChance) || 0)) * 100);
@@ -4264,7 +4281,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     return { label: 'QUAY LẠI', title: 'Quay lại' };
   }
   function syncTouchUi() {
-    const hidden = state !== 'overworld';
+    const hidden = state !== 'overworld' || dialog.active;
     syncDexSearchInput();
     const nextState = hidden ? 'hidden' : 'visible';
     const settingsButton = document.getElementById('settings-open');
@@ -4399,6 +4416,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     if (riding && player.facing !== 'up') drawBicycle();
     drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
+    drawOnboardingWaypoint(camX, camY, frameNow);
   }
   function overworldCamera() {
     let camX = player.px + TILE / 2 - VIEW_PX_W / 2;
@@ -4510,6 +4528,25 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
       cx.fillStyle = '#fff'; cx.font = 'bold 11px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
       cx.strokeStyle = 'rgba(4,10,24,.95)'; cx.lineWidth = 3; cx.strokeText('SPACE', x + 16, y - 21); cx.fillText('SPACE', x + 16, y - 21); cx.textAlign = 'left';
     }
+  }
+  let lastOnboardingWaypoint = null;
+  function drawOnboardingWaypoint(camX, camY, now) {
+    const waypoint = onboardingWaypoint();
+    if (!waypoint) { lastOnboardingWaypoint = null; return; }
+    const playerX = player.px - camX + TILE / 2, playerY = player.py - camY;
+    const bob = Math.sin(now / 170) * 2, markerX = playerX, markerY = playerY - 25 + bob;
+    const pulse = .5 + Math.sin(now / 210) * .5;
+    cx.save(); cx.translate(markerX, markerY); cx.rotate(waypoint.angle);
+    cx.fillStyle = `rgba(255,214,74,${.16 + pulse * .12})`; cx.beginPath(); cx.arc(0, 0, 16 + pulse * 2, 0, Math.PI * 2); cx.fill();
+    cx.strokeStyle = 'rgba(7,17,38,.92)'; cx.lineWidth = 5; cx.lineJoin = 'round';
+    cx.beginPath(); cx.moveTo(13, 0); cx.lineTo(-7, -9); cx.lineTo(-3, 0); cx.lineTo(-7, 9); cx.closePath(); cx.stroke();
+    cx.fillStyle = '#ffd64a'; cx.fill();
+    cx.strokeStyle = '#fff2a6'; cx.lineWidth = 1.5; cx.stroke(); cx.restore();
+    cx.fillStyle = 'rgba(7,17,38,.9)'; cx.fillRect(markerX - 17, markerY - 23, 34, 11);
+    cx.strokeStyle = '#ffd64a'; cx.lineWidth = 1; cx.strokeRect(markerX - 17, markerY - 23, 34, 11);
+    cx.fillStyle = '#fff4b0'; cx.font = 'bold 8px "KanjiGo UI",sans-serif'; cx.textAlign = 'center';
+    cx.fillText(String(waypoint.name || 'Aoi').toUpperCase(), markerX, markerY - 15); cx.textAlign = 'left';
+    lastOnboardingWaypoint = { ...waypoint, x: markerX, y: markerY };
   }
   function drawMapSigns(camX, camY) {
     for (const sign of MAP_SIGNS) {
@@ -5250,8 +5287,14 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     const actorScale = shallowLandscape ? Math.max(.34, baseActorScale * .72) : Math.max(.48, baseActorScale);
     // Character anchors are independent from the background artwork.
     const plCX = stageX + stageW * .18, monCX = stageX + stageW * .82;
-    const plBaseY = Math.min(FIELD_H - 10, stageY + stageH * .9 + 25);
-    const monBaseY = stageY + stageH * .90;
+    // Trên màn hình dọc, hai baseline cũ nằm sát mép battlefield nên chân
+    // mascot bị letterbox/câu hỏi che. Nâng cả hai lên theo chiều cao sân và
+    // giữ nguyên vị trí sau cutscene để không tạo cú "rơi" khi vào trận.
+    const mobilePetLift = stageW < 520 ? Math.max(38, Math.min(54, stageH * .12)) : 0;
+    const mobileEnemyLift = stageW < 520 ? Math.max(16, Math.min(28, stageH * .05)) : 0;
+    const plBaseY = Math.min(FIELD_H - 10, stageY + stageH * .9 + 25) - mobilePetLift;
+    const monBaseY = stageY + stageH * .90 - mobileEnemyLift;
+    lastBattleActorLayout = { fieldH: FIELD_H, stageH, plBaseY, monBaseY, mobilePetLift, mobileEnemyLift };
     const idle = Math.sin(performance.now() / 260) * 3 * actorScale;
     const entranceActive = b.entranceT > 0;
     const entranceProgress = entranceActive ? 1 - b.entranceT / Math.max(1, b.entranceTotal || 1450) : 1;
@@ -6655,12 +6698,52 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     }
   }
 
+  let lastDialogLayout = null;
+  function dialogTextLines(text, maxW) {
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean), lines = [];
+    let line = '';
+    const pushLongWord = (word) => {
+      let chunk = '';
+      for (const char of word) {
+        if (chunk && cx.measureText(chunk + char).width > maxW) { lines.push(chunk); chunk = char; }
+        else chunk += char;
+      }
+      return chunk;
+    };
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (cx.measureText(candidate).width <= maxW) { line = candidate; continue; }
+      if (line) { lines.push(line); line = ''; }
+      line = cx.measureText(word).width <= maxW ? word : pushLongWord(word);
+    }
+    if (line || !lines.length) lines.push(line);
+    return lines;
+  }
   function drawDialog() {
-    const W = SCREEN_W, H = SCREEN_H, w = W - 44, h = 110, x = 22, y = H - h - 16;
+    const W = SCREEN_W, H = SCREEN_H, mobile = W < 520;
+    const margin = mobile ? 12 : 22, w = W - margin * 2, x = margin, pad = mobile ? 16 : 18;
+    const fontSize = mobile ? 15 : 18, lineH = mobile ? 22 : 26, footerH = mobile ? 38 : 32;
+    cx.font = `${fontSize}px ${JPFONT}`;
+    const textW = w - pad * 2, lines = dialogTextLines(dialog.npc.lines[dialog.idx], textW);
+    const titleH = mobile ? 28 : 0;
+    const wantedH = pad + titleH + lines.length * lineH + footerH;
+    const h = Math.min(H - (mobile ? 92 : 32), Math.max(mobile ? 142 : 110, wantedH));
+    const y = Math.max(mobile ? 76 : 16, H - h - (mobile ? 12 : 16));
     cx.fillStyle = 'rgba(11,16,48,.93)'; cx.fillRect(x, y, w, h);
     cx.strokeStyle = '#16558f'; cx.lineWidth = 3; cx.strokeRect(x, y, w, h);
-    cx.fillStyle = '#fff'; cx.font = `18px ${JPFONT}`; wrap(dialog.npc.lines[dialog.idx], x + 18, y + 34, w - 36, 26);
-    cx.fillStyle = '#9fd8f5'; cx.font = '13px "KanjiGo UI",sans-serif'; cx.fillText('▶ Space để tiếp', x + w - 160, y + h - 14);
+    let textY = y + pad + fontSize;
+    if (mobile) {
+      cx.fillStyle = '#6effa1'; cx.font = 'bold 11px "KanjiGo UI",sans-serif';
+      fitText(dialog.npc.name ? `💬 ${dialog.npc.name}` : '💬 HỘI THOẠI', x + pad, textY, textW, 11, true);
+      textY += titleH; cx.font = `${fontSize}px ${JPFONT}`;
+    }
+    cx.fillStyle = '#fff';
+    const maxLines = Math.max(1, Math.floor((y + h - footerH - textY) / lineH) + 1);
+    const visibleLines = lines.slice(0, maxLines);
+    visibleLines.forEach((line, index) => cx.fillText(line, x + pad, textY + index * lineH));
+    cx.fillStyle = '#9fd8f5'; cx.font = `${mobile ? 11 : 13}px "KanjiGo UI",sans-serif`; cx.textAlign = 'right';
+    cx.fillText(mobile ? 'Chạm hộp thoại hoặc TIẾP  ▶' : '▶ Space để tiếp', x + w - pad, y + h - 14); cx.textAlign = 'left';
+    lastDialogLayout = { x, y, w, h, textY, lineH, lineCount: visibleLines.length, footerY: y + h - footerH, textW };
   }
   function drawToast() {
     const W = SCREEN_W, H = SCREEN_H, w = W - 44, h = 46, x = 22, y = H - h - 16;
@@ -6795,7 +6878,9 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     getOverworldHudLayout: () => ({ ...overworldHudLayout() }),
     toggleBicycle, isBicycleActive, bicycleMoveDuration, tryMove, canWalk, onSpace, academyEntranceInReach,
     getOnboardingTour: () => { const tour = onboardingTour(); return tour ? { ...tour, profile: { ...tour.profile }, stop: { ...tour.stop } } : null; },
+    getOnboardingWaypoint: () => lastOnboardingWaypoint ? { ...lastOnboardingWaypoint } : null,
     getDialog: () => dialog.active ? { active: true, idx: dialog.idx, npc: { ...dialog.npc, lines: [...dialog.npc.lines] } } : { active: false },
+    getDialogLayout: () => lastDialogLayout ? { ...lastDialogLayout } : null,
     toggleAutoRide, stopAutoRide, isAutoRideActive: () => autoRideActive, findAutoRidePath, nextAutoRideDirection,
     getPveResult: () => pveResult, getCanvasSize: () => ({ width: SCREEN_W, height: SCREEN_H }), getWorldZoom: () => worldZoom,
     getRenderMetrics: () => ({
@@ -6808,6 +6893,7 @@ setState('battle'); autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attack
     getFontState: () => ({ ready: fontReady, family: 'KanjiGo UI' }),
     clientToLogical,
     getOverworldCamera: () => ({ ...overworldCamera() }), getQuizLayout: () => ({ ...quizPanelLayout(SCREEN_W, SCREEN_H) }),
+    getBattleActorLayout: () => lastBattleActorLayout ? { ...lastBattleActorLayout } : null,
     resetPetTrail, recordPlayerTrail, petFollowPosition, getPetTrail: () => trail.map((point) => ({ ...point })),
     kanjiAnimations: () => Object.fromEntries(Object.entries(KANJI_ANIMATIONS).map(([char, value]) => [char, { ...value }])),
     followerMeaningMotion: (id, moving = false, now = 0) => followerMeaningMotion(C.MONSTERS[id], moving, now),

@@ -428,6 +428,25 @@ test('mobile profile renders in portrait and closes through the shared Back cont
   assert.equal(game.debug.state(), 'overworld');
 });
 
+test('mobile NPC dialog wraps inside its panel and exposes a dedicated Continue action', async () => {
+  const game = createGame({ viewportWidth: 390, viewportHeight: 844 });
+  await new Promise((resolve) => setImmediate(resolve));
+  const player = game.debug.getPlayer();
+  Object.assign(player, { gx: 17, gy: 12, px: 17 * 32, py: 12 * 32, facing: 'up', moving: false });
+  game.debug.onSpace();
+  assert.equal(game.debug.getDialog().active, true);
+  game.debug.renderOnce();
+  const layout = game.debug.getDialogLayout(), canvas = game.debug.getCanvasSize();
+  assert.ok(layout.x >= 0 && layout.x + layout.w <= canvas.width);
+  assert.ok(layout.y >= 0 && layout.y + layout.h <= canvas.height);
+  assert.ok(layout.textY + Math.max(0, layout.lineCount - 1) * layout.lineH <= layout.footerY,
+    'wrapped NPC copy must stop before the dialog footer');
+  assert.equal(game.getTouchBack().text, 'TIẾP');
+  assert.ok(game.getTouchBack().classes.includes('continue-action'));
+  game.dispatchTouchBack();
+  assert.equal(game.debug.getDialog().idx, 1, 'mobile Continue should advance to the next NPC line');
+});
+
 test('academy interaction works from the approach tile and while standing in the doorway', () => {
   for (const position of [
     { gx: 7, gy: 9, facing: 'up', label: 'approach tile', input: 'space' },
@@ -514,6 +533,29 @@ test('new character learns the selected starter while Aoi guides every onboardin
   assert.equal(game.debug.getOnboardingTour(), null);
   assert.equal(game.debug.hasFollower(), true);
   assert.equal(game.context.CONFIG.MONSTERS[game.debug.getPet().id].kanji, '日');
+});
+
+test('onboarding renders a player-side arrow pointing toward guide Aoi', async () => {
+  const characterSlotsSave = {
+    version: 2, activeSlot: 1,
+    slots: [{ id: 1, name: 'Hana', gender: 'female', appearance: 'orange', sandbox: false,
+      starterKanji: '日', onboardingComplete: false, onboardingIntroComplete: true, onboardingStep: 3, onboardingTourStep: 0 }],
+  };
+  const game = createGame({ characterSlotsSave, disableTestUnlocks: true, viewportWidth: 390, viewportHeight: 844 });
+  await new Promise((resolve) => setImmediate(resolve));
+  const player = game.debug.getPlayer();
+  Object.assign(player, { gx: 4, gy: 13, px: 4 * 32, py: 13 * 32, moving: false });
+  game.debug.renderOnce();
+  const waypoint = game.debug.getOnboardingWaypoint();
+  assert.equal(waypoint.targetId, 'academy');
+  assert.equal(waypoint.name, 'Aoi');
+  assert.ok(waypoint.angle < 0, 'Aoi is above the player, so the arrow should point upward');
+  assert.ok(waypoint.distanceTiles > 1);
+  assert.ok(game.textCalls.some((call) => call.text === 'AOI'));
+
+  Object.assign(player, { gx: 8, gy: 10, px: 8 * 32, py: 10 * 32, facing: 'up' });
+  game.debug.onSpace(); game.debug.renderOnce();
+  assert.equal(game.debug.getOnboardingWaypoint(), null, 'the waypoint should hide while talking to Aoi');
 });
 
 test('Settings corner control stays out of the Academy canvas UI', () => {
@@ -1083,7 +1125,7 @@ test('battle renders its HUD and quiz while a lazy enemy sprite is still loading
 });
 
 test('wild grass encounters use the Kanji semantic attack during the locked cutscene', () => {
-  const { debug, textCalls, drawCalls } = createGame();
+  const { debug, textCalls, drawCalls } = createGame({ viewportWidth: 390, viewportHeight: 844 });
   assert.equal(debug.startBattle('grass'), true);
   const battle = debug.getBattle(), initialGauge = battle.botNextIn;
   assert.equal(battle.entranceT, 1450);
@@ -1101,6 +1143,13 @@ test('wild grass encounters use the Kanji semantic attack during the locked cuts
   debug.updateBattle(760);
   debug.renderOnce();
   assert.ok(textCalls.some((call) => call.text.includes(`KANJI HOANG DÃ「${battle.mon.kanji}」TUNG TUYỆT KỸ!`)));
+  const actors = debug.getBattleActorLayout();
+  const cutsceneBarH = Math.max(30, Math.min(62, actors.stageH * .12));
+  assert.ok(actors.plBaseY < actors.fieldH - cutsceneBarH,
+    'the mobile pet baseline must stay above the cutscene letterbox');
+  assert.ok(actors.monBaseY < actors.fieldH - cutsceneBarH,
+    'the wild Kanji baseline must stay above the cutscene letterbox');
+  assert.ok(actors.mobilePetLift >= 38, 'portrait battles should visibly lift the active Kanji');
   assert.equal(battle.entranceSfxPlayed, true);
   assert.ok(battle.encounterImpactT > 0);
   debug.updateBattle(600);
