@@ -2746,6 +2746,12 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     explorer: 8, weather_kid: 9, doctor: 10, citizen: 11,
     merchant: 12, librarian: 13, artist: 14, gym: 15,
   };
+  // The authored atlas has transparent gutters rather than a strict 64px
+  // grid. These 56px windows follow those gutters, keeping every icon centred
+  // and preventing the next/previous icon from leaking into the crop.
+  const TRAINER_THEME_ATLAS_COLUMNS = [16, 70, 124, 181];
+  const TRAINER_THEME_ATLAS_ROWS = [17, 73, 127, 181];
+  const TRAINER_THEME_ATLAS_CELL = 56;
   function trainerTeam(id) {
     const trainer = TRAINER_BY_ID.get(id); if (!trainer) return [];
     const order = new Map(trainer.kanji.map((char, index) => [char, index]));
@@ -3981,6 +3987,30 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     [K.CAMPUS_COURTYARD, 'campus_courtyard_tile'],
   ]);
   const CAMPUS_HARD_SURFACES = new Set([K.CAMPUS_PLAZA, K.TECH_PROMENADE, K.CAMPUS_COURTYARD]);
+  const FTOWN_LANDMARK = MAP_LANDMARKS.find((landmark) => landmark.asset === 'landmark_ftown');
+  const FVILLE_LANDMARK = MAP_LANDMARKS.find((landmark) => landmark.asset === 'landmark_hoa_lac');
+  const HERITAGE_LANDMARK = MAP_LANDMARKS.find((landmark) => landmark.asset === 'landmark_heritage_pavilion');
+  function worldGroundTileAt(gx, gy) {
+    if (gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) return -1;
+    const source = TILES[gy][gx];
+    const atAcademyEntrance = gy === C.ACADEMY.doorGy
+      && Math.abs(gx - C.ACADEMY.doorGx) <= 1;
+    const ftownCenter = FTOWN_LANDMARK ? FTOWN_LANDMARK.gx + FTOWN_LANDMARK.width / 2 : -1;
+    const atFtownEntrance = FTOWN_LANDMARK
+      && gy === FTOWN_LANDMARK.gy + FTOWN_LANDMARK.height - 1
+      && gx >= ftownCenter - 2 && gx < ftownCenter + 2;
+    const fvilleCenter = FVILLE_LANDMARK ? FVILLE_LANDMARK.gx + FVILLE_LANDMARK.width / 2 : -1;
+    const atFvilleEntrance = FVILLE_LANDMARK
+      && gy === FVILLE_LANDMARK.gy + FVILLE_LANDMARK.height - 1
+      && gx >= fvilleCenter - 1 && gx < fvilleCenter + 1;
+    const heritageCenter = HERITAGE_LANDMARK ? HERITAGE_LANDMARK.gx + HERITAGE_LANDMARK.width / 2 : -1;
+    const atHeritageEntrance = HERITAGE_LANDMARK
+      && gy === Math.ceil(HERITAGE_LANDMARK.gy + HERITAGE_LANDMARK.height) - 1
+      && gx >= heritageCenter - 1 && gx < heritageCenter + 1;
+    if (atFvilleEntrance) return K.CAMPUS_COURTYARD;
+    if (atAcademyEntrance || atFtownEntrance || atHeritageEntrance) return K.CAMPUS_PLAZA;
+    return ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
+  }
   function drawTileOn(context, idx, sx, sy, gx = 0, gy = 0) {
     const campusAsset = campusTileAssets.get(idx);
     if (campusAsset && imgs[campusAsset]) {
@@ -4029,8 +4059,8 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       context.fillStyle = 'rgba(24,112,47,.28)'; context.fillRect(sx + 22, sy + 20, 2, 1);
     }
 
-    const tile = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) ? -1 : TILES[y][x];
-    const north = tile(gx, gy - 1), south = tile(gx, gy + 1), west = tile(gx - 1, gy), east = tile(gx + 1, gy);
+    const north = worldGroundTileAt(gx, gy - 1), south = worldGroundTileAt(gx, gy + 1);
+    const west = worldGroundTileAt(gx - 1, gy), east = worldGroundTileAt(gx + 1, gy);
     if (idx === K.WATER) {
       // Viền nước được suy ra từ hàng xóm nên hồ có shoreline đủ bốn cạnh,
       // kể cả khi shape được cắt góc mà không cần thêm atlas riêng.
@@ -4061,7 +4091,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const canvas = document.createElement('canvas'); canvas.width = MAP_W * TILE; canvas.height = MAP_H * TILE;
     const context = canvas.getContext('2d'); context.imageSmoothingEnabled = false;
     for (let gy = 0; gy < MAP_H; gy++) for (let gx = 0; gx < MAP_W; gx++) {
-      const source = TILES[gy][gx], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
+      const idx = worldGroundTileAt(gx, gy);
       const sx = gx * TILE, sy = gy * TILE;
       drawTileOn(context, idx, sx, sy, gx, gy);
       drawStaticGroundDetail(context, idx, sx, sy, gx, gy);
@@ -4083,6 +4113,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       cx.beginPath(); cx.moveTo(sx + 3 + wave, sy + 9); cx.lineTo(sx + 10 + wave, sy + 9); cx.stroke();
       cx.beginPath(); cx.moveTo(sx + 18 - wave / 2, sy + 24); cx.lineTo(sx + 25 - wave / 2, sy + 24); cx.stroke();
     }
+  }
+  function treeRenderJitter(gx, gy) {
+    let x = gx > 0 && gx < MAP_W - 1 ? ((gx * 13 + gy * 7) % 5) - 2 : 0;
+    let y = gy > 0 && gy < MAP_H - 1 ? ((gx * 5 + gy * 11) % 3) - 1 : 0;
+    // A shifted 32px tree sprite otherwise spills into the neighbouring tile.
+    // Keep the organic offset inside groves, but pin every exposed forest edge
+    // so paths, brick and the other authored terrain remain fully visible.
+    if ((x < 0 && TILES[gy][gx - 1] !== K.TREE)
+      || (x > 0 && TILES[gy][gx + 1] !== K.TREE)) x = 0;
+    if ((y < 0 && TILES[gy - 1][gx] !== K.TREE)
+      || (y > 0 && TILES[gy + 1][gx] !== K.TREE)) y = 0;
+    return { x, y };
   }
   function drawRunDust(camX, camY) {
     if (!player.moving || (!player.running && !isBicycleActive()) || player.onBoat) return;
@@ -4207,7 +4249,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const frameNow = performance.now(), bounds = visibleTileBounds(camX, camY), ground = ensureWorldGroundCache();
     if (ground) cx.drawImage(ground, camX, camY, VIEW_PX_W, VIEW_PX_H, 0, 0, VIEW_PX_W, VIEW_PX_H);
     for (let y = bounds.startY; y <= bounds.endY; y++) for (let x = bounds.startX; x <= bounds.endX; x++) {
-      const source = TILES[y][x], idx = ACADEMY_TILES.has(source) || source === K.TREE ? K.GRASS : source;
+      const idx = worldGroundTileAt(x, y);
       const sx = x * TILE - camX, sy = y * TILE - camY;
       if (!ground) { drawTileOn(cx, idx, sx, sy, x, y); drawStaticGroundDetail(cx, idx, sx, sy, x, y); }
       if (idx === K.WATER) drawGroundDetail(idx, sx, sy, x, y, frameNow);
@@ -4219,8 +4261,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (x < bounds.startX || x > bounds.endX || y < bounds.startY || y > bounds.endY) continue;
       const sx = x * TILE - camX, sy = y * TILE - camY;
       if (sx < -TILE || sx > VIEW_PX_W || sy < -TILE || sy > VIEW_PX_H) continue;
-      const jitterX = x > 0 && x < MAP_W - 1 ? ((x * 13 + y * 7) % 5) - 2 : 0;
-      const jitterY = y > 0 && y < MAP_H - 1 ? ((x * 5 + y * 11) % 3) - 1 : 0;
+      const { x: jitterX, y: jitterY } = treeRenderJitter(x, y);
       cx.fillStyle = 'rgba(8,45,24,.22)'; cx.beginPath(); cx.ellipse(sx + 17 + jitterX, sy + 27 + jitterY, 13, 5, 0, 0, Math.PI * 2); cx.fill();
       drawTile(K.TREE, sx + jitterX, sy + jitterY);
     }
@@ -4232,6 +4273,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     // Biển thuộc lớp cảnh quan: actor đi ngang phải luôn nổi phía trước thay
     // vì bị tấm biển che mất toàn bộ thân người/Kanji đi theo.
     drawMapSigns(camX, camY);
+    // Tường Arena là kiến trúc nền khi actor đã bước vào sân. Vẽ trước toàn
+    // bộ NPC/Kanjimon/người chơi để sprite lớn không bị tile tường cắt ngang.
+    drawTrainerArenaForeground(camX, camY);
     for (const n of NPCS) {
       const npcX = n.gx * TILE - camX, npcY = n.gy * TILE - camY;
       if (npcX < -TILE * 2 || npcX > VIEW_PX_W + TILE || npcY < -TILE * 2 || npcY > VIEW_PX_H + TILE) continue;
@@ -4282,7 +4326,6 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     drawSprite(imgs.player, player.facing, player.frame, playerX, riderY,
       activePlayerDrawSize, activePlayerFrameSize);
     if (riding && player.facing !== 'up') drawBicycle();
-    drawTrainerArenaForeground(camX, camY);
     drawFishing(camX, camY);
   }
   function overworldCamera() {
@@ -4355,15 +4398,18 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const previousAlpha = Number.isFinite(cx.globalAlpha) ? cx.globalAlpha : 1;
     const iconIndex = TRAINER_THEME_ICON_INDEX[key];
     if (!Number.isInteger(iconIndex)) return false;
-    const columns = 4;
     const atlasWidth = atlas.naturalWidth || atlas.width || 256;
     const atlasHeight = atlas.naturalHeight || atlas.height || 256;
-    const sourceW = atlasWidth / columns, sourceH = atlasHeight / columns;
+    const column = iconIndex % 4, row = Math.floor(iconIndex / 4);
+    const scaleX = atlasWidth / 256, scaleY = atlasHeight / 256;
+    const sourceX = TRAINER_THEME_ATLAS_COLUMNS[column] * scaleX;
+    const sourceY = TRAINER_THEME_ATLAS_ROWS[row] * scaleY;
+    const sourceW = TRAINER_THEME_ATLAS_CELL * scaleX, sourceH = TRAINER_THEME_ATLAS_CELL * scaleY;
     cx.save();
     cx.globalAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
     cx.imageSmoothingEnabled = false;
     cx.drawImage(atlas,
-      (iconIndex % columns) * sourceW, Math.floor(iconIndex / columns) * sourceH, sourceW, sourceH,
+      sourceX, sourceY, sourceW, sourceH,
       Math.round(x), Math.round(y), Math.round(iconSize), Math.round(iconSize));
     cx.restore();
     // Test/minimal canvas implementations may not preserve state through save/restore.
@@ -4428,7 +4474,6 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     const a = C.ACADEMY, x = a.gx * TILE - camX, y = a.gy * TILE - camY;
     const w = a.width * TILE, h = a.height * TILE;
     const academy = imgs.academy;
-    cx.fillStyle = 'rgba(20,35,30,.22)'; cx.beginPath(); cx.ellipse(x + w / 2, y + h - 3, w * .46, 8, 0, 0, Math.PI * 2); cx.fill();
     if (academy) cx.drawImage(academy, x, y, w, h);
     const plaqueW = 92, plaqueX = x + w / 2 - plaqueW / 2, plaqueY = y - 17;
     cx.fillStyle = 'rgba(25,32,48,.88)'; cx.fillRect(plaqueX, plaqueY, plaqueW, 14);
@@ -4442,6 +4487,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     return x + landmark.width * TILE >= -TILE && x <= VIEW_PX_W + TILE
       && y + landmark.height * TILE >= -TILE && y <= VIEW_PX_H + TILE;
   }
+  function landmarkCastsShadow(landmark) {
+    return landmark && landmark.asset === 'landmark_heritage_pavilion';
+  }
   function drawCampusLandmarks(camX, camY) {
     for (const landmark of MAP_LANDMARKS) {
       if (!landmarkVisible(landmark, camX, camY)) continue;
@@ -4449,7 +4497,9 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
       if (!image) continue;
       const x = Math.round(landmark.gx * TILE - camX), y = Math.round(landmark.gy * TILE - camY);
       const w = landmark.width * TILE, h = landmark.height * TILE;
-      cx.fillStyle = 'rgba(8,22,25,.25)'; cx.beginPath(); cx.ellipse(x + w / 2, y + h - 5, w * .47, 10, 0, 0, Math.PI * 2); cx.fill();
+      if (landmarkCastsShadow(landmark)) {
+        cx.fillStyle = 'rgba(8,22,25,.25)'; cx.beginPath(); cx.ellipse(x + w / 2, y + h - 5, w * .47, 10, 0, 0, Math.PI * 2); cx.fill();
+      }
       cx.save(); cx.imageSmoothingEnabled = false; cx.drawImage(image, x, y, w, h); cx.restore();
     }
   }
@@ -6691,7 +6741,7 @@ state = 'battle'; autoRidePath = []; playSFX('BATTLE_ENCOUNTER'); const attackCy
     resolveKanjiAnimation: (id) => { const animation = kanjiAnimation(C.MONSTERS[id]); return animation ? { ...animation } : null; },
     renderMeaningAttackFrame: (id, progress, reverse = false) => drawMeaningAttackAnimation(
       C.MONSTERS[id], progress, reverse ? 520 : 120, reverse ? 120 : 520, 360, 180),
-    renderOnce: render, targetFrameMs, ensureWorldGroundCache, updateOverworld,
+    renderOnce: render, targetFrameMs, ensureWorldGroundCache, worldGroundTileAt, treeRenderJitter, landmarkCastsShadow, updateOverworld,
   };
   if (typeof window !== 'undefined') window.__KANJIGO_DEBUG = debugApi;
   if (typeof module !== 'undefined') module.exports = { _debug: debugApi };

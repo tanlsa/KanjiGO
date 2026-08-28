@@ -285,6 +285,23 @@ test('mobile overworld zooms out enough to frame the grand academy', () => {
   assert.ok(11 * 32 * zoom <= 390, 'academy footprint should fit the mobile viewport');
 });
 
+test('tree decoration offsets never cover neighbouring non-tree terrain', () => {
+  const { context, debug } = createGame();
+  const tiles = context.MAP_DATA.TILES;
+  const tree = context.CONFIG.TILE_KEYS.TREE;
+
+  for (let gy = 0; gy < tiles.length; gy++) {
+    for (let gx = 0; gx < tiles[gy].length; gx++) {
+      if (tiles[gy][gx] !== tree) continue;
+      const jitter = debug.treeRenderJitter(gx, gy);
+      if (jitter.x < 0) assert.equal(tiles[gy][gx - 1], tree, `tree at ${gx},${gy} covers its left neighbour`);
+      if (jitter.x > 0) assert.equal(tiles[gy][gx + 1], tree, `tree at ${gx},${gy} covers its right neighbour`);
+      if (jitter.y < 0) assert.equal(tiles[gy - 1][gx], tree, `tree at ${gx},${gy} covers its upper neighbour`);
+      if (jitter.y > 0) assert.equal(tiles[gy + 1][gx], tree, `tree at ${gx},${gy} covers its lower neighbour`);
+    }
+  }
+});
+
 test('campus camera stays centered on the player instead of jumping to frame the academy', () => {
   const { debug } = createGame({ viewportWidth: 1280, viewportHeight: 720 });
   const player = debug.getPlayer();
@@ -896,6 +913,25 @@ test('world render builds and reuses one static ground layer', async () => {
   assert.equal(debug.ensureWorldGroundCache(), first);
 });
 
+test('Academy and FTown entrances render contiguous campus brick under their front steps', () => {
+  const { context, debug } = createGame();
+  const plaza = context.CONFIG.TILE_KEYS.CAMPUS_PLAZA;
+  assert.deepEqual([6, 7, 8].map((x) => debug.worldGroundTileAt(x, 8)), [plaza, plaza, plaza]);
+  assert.notEqual(debug.worldGroundTileAt(5, 8), plaza);
+  assert.notEqual(debug.worldGroundTileAt(9, 8), plaza);
+  assert.deepEqual([52, 53, 54, 55].map((x) => debug.worldGroundTileAt(x, 9)),
+    [plaza, plaza, plaza, plaza]);
+  assert.notEqual(debug.worldGroundTileAt(51, 9), plaza);
+  assert.notEqual(debug.worldGroundTileAt(56, 9), plaza);
+  for (let y = 20; y <= 23; y++) {
+    assert.deepEqual([50, 51].map((x) => debug.worldGroundTileAt(x, y)), [plaza, plaza]);
+  }
+  const courtyard = context.CONFIG.TILE_KEYS.CAMPUS_COURTYARD;
+  assert.deepEqual([45, 46].map((x) => debug.worldGroundTileAt(x, 40)), [courtyard, courtyard]);
+  assert.deepEqual([4, 5].map((x) => debug.worldGroundTileAt(x, 33)), [plaza, plaza]);
+  assert.notEqual(debug.worldGroundTileAt(6, 33), plaza);
+});
+
 test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs', async () => {
   const { debug, textCalls, drawCalls } = createGame();
   await new Promise((resolve) => setImmediate(resolve));
@@ -923,6 +959,14 @@ test('overworld renders FTown, Hoa Lac, and discoverable 404 Garden easter eggs'
   const heritageGarden = visit(5, 34);
   assert.ok(heritageGarden.draws.some((call) => call.type === 'drawImage'
     && call.src === 'assets/world/heritage-garden-pavilion-v2.png'));
+});
+
+test('only the Heritage Garden pavilion keeps a landmark shadow', () => {
+  const { context, debug } = createGame();
+  const shadowed = context.MAP_DATA.LANDMARKS
+    .filter((landmark) => debug.landmarkCastsShadow(landmark))
+    .map((landmark) => landmark.asset);
+  assert.deepEqual(Array.from(shadowed), ['landmark_heritage_pavilion']);
 });
 
 test('generated FPT props block only their authored footprints', () => {
@@ -1068,7 +1112,7 @@ test('Trainer image icons stay crisp above the Arena tint and skip off-screen wo
 
   const tintIndex = drawCalls.findIndex((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(17,25,48,.12)');
   const iconIndex = drawCalls.findIndex((call) => call.type === 'drawImage'
-    && call.src === 'assets/world/trainer-theme-icons.png' && call.args[0] === 0 && call.args[1] === 0);
+    && call.src === 'assets/world/trainer-theme-icons.png' && call.args[0] === 16 && call.args[1] === 17);
   assert.ok(tintIndex >= 0, 'Arena tint should render');
   assert.ok(iconIndex > tintIndex, 'Trainer icon must render after the translucent Arena floor');
   assert.equal(drawCalls[iconIndex].filter, 'none', 'Trainer markers should avoid expensive per-frame filters');
@@ -1076,8 +1120,48 @@ test('Trainer image icons stay crisp above the Arena tint and skip off-screen wo
   assert.equal(drawCalls.slice(iconIndex + 1).some((call) => call.type === 'fillRect' && call.fillStyle === 'rgba(17,25,48,.12)'), false,
     'Arena tint must never wash out an already-rendered Trainer icon');
   assert.ok(drawCalls.some((call) => call.type === 'drawImage' && call.src === 'assets/world/trainer-theme-icons.png'
-    && call.args[0] === 64 && call.args[1] === 192),
+    && call.args[0] === 70 && call.args[1] === 181),
     'the Librarian should use the bright open-book image from the atlas');
+});
+
+test('Trainer theme atlas crops follow the authored gutters without clipping the Gym crown', async () => {
+  const { debug, drawCalls } = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  const player = debug.getPlayer();
+  player.gx = 20; player.gy = 23; player.px = 20 * 32; player.py = 23 * 32;
+
+  drawCalls.length = 0;
+  debug.renderOnce();
+
+  const themeIcons = drawCalls.filter((call) => call.type === 'drawImage'
+    && call.src === 'assets/world/trainer-theme-icons.png');
+  const crown = themeIcons.find((call) => call.args[0] === 181 && call.args[1] === 181);
+  assert.ok(crown, 'Gym crown should use the bottom-right authored atlas window');
+  assert.deepEqual(crown.args.slice(0, 4), [181, 181, 56, 56]);
+  assert.ok(themeIcons.every((call) => call.args[2] === 56 && call.args[3] === 56),
+    'all Trainer icons should use equally sized crops so their visual scale stays consistent');
+});
+
+test('Arena wall tiles render behind Kanjimon and the player', async () => {
+  const { debug, drawCalls } = createGame();
+  await new Promise((resolve) => setImmediate(resolve));
+  const player = debug.getPlayer();
+  player.gx = 20; player.gy = 23; player.px = 20 * 32; player.py = 23 * 32;
+  player.facing = 'down'; player.moving = false;
+  debug.resetPetTrail();
+
+  drawCalls.length = 0;
+  debug.renderOnce();
+
+  const lastWallIndex = drawCalls.findLastIndex((call) => call.type === 'drawImage'
+    && call.src === 'assets/world/arena-wall-tiles.png');
+  const petIndex = drawCalls.findIndex((call) => call.type === 'drawImage'
+    && call.src === 'assets/monsters/kuni/sprite.png');
+  const playerIndex = drawCalls.findIndex((call) => call.type === 'drawImage'
+    && call.src === 'assets/characters/player-v4.png');
+  assert.ok(lastWallIndex >= 0, 'Arena wall tiles should render');
+  assert.ok(petIndex > lastWallIndex, 'Kanjimon must render in front of Arena walls');
+  assert.ok(playerIndex > petIndex, 'the player should keep rendering in front of their Kanjimon');
 });
 
 test('mobile battle quiz keeps touch answers and footer inside separate safe areas', () => {

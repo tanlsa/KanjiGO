@@ -292,10 +292,26 @@ test('FTown, Hoa Lac, and the 404 Garden fill walkable world gaps with valid col
   }
   for (let y = 21; y <= 22; y++) {
     for (let x = 47; x <= 54; x++) {
-      const expected = x === 51 ? CONFIG.TILE_KEYS.CAMPUS_PLAZA : CONFIG.TILE_KEYS.TECH_PROMENADE;
+      const expected = x === 50 || x === 51 ? CONFIG.TILE_KEYS.CAMPUS_PLAZA : CONFIG.TILE_KEYS.TECH_PROMENADE;
       assert.equal(MAP_DATA.TILES[y][x], expected, `Innovation Hub forecourt has a hole at ${x},${y}`);
     }
   }
+  for (let y = 20; y <= 23; y++) for (const x of [50, 51]) {
+    assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+      `Innovation Hub entrance path must cover ${x},${y}`);
+  }
+  for (let y = 41; y <= 42; y++) for (const x of [45, 46]) {
+    assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_COURTYARD,
+      `F-Ville entrance path must cover ${x},${y}`);
+  }
+  for (let y = 34; y <= 38; y++) for (let x = 4; x <= 5; x++) {
+    assert.equal(MAP_DATA.TILES[y][x], CONFIG.TILE_KEYS.CAMPUS_PLAZA,
+      `Heritage Garden entrance path must cover ${x},${y}`);
+  }
+  for (let y = 34; y <= 38; y++) assert.equal(MAP_DATA.TILES[y][6], CONFIG.TILE_KEYS.CAMPUS_LAWN,
+    `Heritage Garden right edge should return to lawn at 6,${y}`);
+  assert.equal(MAP_DATA.TILES[39][4], CONFIG.TILE_KEYS.WORN_PATH,
+    'Heritage Garden path should open into the southwest tall grass at 4,39');
   assert.ok((features.encounterGroves || []).length >= 4, 'expanded world should add several encounter groves');
   for (const grove of features.encounterGroves) {
     const groveTiles = MAP_DATA.TILES.slice(grove.y, grove.y + grove.height)
